@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { MagicItem, DamageBonus, SpellCharge } from '@/types/magic-item';
+import { MagicItem, DamageBonus, SpellCharge, ChargedAbility, ChargePool } from '@/types/magic-item';
 import {
   calculateCombatScore,
   getSuggestedRarity,
@@ -95,18 +95,22 @@ export default function CalculatorPage() {
   const [acBonus, setAcBonus] = useState(0);
   const [savingThrowBonus, setSavingThrowBonus] = useState(0);
   const [resistances, setResistances] = useState<string[]>([]);
-  const [charges, setCharges] = useState<SpellCharge[]>([]);
   const [attunement, setAttunement] = useState(false);
+
+  // Charge pool state (new intuitive system)
+  const [maxCharges, setMaxCharges] = useState(0);
+  const [chargesPerShortRest, setChargesPerShortRest] = useState(0);
+  const [chargesPerLongRest, setChargesPerLongRest] = useState(0);
+  const [abilities, setAbilities] = useState<ChargedAbility[]>([]);
 
   // UI state
   const [numAnchorsToShow, setNumAnchorsToShow] = useState(1);
   const [showChargeForm, setShowChargeForm] = useState(false);
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
-  const [newCharge, setNewCharge] = useState<SpellCharge>({
+  const [newAbility, setNewAbility] = useState<ChargedAbility>({
     spell: '',
     spellLevel: 1,
-    usesPerDay: 1,
-    recharge: 'dawn',
+    chargesPerUse: 1,
   });
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
@@ -118,29 +122,33 @@ export default function CalculatorPage() {
       acBonus: acBonus > 0 ? acBonus : undefined,
       savingThrowBonus: savingThrowBonus > 0 ? savingThrowBonus : undefined,
       resistances: resistances.length > 0 ? resistances : undefined,
-      charges: charges.length > 0 ? charges : undefined,
+      chargePool: (maxCharges > 0 || abilities.length > 0) ? {
+        maxCharges,
+        chargesPerShortRest,
+        chargesPerLongRest,
+        abilities,
+      } : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, charges, attunement]);
+  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
 
-  const addCharge = () => {
-    if (newCharge.spell.trim()) {
-      setCharges([...charges, newCharge]);
-      setNewCharge({
+  const addAbility = () => {
+    if (newAbility.spell.trim()) {
+      setAbilities([...abilities, newAbility]);
+      setNewAbility({
         spell: '',
         spellLevel: 1,
-        usesPerDay: 1,
-        recharge: 'dawn',
+        chargesPerUse: 1,
       });
       setShowChargeForm(false);
     }
   };
 
-  const removeCharge = (index: number) => {
-    setCharges(charges.filter((_, i) => i !== index));
+  const removeAbility = (index: number) => {
+    setAbilities(abilities.filter((_, i) => i !== index));
   };
 
   return (
@@ -407,26 +415,71 @@ export default function CalculatorPage() {
                   )}
                 </div>
 
-                {/* Spells & Spell-Like Abilities */}
+                {/* Spells & Spell-Like Abilities (Charge Pool) */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Spells & Spell-Like Abilities
                   </label>
 
-                  {charges.length > 0 && (
+                  {/* Charge Pool Configuration */}
+                  <div className="mb-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-md space-y-3">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                          Max Charges
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={maxCharges}
+                          onChange={(e) => setMaxCharges(parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                          placeholder="7"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                          Per Short Rest
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={chargesPerShortRest}
+                          onChange={(e) => setChargesPerShortRest(parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                          Per Long Rest
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={chargesPerLongRest}
+                          onChange={(e) => setChargesPerLongRest(parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                          placeholder="4"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Abilities List */}
+                  {abilities.length > 0 && (
                     <div className="space-y-2 mb-3">
-                      {charges.map((charge, index) => (
+                      {abilities.map((ability, index) => (
                         <div
                           key={index}
                           className="flex items-center justify-between bg-slate-50 dark:bg-slate-700 p-3 rounded-md"
                         >
                           <div className="text-sm text-slate-700 dark:text-slate-300">
-                            <span className="font-medium">{charge.spell}</span> (
-                            Level {charge.spellLevel}, {charge.usesPerDay}x/
-                            {charge.recharge})
+                            <span className="font-medium">{ability.spell}</span>
+                            {' (Level '}{ability.spellLevel}{', '}{ability.chargesPerUse} charge{ability.chargesPerUse !== 1 ? 's' : ''})
                           </div>
                           <button
-                            onClick={() => removeCharge(index)}
+                            onClick={() => removeAbility(index)}
                             className="text-red-600 hover:text-red-700 text-sm font-medium"
                           >
                             Remove
@@ -436,31 +489,32 @@ export default function CalculatorPage() {
                     </div>
                   )}
 
+                  {/* Add Ability Form */}
                   {showChargeForm ? (
                     <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-md">
                       <input
                         type="text"
-                        value={newCharge.spell}
+                        value={newAbility.spell}
                         onChange={(e) =>
-                          setNewCharge({ ...newCharge, spell: e.target.value })
+                          setNewAbility({ ...newAbility, spell: e.target.value })
                         }
-                        placeholder="Spell name"
+                        placeholder="Spell/Ability name"
                         className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
                       />
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Level
+                            Spell Level (1-9)
                           </label>
                           <input
                             type="number"
                             min="1"
                             max="9"
-                            value={newCharge.spellLevel}
+                            value={newAbility.spellLevel}
                             onChange={(e) =>
-                              setNewCharge({
-                                ...newCharge,
-                                spellLevel: parseInt(e.target.value),
+                              setNewAbility({
+                                ...newAbility,
+                                spellLevel: parseInt(e.target.value) || 1,
                               })
                             }
                             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
@@ -468,48 +522,28 @@ export default function CalculatorPage() {
                         </div>
                         <div>
                           <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Uses/Day
+                            Charges Per Use
                           </label>
                           <input
                             type="number"
                             min="1"
-                            max="10"
-                            value={newCharge.usesPerDay}
+                            value={newAbility.chargesPerUse}
                             onChange={(e) =>
-                              setNewCharge({
-                                ...newCharge,
-                                usesPerDay: parseInt(e.target.value),
+                              setNewAbility({
+                                ...newAbility,
+                                chargesPerUse: parseInt(e.target.value) || 1,
                               })
                             }
                             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
                           />
                         </div>
-                        <div>
-                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Recharge
-                          </label>
-                          <select
-                            value={newCharge.recharge}
-                            onChange={(e) =>
-                              setNewCharge({
-                                ...newCharge,
-                                recharge: e.target.value as SpellCharge['recharge'],
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                          >
-                            <option value="dawn">Dawn</option>
-                            <option value="long rest">Long Rest</option>
-                            <option value="short rest">Short Rest</option>
-                          </select>
-                        </div>
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={addCharge}
+                          onClick={addAbility}
                           className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm font-medium"
                         >
-                          Add Charge
+                          Add Ability
                         </button>
                         <button
                           onClick={() => setShowChargeForm(false)}
@@ -585,18 +619,6 @@ export default function CalculatorPage() {
                       </div>
                     </div>
 
-                    {/* Warning Legend */}
-                    <div className="mb-3 p-2 bg-slate-800/50 rounded text-xs space-y-1">
-                      <div className="text-cyan-400 flex items-center gap-1">
-                        <span>🔷</span>
-                        <span>Mathematical mismatch (formula vs rarity)</span>
-                      </div>
-                      <div className="text-amber-400 flex items-center gap-1">
-                        <span>🟠</span>
-                        <span>Community consensus mismatch</span>
-                      </div>
-                    </div>
-
                     <div className="space-y-6">
                       {topAnchors.slice(0, numAnchorsToShow).map((anchorData, index) => {
                         const { anchor, anchorScore, comparison } = anchorData;
@@ -621,8 +643,8 @@ export default function CalculatorPage() {
                               <div className="text-white font-semibold text-base flex items-center gap-2 mb-1">
                                 <span className="text-emerald-400 text-xs font-mono">#{index + 1}</span>
                                 <span>{anchor.name}</span>
-                                {warnings.hasMath && <span title="Mathematical mismatch" className="text-cyan-400">🔷</span>}
-                                {warnings.hasCommunity && <span title="Community mismatch" className="text-amber-400">🟠</span>}
+                                {warnings.hasMath && <span title="Mathematical mismatch" className="text-cyan-400 font-bold">*</span>}
+                                {warnings.hasCommunity && <span title="Community mismatch" className="text-amber-400 font-bold">**</span>}
                               </div>
                               <div className="text-xs text-slate-400">
                                 <span className="text-emerald-300">{anchor.rarity?.toUpperCase()}</span>
@@ -720,10 +742,14 @@ export default function CalculatorPage() {
                           {resistances.length > 0 && (
                             <div>Resist: {resistances.join(', ')}</div>
                           )}
-                          {charges.length > 0 && (
-                            <div>{charges.length} charge{charges.length > 1 ? 's' : ''}</div>
+                          {abilities.length > 0 && (
+                            <div>
+                              {maxCharges} charges ({abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'})
+                              {chargesPerShortRest > 0 && <span className="text-slate-400"> • {chargesPerShortRest}/SR</span>}
+                              {chargesPerLongRest > 0 && <span className="text-slate-400"> • {chargesPerLongRest}/LR</span>}
+                            </div>
                           )}
-                          {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && resistances.length === 0 && charges.length === 0 && (
+                          {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && resistances.length === 0 && abilities.length === 0 && (
                             <div className="text-slate-500 italic">No features added</div>
                           )}
                         </div>
@@ -798,6 +824,16 @@ export default function CalculatorPage() {
                         <div>• Rare: 2.0-2.9 pts</div>
                         <div>• Very Rare: 3.0-3.9 pts</div>
                         <div>• Legendary: 4.0+ pts</div>
+                      </div>
+
+                      <div className="space-y-1 pt-2 border-t border-slate-700/50">
+                        <div className="text-emerald-400 font-semibold">Balance Indicators:</div>
+                        <div className="text-cyan-400">
+                          <span className="font-bold">*</span> Mathematical mismatch - Formula not yet nuanced enough to handle all item features
+                        </div>
+                        <div className="text-amber-400">
+                          <span className="font-bold">**</span> Community consensus - D&D community reports imbalance for rarity
+                        </div>
                       </div>
                     </div>
                   )}

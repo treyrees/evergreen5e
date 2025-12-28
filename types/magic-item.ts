@@ -11,12 +11,26 @@ export interface SpellCharge {
   recharge: 'dawn' | 'short rest' | 'long rest';
 }
 
+export interface ChargedAbility {
+  spell: string;
+  spellLevel: number;
+  chargesPerUse: number; // How many charges this ability consumes (default 1)
+}
+
+export interface ChargePool {
+  maxCharges: number; // Total charges the item holds
+  chargesPerShortRest: number; // Charges regained on short rest
+  chargesPerLongRest: number; // Charges regained on long rest
+  abilities: ChargedAbility[]; // Abilities that consume charges
+}
+
 export interface CombatFeatures {
   enhancement: number; // 0, 1, 2, 3
   damageBonus?: DamageBonus;
   acBonus?: number;
   savingThrowBonus?: number;
-  charges?: SpellCharge[];
+  charges?: SpellCharge[]; // Legacy format for existing SRD items
+  chargePool?: ChargePool; // New intuitive format for user items
   resistances?: string[]; // Damage types resisted: "fire", "cold", "all", etc.
 }
 

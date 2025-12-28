@@ -137,11 +137,31 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     score += combat.resistances.length * 1.5;
   }
 
-  // Spell charges
+  // Spell charges (legacy format)
   if (combat.charges && combat.charges.length > 0) {
     for (const charge of combat.charges) {
       const multiplier = RECHARGE_MULTIPLIERS[charge.recharge] || 0.5;
       score += charge.spellLevel * charge.usesPerDay * multiplier;
+    }
+  }
+
+  // Charge pool (new intuitive format)
+  if (combat.chargePool && combat.chargePool.abilities.length > 0) {
+    // Estimate total charges available per day
+    // Assumes 2 short rests per adventuring day (standard assumption)
+    const totalChargesPerDay =
+      combat.chargePool.maxCharges +
+      combat.chargePool.chargesPerLongRest +
+      (combat.chargePool.chargesPerShortRest * 2);
+
+    // Calculate score for each ability
+    for (const ability of combat.chargePool.abilities) {
+      if (ability.chargesPerUse > 0) {
+        const effectiveUses = totalChargesPerDay / ability.chargesPerUse;
+        // Use a lower multiplier since charges are limited and shared across abilities
+        const multiplier = 0.15; // Slightly higher than legacy due to more accurate modeling
+        score += ability.spellLevel * effectiveUses * multiplier;
+      }
     }
   }
 
