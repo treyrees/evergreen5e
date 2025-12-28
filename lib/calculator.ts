@@ -86,6 +86,20 @@ function getItemCategory(baseItem: string): string {
 }
 
 /**
+ * Check if an item is a generic +X item (used as fallback only)
+ */
+function isGenericItem(item: MagicItem): boolean {
+  const genericPatterns = [
+    /^\+\d+ Weapon$/,
+    /^\+\d+ Armor$/,
+    /^\+\d+ Shield$/,
+    /^\+\d+ Crossbow$/,
+    /^\+\d+ Bow$/,
+  ];
+  return genericPatterns.some(pattern => pattern.test(item.name));
+}
+
+/**
  * Calculate combat power score from combat features
  */
 export function calculateCombatScore(combat: CombatFeatures): number {
@@ -143,7 +157,8 @@ export interface AnchorComparison {
 
 /**
  * Find anchor item - the baseline SRD item for balancing reference
- * Prioritizes physical similarity: exact match > same category > any item
+ * Prioritizes named items (Flame Tongue, Sun Blade) over generic +X items
+ * Physical similarity: exact match > same category > any item
  */
 export function findAnchorItem(
   userItem: Partial<MagicItem>
@@ -159,24 +174,52 @@ export function findAnchorItem(
   const userScore = calculateCombatScore(userItem.combat);
   const allItems = srdItems as MagicItem[];
 
-  // Priority 1: Try exact base item match first
-  let anchor = findClosestInCandidates(
-    allItems.filter((item) => item.baseItem === userItem.baseItem),
+  // Separate named items from generic +X items
+  const namedItems = allItems.filter(item => !isGenericItem(item));
+  const genericItems = allItems.filter(item => isGenericItem(item));
+
+  let anchor: MagicItem | null = null;
+
+  // Priority 1: Named items with exact base item match
+  anchor = findClosestInCandidates(
+    namedItems.filter((item) => item.baseItem === userItem.baseItem),
     userScore
   );
 
-  // Priority 2: If no exact match, try same category (e.g., longsword → greatsword)
+  // Priority 2: Named items with same category (e.g., longsword → greatsword)
   if (!anchor && userItem.baseItem) {
     const userCategory = getItemCategory(userItem.baseItem);
     anchor = findClosestInCandidates(
-      allItems.filter((item) => getItemCategory(item.baseItem) === userCategory),
+      namedItems.filter((item) => getItemCategory(item.baseItem) === userCategory),
       userScore
     );
   }
 
-  // Priority 3: Fall back to any item
+  // Priority 3: Any named item
   if (!anchor) {
-    anchor = findClosestInCandidates(allItems, userScore);
+    anchor = findClosestInCandidates(namedItems, userScore);
+  }
+
+  // Priority 4: Generic items with exact base item match (fallback)
+  if (!anchor) {
+    anchor = findClosestInCandidates(
+      genericItems.filter((item) => item.baseItem === userItem.baseItem),
+      userScore
+    );
+  }
+
+  // Priority 5: Generic items with same category (fallback)
+  if (!anchor && userItem.baseItem) {
+    const userCategory = getItemCategory(userItem.baseItem);
+    anchor = findClosestInCandidates(
+      genericItems.filter((item) => getItemCategory(item.baseItem) === userCategory),
+      userScore
+    );
+  }
+
+  // Priority 6: Any generic item (last resort)
+  if (!anchor) {
+    anchor = findClosestInCandidates(genericItems, userScore);
   }
 
   if (!anchor) {
