@@ -175,7 +175,7 @@ export default function CalculatorPage() {
               Magic Item Calculator
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Build your custom magic item
+              Find the right rarity for your creation
             </p>
           </div>
           <Link

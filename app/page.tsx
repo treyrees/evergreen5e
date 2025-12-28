@@ -18,8 +18,8 @@ export default function Home() {
             Balance custom magic items by discovering which official item yours is most similar to.
           </p>
           <p className="text-slate-700 dark:text-slate-300">
-            Every custom item you create is compared to a balanced <strong>anchor item</strong> from
-            official sources. See exactly how your item stacks up—stronger, weaker, or equal—and
+            Your homebrew items are compared to balanced <strong>anchor items</strong> from
+            official sources. See exactly how your creation stacks up—stronger, weaker, or equal—and
             understand <em>why</em> it has a certain rarity.
           </p>
         </div>
@@ -28,7 +28,7 @@ export default function Home() {
           href="/calculator"
           className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-8 py-4 rounded-lg transition-colors shadow-md hover:shadow-lg"
         >
-          Create Item
+          Balance Item
         </Link>
 
         <div className="pt-8 text-sm text-slate-500 dark:text-slate-500">
