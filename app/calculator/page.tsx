@@ -109,7 +109,7 @@ export default function CalculatorPage() {
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [newAbility, setNewAbility] = useState<ChargedAbility>({
     spell: '',
-    spellLevel: 1,
+    spellLevel: 0,
     chargesPerUse: 1,
   });
 
@@ -140,7 +140,7 @@ export default function CalculatorPage() {
       setAbilities([...abilities, newAbility]);
       setNewAbility({
         spell: '',
-        spellLevel: 1,
+        spellLevel: 0,
         chargesPerUse: 1,
       });
       setShowChargeForm(false);
@@ -376,6 +376,9 @@ export default function CalculatorPage() {
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Spells & Spell-Like Abilities
                   </label>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
+                    For non-spell abilities, estimate equivalent spell level (0 for cantrip-like, 1-9 for leveled spells)
+                  </p>
 
                   {/* Abilities List */}
                   {abilities.length > 0 && (
@@ -468,20 +471,21 @@ export default function CalculatorPage() {
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                              Spell Level (1-9)
+                              Spell Level (0-9)
                             </label>
                             <input
                               type="number"
-                              min="1"
+                              min="0"
                               max="9"
                               value={newAbility.spellLevel}
                               onChange={(e) =>
                                 setNewAbility({
                                   ...newAbility,
-                                  spellLevel: parseInt(e.target.value) || 1,
+                                  spellLevel: parseInt(e.target.value) || 0,
                                 })
                               }
                               className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                              placeholder="0 = cantrip"
                             />
                           </div>
                           <div>
