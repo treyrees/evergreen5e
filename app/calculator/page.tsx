@@ -538,12 +538,27 @@ export default function CalculatorPage() {
               </div>
 
               <div className="space-y-4">
-                {/* Anchor Item - Primary Reference */}
+                {/* Suggested Rarity - THE ANSWER */}
+                <div className="bg-emerald-900/30 border border-emerald-700 rounded-md p-4">
+                  <div className="text-emerald-400 font-bold mb-2">
+                    📊 SUGGESTED RARITY
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-2xl font-bold text-white">
+                      {results.suggestedRarity}
+                    </div>
+                    <div className="text-xs text-slate-300">
+                      {results.explanation}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Anchor Item - Reference for Comparison */}
                 {results.anchorItem && (
-                  <div className="bg-emerald-900/30 border border-emerald-700 rounded-md p-4">
+                  <div className="border-t border-slate-700 pt-4">
                     <div className="text-emerald-400 font-bold mb-3 flex items-center gap-2">
                       <span className="text-lg">⚓</span>
-                      <span>ANCHOR ITEM</span>
+                      <span>ANCHOR ITEM (Reference)</span>
                     </div>
                     <div className="space-y-2">
                       <div className="text-white font-semibold text-base">
@@ -564,10 +579,14 @@ export default function CalculatorPage() {
                           <div>
                             • {results.anchorItem.combat.damageBonus.dice}{' '}
                             {results.anchorItem.combat.damageBonus.type} damage
+                            {results.anchorItem.combat.damageBonus.conditional && <span className="text-yellow-400"> (conditional)</span>}
                           </div>
                         )}
                         {results.anchorItem.combat.acBonus && (
                           <div>• +{results.anchorItem.combat.acBonus} AC</div>
+                        )}
+                        {results.anchorItem.combat.resistances && results.anchorItem.combat.resistances.length > 0 && (
+                          <div>• Resistances: {results.anchorItem.combat.resistances.join(', ')}</div>
                         )}
                         {results.anchorItem.combat.charges && (
                           <div>• {results.anchorItem.combat.charges.length} spell/ability charges</div>
@@ -625,11 +644,17 @@ export default function CalculatorPage() {
                     {damageBonus && (
                       <div>
                         Damage: {damageBonus.dice} {damageBonus.type}
+                        {damageBonus.conditional && <span className="text-yellow-400"> (conditional)</span>}
                       </div>
                     )}
                     {acBonus > 0 && <div>AC Bonus: +{acBonus}</div>}
                     {savingThrowBonus > 0 && (
                       <div>Saving Throw: +{savingThrowBonus}</div>
+                    )}
+                    {resistances.length > 0 && (
+                      <div>
+                        Resistances: {resistances.join(', ')}
+                      </div>
                     )}
                     {charges.length > 0 && (
                       <div>
@@ -639,21 +664,6 @@ export default function CalculatorPage() {
                     )}
                     <div className="pt-2 text-emerald-400">
                       Combat Score: {results.combatScore.toFixed(1)} points
-                    </div>
-                  </div>
-                </div>
-
-                {/* Suggested Rarity */}
-                <div className="border-t border-slate-700 pt-4">
-                  <div className="text-emerald-400 font-bold mb-2">
-                    📊 SUGGESTED RARITY
-                  </div>
-                  <div className="pl-4 space-y-2">
-                    <div className="text-xl font-bold text-white">
-                      {results.suggestedRarity}
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      {results.explanation}
                     </div>
                   </div>
                 </div>

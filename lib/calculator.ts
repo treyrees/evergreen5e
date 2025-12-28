@@ -333,6 +333,17 @@ function compareToAnchor(
     }
   }
 
+  // Resistances comparison
+  const userResistances = userCombat.resistances?.length || 0;
+  const anchorResistances = anchorCombat.resistances?.length || 0;
+  if (userResistances !== anchorResistances) {
+    if (userResistances > anchorResistances) {
+      details.push(`${userResistances} resistances (anchor has ${anchorResistances})`);
+    } else {
+      details.push(`${userResistances} resistances (anchor has ${anchorResistances})`);
+    }
+  }
+
   // Spell charges comparison
   const userCharges = userCombat.charges?.length || 0;
   const anchorCharges = anchorCombat.charges?.length || 0;
