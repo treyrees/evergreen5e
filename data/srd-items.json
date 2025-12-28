@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Flame Tongue",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "damageBonus": {
+        "dice": "2d6",
+        "type": "fire"
+      }
+    },
+    "ribbons": {
+      "cosmetic": ["Ignites with flames, sheds bright light 40ft"]
+    }
+  },
+  {
+    "name": "+1 Longsword",
+    "baseItem": "longsword",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "+2 Longsword",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 2
+    }
+  },
+  {
+    "name": "Sun Blade",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 2,
+      "damageBonus": {
+        "dice": "1d8",
+        "type": "radiant"
+      }
+    },
+    "ribbons": {
+      "cosmetic": ["Sheds bright light 15ft, dim light 15ft"],
+      "utilitySpells": ["Functions as finesse weapon"]
+    }
+  },
+  {
+    "name": "Oathbow",
+    "baseItem": "longbow",
+    "rarity": "very rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "damageBonus": {
+        "dice": "3d6",
+        "type": "piercing"
+      }
+    }
+  }
+]
