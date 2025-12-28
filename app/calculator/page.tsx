@@ -84,7 +84,7 @@ const DAMAGE_TYPES = [
 ];
 
 export default function CalculatorPage() {
-  const [itemName, setItemName] = useState('Trident of Fish Command');
+  const [itemName, setItemName] = useState('');
   const [baseItem, setBaseItem] = useState('trident');
   const [enhancement, setEnhancement] = useState(1);
   const [damageBonus, setDamageBonus] = useState<DamageBonus | undefined>(
