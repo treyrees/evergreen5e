@@ -10,7 +10,6 @@ const DICE_VALUES = {
 };
 
 const RECHARGE_MULTIPLIERS = {
-  'dawn': 0.10,  // Updated to fix wand overvaluation
   'long rest': 0.25,
   'short rest': 0.4,
 };
@@ -44,7 +43,11 @@ function calculateCombatScore(combat) {
   // Legacy charges
   if (combat.charges) {
     for (const charge of combat.charges) {
-      const multiplier = RECHARGE_MULTIPLIERS[charge.recharge] || 0.1;
+      // Normalize "dawn" and "per day" to "long rest"
+      const normalizedRecharge = (charge.recharge === 'dawn' || charge.recharge === 'per day')
+        ? 'long rest'
+        : charge.recharge;
+      const multiplier = RECHARGE_MULTIPLIERS[normalizedRecharge] || 0.5;
       score += charge.spellLevel * charge.usesPerDay * multiplier;
     }
   }

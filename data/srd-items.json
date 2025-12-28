@@ -323,8 +323,8 @@
         {
           "spell": "Fireball",
           "spellLevel": 3,
-          "usesPerDay": 7,
-          "recharge": "dawn"
+          "usesPerDay": 4,
+          "recharge": "long rest"
         }
       ],
       "enhancement": 0
@@ -340,8 +340,8 @@
         {
           "spell": "Lightning Bolt",
           "spellLevel": 3,
-          "usesPerDay": 7,
-          "recharge": "dawn"
+          "usesPerDay": 4,
+          "recharge": "long rest"
         }
       ],
       "enhancement": 0
@@ -357,8 +357,8 @@
         {
           "spell": "Magic Missile",
           "spellLevel": 1,
-          "usesPerDay": 7,
-          "recharge": "dawn"
+          "usesPerDay": 4,
+          "recharge": "long rest"
         }
       ],
       "enhancement": 0

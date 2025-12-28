@@ -164,7 +164,11 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   // Spell charges (legacy format)
   if (combat.charges && combat.charges.length > 0) {
     for (const charge of combat.charges) {
-      const multiplier = RECHARGE_MULTIPLIERS[charge.recharge] || 0.5;
+      // Normalize "dawn" and "per day" to "long rest"
+      const normalizedRecharge = (charge.recharge === 'dawn' || charge.recharge === 'per day')
+        ? 'long rest'
+        : charge.recharge;
+      const multiplier = RECHARGE_MULTIPLIERS[normalizedRecharge] || 0.5;
       score += charge.spellLevel * charge.usesPerDay * multiplier;
     }
   }
