@@ -496,7 +496,7 @@ function compareToAnchor(
     }
   }
 
-  // Spell charges comparison
+  // Spell charges comparison (legacy format)
   const userCharges = userCombat.charges?.length || 0;
   const anchorCharges = anchorCombat.charges?.length || 0;
   if (userCharges !== anchorCharges) {
@@ -505,6 +505,43 @@ function compareToAnchor(
     } else {
       details.push(`${userCharges} spell charges (anchor has ${anchorCharges})`);
     }
+  }
+
+  // Charge pool comparison (new format)
+  const userPool = userCombat.chargePool;
+  const anchorPool = anchorCombat.chargePool;
+
+  if (userPool && userPool.abilities.length > 0) {
+    // Calculate user's daily charge budget
+    const userDailyCharges = userPool.maxCharges + userPool.chargesPerLongRest + (userPool.chargesPerShortRest * 2);
+
+    // Describe each ability and its contribution
+    for (const ability of userPool.abilities) {
+      const usesPerDay = Math.floor(userDailyCharges / ability.chargesPerUse);
+      const spellLevelText = ability.spellLevel === 0 ? 'cantrip' : `level ${ability.spellLevel}`;
+
+      if (anchorPool && anchorPool.abilities.length > 0) {
+        // Compare to anchor's abilities
+        details.push(`${ability.spell} (${spellLevelText}, ~${usesPerDay}×/day)`);
+      } else {
+        // Anchor has no charge pool
+        details.push(`has ${ability.spell} (${spellLevelText}, ~${usesPerDay}×/day, anchor has none)`);
+      }
+    }
+
+    // Add charge pool summary
+    if (!anchorPool || anchorPool.abilities.length === 0) {
+      details.push(`${userPool.maxCharges} max charges + ${userPool.chargesPerLongRest}/LR (anchor has no charges)`);
+    } else {
+      const anchorDailyCharges = anchorPool.maxCharges + anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
+      if (userDailyCharges !== anchorDailyCharges) {
+        details.push(`~${userDailyCharges} charges/day vs anchor's ~${anchorDailyCharges}`);
+      }
+    }
+  } else if (anchorPool && anchorPool.abilities.length > 0) {
+    // User has no charge pool but anchor does
+    const anchorDailyCharges = anchorPool.maxCharges + anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
+    details.push(`no spell abilities (anchor has ~${anchorDailyCharges} charges/day)`);
   }
 
   // Determine type
