@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Evergreen 5e - Magic Item Balance Calculator",
-  description: "D&D 5e magic item rarity calculator based on combat power and ribbon features",
+  title: "Evergreen 5e - Encyclopedic Magic Item Balancing",
+  description: "Balance custom D&D 5e magic items with educational anchor references from the SRD. Learn why items have certain rarities through direct comparison to known balanced items.",
 };
 
 export default function RootLayout({

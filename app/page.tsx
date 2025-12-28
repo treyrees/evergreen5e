@@ -9,20 +9,27 @@ export default function Home() {
             Evergreen 5e
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400">
-            Magic Item Balance Calculator
+            Encyclopedic Magic Item Balancing
           </p>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 space-y-4">
+          <p className="text-slate-700 dark:text-slate-300 font-medium">
+            Balance custom magic items with <span className="text-emerald-600 dark:text-emerald-400">educational anchors</span> from the D&D 5e SRD.
+          </p>
           <p className="text-slate-700 dark:text-slate-300">
-            Calculate magic item rarity based on combat power using pure
-            mathematics. Enhancement bonuses, damage bonuses, and spell charges
-            are converted to a power score that determines rarity.
+            Every custom item you create is compared to a balanced <strong>anchor item</strong> from
+            official sources. See exactly how your item stacks up—stronger, weaker, or equal—and
+            understand <em>why</em> it has a certain rarity.
           </p>
-          <p className="text-slate-600 dark:text-slate-400 text-sm">
-            Non-combat features (ribbons) like skill boosts, mobility, and
-            senses are categorized separately for reference.
-          </p>
+          <div className="border-l-4 border-emerald-600 pl-4 py-2 bg-emerald-50 dark:bg-emerald-950/30">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              <strong className="text-slate-700 dark:text-slate-300">⚓ Anchor Items:</strong> Direct
+              references to known balanced items that serve as your baseline for comparison.
+              Mathematical scoring plus educational context means you learn balance principles,
+              not just numbers.
+            </p>
+          </div>
         </div>
 
         <Link
