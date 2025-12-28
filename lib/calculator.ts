@@ -258,6 +258,138 @@ export function findAnchorItem(
 }
 
 /**
+ * Find top N anchor items for comparison
+ */
+export function findTopAnchorItems(
+  userItem: Partial<MagicItem>,
+  count: number = 3
+): Array<{
+  anchor: MagicItem;
+  anchorScore: number;
+  comparison: AnchorComparison;
+}> {
+  if (!userItem.combat) {
+    return [];
+  }
+
+  const userScore = calculateCombatScore(userItem.combat);
+  const allItems = srdItems as MagicItem[];
+
+  // Separate named items from generic +X items
+  const namedItems = allItems.filter(item => !isGenericItem(item));
+  const genericItems = allItems.filter(item => isGenericItem(item));
+
+  // Collect all candidates with their scores and priority level
+  const candidates: Array<{
+    item: MagicItem;
+    score: number;
+    scoreDiff: number;
+    priority: number;
+  }> = [];
+
+  // Priority 1: Named items with exact base item match
+  const priority1 = namedItems.filter((item) => item.baseItem === userItem.baseItem);
+  priority1.forEach((item) => {
+    const score = calculateCombatScore(item.combat);
+    candidates.push({
+      item,
+      score,
+      scoreDiff: Math.abs(score - userScore),
+      priority: 1,
+    });
+  });
+
+  // Priority 2: Named items with same category
+  if (userItem.baseItem) {
+    const userCategory = getItemCategory(userItem.baseItem);
+    const priority2 = namedItems.filter(
+      (item) =>
+        getItemCategory(item.baseItem) === userCategory &&
+        item.baseItem !== userItem.baseItem
+    );
+    priority2.forEach((item) => {
+      const score = calculateCombatScore(item.combat);
+      candidates.push({
+        item,
+        score,
+        scoreDiff: Math.abs(score - userScore),
+        priority: 2,
+      });
+    });
+  }
+
+  // Priority 3: Any other named item
+  const userCategory = userItem.baseItem ? getItemCategory(userItem.baseItem) : 'other';
+  const priority3 = namedItems.filter(
+    (item) =>
+      item.baseItem !== userItem.baseItem &&
+      getItemCategory(item.baseItem) !== userCategory
+  );
+  priority3.forEach((item) => {
+    const score = calculateCombatScore(item.combat);
+    candidates.push({
+      item,
+      score,
+      scoreDiff: Math.abs(score - userScore),
+      priority: 3,
+    });
+  });
+
+  // Priority 4-6: Generic items (only if we need more)
+  const genericCandidates: typeof candidates = [];
+  genericItems.forEach((item) => {
+    const score = calculateCombatScore(item.combat);
+    let priority = 6; // default: any generic
+    if (item.baseItem === userItem.baseItem) {
+      priority = 4;
+    } else if (
+      userItem.baseItem &&
+      getItemCategory(item.baseItem) === getItemCategory(userItem.baseItem)
+    ) {
+      priority = 5;
+    }
+    genericCandidates.push({
+      item,
+      score,
+      scoreDiff: Math.abs(score - userScore),
+      priority,
+    });
+  });
+
+  // Sort candidates: first by priority (lower is better), then by score difference (smaller is better)
+  candidates.sort((a, b) => {
+    if (a.priority !== b.priority) {
+      return a.priority - b.priority;
+    }
+    return a.scoreDiff - b.scoreDiff;
+  });
+
+  genericCandidates.sort((a, b) => {
+    if (a.priority !== b.priority) {
+      return a.priority - b.priority;
+    }
+    return a.scoreDiff - b.scoreDiff;
+  });
+
+  // Take top items, preferring named items but falling back to generic if needed
+  const topCandidates = candidates.slice(0, count);
+  if (topCandidates.length < count) {
+    topCandidates.push(...genericCandidates.slice(0, count - topCandidates.length));
+  }
+
+  // Convert to final format with comparisons
+  return topCandidates.map((candidate) => {
+    const scoreDiff = userScore - candidate.score;
+    const comparison = compareToAnchor(userItem, candidate.item, scoreDiff);
+    return {
+      anchor: candidate.item,
+      anchorScore: candidate.score,
+      comparison,
+    };
+  });
+}
+
+/**
  * Find the closest item by combat score within a set of candidates
  */
 function findClosestInCandidates(
