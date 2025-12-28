@@ -7,16 +7,14 @@
 /**
  * Mathematical mismatches: Items in SRD where our calculation differs by 2+ tiers
  * These are items where the combat math doesn't match the stated rarity
+ * Updated based on formula improvements (dawn=0.10, chargePool=0.15, minimum floor)
  */
 export const MATHEMATICAL_MISMATCHES = new Set([
-  'Cloak of Protection',      // Uncommon → should be Rare (2.0 pts)
-  'Boots of Speed',            // Rare → should be Common (0 pts)
-  'Amulet of Health',          // Rare → should be Common (0 pts)
-  'Luck Blade',                // Legendary → should be Uncommon (1.0 pts)
-  'Vorpal Sword',              // Legendary → should be Very Rare (3.0 pts)
-  'Javelin of Lightning',      // Uncommon → should be Legendary (4.0 pts)
-  'Rod of Absorption',         // Very Rare → should be Common (0 pts)
-  'Gloves of Missile Snaring', // Uncommon → should be Common (0 pts)
+  'Rod of Absorption',         // Very Rare → Common (0 pts) - utility item, no combat features
+  'Luck Blade',                // Legendary → Uncommon (1.0 pts) - wishes not modeled
+  'Vicious Weapon',            // Rare → Common (0 pts) - nat 20 only damage not valued
+  'Boots of Speed',            // Rare → Common (0 pts) - utility item, no combat features
+  'Amulet of Health',          // Rare → Common (0 pts) - sets CON to 19, not modeled
 ]);
 
 /**

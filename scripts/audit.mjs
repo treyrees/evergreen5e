@@ -10,7 +10,7 @@ const DICE_VALUES = {
 };
 
 const RECHARGE_MULTIPLIERS = {
-  'dawn': 0.25,
+  'dawn': 0.10,  // Updated to fix wand overvaluation
   'long rest': 0.25,
   'short rest': 0.4,
 };
@@ -70,7 +70,12 @@ function calculateCombatScore(combat) {
   return score;
 }
 
-function scoreToRarity(score) {
+function scoreToRarity(score, hasCombatFeatures = false) {
+  // Minimum floor: items with features should be at least Uncommon
+  if (hasCombatFeatures && score > 0 && score < 1) {
+    return 'Uncommon';
+  }
+
   if (score < 1) return 'Common';
   if (score < 2) return 'Uncommon';
   if (score < 3) return 'Rare';
@@ -92,7 +97,8 @@ const results = srdItems
   .filter(item => item.rarity)
   .map(item => {
     const score = calculateCombatScore(item.combat);
-    const calculated = scoreToRarity(score);
+    const hasCombatFeatures = score > 0;
+    const calculated = scoreToRarity(score, hasCombatFeatures);
     const distance = getRarityDistance(calculated, item.rarity);
     return {
       name: item.name,

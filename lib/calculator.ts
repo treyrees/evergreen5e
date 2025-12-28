@@ -18,7 +18,7 @@ const DICE_VALUES: Record<string, number> = {
 // These represent the value of spell abilities based on how often they recharge
 // A level 3 spell (like Fireball) once per long rest should be worth ~0.75-0.9 points
 const RECHARGE_MULTIPLIERS: Record<string, number> = {
-  'dawn': 0.25,
+  'dawn': 0.10,  // Lower because wands/staves don't fully recharge (typically 1d6+1)
   'long rest': 0.25,
   'short rest': 0.4,
 };
@@ -189,8 +189,8 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     for (const ability of combat.chargePool.abilities) {
       if (ability.chargesPerUse > 0) {
         const effectiveUses = sustainableDailyCharges / ability.chargesPerUse;
-        // Multiplier similar to legacy charges (0.25) but slightly lower since shared pool
-        const multiplier = 0.2;
+        // Multiplier tuned to balance charge-based items appropriately
+        const multiplier = 0.15;
         score += ability.spellLevel * effectiveUses * multiplier;
       }
     }
@@ -201,8 +201,15 @@ export function calculateCombatScore(combat: CombatFeatures): number {
 
 /**
  * Convert combat score to rarity
+ * Note: Items with any combat features but score < 1 get bumped to Uncommon
+ * This prevents utility items from being rated as Common when they have features
  */
-export function scoreToRarity(score: number): Rarity {
+export function scoreToRarity(score: number, hasCombatFeatures: boolean = false): Rarity {
+  // Minimum floor: items with features should be at least Uncommon
+  if (hasCombatFeatures && score > 0 && score < 1) {
+    return 'Uncommon';
+  }
+
   if (score < 1) return 'Common';
   if (score < 2) return 'Uncommon';
   if (score < 3) return 'Rare';
@@ -705,7 +712,8 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   anchorIsUnbalanced: boolean;
 } {
   const combatScore = item.combat ? calculateCombatScore(item.combat) : 0;
-  const combatRarity = scoreToRarity(combatScore);
+  const hasCombatFeatures = combatScore > 0;
+  const combatRarity = scoreToRarity(combatScore, hasCombatFeatures);
   const ribbonCount = countRibbons(item.ribbons);
 
   // Get anchor item for reference
@@ -716,7 +724,8 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   // This accounts for special abilities and ribbons we don't measure in combat score
   let anchorIsUnbalanced = false;
   if (anchor && anchor.rarity) {
-    const anchorCalculatedRarity = scoreToRarity(anchorScore);
+    const anchorHasFeatures = anchorScore > 0;
+    const anchorCalculatedRarity = scoreToRarity(anchorScore, anchorHasFeatures);
     const tierDiff = getRarityTierDifference(anchorCalculatedRarity, anchor.rarity);
     anchorIsUnbalanced = tierDiff >= 2;
   }
@@ -740,7 +749,8 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
 
     // Warn if anchor item appears unbalanced
     if (anchorIsUnbalanced) {
-      const anchorCalculatedRarity = scoreToRarity(anchorScore);
+      const anchorHasFeatures = anchorScore > 0;
+      const anchorCalculatedRarity = scoreToRarity(anchorScore, anchorHasFeatures);
       explanation += ` ⚠️ Note: ${anchorName} appears unbalanced—its stated rarity (${anchor.rarity}) doesn't match our formula (${anchorCalculatedRarity} for ${anchorScore.toFixed(1)} points). Consider this when balancing.`;
     }
   }
