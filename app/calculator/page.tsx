@@ -336,10 +336,10 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Spell Charges */}
+                {/* Spells & Spell-Like Abilities */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Spell Charges
+                    Spells & Spell-Like Abilities
                   </label>
 
                   {charges.length > 0 && (
@@ -453,7 +453,7 @@ export default function CalculatorPage() {
                       onClick={() => setShowChargeForm(true)}
                       className="w-full px-4 py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-400 hover:border-emerald-600 hover:text-emerald-600 transition-colors"
                     >
-                      + Add Spell Charge
+                      + Add Spell or Ability
                     </button>
                   )}
                 </div>
@@ -504,7 +504,7 @@ export default function CalculatorPage() {
                           <div>• +{results.anchorItem.combat.acBonus} AC</div>
                         )}
                         {results.anchorItem.combat.charges && (
-                          <div>• {results.anchorItem.combat.charges.length} spell charges</div>
+                          <div>• {results.anchorItem.combat.charges.length} spell/ability charges</div>
                         )}
                       </div>
 
@@ -567,8 +567,8 @@ export default function CalculatorPage() {
                     )}
                     {charges.length > 0 && (
                       <div>
-                        Charges: {charges.length} spell
-                        {charges.length !== 1 ? 's' : ''}
+                        Charges: {charges.length} spell/abilit
+                        {charges.length !== 1 ? 'ies' : 'y'}
                       </div>
                     )}
                     <div className="pt-2 text-emerald-400">

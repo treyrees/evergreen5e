@@ -15,10 +15,13 @@ const DICE_VALUES: Record<string, number> = {
 };
 
 // Recharge frequency multipliers
+// Note: These are significantly lower than you might expect because many charged items
+// have limited total charges that don't fully recharge daily (e.g., wands with 7 charges
+// that regain 1d6+1 per dawn). This accounts for average sustainable daily use.
 const RECHARGE_MULTIPLIERS: Record<string, number> = {
-  'dawn': 0.5,
-  'long rest': 0.5,
-  'short rest': 1.0,
+  'dawn': 0.1,
+  'long rest': 0.1,
+  'short rest': 0.2,
 };
 
 // Item categories for better anchor matching
@@ -144,6 +147,16 @@ export function scoreToRarity(score: number): Rarity {
   if (score < 3) return 'Rare';
   if (score < 4) return 'Very Rare';
   return 'Legendary';
+}
+
+/**
+ * Calculate how many tiers apart two rarities are
+ */
+function getRarityTierDifference(rarity1: string, rarity2: string): number {
+  const rarityOrder = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
+  const idx1 = rarityOrder.findIndex(r => r.toLowerCase() === rarity1.toLowerCase());
+  const idx2 = rarityOrder.findIndex(r => r.toLowerCase() === rarity2.toLowerCase());
+  return Math.abs(idx1 - idx2);
 }
 
 /**
@@ -373,11 +386,14 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   // Get anchor item for reference
   const { anchor, anchorScore, comparison } = findAnchorItem(item);
 
-  // Check if anchor item's stated rarity matches its calculated rarity
+  // Check if anchor item's stated rarity is significantly off from calculated
+  // Only flag items that are 2+ tiers away (e.g., Uncommon item calculated as Very Rare)
+  // This accounts for special abilities and ribbons we don't measure in combat score
   let anchorIsUnbalanced = false;
-  if (anchor) {
+  if (anchor && anchor.rarity) {
     const anchorCalculatedRarity = scoreToRarity(anchorScore);
-    anchorIsUnbalanced = anchorCalculatedRarity !== anchor.rarity;
+    const tierDiff = getRarityTierDifference(anchorCalculatedRarity, anchor.rarity);
+    anchorIsUnbalanced = tierDiff >= 2;
   }
 
   // For now, ribbons don't affect rarity (as we're not implementing them yet)
