@@ -372,6 +372,32 @@ export function findTopAnchorItems(
     priority: number;
   }> = [];
 
+  // Process generic items first - exact score matches get highest priority
+  genericItems.forEach((item) => {
+    const score = calculateCombatScore(item.combat);
+    const scoreDiff = Math.abs(score - userScore);
+    const itemBroadCategory = getBroadCategory(item.baseItem);
+    const sameBroadCategory = itemBroadCategory === userBroadCategory;
+
+    let priority: number;
+
+    // Exact score match gets top priority (perfect +1/+2/+3 match)
+    if (scoreDiff < 0.1 && sameBroadCategory) {
+      priority = 1;
+    } else if (sameBroadCategory) {
+      priority = 6;
+    } else {
+      priority = 7;
+    }
+
+    candidates.push({
+      item,
+      score,
+      scoreDiff,
+      priority,
+    });
+  });
+
   // Process all named items and assign priorities
   namedItems.forEach((item) => {
     const itemBroadCategory = getBroadCategory(item.baseItem);
@@ -383,46 +409,19 @@ export function findTopAnchorItems(
     let priority: number;
 
     if (sameBroadCategory && sameAttunement && exactMatch) {
-      priority = 1; // Same category, same attunement, exact base item match
+      priority = 2; // Same category, same attunement, exact base item match
     } else if (sameBroadCategory && sameAttunement) {
-      priority = 2; // Same category, same attunement
+      priority = 3; // Same category, same attunement
     } else if (sameBroadCategory) {
-      priority = 3; // Same category, different attunement
+      priority = 4; // Same category, different attunement
     } else if (sameAttunement) {
-      priority = 4; // Different category, same attunement
+      priority = 5; // Different category, same attunement
     } else {
-      priority = 5; // Different category, different attunement
+      priority = 8; // Different category, different attunement
     }
 
     const score = calculateCombatScore(item.combat);
     candidates.push({
-      item,
-      score,
-      scoreDiff: Math.abs(score - userScore),
-      priority,
-    });
-  });
-
-  // Add generic items with lower priority
-  const genericCandidates: typeof candidates = [];
-  genericItems.forEach((item) => {
-    const itemBroadCategory = getBroadCategory(item.baseItem);
-    const itemAttunement = item.attunement || false;
-    const sameBroadCategory = itemBroadCategory === userBroadCategory;
-    const sameAttunement = itemAttunement === userAttunement;
-
-    let priority: number;
-
-    if (sameBroadCategory && sameAttunement) {
-      priority = 6;
-    } else if (sameBroadCategory) {
-      priority = 7;
-    } else {
-      priority = 8;
-    }
-
-    const score = calculateCombatScore(item.combat);
-    genericCandidates.push({
       item,
       score,
       scoreDiff: Math.abs(score - userScore),
@@ -438,18 +437,8 @@ export function findTopAnchorItems(
     return a.scoreDiff - b.scoreDiff;
   });
 
-  genericCandidates.sort((a, b) => {
-    if (a.priority !== b.priority) {
-      return a.priority - b.priority;
-    }
-    return a.scoreDiff - b.scoreDiff;
-  });
-
-  // Take top items, preferring named items but falling back to generic if needed
+  // Take top items
   const topCandidates = candidates.slice(0, count);
-  if (topCandidates.length < count) {
-    topCandidates.push(...genericCandidates.slice(0, count - topCandidates.length));
-  }
 
   // Convert to final format with comparisons
   return topCandidates.map((candidate) => {

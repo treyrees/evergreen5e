@@ -27,6 +27,36 @@
     }
   },
   {
+    "name": "+1 Armor",
+    "baseItem": "armor (medium)",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 1
+    }
+  },
+  {
+    "name": "+2 Armor",
+    "baseItem": "armor (medium)",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 2
+    }
+  },
+  {
+    "name": "+3 Armor",
+    "baseItem": "armor (medium)",
+    "rarity": "very rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 3
+    }
+  },
+  {
     "name": "Flame Tongue",
     "baseItem": "longsword",
     "rarity": "rare",
@@ -55,7 +85,9 @@
         "dice": "1d6",
         "type": "cold"
       },
-      "resistances": ["fire"]
+      "resistances": [
+        "fire"
+      ]
     }
   },
   {
@@ -89,33 +121,6 @@
     }
   },
   {
-    "name": "+1 Bow",
-    "baseItem": "longbow",
-    "rarity": "uncommon",
-    "attunement": false,
-    "combat": {
-      "enhancement": 1
-    }
-  },
-  {
-    "name": "+2 Bow",
-    "baseItem": "longbow",
-    "rarity": "rare",
-    "attunement": false,
-    "combat": {
-      "enhancement": 2
-    }
-  },
-  {
-    "name": "+3 Bow",
-    "baseItem": "longbow",
-    "rarity": "very rare",
-    "attunement": false,
-    "combat": {
-      "enhancement": 3
-    }
-  },
-  {
     "name": "Oathbow",
     "baseItem": "longbow",
     "rarity": "very rare",
@@ -126,15 +131,6 @@
         "dice": "3d6",
         "type": "piercing"
       }
-    }
-  },
-  {
-    "name": "+1 Dagger",
-    "baseItem": "dagger",
-    "rarity": "uncommon",
-    "attunement": false,
-    "combat": {
-      "enhancement": 1
     }
   },
   {
@@ -155,69 +151,12 @@
     }
   },
   {
-    "name": "+1 Greatsword",
-    "baseItem": "greatsword",
-    "rarity": "uncommon",
-    "attunement": false,
-    "combat": {
-      "enhancement": 1
-    }
-  },
-  {
-    "name": "+2 Greatsword",
-    "baseItem": "greatsword",
-    "rarity": "rare",
-    "attunement": false,
-    "combat": {
-      "enhancement": 2
-    }
-  },
-  {
-    "name": "+1 Rapier",
-    "baseItem": "rapier",
-    "rarity": "uncommon",
-    "attunement": false,
-    "combat": {
-      "enhancement": 1
-    }
-  },
-  {
     "name": "Nine Lives Stealer",
     "baseItem": "rapier",
     "rarity": "very rare",
     "attunement": true,
     "combat": {
       "enhancement": 2
-    }
-  },
-  {
-    "name": "+1 Shield",
-    "baseItem": "shield",
-    "rarity": "uncommon",
-    "attunement": false,
-    "combat": {
-      "acBonus": 1,
-      "enhancement": 0
-    }
-  },
-  {
-    "name": "+2 Shield",
-    "baseItem": "shield",
-    "rarity": "rare",
-    "attunement": false,
-    "combat": {
-      "acBonus": 2,
-      "enhancement": 0
-    }
-  },
-  {
-    "name": "+3 Shield",
-    "baseItem": "shield",
-    "rarity": "very rare",
-    "attunement": false,
-    "combat": {
-      "acBonus": 3,
-      "enhancement": 0
     }
   },
   {
@@ -231,43 +170,15 @@
     }
   },
   {
-    "name": "+1 Armor",
-    "baseItem": "armor (medium)",
-    "rarity": "uncommon",
-    "attunement": false,
-    "combat": {
-      "acBonus": 1,
-      "enhancement": 0
-    }
-  },
-  {
-    "name": "+2 Armor",
-    "baseItem": "armor (medium)",
-    "rarity": "rare",
-    "attunement": false,
-    "combat": {
-      "acBonus": 2,
-      "enhancement": 0
-    }
-  },
-  {
-    "name": "+3 Armor",
-    "baseItem": "armor (medium)",
-    "rarity": "very rare",
-    "attunement": false,
-    "combat": {
-      "acBonus": 3,
-      "enhancement": 0
-    }
-  },
-  {
     "name": "Armor of Resistance",
     "baseItem": "armor (medium)",
     "rarity": "rare",
     "attunement": true,
     "combat": {
       "enhancement": 0,
-      "resistances": ["acid"]
+      "resistances": [
+        "acid"
+      ]
     }
   },
   {
@@ -507,33 +418,6 @@
         "+4d6 slashing damage on nat 20",
         "Max damage vs objects"
       ]
-    }
-  },
-  {
-    "name": "+1 Shortbow",
-    "baseItem": "shortbow",
-    "rarity": "uncommon",
-    "attunement": false,
-    "combat": {
-      "enhancement": 1
-    }
-  },
-  {
-    "name": "+1 Crossbow",
-    "baseItem": "crossbow (light)",
-    "rarity": "uncommon",
-    "attunement": false,
-    "combat": {
-      "enhancement": 1
-    }
-  },
-  {
-    "name": "+2 Crossbow",
-    "baseItem": "crossbow (light)",
-    "rarity": "rare",
-    "attunement": false,
-    "combat": {
-      "enhancement": 2
     }
   },
   {
