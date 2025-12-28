@@ -8,26 +8,62 @@ import {
   getSuggestedRarity,
 } from '@/lib/calculator';
 
-const BASE_ITEMS = [
-  'longsword',
-  'greatsword',
-  'shortsword',
-  'dagger',
-  'rapier',
-  'longbow',
-  'shortbow',
-  'crossbow',
-  'shield',
-  'armor',
-  'staff',
-  'wand',
-  'rod',
-  'ring',
-  'amulet',
-  'cloak',
-  'boots',
-  'gloves',
-];
+const BASE_ITEMS = {
+  'Melee Weapons (Simple)': [
+    'club',
+    'dagger',
+    'greatclub',
+    'handaxe',
+    'javelin',
+    'mace',
+    'quarterstaff',
+    'spear',
+  ],
+  'Melee Weapons (Martial)': [
+    'battleaxe',
+    'flail',
+    'glaive',
+    'greataxe',
+    'greatsword',
+    'halberd',
+    'lance',
+    'longsword',
+    'maul',
+    'morningstar',
+    'pike',
+    'rapier',
+    'scimitar',
+    'shortsword',
+    'trident',
+    'warhammer',
+    'whip',
+  ],
+  'Ranged Weapons': [
+    'crossbow (hand)',
+    'crossbow (heavy)',
+    'crossbow (light)',
+    'longbow',
+    'shortbow',
+  ],
+  'Armor': [
+    'armor (light)',
+    'armor (medium)',
+    'armor (heavy)',
+    'shield',
+  ],
+  'Implements': [
+    'rod',
+    'staff',
+    'wand',
+  ],
+  'Accessories': [
+    'amulet',
+    'boots',
+    'cloak',
+    'gloves',
+    'ring',
+  ],
+};
 
 const DAMAGE_DICE = ['1d4', '1d6', '1d8', '1d10', '2d6', '2d8', '3d6', '3d8', '4d6'];
 
@@ -156,10 +192,14 @@ export default function CalculatorPage() {
                       onChange={(e) => setBaseItem(e.target.value)}
                       className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                     >
-                      {BASE_ITEMS.map((item) => (
-                        <option key={item} value={item}>
-                          {item.charAt(0).toUpperCase() + item.slice(1)}
-                        </option>
+                      {Object.entries(BASE_ITEMS).map(([category, items]) => (
+                        <optgroup key={category} label={category}>
+                          {items.map((item) => (
+                            <option key={item} value={item}>
+                              {item.charAt(0).toUpperCase() + item.slice(1)}
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   </div>

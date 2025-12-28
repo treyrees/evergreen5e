@@ -227,7 +227,7 @@
   },
   {
     "name": "+1 Armor",
-    "baseItem": "armor",
+    "baseItem": "armor (medium)",
     "rarity": "uncommon",
     "attunement": false,
     "combat": {
@@ -237,7 +237,7 @@
   },
   {
     "name": "+2 Armor",
-    "baseItem": "armor",
+    "baseItem": "armor (medium)",
     "rarity": "rare",
     "attunement": false,
     "combat": {
@@ -247,7 +247,7 @@
   },
   {
     "name": "+3 Armor",
-    "baseItem": "armor",
+    "baseItem": "armor (medium)",
     "rarity": "very rare",
     "attunement": false,
     "combat": {
@@ -257,7 +257,7 @@
   },
   {
     "name": "Armor of Resistance",
-    "baseItem": "armor",
+    "baseItem": "armor (medium)",
     "rarity": "rare",
     "attunement": true,
     "combat": {
@@ -500,7 +500,7 @@
   },
   {
     "name": "+1 Crossbow",
-    "baseItem": "crossbow",
+    "baseItem": "crossbow (light)",
     "rarity": "uncommon",
     "attunement": false,
     "combat": {
@@ -509,7 +509,7 @@
   },
   {
     "name": "+2 Crossbow",
-    "baseItem": "crossbow",
+    "baseItem": "crossbow (light)",
     "rarity": "rare",
     "attunement": false,
     "combat": {

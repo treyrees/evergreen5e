@@ -23,21 +23,47 @@ const RECHARGE_MULTIPLIERS: Record<string, number> = {
 
 // Item categories for better anchor matching
 const ITEM_CATEGORIES: Record<string, string> = {
-  // Melee weapons
-  'longsword': 'melee-weapon',
-  'greatsword': 'melee-weapon',
-  'shortsword': 'melee-weapon',
+  // Melee weapons - Simple
+  'club': 'melee-weapon',
   'dagger': 'melee-weapon',
+  'greatclub': 'melee-weapon',
+  'handaxe': 'melee-weapon',
+  'javelin': 'melee-weapon',
+  'mace': 'melee-weapon',
+  'quarterstaff': 'melee-weapon',
+  'spear': 'melee-weapon',
+
+  // Melee weapons - Martial
+  'battleaxe': 'melee-weapon',
+  'flail': 'melee-weapon',
+  'glaive': 'melee-weapon',
+  'greataxe': 'melee-weapon',
+  'greatsword': 'melee-weapon',
+  'halberd': 'melee-weapon',
+  'lance': 'melee-weapon',
+  'longsword': 'melee-weapon',
+  'maul': 'melee-weapon',
+  'morningstar': 'melee-weapon',
+  'pike': 'melee-weapon',
   'rapier': 'melee-weapon',
+  'scimitar': 'melee-weapon',
+  'shortsword': 'melee-weapon',
+  'trident': 'melee-weapon',
+  'warhammer': 'melee-weapon',
+  'whip': 'melee-weapon',
 
   // Ranged weapons
+  'crossbow (hand)': 'ranged-weapon',
+  'crossbow (heavy)': 'ranged-weapon',
+  'crossbow (light)': 'ranged-weapon',
   'longbow': 'ranged-weapon',
   'shortbow': 'ranged-weapon',
-  'crossbow': 'ranged-weapon',
 
   // Defensive gear
   'shield': 'defensive',
-  'armor': 'defensive',
+  'armor (light)': 'defensive',
+  'armor (medium)': 'defensive',
+  'armor (heavy)': 'defensive',
 
   // Magic implements
   'staff': 'implement',
