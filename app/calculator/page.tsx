@@ -371,56 +371,6 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Charge Pool Configuration */}
-                {(maxCharges > 0 || chargesPerShortRest > 0 || chargesPerLongRest > 0 || abilities.length > 0) && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Charge Pool
-                    </label>
-                    <div className="grid grid-cols-3 gap-3 mb-4">
-                      <div>
-                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                          Max Charges
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={maxCharges}
-                          onChange={(e) => setMaxCharges(parseInt(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                          placeholder="7"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                          Per Short Rest
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={chargesPerShortRest}
-                          onChange={(e) => setChargesPerShortRest(parseInt(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                          Per Long Rest
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={chargesPerLongRest}
-                          onChange={(e) => setChargesPerLongRest(parseInt(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                          placeholder="4"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Spells & Spell-Like Abilities */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -429,6 +379,56 @@ export default function CalculatorPage() {
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
                     For non-spell abilities, estimate equivalent spell level (0 for cantrip-like, 1-9 for leveled spells)
                   </p>
+
+                  {/* Charge Pool Configuration */}
+                  {(maxCharges > 0 || chargesPerShortRest > 0 || chargesPerLongRest > 0 || abilities.length > 0) && (
+                    <div className="mb-4">
+                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                        Charge Pool
+                      </label>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                            Max Charges
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={maxCharges}
+                            onChange={(e) => setMaxCharges(parseInt(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                            placeholder="7"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                            Per Short Rest
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={chargesPerShortRest}
+                            onChange={(e) => setChargesPerShortRest(parseInt(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                            Per Long Rest
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={chargesPerLongRest}
+                            onChange={(e) => setChargesPerLongRest(parseInt(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                            placeholder="4"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Abilities List */}
                   {abilities.length > 0 && (
@@ -440,7 +440,7 @@ export default function CalculatorPage() {
                         >
                           <div className="text-sm text-slate-700 dark:text-slate-300">
                             <span className="font-medium">{ability.spell}</span>
-                            {' (Level '}{ability.spellLevel}{', '}{ability.chargesPerUse} charge{ability.chargesPerUse !== 1 ? 's' : ''})
+                            {' (Level '}{ability.spellLevel}{', '}{ability.chargesPerUse} charge{ability.chargesPerUse !== 1 ? 's' : ''} per use)
                           </div>
                           <button
                             onClick={() => removeAbility(index)}
