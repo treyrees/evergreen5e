@@ -113,6 +113,20 @@ export default function CalculatorPage() {
     chargesPerUse: 1,
   });
 
+  // Check if any combat attributes are selected (for blur effect)
+  const hasSelectedAttributes = useMemo(() => {
+    return (
+      enhancement > 0 ||
+      damageBonus !== undefined ||
+      acBonus > 0 ||
+      savingThrowBonus > 0 ||
+      maxCharges > 0 ||
+      chargesPerShortRest > 0 ||
+      chargesPerLongRest > 0 ||
+      abilities.length > 0
+    );
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities]);
+
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
     baseItem,
@@ -559,7 +573,20 @@ export default function CalculatorPage() {
 
           {/* Right Column - Results */}
           <div className="lg:sticky lg:top-8 h-fit">
-            <div className="bg-slate-900 text-slate-100 rounded-lg shadow-xl p-6 font-mono text-sm">
+            <div className="relative bg-slate-900 text-slate-100 rounded-lg shadow-xl p-6 font-mono text-sm">
+              {/* Blur overlay when no attributes selected */}
+              {!hasSelectedAttributes && (
+                <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                  <div className="text-center px-6">
+                    <div className="text-xl font-bold text-slate-300 mb-2">
+                      Select an attribute to see results
+                    </div>
+                    <div className="text-sm text-slate-400">
+                      Choose combat features on the left to calculate item rarity
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="border-b border-slate-700 pb-4 mb-4">
                 <div className="text-center text-lg font-bold">
                   {currentItem.name?.toUpperCase() || 'UNNAMED ITEM'}
