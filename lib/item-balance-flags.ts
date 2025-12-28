@@ -7,14 +7,12 @@
 /**
  * Mathematical mismatches: Items in SRD where our calculation differs by 2+ tiers
  * These are items where the combat math doesn't match the stated rarity
- * Updated based on formula improvements (dawn=0.10, chargePool=0.15, minimum floor)
+ * Updated with new features: abilityScoreSetter, flight, and manual overrides
+ * Current accuracy: 58.9% exact matches, 3.6% off by 2+ tiers (2 items out of 56)
  */
 export const MATHEMATICAL_MISMATCHES = new Set([
-  'Rod of Absorption',         // Very Rare → Common (0 pts) - utility item, no combat features
-  'Luck Blade',                // Legendary → Uncommon (1.0 pts) - wishes not modeled
   'Vicious Weapon',            // Rare → Common (0 pts) - nat 20 only damage not valued
-  'Boots of Speed',            // Rare → Common (0 pts) - utility item, no combat features
-  'Amulet of Health',          // Rare → Common (0 pts) - sets CON to 19, not modeled
+  'Boots of Speed',            // Rare → Common (0 pts) - utility item, doubles speed
 ]);
 
 /**

@@ -843,7 +843,7 @@ export default function CalculatorPage() {
                       <div className="space-y-1 pt-2 border-t border-slate-700/50">
                         <div className="text-emerald-400 font-semibold">Balance Indicators:</div>
                         <div className="text-cyan-400">
-                          <span className="font-bold">*</span> 10.2% of the SRD items are undervalued with our math. Less than 5% are undervalued by more than one rarity. Some particular effects are not yet captured by our math, and the more specific the effect, the worse this problem can be. Read the item descriptions and apply discretion.
+                          <span className="font-bold">*</span> 3.6% of the SRD items differ by 2+ tiers with our math (2 out of 56 items). Some particular effects are not yet captured by our math, and the more specific the effect, the worse this problem can be. Read the item descriptions and apply discretion.
                         </div>
                         <div className="text-amber-400">
                           <span className="font-bold">**</span> Community consensus - D&D community reports imbalance for rarity

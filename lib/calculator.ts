@@ -155,6 +155,27 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     score += combat.savingThrowBonus;
   }
 
+  // Ability score setter - sets an ability score to a fixed value (e.g., STR to 19)
+  // This is worth 2.5 points because it's a massive boost for characters with low stats
+  // Equivalent to +4 to +9 in that ability score (affects AC, HP, attack, saves, DCs)
+  if (combat.abilityScoreSetter) {
+    score += 2.5;
+  }
+
+  // Flight - one of the most powerful abilities in D&D
+  if (combat.flight) {
+    if (combat.flight.duration === 'unlimited') {
+      // Unlimited flight is extremely powerful (Broom of Flying should be Rare)
+      score += 2.0;
+    } else if (combat.flight.hoursPerDay && combat.flight.hoursPerDay >= 4) {
+      // 4+ hours per day is still very strong (Winged Boots)
+      score += 1.5;
+    } else {
+      // Limited flight (1-2 hours/day like Wings of Flying)
+      score += 1.0;
+    }
+  }
+
   // Damage resistances - each resistance is worth 1.5 points
   // (defensive, situational, but very valuable in the right circumstances)
   if (combat.resistances && combat.resistances.length > 0) {

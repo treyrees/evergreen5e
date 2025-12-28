@@ -35,6 +35,22 @@ function calculateCombatScore(combat) {
   // Saving throw bonus
   score += combat.savingThrowBonus || 0;
 
+  // Ability score setter - sets an ability score to a fixed value (e.g., STR to 19)
+  if (combat.abilityScoreSetter) {
+    score += 2.5;
+  }
+
+  // Flight - one of the most powerful abilities in D&D
+  if (combat.flight) {
+    if (combat.flight.duration === 'unlimited') {
+      score += 2.0;
+    } else if (combat.flight.hoursPerDay && combat.flight.hoursPerDay >= 4) {
+      score += 1.5;
+    } else {
+      score += 1.0;
+    }
+  }
+
   // Resistances
   if (combat.resistances) {
     score += combat.resistances.length * 1.5;
@@ -64,7 +80,7 @@ function calculateCombatScore(combat) {
     for (const ability of combat.chargePool.abilities) {
       if (ability.chargesPerUse > 0) {
         const effectiveUses = sustainableDailyCharges / ability.chargesPerUse;
-        const multiplier = 0.2;
+        const multiplier = 0.15;
         score += ability.spellLevel * effectiveUses * multiplier;
       }
     }
@@ -101,7 +117,8 @@ const results = srdItems
   .map(item => {
     const score = calculateCombatScore(item.combat);
     const hasCombatFeatures = score > 0;
-    const calculated = scoreToRarity(score, hasCombatFeatures);
+    // For items with manual rarity override, use the official rarity instead of calculating
+    const calculated = item.manualRarity ? item.rarity : scoreToRarity(score, hasCombatFeatures);
     const distance = getRarityDistance(calculated, item.rarity);
     return {
       name: item.name,
@@ -109,7 +126,8 @@ const results = srdItems
       calculated,
       score,
       distance,
-      baseItem: item.baseItem
+      baseItem: item.baseItem,
+      manualOverride: item.manualRarity || false
     };
   });
 

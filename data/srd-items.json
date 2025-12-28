@@ -369,6 +369,7 @@
     "baseItem": "rod",
     "rarity": "very rare",
     "attunement": true,
+    "manualRarity": true,
     "combat": {
       "enhancement": 0
     }
@@ -475,6 +476,7 @@
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
+    "manualRarity": true,
     "combat": {
       "enhancement": 1
     }
@@ -560,7 +562,95 @@
     "rarity": "rare",
     "attunement": true,
     "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "CON",
+        "setValue": 19
+      }
+    }
+  },
+  {
+    "name": "Headband of Intellect",
+    "baseItem": "headband",
+    "rarity": "uncommon",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "INT",
+        "setValue": 19
+      }
+    }
+  },
+  {
+    "name": "Gauntlets of Ogre Power",
+    "baseItem": "gauntlets",
+    "rarity": "uncommon",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "STR",
+        "setValue": 19
+      }
+    }
+  },
+  {
+    "name": "Broom of Flying",
+    "baseItem": "broom",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 0,
+      "flight": {
+        "duration": "unlimited"
+      }
+    }
+  },
+  {
+    "name": "Winged Boots",
+    "baseItem": "boots",
+    "rarity": "uncommon",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "flight": {
+        "duration": "limited",
+        "hoursPerDay": 4
+      }
+    }
+  },
+  {
+    "name": "Wings of Flying",
+    "baseItem": "cloak",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "flight": {
+        "duration": "limited",
+        "hoursPerDay": 1.5
+      }
+    }
+  },
+  {
+    "name": "Ring of Spell Storing",
+    "baseItem": "ring",
+    "rarity": "rare",
+    "attunement": true,
+    "manualRarity": true,
+    "combat": {
       "enhancement": 0
+    }
+  },
+  {
+    "name": "Cloak of Displacement",
+    "baseItem": "cloak",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 2
     }
   }
 ]

@@ -25,6 +25,17 @@ export interface ChargePool {
   abilities: ChargedAbility[]; // Abilities that consume charges
 }
 
+export interface AbilityScoreSetter {
+  ability: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+  setValue: number; // 19, 21, 23, etc.
+}
+
+export interface Flight {
+  duration: 'unlimited' | 'limited';
+  hoursPerDay?: number; // if limited
+  requiresAction?: boolean; // bonus action to activate
+}
+
 export interface CombatFeatures {
   enhancement: number; // 0, 1, 2, 3
   damageBonus?: DamageBonus;
@@ -33,6 +44,8 @@ export interface CombatFeatures {
   charges?: SpellCharge[]; // Legacy format for existing SRD items
   chargePool?: ChargePool; // New intuitive format for user items
   resistances?: string[]; // Damage types resisted: "fire", "cold", "all", etc.
+  abilityScoreSetter?: AbilityScoreSetter; // Sets ability score to fixed value (e.g., Gauntlets of Ogre Power)
+  flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots)
 }
 
 export interface RibbonFeatures {
@@ -51,6 +64,7 @@ export interface MagicItem {
   ribbons?: RibbonFeatures;
   attunement: boolean;
   rarity?: string; // For SRD items
+  manualRarity?: boolean; // If true, use official rarity instead of calculating
 }
 
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Very Rare' | 'Legendary';
