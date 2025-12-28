@@ -447,15 +447,19 @@
   },
   {
     "name": "Javelin of Lightning",
-    "baseItem": "longsword",
+    "baseItem": "javelin",
     "rarity": "uncommon",
     "attunement": false,
     "combat": {
       "enhancement": 0,
-      "damageBonus": {
-        "dice": "4d6",
-        "type": "lightning"
-      }
+      "charges": [
+        {
+          "spell": "Lightning Bolt (4d6, DC 13)",
+          "spellLevel": 3,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
     }
   },
   {

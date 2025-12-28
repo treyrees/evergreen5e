@@ -1,6 +1,7 @@
 export interface DamageBonus {
   dice: string; // "1d6", "2d6", etc.
   type: string; // "fire", "cold", "radiant", etc.
+  frequency?: 'per-hit' | 'per-turn'; // per-hit (default) or once per turn
   conditional?: boolean; // true if only works vs specific creatures (dragons, giants, etc.)
 }
 

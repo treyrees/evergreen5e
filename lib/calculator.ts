@@ -114,10 +114,20 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   // Damage bonus
   if (combat.damageBonus?.dice) {
     let diceValue = DICE_VALUES[combat.damageBonus.dice] || 0;
+
+    // Frequency multiplier
+    // - per-hit (default): 1.0 - applies to every attack
+    // - per-turn: 0.5 - only applies once per turn (even with multiple attacks)
+    const frequency = combat.damageBonus.frequency || 'per-hit';
+    if (frequency === 'per-turn') {
+      diceValue *= 0.5;
+    }
+
     // Conditional damage (only works vs specific creatures) is worth 25% of normal value
     if (combat.damageBonus.conditional) {
       diceValue *= 0.25;
     }
+
     score += diceValue;
   }
 
@@ -460,17 +470,23 @@ function compareToAnchor(
   // Damage comparison
   const userDmg = userCombat.damageBonus?.dice;
   const anchorDmg = anchorCombat.damageBonus?.dice;
+  const userFreq = userCombat.damageBonus?.frequency || 'per-hit';
+  const anchorFreq = anchorCombat.damageBonus?.frequency || 'per-hit';
+
   if (userDmg && !anchorDmg) {
-    details.push(`has ${userDmg} damage (anchor has none)`);
+    const freqText = userFreq === 'per-turn' ? ' per turn' : '';
+    details.push(`has ${userDmg}${freqText} damage (anchor has none)`);
   } else if (!userDmg && anchorDmg) {
-    details.push(`no damage bonus (anchor has ${anchorDmg})`);
-  } else if (userDmg && anchorDmg && userDmg !== anchorDmg) {
+    const freqText = anchorFreq === 'per-turn' ? ' per turn' : '';
+    details.push(`no damage bonus (anchor has ${anchorDmg}${freqText})`);
+  } else if (userDmg && anchorDmg) {
     const userDmgValue = DICE_VALUES[userDmg] || 0;
     const anchorDmgValue = DICE_VALUES[anchorDmg] || 0;
-    if (userDmgValue > anchorDmgValue) {
-      details.push(`${userDmg} vs anchor's ${anchorDmg} damage`);
-    } else {
-      details.push(`${userDmg} vs anchor's ${anchorDmg} damage`);
+    const userFreqText = userFreq === 'per-turn' ? ' per turn' : '';
+    const anchorFreqText = anchorFreq === 'per-turn' ? ' per turn' : '';
+
+    if (userDmg !== anchorDmg || userFreq !== anchorFreq) {
+      details.push(`${userDmg}${userFreqText} vs anchor's ${anchorDmg}${anchorFreqText} damage`);
     }
   }
 

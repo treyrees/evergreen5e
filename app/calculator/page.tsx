@@ -276,6 +276,7 @@ export default function CalculatorPage() {
                             ? {
                                 dice: e.target.value,
                                 type: damageBonus?.type || 'fire',
+                                frequency: damageBonus?.frequency || 'per-hit',
                                 conditional: damageBonus?.conditional || false,
                               }
                             : undefined
@@ -307,22 +308,46 @@ export default function CalculatorPage() {
                     )}
                   </div>
                   {damageBonus && (
-                    <div className="mt-2 flex items-center">
-                      <input
-                        type="checkbox"
-                        id="conditional-damage"
-                        checked={damageBonus.conditional || false}
-                        onChange={(e) =>
-                          setDamageBonus({ ...damageBonus, conditional: e.target.checked })
-                        }
-                        className="mr-2 h-4 w-4 text-emerald-600 rounded"
-                      />
-                      <label
-                        htmlFor="conditional-damage"
-                        className="text-sm text-slate-600 dark:text-slate-400"
-                      >
-                        Conditional (only vs specific creatures, e.g. dragons/giants)
-                      </label>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-hit' })}
+                          className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                            (damageBonus.frequency || 'per-hit') === 'per-hit'
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                          }`}
+                        >
+                          Per Hit
+                        </button>
+                        <button
+                          onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-turn' })}
+                          className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                            damageBonus.frequency === 'per-turn'
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                          }`}
+                        >
+                          Once Per Turn
+                        </button>
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="conditional-damage"
+                          checked={damageBonus.conditional || false}
+                          onChange={(e) =>
+                            setDamageBonus({ ...damageBonus, conditional: e.target.checked })
+                          }
+                          className="mr-2 h-4 w-4 text-emerald-600 rounded"
+                        />
+                        <label
+                          htmlFor="conditional-damage"
+                          className="text-sm text-slate-600 dark:text-slate-400"
+                        >
+                          Conditional (only vs specific creatures, e.g. dragons/giants)
+                        </label>
+                      </div>
                     </div>
                   )}
                 </div>
