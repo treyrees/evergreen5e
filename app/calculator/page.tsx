@@ -97,6 +97,12 @@ export default function CalculatorPage() {
   const [resistances, setResistances] = useState<string[]>([]);
   const [attunement, setAttunement] = useState(false);
 
+  // Ability score setter state
+  const [abilityScoreSetter, setAbilityScoreSetter] = useState<{ability: string; setValue: number} | undefined>(undefined);
+
+  // Flight state
+  const [flight, setFlight] = useState<{duration: 'unlimited' | 'limited'; hoursPerDay?: number} | undefined>(undefined);
+
   // Charge pool state (new intuitive system)
   const [maxCharges, setMaxCharges] = useState(0);
   const [chargesPerShortRest, setChargesPerShortRest] = useState(0);
@@ -123,9 +129,11 @@ export default function CalculatorPage() {
       maxCharges > 0 ||
       chargesPerShortRest > 0 ||
       chargesPerLongRest > 0 ||
-      abilities.length > 0
+      abilities.length > 0 ||
+      abilityScoreSetter !== undefined ||
+      flight !== undefined
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities]);
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, flight]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
@@ -136,6 +144,8 @@ export default function CalculatorPage() {
       acBonus: acBonus > 0 ? acBonus : undefined,
       savingThrowBonus: savingThrowBonus > 0 ? savingThrowBonus : undefined,
       resistances: resistances.length > 0 ? resistances : undefined,
+      abilityScoreSetter,
+      flight,
       chargePool: (maxCharges > 0 || abilities.length > 0) ? {
         maxCharges,
         chargesPerShortRest,
@@ -144,7 +154,7 @@ export default function CalculatorPage() {
       } : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement]);
+  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, flight, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -407,6 +417,100 @@ export default function CalculatorPage() {
                         +{value}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                {/* Ability Score Setter */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Set Ability Score
+                  </label>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 italic">
+                    Sets a specific ability score to a fixed value (e.g., Gauntlets of Ogre Power set STR to 19)
+                  </p>
+                  <div className="flex gap-2">
+                    <select
+                      value={abilityScoreSetter?.ability || ''}
+                      onChange={(e) => {
+                        if (e.target.value === '') {
+                          setAbilityScoreSetter(undefined);
+                        } else {
+                          setAbilityScoreSetter({
+                            ability: e.target.value,
+                            setValue: abilityScoreSetter?.setValue || 19
+                          });
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    >
+                      <option value="">None</option>
+                      <option value="STR">Strength</option>
+                      <option value="DEX">Dexterity</option>
+                      <option value="CON">Constitution</option>
+                      <option value="INT">Intelligence</option>
+                      <option value="WIS">Wisdom</option>
+                      <option value="CHA">Charisma</option>
+                    </select>
+                    {abilityScoreSetter && (
+                      <input
+                        type="number"
+                        min="1"
+                        max="30"
+                        value={abilityScoreSetter.setValue}
+                        onChange={(e) => setAbilityScoreSetter({
+                          ...abilityScoreSetter,
+                          setValue: parseInt(e.target.value) || 19
+                        })}
+                        className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                        placeholder="19"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Flight */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Flight
+                  </label>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 italic">
+                    Grants the ability to fly (e.g., Broom of Flying, Winged Boots)
+                  </p>
+                  <div className="space-y-2">
+                    <select
+                      value={flight?.duration || ''}
+                      onChange={(e) => {
+                        if (e.target.value === '') {
+                          setFlight(undefined);
+                        } else if (e.target.value === 'unlimited') {
+                          setFlight({ duration: 'unlimited' });
+                        } else {
+                          setFlight({ duration: 'limited', hoursPerDay: 4 });
+                        }
+                      }}
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    >
+                      <option value="">No Flight</option>
+                      <option value="unlimited">Unlimited Flight</option>
+                      <option value="limited">Limited Flight (hours per day)</option>
+                    </select>
+                    {flight?.duration === 'limited' && (
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm text-slate-600 dark:text-slate-400">Hours per day:</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={flight.hoursPerDay || 4}
+                          onChange={(e) => setFlight({
+                            duration: 'limited',
+                            hoursPerDay: parseFloat(e.target.value) || 4
+                          })}
+                          className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                          placeholder="4"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -686,13 +790,21 @@ export default function CalculatorPage() {
                                 )}
                                 {anchor.combat.acBonus && <div>+{anchor.combat.acBonus} AC</div>}
                                 {anchor.combat.savingThrowBonus && <div>+{anchor.combat.savingThrowBonus} saves</div>}
+                                {anchor.combat.abilityScoreSetter && (
+                                  <div>{anchor.combat.abilityScoreSetter.ability} set to {anchor.combat.abilityScoreSetter.setValue}</div>
+                                )}
+                                {anchor.combat.flight && (
+                                  <div>
+                                    Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}
+                                  </div>
+                                )}
                                 {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
                                   <div>Resist: {anchor.combat.resistances.join(', ')}</div>
                                 )}
                                 {anchor.combat.charges && (
                                   <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
                                 )}
-                                {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.resistances && !anchor.combat.charges && (
+                                {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && (
                                   <div className="text-slate-500 italic">No measurable combat features</div>
                                 )}
                               </div>
@@ -756,6 +868,14 @@ export default function CalculatorPage() {
                           )}
                           {acBonus > 0 && <div>+{acBonus} AC</div>}
                           {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves</div>}
+                          {abilityScoreSetter && (
+                            <div>{abilityScoreSetter.ability} set to {abilityScoreSetter.setValue}</div>
+                          )}
+                          {flight && (
+                            <div>
+                              Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}
+                            </div>
+                          )}
                           {abilities.length > 0 && (
                             <div>
                               {maxCharges} charges ({abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'})
@@ -763,7 +883,7 @@ export default function CalculatorPage() {
                               {chargesPerLongRest > 0 && <span className="text-slate-400"> • {chargesPerLongRest}/LR</span>}
                             </div>
                           )}
-                          {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && abilities.length === 0 && (
+                          {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !flight && abilities.length === 0 && (
                             <div className="text-slate-500 italic">No features added</div>
                           )}
                         </div>
