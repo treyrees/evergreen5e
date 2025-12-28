@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { MagicItem, DamageBonus, SpellCharge, ChargedAbility, ChargePool } from '@/types/magic-item';
+import { MagicItem, DamageBonus, SpellCharge, ChargedAbility, ChargePool, AbilityScoreSetter, Flight } from '@/types/magic-item';
 import {
   calculateCombatScore,
   getSuggestedRarity,
@@ -98,10 +98,10 @@ export default function CalculatorPage() {
   const [attunement, setAttunement] = useState(false);
 
   // Ability score setter state
-  const [abilityScoreSetter, setAbilityScoreSetter] = useState<{ability: string; setValue: number} | undefined>(undefined);
+  const [abilityScoreSetter, setAbilityScoreSetter] = useState<AbilityScoreSetter | undefined>(undefined);
 
   // Flight state
-  const [flight, setFlight] = useState<{duration: 'unlimited' | 'limited'; hoursPerDay?: number} | undefined>(undefined);
+  const [flight, setFlight] = useState<Flight | undefined>(undefined);
 
   // Charge pool state (new intuitive system)
   const [maxCharges, setMaxCharges] = useState(0);
@@ -436,7 +436,7 @@ export default function CalculatorPage() {
                           setAbilityScoreSetter(undefined);
                         } else {
                           setAbilityScoreSetter({
-                            ability: e.target.value,
+                            ability: e.target.value as AbilityScoreSetter['ability'],
                             setValue: abilityScoreSetter?.setValue || 19
                           });
                         }
