@@ -88,18 +88,22 @@ function getItemCategory(baseItem: string): string {
 }
 
 /**
- * Check if a category is a weapon (melee or ranged)
+ * Get broad category for matching purposes
+ * Returns: 'weapon', 'armor', or 'trinket'
  */
-function isWeaponCategory(category: string): boolean {
-  return category === 'melee-weapon' || category === 'ranged-weapon';
-}
+function getBroadCategory(baseItem: string): 'weapon' | 'armor' | 'trinket' {
+  const category = getItemCategory(baseItem);
 
-/**
- * Check if an item category has limited anchors (should expand search earlier)
- */
-function isLimitedCategory(category: string): boolean {
-  // Ranged weapons, implements, and accessories have very few SRD items
-  return category === 'ranged-weapon' || category === 'implement' || category === 'accessory';
+  if (category === 'melee-weapon' || category === 'ranged-weapon') {
+    return 'weapon';
+  }
+
+  if (category === 'defensive') {
+    return 'armor';
+  }
+
+  // Everything else (implements, accessories, other) is a trinket
+  return 'trinket';
 }
 
 /**
@@ -263,8 +267,7 @@ export interface AnchorComparison {
 
 /**
  * Find anchor item - the baseline SRD item for balancing reference
- * Prioritizes named items (Flame Tongue, Sun Blade) over generic +X items
- * Physical similarity: exact match > same category > any item
+ * Prioritizes based on: broad category (weapon/armor/trinket), attunement, and score proximity
  */
 export function findAnchorItem(
   userItem: Partial<MagicItem>
@@ -279,6 +282,8 @@ export function findAnchorItem(
 
   const userScore = calculateCombatScore(userItem.combat);
   const allItems = srdItems as MagicItem[];
+  const userBroadCategory = userItem.baseItem ? getBroadCategory(userItem.baseItem) : 'trinket';
+  const userAttunement = userItem.attunement || false;
 
   // Separate named items from generic +X items
   const namedItems = allItems.filter(item => !isGenericItem(item));
@@ -286,70 +291,38 @@ export function findAnchorItem(
 
   let anchor: MagicItem | null = null;
 
-  // Priority 1: Named items with exact base item match
+  // Priority 1: Same broad category + same attunement
   anchor = findClosestInCandidates(
-    namedItems.filter((item) => item.baseItem === userItem.baseItem),
+    namedItems.filter((item) => {
+      const itemBroadCategory = getBroadCategory(item.baseItem);
+      const itemAttunement = item.attunement || false;
+      return itemBroadCategory === userBroadCategory && itemAttunement === userAttunement;
+    }),
     userScore
   );
 
-  // Priority 2: Named items with same category (e.g., longsword → greatsword)
-  if (!anchor && userItem.baseItem) {
-    const userCategory = getItemCategory(userItem.baseItem);
+  // Priority 2: Same broad category (any attunement)
+  if (!anchor) {
     anchor = findClosestInCandidates(
-      namedItems.filter((item) => getItemCategory(item.baseItem) === userCategory),
+      namedItems.filter((item) => getBroadCategory(item.baseItem) === userBroadCategory),
       userScore
     );
   }
 
-  // Priority 2.5: For limited categories, expand to related items
-  if (!anchor && userItem.baseItem) {
-    const userCategory = getItemCategory(userItem.baseItem);
-    if (isLimitedCategory(userCategory)) {
-      anchor = findClosestInCandidates(
-        namedItems.filter((item) => {
-          const itemCategory = getItemCategory(item.baseItem);
-          // Ranged weapons can compare with melee weapons
-          if (userCategory === 'ranged-weapon' && itemCategory === 'melee-weapon') {
-            return true;
-          }
-          // Implements can compare with weapons
-          if (userCategory === 'implement' && isWeaponCategory(itemCategory)) {
-            return true;
-          }
-          // Accessories can compare with weapons and implements
-          if (userCategory === 'accessory' && (isWeaponCategory(itemCategory) || itemCategory === 'implement')) {
-            return true;
-          }
-          return false;
-        }),
-        userScore
-      );
-    }
+  // Priority 3: Same attunement (any category)
+  if (!anchor) {
+    anchor = findClosestInCandidates(
+      namedItems.filter((item) => (item.attunement || false) === userAttunement),
+      userScore
+    );
   }
 
-  // Priority 3: Any named item
+  // Priority 4: Any named item
   if (!anchor) {
     anchor = findClosestInCandidates(namedItems, userScore);
   }
 
-  // Priority 4: Generic items with exact base item match (fallback)
-  if (!anchor) {
-    anchor = findClosestInCandidates(
-      genericItems.filter((item) => item.baseItem === userItem.baseItem),
-      userScore
-    );
-  }
-
-  // Priority 5: Generic items with same category (fallback)
-  if (!anchor && userItem.baseItem) {
-    const userCategory = getItemCategory(userItem.baseItem);
-    anchor = findClosestInCandidates(
-      genericItems.filter((item) => getItemCategory(item.baseItem) === userCategory),
-      userScore
-    );
-  }
-
-  // Priority 6: Any generic item (last resort)
+  // Priority 5: Generic items (fallback)
   if (!anchor) {
     anchor = findClosestInCandidates(genericItems, userScore);
   }
@@ -368,6 +341,7 @@ export function findAnchorItem(
 
 /**
  * Find top N anchor items for comparison
+ * Prioritizes based on: broad category (weapon/armor/trinket), attunement, and score proximity
  */
 export function findTopAnchorItems(
   userItem: Partial<MagicItem>,
@@ -383,6 +357,8 @@ export function findTopAnchorItems(
 
   const userScore = calculateCombatScore(userItem.combat);
   const allItems = srdItems as MagicItem[];
+  const userBroadCategory = userItem.baseItem ? getBroadCategory(userItem.baseItem) : 'trinket';
+  const userAttunement = userItem.attunement || false;
 
   // Separate named items from generic +X items
   const namedItems = allItems.filter(item => !isGenericItem(item));
@@ -396,103 +372,56 @@ export function findTopAnchorItems(
     priority: number;
   }> = [];
 
-  // Priority 1: Named items with exact base item match
-  const priority1 = namedItems.filter((item) => item.baseItem === userItem.baseItem);
-  priority1.forEach((item) => {
+  // Process all named items and assign priorities
+  namedItems.forEach((item) => {
+    const itemBroadCategory = getBroadCategory(item.baseItem);
+    const itemAttunement = item.attunement || false;
+    const sameBroadCategory = itemBroadCategory === userBroadCategory;
+    const sameAttunement = itemAttunement === userAttunement;
+    const exactMatch = item.baseItem === userItem.baseItem;
+
+    let priority: number;
+
+    if (sameBroadCategory && sameAttunement && exactMatch) {
+      priority = 1; // Same category, same attunement, exact base item match
+    } else if (sameBroadCategory && sameAttunement) {
+      priority = 2; // Same category, same attunement
+    } else if (sameBroadCategory) {
+      priority = 3; // Same category, different attunement
+    } else if (sameAttunement) {
+      priority = 4; // Different category, same attunement
+    } else {
+      priority = 5; // Different category, different attunement
+    }
+
     const score = calculateCombatScore(item.combat);
     candidates.push({
       item,
       score,
       scoreDiff: Math.abs(score - userScore),
-      priority: 1,
+      priority,
     });
   });
 
-  // Priority 2: Named items with same category
-  const userCategory = userItem.baseItem ? getItemCategory(userItem.baseItem) : 'other';
-  if (userItem.baseItem) {
-    const priority2 = namedItems.filter(
-      (item) =>
-        getItemCategory(item.baseItem) === userCategory &&
-        item.baseItem !== userItem.baseItem
-    );
-    priority2.forEach((item) => {
-      const score = calculateCombatScore(item.combat);
-      candidates.push({
-        item,
-        score,
-        scoreDiff: Math.abs(score - userScore),
-        priority: 2,
-      });
-    });
-  }
-
-  // Priority 2.5: For limited categories, expand to related items
-  // (e.g., ranged weapons can compare with melee weapons, implements with weapons, etc.)
-  if (isLimitedCategory(userCategory)) {
-    const priority2_5 = namedItems.filter((item) => {
-      const itemCategory = getItemCategory(item.baseItem);
-      if (item.baseItem === userItem.baseItem || itemCategory === userCategory) {
-        return false; // Already included in priority 1 or 2
-      }
-      // Ranged weapons can compare with melee weapons (both are weapons)
-      if (userCategory === 'ranged-weapon' && itemCategory === 'melee-weapon') {
-        return true;
-      }
-      // Melee weapons can compare with ranged weapons (for low ranged item count)
-      if (userCategory === 'melee-weapon' && itemCategory === 'ranged-weapon') {
-        return true;
-      }
-      // Implements can compare with weapons
-      if (userCategory === 'implement' && isWeaponCategory(itemCategory)) {
-        return true;
-      }
-      // Accessories can compare with weapons and implements
-      if (userCategory === 'accessory' && (isWeaponCategory(itemCategory) || itemCategory === 'implement')) {
-        return true;
-      }
-      return false;
-    });
-    priority2_5.forEach((item) => {
-      const score = calculateCombatScore(item.combat);
-      candidates.push({
-        item,
-        score,
-        scoreDiff: Math.abs(score - userScore),
-        priority: 2.5,
-      });
-    });
-  }
-
-  // Priority 3: Any other named item
-  const priority3 = namedItems.filter(
-    (item) =>
-      item.baseItem !== userItem.baseItem &&
-      getItemCategory(item.baseItem) !== userCategory
-  );
-  priority3.forEach((item) => {
-    const score = calculateCombatScore(item.combat);
-    candidates.push({
-      item,
-      score,
-      scoreDiff: Math.abs(score - userScore),
-      priority: 3,
-    });
-  });
-
-  // Priority 4-6: Generic items (only if we need more)
+  // Add generic items with lower priority
   const genericCandidates: typeof candidates = [];
   genericItems.forEach((item) => {
-    const score = calculateCombatScore(item.combat);
-    let priority = 6; // default: any generic
-    if (item.baseItem === userItem.baseItem) {
-      priority = 4;
-    } else if (
-      userItem.baseItem &&
-      getItemCategory(item.baseItem) === getItemCategory(userItem.baseItem)
-    ) {
-      priority = 5;
+    const itemBroadCategory = getBroadCategory(item.baseItem);
+    const itemAttunement = item.attunement || false;
+    const sameBroadCategory = itemBroadCategory === userBroadCategory;
+    const sameAttunement = itemAttunement === userAttunement;
+
+    let priority: number;
+
+    if (sameBroadCategory && sameAttunement) {
+      priority = 6;
+    } else if (sameBroadCategory) {
+      priority = 7;
+    } else {
+      priority = 8;
     }
+
+    const score = calculateCombatScore(item.combat);
     genericCandidates.push({
       item,
       score,
