@@ -8,6 +8,7 @@ import {
   getSuggestedRarity,
   findTopAnchorItems,
 } from '@/lib/calculator';
+import { getWarningIndicator } from '@/lib/item-balance-flags';
 
 const BASE_ITEMS = {
   'Melee Weapons (Simple)': [
@@ -563,7 +564,7 @@ export default function CalculatorPage() {
                     <div className="text-emerald-400 font-bold mb-3 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">⚓</span>
-                        <span>ANCHOR ITEMS (Reference)</span>
+                        <span>ANCHOR ITEMS</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -584,9 +585,22 @@ export default function CalculatorPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    {/* Warning Legend */}
+                    <div className="mb-3 p-2 bg-slate-800/50 rounded text-xs space-y-1">
+                      <div className="text-cyan-400 flex items-center gap-1">
+                        <span>🔷</span>
+                        <span>Mathematical mismatch (formula vs rarity)</span>
+                      </div>
+                      <div className="text-amber-400 flex items-center gap-1">
+                        <span>🟠</span>
+                        <span>Community consensus mismatch</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
                       {topAnchors.slice(0, numAnchorsToShow).map((anchorData, index) => {
                         const { anchor, anchorScore, comparison } = anchorData;
+                        const warnings = getWarningIndicator(anchor.name);
 
                         // Check if anchor is unbalanced
                         const isUnbalanced = anchor.rarity && (() => {
@@ -601,73 +615,78 @@ export default function CalculatorPage() {
                         })();
 
                         return (
-                          <div key={index} className={`${index > 0 ? 'border-t border-slate-700/50 pt-4' : ''}`}>
-                            <div className="space-y-2">
-                              <div className="text-white font-semibold text-base flex items-center gap-2">
-                                <span className="text-emerald-400 text-xs">#{index + 1}</span>
-                                {anchor.name}
+                          <div key={index} className={`${index > 0 ? 'border-t border-slate-700 pt-4' : ''} bg-slate-800/30 rounded-lg p-3`}>
+                            {/* Anchor Header */}
+                            <div className="mb-3 pb-2 border-b border-slate-700/50">
+                              <div className="text-white font-semibold text-base flex items-center gap-2 mb-1">
+                                <span className="text-emerald-400 text-xs font-mono">#{index + 1}</span>
+                                <span>{anchor.name}</span>
+                                {warnings.hasMath && <span title="Mathematical mismatch" className="text-cyan-400">🔷</span>}
+                                {warnings.hasCommunity && <span title="Community mismatch" className="text-amber-400">🟠</span>}
                               </div>
-                              <div className="text-xs text-emerald-300">
-                                {anchor.rarity?.toUpperCase()} •{' '}
-                                {anchorScore.toFixed(1)} points
-                                {anchor.attunement && ' • Requires Attunement'}
+                              <div className="text-xs text-slate-400">
+                                <span className="text-emerald-300">{anchor.rarity?.toUpperCase()}</span>
+                                {' • '}
+                                <span className="font-mono">{anchorScore.toFixed(1)} pts</span>
+                                {anchor.attunement && ' • Attunement'}
                               </div>
+                            </div>
 
-                              {/* Anchor Combat Features */}
-                              <div className="mt-2 pt-2 border-t border-emerald-700/50 text-xs text-slate-300 space-y-1">
+                            {/* Combat Features */}
+                            <div className="mb-3">
+                              <div className="text-emerald-400 text-xs font-semibold mb-1">Features</div>
+                              <div className="text-xs text-slate-300 space-y-0.5 pl-2">
                                 {anchor.combat.enhancement > 0 && (
-                                  <div>• +{anchor.combat.enhancement} enhancement</div>
+                                  <div>+{anchor.combat.enhancement} enhancement</div>
                                 )}
                                 {anchor.combat.damageBonus && (
                                   <div>
-                                    • {anchor.combat.damageBonus.dice}{' '}
-                                    {anchor.combat.damageBonus.type} damage
-                                    {anchor.combat.damageBonus.conditional && <span className="text-yellow-400"> (conditional)</span>}
+                                    {anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}
+                                    {anchor.combat.damageBonus.conditional && <span className="text-yellow-400 ml-1">(conditional)</span>}
                                   </div>
                                 )}
-                                {anchor.combat.acBonus && (
-                                  <div>• +{anchor.combat.acBonus} AC</div>
-                                )}
+                                {anchor.combat.acBonus && <div>+{anchor.combat.acBonus} AC</div>}
+                                {anchor.combat.savingThrowBonus && <div>+{anchor.combat.savingThrowBonus} saves</div>}
                                 {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
-                                  <div>• Resistances: {anchor.combat.resistances.join(', ')}</div>
+                                  <div>Resist: {anchor.combat.resistances.join(', ')}</div>
                                 )}
                                 {anchor.combat.charges && (
-                                  <div>• {anchor.combat.charges.length} spell/ability charges</div>
+                                  <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
+                                )}
+                                {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.resistances && !anchor.combat.charges && (
+                                  <div className="text-slate-500 italic">No measurable combat features</div>
                                 )}
                               </div>
+                            </div>
 
-                              {/* Comparison to Anchor */}
-                              <div className="mt-3 pt-2 border-t border-emerald-700/50">
-                                <div className="text-xs font-semibold text-emerald-300 mb-1">
-                                  {itemName || 'UNNAMED ITEM'} vs {anchor.name.toUpperCase()}:
-                                </div>
-                                <div className="text-xs text-slate-300 space-y-0.5">
-                                  {comparison.type === 'stronger' && (
-                                    <div className="text-yellow-400">
-                                      ↑ {comparison.scoreDifference.toFixed(1)} points stronger
-                                    </div>
-                                  )}
-                                  {comparison.type === 'weaker' && (
-                                    <div className="text-blue-400">
-                                      ↓ {Math.abs(comparison.scoreDifference).toFixed(1)} points weaker
-                                    </div>
-                                  )}
-                                  {comparison.type === 'equal' && (
-                                    <div className="text-emerald-400">
-                                      ≈ Equal power level
-                                    </div>
-                                  )}
-                                  {comparison.details.map((detail, idx) => (
-                                    <div key={idx} className="text-slate-400">
-                                      • {detail}
-                                    </div>
-                                  ))}
-                                  {isUnbalanced && (
-                                    <div className="mt-2 pt-2 border-t border-yellow-700/30 text-yellow-400">
-                                      ⚠️ This anchor appears unbalanced in the SRD
-                                    </div>
-                                  )}
-                                </div>
+                            {/* Comparison */}
+                            <div className="bg-slate-900/50 rounded p-2">
+                              <div className="text-xs font-semibold text-slate-400 mb-1">
+                                Comparison
+                              </div>
+                              <div className="text-xs space-y-0.5">
+                                {comparison.type === 'stronger' && (
+                                  <div className="text-yellow-400 font-medium">
+                                    ↑ {comparison.scoreDifference.toFixed(1)} pts stronger
+                                  </div>
+                                )}
+                                {comparison.type === 'weaker' && (
+                                  <div className="text-blue-400 font-medium">
+                                    ↓ {Math.abs(comparison.scoreDifference).toFixed(1)} pts weaker
+                                  </div>
+                                )}
+                                {comparison.type === 'equal' && (
+                                  <div className="text-emerald-400 font-medium">
+                                    ≈ Equal power
+                                  </div>
+                                )}
+                                {comparison.details.length > 0 && (
+                                  <div className="mt-1 pt-1 border-t border-slate-700/50 text-slate-400 space-y-0.5">
+                                    {comparison.details.map((detail, idx) => (
+                                      <div key={idx}>• {detail}</div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -677,47 +696,59 @@ export default function CalculatorPage() {
                   </div>
                 )}
 
-                {/* Combat Power */}
+                {/* Your Item Summary */}
                 <div className="border-t border-slate-700 pt-4">
-                  <div className="text-emerald-400 font-bold mb-2">
-                    ⚔️ YOUR ITEM&apos;S COMBAT POWER
+                  <div className="text-emerald-400 font-bold mb-2 flex items-center gap-2">
+                    <span>⚔️</span>
+                    <span>YOUR ITEM</span>
                   </div>
-                  <div className="pl-4 space-y-1 text-slate-300">
-                    {enhancement > 0 && (
-                      <div>Enhancement: +{enhancement}</div>
-                    )}
-                    {damageBonus && (
+                  <div className="bg-slate-800/30 rounded-lg p-3">
+                    <div className="text-xs space-y-2">
+                      {/* Features List */}
                       <div>
-                        Damage: {damageBonus.dice} {damageBonus.type}
-                        {damageBonus.conditional && <span className="text-yellow-400"> (conditional)</span>}
+                        <div className="text-slate-400 font-semibold mb-1">Features</div>
+                        <div className="text-slate-300 space-y-0.5 pl-2">
+                          {enhancement > 0 && <div>+{enhancement} enhancement</div>}
+                          {damageBonus && (
+                            <div>
+                              {damageBonus.dice} {damageBonus.type}
+                              {damageBonus.conditional && <span className="text-yellow-400 ml-1">(conditional)</span>}
+                            </div>
+                          )}
+                          {acBonus > 0 && <div>+{acBonus} AC</div>}
+                          {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves</div>}
+                          {resistances.length > 0 && (
+                            <div>Resist: {resistances.join(', ')}</div>
+                          )}
+                          {charges.length > 0 && (
+                            <div>{charges.length} charge{charges.length > 1 ? 's' : ''}</div>
+                          )}
+                          {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && resistances.length === 0 && charges.length === 0 && (
+                            <div className="text-slate-500 italic">No features added</div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    {acBonus > 0 && <div>AC Bonus: +{acBonus}</div>}
-                    {savingThrowBonus > 0 && (
-                      <div>Saving Throw: +{savingThrowBonus}</div>
-                    )}
-                    {resistances.length > 0 && (
-                      <div>
-                        Resistances: {resistances.join(', ')}
+
+                      {/* Combat Score */}
+                      <div className="pt-2 border-t border-slate-700/50">
+                        <div className="text-slate-400 font-semibold mb-1">Combat Score</div>
+                        <div className="text-emerald-400 font-mono font-bold">
+                          {results.combatScore.toFixed(1)} pts
+                        </div>
                       </div>
-                    )}
-                    {charges.length > 0 && (
-                      <div>
-                        Charges: {charges.length} spell/abilit
-                        {charges.length !== 1 ? 'ies' : 'y'}
-                      </div>
-                    )}
-                    <div className="pt-2 text-emerald-400">
-                      Combat Score: {results.combatScore.toFixed(1)} points
+
+                      {/* Attunement Notice */}
+                      {attunement && (
+                        <div className="pt-2 border-t border-slate-700/50">
+                          <div className="text-yellow-400 flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>Requires Attunement</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-
-                {attunement && (
-                  <div className="border-t border-slate-700 pt-4 text-yellow-400 text-xs">
-                    ⚠️ Requires Attunement
-                  </div>
-                )}
 
                 {/* Advanced: Formula Details */}
                 <div className="border-t border-slate-700 pt-4">
