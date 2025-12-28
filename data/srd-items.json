@@ -144,10 +144,14 @@
     "attunement": false,
     "combat": {
       "enhancement": 1,
-      "damageBonus": {
-        "dice": "2d6",
-        "type": "poison"
-      }
+      "charges": [
+        {
+          "spell": "Poison Coating (2d10, DC 15)",
+          "spellLevel": 2,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
     }
   },
   {
@@ -403,37 +407,41 @@
     "rarity": "rare",
     "attunement": false,
     "combat": {
-      "enhancement": 0,
-      "damageBonus": {
-        "dice": "2d6",
-        "type": "piercing"
-      }
+      "enhancement": 0
+    },
+    "ribbons": {
+      "utilitySpells": [
+        "+2d6 (or +7) damage on natural 20"
+      ]
     }
   },
   {
     "name": "Mace of Disruption",
-    "baseItem": "longsword",
+    "baseItem": "mace",
     "rarity": "rare",
     "attunement": true,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
         "dice": "2d6",
-        "type": "radiant"
+        "type": "radiant",
+        "conditional": true
       }
     }
   },
   {
     "name": "Mace of Smiting",
-    "baseItem": "longsword",
+    "baseItem": "mace",
     "rarity": "rare",
     "attunement": false,
     "combat": {
-      "enhancement": 1,
-      "damageBonus": {
-        "dice": "2d6",
-        "type": "bludgeoning"
-      }
+      "enhancement": 1
+    },
+    "ribbons": {
+      "utilitySpells": [
+        "+2 enhancement vs constructs",
+        "+2d6 damage on nat 20 vs constructs"
+      ]
     }
   },
   {
@@ -490,11 +498,13 @@
     "rarity": "very rare",
     "attunement": true,
     "combat": {
-      "enhancement": 0,
-      "damageBonus": {
-        "dice": "4d6",
-        "type": "slashing"
-      }
+      "enhancement": 3
+    },
+    "ribbons": {
+      "utilitySpells": [
+        "+4d6 slashing damage on nat 20",
+        "Max damage vs objects"
+      ]
     }
   },
   {
