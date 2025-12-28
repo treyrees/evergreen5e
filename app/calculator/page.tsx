@@ -124,88 +124,91 @@ export default function CalculatorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Form */}
           <div className="space-y-6">
-            {/* Step 1: Basic Info */}
+            {/* Item Builder */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                Step 1: Basic Info
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Item Name
-                  </label>
-                  <input
-                    type="text"
-                    value={itemName}
-                    onChange={(e) => setItemName(e.target.value)}
-                    placeholder="e.g., Sword of Flames"
-                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Base Item Type
-                  </label>
-                  <select
-                    value={baseItem}
-                    onChange={(e) => setBaseItem(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                  >
-                    {BASE_ITEMS.map((item) => (
-                      <option key={item} value={item}>
-                        {item.charAt(0).toUpperCase() + item.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="attunement"
-                    checked={attunement}
-                    onChange={(e) => setAttunement(e.target.checked)}
-                    className="mr-2 h-4 w-4 text-emerald-600 rounded"
-                  />
-                  <label
-                    htmlFor="attunement"
-                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
-                  >
-                    Requires Attunement
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 2: Combat Features */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                Step 2: Combat Features
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">
+                Item Builder
               </h2>
               <div className="space-y-6">
-                {/* Enhancement Bonus */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Enhancement Bonus
-                  </label>
-                  <div className="flex gap-2">
-                    {[0, 1, 2, 3].map((value) => (
-                      <button
-                        key={value}
-                        onClick={() => setEnhancement(value)}
-                        className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                          enhancement === value
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                        }`}
-                      >
-                        +{value}
-                      </button>
-                    ))}
+                {/* Basic Info Section */}
+                <div className="space-y-4 pb-6 border-b border-slate-200 dark:border-slate-700">
+                  <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                    Basic Info
+                  </h3>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Item Name
+                    </label>
+                    <input
+                      type="text"
+                      value={itemName}
+                      onChange={(e) => setItemName(e.target.value)}
+                      placeholder="e.g., Sword of Flames"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Base Item Type
+                    </label>
+                    <select
+                      value={baseItem}
+                      onChange={(e) => setBaseItem(e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    >
+                      {BASE_ITEMS.map((item) => (
+                        <option key={item} value={item}>
+                          {item.charAt(0).toUpperCase() + item.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="attunement"
+                      checked={attunement}
+                      onChange={(e) => setAttunement(e.target.checked)}
+                      className="mr-2 h-4 w-4 text-emerald-600 rounded"
+                    />
+                    <label
+                      htmlFor="attunement"
+                      className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      Requires Attunement
+                    </label>
                   </div>
                 </div>
 
-                {/* Damage Bonus */}
-                <div>
+                {/* Combat Features Section */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                    Combat Features
+                  </h3>
+                  {/* Enhancement Bonus */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Enhancement Bonus
+                    </label>
+                    <div className="flex gap-2">
+                      {[0, 1, 2, 3].map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => setEnhancement(value)}
+                          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                            enhancement === value
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                          }`}
+                        >
+                          +{value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Damage Bonus */}
+                  <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Damage Bonus
                   </label>
@@ -413,6 +416,7 @@ export default function CalculatorPage() {
                       + Add Spell Charge
                     </button>
                   )}
+                </div>
                 </div>
               </div>
             </div>
