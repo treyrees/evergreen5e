@@ -87,7 +87,7 @@ const DAMAGE_TYPES = [
 
 export default function CalculatorPage() {
   const [itemName, setItemName] = useState('');
-  const [baseItem, setBaseItem] = useState('club');
+  const [baseItem, setBaseItem] = useState('');
   const [enhancement, setEnhancement] = useState(0);
   const [damageBonus, setDamageBonus] = useState<DamageBonus | undefined>(
     undefined
@@ -231,6 +231,9 @@ export default function CalculatorPage() {
                       onChange={(e) => setBaseItem(e.target.value)}
                       className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                     >
+                      <option value="" disabled className="text-slate-400">
+                        Select base item type...
+                      </option>
                       {Object.entries(BASE_ITEMS).map(([category, items]) => (
                         <optgroup key={category} label={category}>
                           {items.map((item) => (
