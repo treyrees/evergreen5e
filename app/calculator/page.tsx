@@ -371,6 +371,56 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
+                {/* Charge Pool Configuration */}
+                {(maxCharges > 0 || chargesPerShortRest > 0 || chargesPerLongRest > 0 || abilities.length > 0) && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Charge Pool
+                    </label>
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div>
+                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                          Max Charges
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={maxCharges}
+                          onChange={(e) => setMaxCharges(parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                          placeholder="7"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                          Per Short Rest
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={chargesPerShortRest}
+                          onChange={(e) => setChargesPerShortRest(parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                          Per Long Rest
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={chargesPerLongRest}
+                          onChange={(e) => setChargesPerLongRest(parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                          placeholder="4"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Spells & Spell-Like Abilities */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -406,105 +456,51 @@ export default function CalculatorPage() {
                   {/* Add Ability Form */}
                   {showChargeForm ? (
                     <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-md">
-                      {/* Charge Pool Configuration */}
-                      <div className="pb-3 border-b border-slate-300 dark:border-slate-600">
-                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                          Item Charge Pool
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          <div>
-                            <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                              Max Charges
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={maxCharges}
-                              onChange={(e) => setMaxCharges(parseInt(e.target.value) || 0)}
-                              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                              placeholder="7"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                              Per Short Rest
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={chargesPerShortRest}
-                              onChange={(e) => setChargesPerShortRest(parseInt(e.target.value) || 0)}
-                              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                              placeholder="0"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                              Per Long Rest
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={chargesPerLongRest}
-                              onChange={(e) => setChargesPerLongRest(parseInt(e.target.value) || 0)}
-                              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                              placeholder="4"
-                            />
-                          </div>
+                      <input
+                        type="text"
+                        value={newAbility.spell}
+                        onChange={(e) =>
+                          setNewAbility({ ...newAbility, spell: e.target.value })
+                        }
+                        placeholder="Spell/Ability name"
+                        className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                            Spell Level (0-9)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="9"
+                            value={newAbility.spellLevel}
+                            onChange={(e) =>
+                              setNewAbility({
+                                ...newAbility,
+                                spellLevel: parseInt(e.target.value) || 0,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                            placeholder="0 = cantrip"
+                          />
                         </div>
-                      </div>
-
-                      {/* Ability Details */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                          Ability Details
-                        </label>
-                        <input
-                          type="text"
-                          value={newAbility.spell}
-                          onChange={(e) =>
-                            setNewAbility({ ...newAbility, spell: e.target.value })
-                          }
-                          placeholder="Spell/Ability name"
-                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm mb-2"
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                              Spell Level (0-9)
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              max="9"
-                              value={newAbility.spellLevel}
-                              onChange={(e) =>
-                                setNewAbility({
-                                  ...newAbility,
-                                  spellLevel: parseInt(e.target.value) || 0,
-                                })
-                              }
-                              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                              placeholder="0 = cantrip"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                              Charges Per Use
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              value={newAbility.chargesPerUse}
-                              onChange={(e) =>
-                                setNewAbility({
-                                  ...newAbility,
-                                  chargesPerUse: parseInt(e.target.value) || 1,
-                                })
-                              }
-                              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                            />
-                          </div>
+                        <div>
+                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
+                            Charges Per Use
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={newAbility.chargesPerUse}
+                            onChange={(e) =>
+                              setNewAbility({
+                                ...newAbility,
+                                chargesPerUse: parseInt(e.target.value) || 1,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                          />
                         </div>
                       </div>
                       <div className="flex gap-2">
