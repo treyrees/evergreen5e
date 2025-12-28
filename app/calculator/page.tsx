@@ -143,7 +143,7 @@ export default function CalculatorPage() {
         spellLevel: 0,
         chargesPerUse: 1,
       });
-      setShowChargeForm(false);
+      // Keep form open to allow adding multiple abilities
     }
   };
 
