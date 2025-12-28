@@ -682,11 +682,8 @@ export default function CalculatorPage() {
               {!hasSelectedAttributes && (
                 <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
                   <div className="text-center px-6">
-                    <div className="text-xl font-bold text-slate-300 mb-2">
-                      Select an attribute to see results
-                    </div>
-                    <div className="text-sm text-slate-400">
-                      Choose combat features on the left to calculate item rarity
+                    <div className="text-xl font-bold text-slate-300">
+                      Select a base item type and at least one attribute
                     </div>
                   </div>
                 </div>
