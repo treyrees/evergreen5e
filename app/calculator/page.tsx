@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { MagicItem, DamageBonus, SpellCharge } from '@/types/magic-item';
 import {
   calculateCombatScore,
-  scoreToRarity,
-  findClosestMatch,
   getSuggestedRarity,
 } from '@/lib/calculator';
 
@@ -84,7 +82,6 @@ export default function CalculatorPage() {
   };
 
   const results = getSuggestedRarity(currentItem);
-  const closestMatch = findClosestMatch(currentItem);
 
   const addCharge = () => {
     if (newCharge.spell.trim()) {
@@ -431,9 +428,80 @@ export default function CalculatorPage() {
               </div>
 
               <div className="space-y-4">
-                <div>
+                {/* Anchor Item - Primary Reference */}
+                {results.anchorItem && (
+                  <div className="bg-emerald-900/30 border border-emerald-700 rounded-md p-4">
+                    <div className="text-emerald-400 font-bold mb-3 flex items-center gap-2">
+                      <span className="text-lg">⚓</span>
+                      <span>ANCHOR ITEM</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-white font-semibold text-base">
+                        {results.anchorItem.name}
+                      </div>
+                      <div className="text-xs text-emerald-300">
+                        {results.anchorItem.rarity?.toUpperCase()} •{' '}
+                        {results.anchorScore.toFixed(1)} points
+                        {results.anchorItem.attunement && ' • Requires Attunement'}
+                      </div>
+
+                      {/* Anchor Combat Features */}
+                      <div className="mt-2 pt-2 border-t border-emerald-700/50 text-xs text-slate-300 space-y-1">
+                        {results.anchorItem.combat.enhancement > 0 && (
+                          <div>• +{results.anchorItem.combat.enhancement} enhancement</div>
+                        )}
+                        {results.anchorItem.combat.damageBonus && (
+                          <div>
+                            • {results.anchorItem.combat.damageBonus.dice}{' '}
+                            {results.anchorItem.combat.damageBonus.type} damage
+                          </div>
+                        )}
+                        {results.anchorItem.combat.acBonus && (
+                          <div>• +{results.anchorItem.combat.acBonus} AC</div>
+                        )}
+                        {results.anchorItem.combat.charges && (
+                          <div>• {results.anchorItem.combat.charges.length} spell charges</div>
+                        )}
+                      </div>
+
+                      {/* Comparison to Anchor */}
+                      {results.anchorComparison && (
+                        <div className="mt-3 pt-2 border-t border-emerald-700/50">
+                          <div className="text-xs font-semibold text-emerald-300 mb-1">
+                            YOUR ITEM vs ANCHOR:
+                          </div>
+                          <div className="text-xs text-slate-300 space-y-0.5">
+                            {results.anchorComparison.type === 'stronger' && (
+                              <div className="text-yellow-400">
+                                ↑ {results.anchorComparison.scoreDifference.toFixed(1)} points stronger
+                              </div>
+                            )}
+                            {results.anchorComparison.type === 'weaker' && (
+                              <div className="text-blue-400">
+                                ↓ {Math.abs(results.anchorComparison.scoreDifference).toFixed(1)} points weaker
+                              </div>
+                            )}
+                            {results.anchorComparison.type === 'equal' && (
+                              <div className="text-emerald-400">
+                                ≈ Equal power level
+                              </div>
+                            )}
+                            {results.anchorComparison.details.map((detail, idx) => (
+                              <div key={idx} className="text-slate-400">
+                                • {detail}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Combat Power */}
+                <div className="border-t border-slate-700 pt-4">
                   <div className="text-emerald-400 font-bold mb-2">
-                    ⚔️ COMBAT POWER: {results.combatRarity}
+                    ⚔️ YOUR ITEM&apos;S COMBAT POWER
                   </div>
                   <div className="pl-4 space-y-1 text-slate-300">
                     {enhancement > 0 && (
@@ -460,22 +528,7 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {closestMatch && (
-                  <div className="border-t border-slate-700 pt-4">
-                    <div className="text-emerald-400 font-bold mb-2">
-                      🎯 CLOSEST MATCH
-                    </div>
-                    <div className="pl-4 text-slate-300">
-                      <div className="font-medium">{closestMatch.name}</div>
-                      <div className="text-xs text-slate-400 mt-1">
-                        {closestMatch.rarity} •{' '}
-                        {calculateCombatScore(closestMatch.combat).toFixed(1)}{' '}
-                        points
-                      </div>
-                    </div>
-                  </div>
-                )}
-
+                {/* Suggested Rarity */}
                 <div className="border-t border-slate-700 pt-4">
                   <div className="text-emerald-400 font-bold mb-2">
                     📊 SUGGESTED RARITY

@@ -69,30 +69,44 @@ export function scoreToRarity(score: number): Rarity {
 }
 
 /**
- * Find the closest matching SRD item based on combat score
+ * Comparison result between user item and anchor
  */
-export function findClosestMatch(
+export interface AnchorComparison {
+  type: 'stronger' | 'weaker' | 'equal';
+  scoreDifference: number;
+  details: string[];
+}
+
+/**
+ * Find anchor item - the baseline SRD item for balancing reference
+ */
+export function findAnchorItem(
   userItem: Partial<MagicItem>
-): MagicItem | null {
-  if (!userItem.combat) return null;
+): {
+  anchor: MagicItem | null;
+  anchorScore: number;
+  comparison: AnchorComparison | null;
+} {
+  if (!userItem.combat) {
+    return { anchor: null, anchorScore: 0, comparison: null };
+  }
 
   const userScore = calculateCombatScore(userItem.combat);
 
   // Filter by base item if specified
   let candidates = srdItems as MagicItem[];
   if (userItem.baseItem) {
-    candidates = candidates.filter(
+    const matchingBase = candidates.filter(
       (item) => item.baseItem === userItem.baseItem
     );
-  }
-
-  if (candidates.length === 0) {
-    // Fall back to all items if no matching base item
-    candidates = srdItems as MagicItem[];
+    // Only use matching base if we found any
+    if (matchingBase.length > 0) {
+      candidates = matchingBase;
+    }
   }
 
   // Find closest by score
-  let closestItem: MagicItem | null = null;
+  let anchor: MagicItem | null = null;
   let smallestDiff = Infinity;
 
   for (const item of candidates) {
@@ -101,11 +115,97 @@ export function findClosestMatch(
 
     if (diff < smallestDiff) {
       smallestDiff = diff;
-      closestItem = item;
+      anchor = item;
     }
   }
 
-  return closestItem;
+  if (!anchor) {
+    return { anchor: null, anchorScore: 0, comparison: null };
+  }
+
+  // Calculate detailed comparison
+  const anchorScore = calculateCombatScore(anchor.combat);
+  const scoreDiff = userScore - anchorScore;
+  const comparison = compareToAnchor(userItem, anchor, scoreDiff);
+
+  return { anchor, anchorScore, comparison };
+}
+
+/**
+ * Compare user item to anchor item and generate educational details
+ */
+function compareToAnchor(
+  userItem: Partial<MagicItem>,
+  anchor: MagicItem,
+  scoreDiff: number
+): AnchorComparison {
+  const details: string[] = [];
+  const userCombat = userItem.combat!;
+  const anchorCombat = anchor.combat;
+
+  // Enhancement comparison
+  const userEnh = userCombat.enhancement || 0;
+  const anchorEnh = anchorCombat.enhancement || 0;
+  if (userEnh !== anchorEnh) {
+    if (userEnh > anchorEnh) {
+      details.push(`+${userEnh - anchorEnh} higher enhancement`);
+    } else {
+      details.push(`+${anchorEnh - userEnh} lower enhancement`);
+    }
+  }
+
+  // Damage comparison
+  const userDmg = userCombat.damageBonus?.dice;
+  const anchorDmg = anchorCombat.damageBonus?.dice;
+  if (userDmg && !anchorDmg) {
+    details.push(`has ${userDmg} damage (anchor has none)`);
+  } else if (!userDmg && anchorDmg) {
+    details.push(`no damage bonus (anchor has ${anchorDmg})`);
+  } else if (userDmg && anchorDmg && userDmg !== anchorDmg) {
+    const userDmgValue = DICE_VALUES[userDmg] || 0;
+    const anchorDmgValue = DICE_VALUES[anchorDmg] || 0;
+    if (userDmgValue > anchorDmgValue) {
+      details.push(`${userDmg} vs anchor's ${anchorDmg} damage`);
+    } else {
+      details.push(`${userDmg} vs anchor's ${anchorDmg} damage`);
+    }
+  }
+
+  // AC bonus comparison
+  const userAC = userCombat.acBonus || 0;
+  const anchorAC = anchorCombat.acBonus || 0;
+  if (userAC !== anchorAC) {
+    if (userAC > anchorAC) {
+      details.push(`+${userAC - anchorAC} higher AC bonus`);
+    } else {
+      details.push(`+${anchorAC - userAC} lower AC bonus`);
+    }
+  }
+
+  // Spell charges comparison
+  const userCharges = userCombat.charges?.length || 0;
+  const anchorCharges = anchorCombat.charges?.length || 0;
+  if (userCharges !== anchorCharges) {
+    if (userCharges > anchorCharges) {
+      details.push(`${userCharges} spell charges (anchor has ${anchorCharges})`);
+    } else {
+      details.push(`${userCharges} spell charges (anchor has ${anchorCharges})`);
+    }
+  }
+
+  // Determine type
+  let type: 'stronger' | 'weaker' | 'equal' = 'equal';
+  if (scoreDiff > 0.25) {
+    type = 'stronger';
+  } else if (scoreDiff < -0.25) {
+    type = 'weaker';
+  }
+
+  return {
+    type,
+    scoreDifference: scoreDiff,
+    details: details.length > 0 ? details : ['Similar combat power'],
+  };
 }
 
 /**
@@ -125,7 +225,7 @@ export function countRibbons(ribbons?: MagicItem['ribbons']): number {
 }
 
 /**
- * Get suggested rarity with ribbons consideration
+ * Get suggested rarity with ribbons consideration and anchor reference
  */
 export function getSuggestedRarity(item: Partial<MagicItem>): {
   combatRarity: Rarity;
@@ -133,15 +233,31 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   ribbonCount: number;
   suggestedRarity: Rarity;
   explanation: string;
+  anchorItem: MagicItem | null;
+  anchorScore: number;
+  anchorComparison: AnchorComparison | null;
 } {
   const combatScore = item.combat ? calculateCombatScore(item.combat) : 0;
   const combatRarity = scoreToRarity(combatScore);
   const ribbonCount = countRibbons(item.ribbons);
 
+  // Get anchor item for reference
+  const { anchor, anchorScore, comparison } = findAnchorItem(item);
+
   // For now, ribbons don't affect rarity (as we're not implementing them yet)
   // But we'll return the structure for future use
   let suggestedRarity = combatRarity;
   let explanation = `Based on ${combatScore.toFixed(1)} combat points, this item is ${combatRarity}.`;
+
+  if (anchor && comparison) {
+    if (comparison.type === 'equal') {
+      explanation += ` This matches the power level of ${anchor.name} (${anchor.rarity}).`;
+    } else if (comparison.type === 'stronger') {
+      explanation += ` This is ${comparison.scoreDifference.toFixed(1)} points stronger than ${anchor.name} (${anchor.rarity}).`;
+    } else {
+      explanation += ` This is ${Math.abs(comparison.scoreDifference).toFixed(1)} points weaker than ${anchor.name} (${anchor.rarity}).`;
+    }
+  }
 
   if (ribbonCount > 0) {
     explanation += ` It also has ${ribbonCount} ribbon feature(s), which may increase rarity by 0-1 tier depending on their utility.`;
@@ -153,5 +269,8 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
     ribbonCount,
     suggestedRarity,
     explanation,
+    anchorItem: anchor,
+    anchorScore,
+    anchorComparison: comparison,
   };
 }
