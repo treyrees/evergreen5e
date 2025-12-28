@@ -21,6 +21,44 @@ const RECHARGE_MULTIPLIERS: Record<string, number> = {
   'short rest': 1.0,
 };
 
+// Item categories for better anchor matching
+const ITEM_CATEGORIES: Record<string, string> = {
+  // Melee weapons
+  'longsword': 'melee-weapon',
+  'greatsword': 'melee-weapon',
+  'shortsword': 'melee-weapon',
+  'dagger': 'melee-weapon',
+  'rapier': 'melee-weapon',
+
+  // Ranged weapons
+  'longbow': 'ranged-weapon',
+  'shortbow': 'ranged-weapon',
+  'crossbow': 'ranged-weapon',
+
+  // Defensive gear
+  'shield': 'defensive',
+  'armor': 'defensive',
+
+  // Magic implements
+  'staff': 'implement',
+  'wand': 'implement',
+  'rod': 'implement',
+
+  // Accessories
+  'ring': 'accessory',
+  'amulet': 'accessory',
+  'cloak': 'accessory',
+  'boots': 'accessory',
+  'gloves': 'accessory',
+};
+
+/**
+ * Get item category for matching purposes
+ */
+function getItemCategory(baseItem: string): string {
+  return ITEM_CATEGORIES[baseItem] || 'other';
+}
+
 /**
  * Calculate combat power score from combat features
  */
@@ -79,6 +117,7 @@ export interface AnchorComparison {
 
 /**
  * Find anchor item - the baseline SRD item for balancing reference
+ * Prioritizes physical similarity: exact match > same category > any item
  */
 export function findAnchorItem(
   userItem: Partial<MagicItem>
@@ -92,31 +131,26 @@ export function findAnchorItem(
   }
 
   const userScore = calculateCombatScore(userItem.combat);
+  const allItems = srdItems as MagicItem[];
 
-  // Filter by base item if specified
-  let candidates = srdItems as MagicItem[];
-  if (userItem.baseItem) {
-    const matchingBase = candidates.filter(
-      (item) => item.baseItem === userItem.baseItem
+  // Priority 1: Try exact base item match first
+  let anchor = findClosestInCandidates(
+    allItems.filter((item) => item.baseItem === userItem.baseItem),
+    userScore
+  );
+
+  // Priority 2: If no exact match, try same category (e.g., longsword → greatsword)
+  if (!anchor && userItem.baseItem) {
+    const userCategory = getItemCategory(userItem.baseItem);
+    anchor = findClosestInCandidates(
+      allItems.filter((item) => getItemCategory(item.baseItem) === userCategory),
+      userScore
     );
-    // Only use matching base if we found any
-    if (matchingBase.length > 0) {
-      candidates = matchingBase;
-    }
   }
 
-  // Find closest by score
-  let anchor: MagicItem | null = null;
-  let smallestDiff = Infinity;
-
-  for (const item of candidates) {
-    const itemScore = calculateCombatScore(item.combat);
-    const diff = Math.abs(itemScore - userScore);
-
-    if (diff < smallestDiff) {
-      smallestDiff = diff;
-      anchor = item;
-    }
+  // Priority 3: Fall back to any item
+  if (!anchor) {
+    anchor = findClosestInCandidates(allItems, userScore);
   }
 
   if (!anchor) {
@@ -129,6 +163,31 @@ export function findAnchorItem(
   const comparison = compareToAnchor(userItem, anchor, scoreDiff);
 
   return { anchor, anchorScore, comparison };
+}
+
+/**
+ * Find the closest item by combat score within a set of candidates
+ */
+function findClosestInCandidates(
+  candidates: MagicItem[],
+  targetScore: number
+): MagicItem | null {
+  if (candidates.length === 0) return null;
+
+  let closest: MagicItem | null = null;
+  let smallestDiff = Infinity;
+
+  for (const item of candidates) {
+    const itemScore = calculateCombatScore(item.combat);
+    const diff = Math.abs(itemScore - targetScore);
+
+    if (diff < smallestDiff) {
+      smallestDiff = diff;
+      closest = item;
+    }
+  }
+
+  return closest;
 }
 
 /**

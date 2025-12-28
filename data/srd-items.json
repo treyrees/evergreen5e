@@ -39,7 +39,9 @@
       }
     },
     "ribbons": {
-      "cosmetic": ["Ignites with flames, sheds bright light 40ft"]
+      "cosmetic": [
+        "Ignites with flames, sheds bright light 40ft"
+      ]
     }
   },
   {
@@ -68,8 +70,12 @@
       }
     },
     "ribbons": {
-      "cosmetic": ["Sheds bright light 15ft, dim light 15ft"],
-      "utilitySpells": ["Functions as finesse weapon"]
+      "cosmetic": [
+        "Sheds bright light 15ft, dim light 15ft"
+      ],
+      "utilitySpells": [
+        "Functions as finesse weapon"
+      ]
     }
   },
   {
@@ -185,7 +191,8 @@
     "rarity": "uncommon",
     "attunement": false,
     "combat": {
-      "acBonus": 1
+      "acBonus": 1,
+      "enhancement": 0
     }
   },
   {
@@ -194,7 +201,8 @@
     "rarity": "rare",
     "attunement": false,
     "combat": {
-      "acBonus": 2
+      "acBonus": 2,
+      "enhancement": 0
     }
   },
   {
@@ -203,7 +211,8 @@
     "rarity": "very rare",
     "attunement": false,
     "combat": {
-      "acBonus": 3
+      "acBonus": 3,
+      "enhancement": 0
     }
   },
   {
@@ -212,7 +221,8 @@
     "rarity": "very rare",
     "attunement": true,
     "combat": {
-      "acBonus": 2
+      "acBonus": 2,
+      "enhancement": 0
     }
   },
   {
@@ -221,7 +231,8 @@
     "rarity": "uncommon",
     "attunement": false,
     "combat": {
-      "acBonus": 1
+      "acBonus": 1,
+      "enhancement": 0
     }
   },
   {
@@ -230,7 +241,8 @@
     "rarity": "rare",
     "attunement": false,
     "combat": {
-      "acBonus": 2
+      "acBonus": 2,
+      "enhancement": 0
     }
   },
   {
@@ -239,7 +251,8 @@
     "rarity": "very rare",
     "attunement": false,
     "combat": {
-      "acBonus": 3
+      "acBonus": 3,
+      "enhancement": 0
     }
   },
   {
@@ -258,7 +271,8 @@
     "attunement": true,
     "combat": {
       "acBonus": 1,
-      "savingThrowBonus": 1
+      "savingThrowBonus": 1,
+      "enhancement": 0
     }
   },
   {
@@ -268,7 +282,8 @@
     "attunement": true,
     "combat": {
       "acBonus": 1,
-      "savingThrowBonus": 1
+      "savingThrowBonus": 1,
+      "enhancement": 0
     }
   },
   {
@@ -305,7 +320,8 @@
           "usesPerDay": 7,
           "recharge": "dawn"
         }
-      ]
+      ],
+      "enhancement": 0
     }
   },
   {
@@ -321,7 +337,8 @@
           "usesPerDay": 7,
           "recharge": "dawn"
         }
-      ]
+      ],
+      "enhancement": 0
     }
   },
   {
@@ -337,7 +354,8 @@
           "usesPerDay": 7,
           "recharge": "dawn"
         }
-      ]
+      ],
+      "enhancement": 0
     }
   },
   {
@@ -504,7 +522,8 @@
     "rarity": "rare",
     "attunement": true,
     "combat": {
-      "acBonus": 0
+      "acBonus": 0,
+      "enhancement": 0
     }
   },
   {
@@ -513,7 +532,8 @@
     "rarity": "uncommon",
     "attunement": true,
     "combat": {
-      "acBonus": 0
+      "acBonus": 0,
+      "enhancement": 0
     }
   },
   {
