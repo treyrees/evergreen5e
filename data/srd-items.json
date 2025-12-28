@@ -1,5 +1,32 @@
 [
   {
+    "name": "+1 Weapon",
+    "baseItem": "longsword",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "+2 Weapon",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 2
+    }
+  },
+  {
+    "name": "+3 Weapon",
+    "baseItem": "longsword",
+    "rarity": "very rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 3
+    }
+  },
+  {
     "name": "Flame Tongue",
     "baseItem": "longsword",
     "rarity": "rare",
@@ -16,21 +43,16 @@
     }
   },
   {
-    "name": "+1 Longsword",
+    "name": "Frost Brand",
     "baseItem": "longsword",
-    "rarity": "uncommon",
-    "attunement": false,
+    "rarity": "very rare",
+    "attunement": true,
     "combat": {
-      "enhancement": 1
-    }
-  },
-  {
-    "name": "+2 Longsword",
-    "baseItem": "longsword",
-    "rarity": "rare",
-    "attunement": false,
-    "combat": {
-      "enhancement": 2
+      "enhancement": 0,
+      "damageBonus": {
+        "dice": "1d6",
+        "type": "cold"
+      }
     }
   },
   {
@@ -51,6 +73,42 @@
     }
   },
   {
+    "name": "Vorpal Sword",
+    "baseItem": "longsword",
+    "rarity": "legendary",
+    "attunement": true,
+    "combat": {
+      "enhancement": 3
+    }
+  },
+  {
+    "name": "+1 Bow",
+    "baseItem": "longbow",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "+2 Bow",
+    "baseItem": "longbow",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 2
+    }
+  },
+  {
+    "name": "+3 Bow",
+    "baseItem": "longbow",
+    "rarity": "very rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 3
+    }
+  },
+  {
     "name": "Oathbow",
     "baseItem": "longbow",
     "rarity": "very rare",
@@ -61,6 +119,410 @@
         "dice": "3d6",
         "type": "piercing"
       }
+    }
+  },
+  {
+    "name": "+1 Dagger",
+    "baseItem": "dagger",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "Dagger of Venom",
+    "baseItem": "dagger",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1,
+      "damageBonus": {
+        "dice": "2d6",
+        "type": "poison"
+      }
+    }
+  },
+  {
+    "name": "+1 Greatsword",
+    "baseItem": "greatsword",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "+2 Greatsword",
+    "baseItem": "greatsword",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 2
+    }
+  },
+  {
+    "name": "+1 Rapier",
+    "baseItem": "rapier",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "Nine Lives Stealer",
+    "baseItem": "rapier",
+    "rarity": "very rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 2
+    }
+  },
+  {
+    "name": "+1 Shield",
+    "baseItem": "shield",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "acBonus": 1
+    }
+  },
+  {
+    "name": "+2 Shield",
+    "baseItem": "shield",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "acBonus": 2
+    }
+  },
+  {
+    "name": "+3 Shield",
+    "baseItem": "shield",
+    "rarity": "very rare",
+    "attunement": false,
+    "combat": {
+      "acBonus": 3
+    }
+  },
+  {
+    "name": "Animated Shield",
+    "baseItem": "shield",
+    "rarity": "very rare",
+    "attunement": true,
+    "combat": {
+      "acBonus": 2
+    }
+  },
+  {
+    "name": "+1 Armor",
+    "baseItem": "armor",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "acBonus": 1
+    }
+  },
+  {
+    "name": "+2 Armor",
+    "baseItem": "armor",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "acBonus": 2
+    }
+  },
+  {
+    "name": "+3 Armor",
+    "baseItem": "armor",
+    "rarity": "very rare",
+    "attunement": false,
+    "combat": {
+      "acBonus": 3
+    }
+  },
+  {
+    "name": "Armor of Resistance",
+    "baseItem": "armor",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0
+    }
+  },
+  {
+    "name": "Ring of Protection",
+    "baseItem": "ring",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "acBonus": 1,
+      "savingThrowBonus": 1
+    }
+  },
+  {
+    "name": "Cloak of Protection",
+    "baseItem": "cloak",
+    "rarity": "uncommon",
+    "attunement": true,
+    "combat": {
+      "acBonus": 1,
+      "savingThrowBonus": 1
+    }
+  },
+  {
+    "name": "Defender",
+    "baseItem": "longsword",
+    "rarity": "legendary",
+    "attunement": true,
+    "combat": {
+      "enhancement": 3,
+      "acBonus": 3
+    }
+  },
+  {
+    "name": "Staff of Power",
+    "baseItem": "staff",
+    "rarity": "very rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 2,
+      "acBonus": 2,
+      "savingThrowBonus": 2
+    }
+  },
+  {
+    "name": "Wand of Fireballs",
+    "baseItem": "wand",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "charges": [
+        {
+          "spell": "Fireball",
+          "spellLevel": 3,
+          "usesPerDay": 7,
+          "recharge": "dawn"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Wand of Lightning Bolts",
+    "baseItem": "wand",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "charges": [
+        {
+          "spell": "Lightning Bolt",
+          "spellLevel": 3,
+          "usesPerDay": 7,
+          "recharge": "dawn"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Wand of Magic Missiles",
+    "baseItem": "wand",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "charges": [
+        {
+          "spell": "Magic Missile",
+          "spellLevel": 1,
+          "usesPerDay": 7,
+          "recharge": "dawn"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Rod of Absorption",
+    "baseItem": "rod",
+    "rarity": "very rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0
+    }
+  },
+  {
+    "name": "Giant Slayer",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1,
+      "damageBonus": {
+        "dice": "2d6",
+        "type": "slashing"
+      }
+    }
+  },
+  {
+    "name": "Dragon Slayer",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1,
+      "damageBonus": {
+        "dice": "3d6",
+        "type": "slashing"
+      }
+    }
+  },
+  {
+    "name": "Vicious Weapon",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 0,
+      "damageBonus": {
+        "dice": "2d6",
+        "type": "piercing"
+      }
+    }
+  },
+  {
+    "name": "Mace of Disruption",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "damageBonus": {
+        "dice": "2d6",
+        "type": "radiant"
+      }
+    }
+  },
+  {
+    "name": "Mace of Smiting",
+    "baseItem": "longsword",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1,
+      "damageBonus": {
+        "dice": "2d6",
+        "type": "bludgeoning"
+      }
+    }
+  },
+  {
+    "name": "Trident of Fish Command",
+    "baseItem": "longsword",
+    "rarity": "uncommon",
+    "attunement": true,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "Javelin of Lightning",
+    "baseItem": "longsword",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 0,
+      "damageBonus": {
+        "dice": "4d6",
+        "type": "lightning"
+      }
+    }
+  },
+  {
+    "name": "Luck Blade",
+    "baseItem": "longsword",
+    "rarity": "legendary",
+    "attunement": true,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "Holy Avenger",
+    "baseItem": "longsword",
+    "rarity": "legendary",
+    "attunement": true,
+    "combat": {
+      "enhancement": 3,
+      "damageBonus": {
+        "dice": "2d10",
+        "type": "radiant"
+      }
+    }
+  },
+  {
+    "name": "Sword of Sharpness",
+    "baseItem": "longsword",
+    "rarity": "very rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "damageBonus": {
+        "dice": "4d6",
+        "type": "slashing"
+      }
+    }
+  },
+  {
+    "name": "+1 Shortbow",
+    "baseItem": "shortbow",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "+1 Crossbow",
+    "baseItem": "crossbow",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 1
+    }
+  },
+  {
+    "name": "+2 Crossbow",
+    "baseItem": "crossbow",
+    "rarity": "rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 2
+    }
+  },
+  {
+    "name": "Boots of Speed",
+    "baseItem": "boots",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "acBonus": 0
+    }
+  },
+  {
+    "name": "Gloves of Missile Snaring",
+    "baseItem": "gloves",
+    "rarity": "uncommon",
+    "attunement": true,
+    "combat": {
+      "acBonus": 0
+    }
+  },
+  {
+    "name": "Amulet of Health",
+    "baseItem": "amulet",
+    "rarity": "rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0
     }
   }
 ]

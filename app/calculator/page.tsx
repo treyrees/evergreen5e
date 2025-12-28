@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { MagicItem, DamageBonus, SpellCharge } from '@/types/magic-item';
 import {
@@ -68,7 +68,7 @@ export default function CalculatorPage() {
     recharge: 'dawn',
   });
 
-  const currentItem: Partial<MagicItem> = {
+  const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
     baseItem,
     combat: {
@@ -79,9 +79,9 @@ export default function CalculatorPage() {
       charges: charges.length > 0 ? charges : undefined,
     },
     attunement,
-  };
+  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, charges, attunement]);
 
-  const results = getSuggestedRarity(currentItem);
+  const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
 
   const addCharge = () => {
     if (newCharge.spell.trim()) {
