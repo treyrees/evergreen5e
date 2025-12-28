@@ -15,13 +15,12 @@ const DICE_VALUES: Record<string, number> = {
 };
 
 // Recharge frequency multipliers
-// Note: These are significantly lower than you might expect because many charged items
-// have limited total charges that don't fully recharge daily (e.g., wands with 7 charges
-// that regain 1d6+1 per dawn). This accounts for average sustainable daily use.
+// These represent the value of spell abilities based on how often they recharge
+// A level 3 spell (like Fireball) once per long rest should be worth ~0.75-0.9 points
 const RECHARGE_MULTIPLIERS: Record<string, number> = {
-  'dawn': 0.1,
-  'long rest': 0.1,
-  'short rest': 0.2,
+  'dawn': 0.25,
+  'long rest': 0.25,
+  'short rest': 0.4,
 };
 
 // Item categories for better anchor matching
@@ -117,10 +116,10 @@ export function calculateCombatScore(combat: CombatFeatures): number {
 
     // Frequency multiplier
     // - per-hit (default): 1.0 - applies to every attack
-    // - per-turn: 0.5 - only applies once per turn (even with multiple attacks)
+    // - per-turn: 0.4 - only applies once per turn (even with multiple attacks)
     const frequency = combat.damageBonus.frequency || 'per-hit';
     if (frequency === 'per-turn') {
-      diceValue *= 0.5;
+      diceValue *= 0.4;
     }
 
     // Conditional damage (only works vs specific creatures) is worth 25% of normal value
@@ -157,19 +156,26 @@ export function calculateCombatScore(combat: CombatFeatures): number {
 
   // Charge pool (new intuitive format)
   if (combat.chargePool && combat.chargePool.abilities.length > 0) {
-    // Estimate total charges available per day
-    // Assumes 2 short rests per adventuring day (standard assumption)
-    const totalChargesPerDay =
-      combat.chargePool.maxCharges +
+    // Calculate sustainable daily charges (what you can expect to use each day on average)
+    // Assumes 2 short rests per adventuring day (standard D&D assumption)
+    // Note: maxCharges is just the cap, not additional daily charges
+    const dailyRecharge =
       combat.chargePool.chargesPerLongRest +
       (combat.chargePool.chargesPerShortRest * 2);
+
+    // Use the lower of daily recharge or max charges as the sustainable daily budget
+    // (If you regain more than max, you're capped; if less, you use what you regain)
+    const sustainableDailyCharges = Math.min(
+      dailyRecharge > 0 ? dailyRecharge : combat.chargePool.maxCharges,
+      combat.chargePool.maxCharges
+    );
 
     // Calculate score for each ability
     for (const ability of combat.chargePool.abilities) {
       if (ability.chargesPerUse > 0) {
-        const effectiveUses = totalChargesPerDay / ability.chargesPerUse;
-        // Use a lower multiplier since charges are limited and shared across abilities
-        const multiplier = 0.15; // Slightly higher than legacy due to more accurate modeling
+        const effectiveUses = sustainableDailyCharges / ability.chargesPerUse;
+        // Multiplier similar to legacy charges (0.25) but slightly lower since shared pool
+        const multiplier = 0.2;
         score += ability.spellLevel * effectiveUses * multiplier;
       }
     }
@@ -528,8 +534,12 @@ function compareToAnchor(
   const anchorPool = anchorCombat.chargePool;
 
   if (userPool && userPool.abilities.length > 0) {
-    // Calculate user's daily charge budget
-    const userDailyCharges = userPool.maxCharges + userPool.chargesPerLongRest + (userPool.chargesPerShortRest * 2);
+    // Calculate sustainable daily charges (same logic as scoring)
+    const userDailyRecharge = userPool.chargesPerLongRest + (userPool.chargesPerShortRest * 2);
+    const userDailyCharges = Math.min(
+      userDailyRecharge > 0 ? userDailyRecharge : userPool.maxCharges,
+      userPool.maxCharges
+    );
 
     // Describe each ability and its contribution
     for (const ability of userPool.abilities) {
@@ -547,17 +557,29 @@ function compareToAnchor(
 
     // Add charge pool summary
     if (!anchorPool || anchorPool.abilities.length === 0) {
-      details.push(`${userPool.maxCharges} max charges + ${userPool.chargesPerLongRest}/LR (anchor has no charges)`);
+      if (userDailyRecharge > 0) {
+        details.push(`${userPool.maxCharges} max charges, ${userDailyRecharge}/day sustainable (anchor has no charges)`);
+      } else {
+        details.push(`${userPool.maxCharges} charges total (anchor has no charges)`);
+      }
     } else {
-      const anchorDailyCharges = anchorPool.maxCharges + anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
+      const anchorDailyRecharge = anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
+      const anchorDailyCharges = Math.min(
+        anchorDailyRecharge > 0 ? anchorDailyRecharge : anchorPool.maxCharges,
+        anchorPool.maxCharges
+      );
       if (userDailyCharges !== anchorDailyCharges) {
-        details.push(`~${userDailyCharges} charges/day vs anchor's ~${anchorDailyCharges}`);
+        details.push(`~${userDailyCharges} sustainable charges/day vs anchor's ~${anchorDailyCharges}`);
       }
     }
   } else if (anchorPool && anchorPool.abilities.length > 0) {
     // User has no charge pool but anchor does
-    const anchorDailyCharges = anchorPool.maxCharges + anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
-    details.push(`no spell abilities (anchor has ~${anchorDailyCharges} charges/day)`);
+    const anchorDailyRecharge = anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
+    const anchorDailyCharges = Math.min(
+      anchorDailyRecharge > 0 ? anchorDailyRecharge : anchorPool.maxCharges,
+      anchorPool.maxCharges
+    );
+    details.push(`no spell abilities (anchor has ~${anchorDailyCharges} sustainable charges/day)`);
   }
 
   // Determine type
