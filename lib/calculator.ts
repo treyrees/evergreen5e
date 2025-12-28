@@ -364,6 +364,7 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   anchorItem: MagicItem | null;
   anchorScore: number;
   anchorComparison: AnchorComparison | null;
+  anchorIsUnbalanced: boolean;
 } {
   const combatScore = item.combat ? calculateCombatScore(item.combat) : 0;
   const combatRarity = scoreToRarity(combatScore);
@@ -372,18 +373,34 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   // Get anchor item for reference
   const { anchor, anchorScore, comparison } = findAnchorItem(item);
 
+  // Check if anchor item's stated rarity matches its calculated rarity
+  let anchorIsUnbalanced = false;
+  if (anchor) {
+    const anchorCalculatedRarity = scoreToRarity(anchorScore);
+    anchorIsUnbalanced = anchorCalculatedRarity !== anchor.rarity;
+  }
+
   // For now, ribbons don't affect rarity (as we're not implementing them yet)
   // But we'll return the structure for future use
   let suggestedRarity = combatRarity;
   let explanation = `Based on ${combatScore.toFixed(1)} combat points, this item is ${combatRarity}.`;
 
   if (anchor && comparison) {
+    const userItemName = item.name || 'Your item';
+    const anchorName = anchor.name;
+
     if (comparison.type === 'equal') {
-      explanation += ` This matches the power level of ${anchor.name} (${anchor.rarity}).`;
+      explanation += ` ${userItemName} matches the power level of ${anchorName} (${anchor.rarity}).`;
     } else if (comparison.type === 'stronger') {
-      explanation += ` This is ${comparison.scoreDifference.toFixed(1)} points stronger than ${anchor.name} (${anchor.rarity}).`;
+      explanation += ` ${userItemName} is ${comparison.scoreDifference.toFixed(1)} points stronger than ${anchorName} (${anchor.rarity}).`;
     } else {
-      explanation += ` This is ${Math.abs(comparison.scoreDifference).toFixed(1)} points weaker than ${anchor.name} (${anchor.rarity}).`;
+      explanation += ` ${userItemName} is ${Math.abs(comparison.scoreDifference).toFixed(1)} points weaker than ${anchorName} (${anchor.rarity}).`;
+    }
+
+    // Warn if anchor item appears unbalanced
+    if (anchorIsUnbalanced) {
+      const anchorCalculatedRarity = scoreToRarity(anchorScore);
+      explanation += ` ⚠️ Note: ${anchorName} appears unbalanced—its stated rarity (${anchor.rarity}) doesn't match our formula (${anchorCalculatedRarity} for ${anchorScore.toFixed(1)} points). Consider this when balancing.`;
     }
   }
 
@@ -400,5 +417,6 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
     anchorItem: anchor,
     anchorScore,
     anchorComparison: comparison,
+    anchorIsUnbalanced,
   };
 }

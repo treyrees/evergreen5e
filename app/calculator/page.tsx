@@ -512,7 +512,7 @@ export default function CalculatorPage() {
                       {results.anchorComparison && (
                         <div className="mt-3 pt-2 border-t border-emerald-700/50">
                           <div className="text-xs font-semibold text-emerald-300 mb-1">
-                            YOUR ITEM vs ANCHOR:
+                            {itemName || 'UNNAMED ITEM'} vs {results.anchorItem.name.toUpperCase()}:
                           </div>
                           <div className="text-xs text-slate-300 space-y-0.5">
                             {results.anchorComparison.type === 'stronger' && (
@@ -535,6 +535,11 @@ export default function CalculatorPage() {
                                 • {detail}
                               </div>
                             ))}
+                            {results.anchorIsUnbalanced && (
+                              <div className="mt-2 pt-2 border-t border-yellow-700/30 text-yellow-400">
+                                ⚠️ This anchor appears unbalanced in the SRD
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
