@@ -84,9 +84,9 @@ const DAMAGE_TYPES = [
 ];
 
 export default function CalculatorPage() {
-  const [itemName, setItemName] = useState('');
-  const [baseItem, setBaseItem] = useState('longsword');
-  const [enhancement, setEnhancement] = useState(0);
+  const [itemName, setItemName] = useState('Trident of Fish Command');
+  const [baseItem, setBaseItem] = useState('trident');
+  const [enhancement, setEnhancement] = useState(1);
   const [damageBonus, setDamageBonus] = useState<DamageBonus | undefined>(
     undefined
   );
@@ -94,10 +94,11 @@ export default function CalculatorPage() {
   const [savingThrowBonus, setSavingThrowBonus] = useState(0);
   const [resistances, setResistances] = useState<string[]>([]);
   const [charges, setCharges] = useState<SpellCharge[]>([]);
-  const [attunement, setAttunement] = useState(false);
+  const [attunement, setAttunement] = useState(true);
 
-  // Spell charge form state
+  // UI state
   const [showChargeForm, setShowChargeForm] = useState(false);
+  const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [newCharge, setNewCharge] = useState<SpellCharge>({
     spell: '',
     spellLevel: 1,
@@ -673,6 +674,59 @@ export default function CalculatorPage() {
                     ⚠️ Requires Attunement
                   </div>
                 )}
+
+                {/* Advanced: Formula Details */}
+                <div className="border-t border-slate-700 pt-4">
+                  <button
+                    onClick={() => setShowFormulaDetails(!showFormulaDetails)}
+                    className="w-full text-left text-slate-400 hover:text-emerald-400 text-xs font-semibold flex items-center justify-between transition-colors"
+                  >
+                    <span>⚙️ Advanced: Formula Details</span>
+                    <span className="text-xl">{showFormulaDetails ? '−' : '+'}</span>
+                  </button>
+
+                  {showFormulaDetails && (
+                    <div className="mt-3 text-xs text-slate-400 space-y-2 pl-4">
+                      <div className="space-y-1">
+                        <div className="text-emerald-400 font-semibold">Base Values:</div>
+                        <div>• Enhancement: 1 point per +1</div>
+                        <div>• AC Bonus: 1 point per +1</div>
+                        <div>• Saving Throw Bonus: 1 point per +1</div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-emerald-400 font-semibold">Damage Dice:</div>
+                        <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts</div>
+                        <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
+                        <div className="text-yellow-400">• Conditional damage: ×0.25 (only vs specific creatures)</div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-emerald-400 font-semibold">Resistances:</div>
+                        <div>• 1.5 points per damage type resisted</div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-emerald-400 font-semibold">Spell/Ability Charges:</div>
+                        <div>• Formula: spell_level × uses_per_day × recharge_multiplier</div>
+                        <div>• Dawn/Long Rest: ×0.1</div>
+                        <div>• Short Rest: ×0.2</div>
+                        <div className="text-slate-500 italic">
+                          (Low multipliers account for limited total charges that don't fully recharge)
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-emerald-400 font-semibold">Rarity Thresholds:</div>
+                        <div>• Common: &lt;1.0 pts</div>
+                        <div>• Uncommon: 1.0-1.9 pts</div>
+                        <div>• Rare: 2.0-2.9 pts</div>
+                        <div>• Very Rare: 3.0-3.9 pts</div>
+                        <div>• Legendary: 4.0+ pts</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
