@@ -113,7 +113,11 @@ export function calculateCombatScore(combat: CombatFeatures): number {
 
   // Damage bonus
   if (combat.damageBonus?.dice) {
-    const diceValue = DICE_VALUES[combat.damageBonus.dice] || 0;
+    let diceValue = DICE_VALUES[combat.damageBonus.dice] || 0;
+    // Conditional damage (only works vs specific creatures) is worth 25% of normal value
+    if (combat.damageBonus.conditional) {
+      diceValue *= 0.25;
+    }
     score += diceValue;
   }
 
@@ -125,6 +129,12 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   // Saving throw bonus
   if (combat.savingThrowBonus) {
     score += combat.savingThrowBonus;
+  }
+
+  // Damage resistances - each resistance is worth 1.5 points
+  // (defensive, situational, but very valuable in the right circumstances)
+  if (combat.resistances && combat.resistances.length > 0) {
+    score += combat.resistances.length * 1.5;
   }
 
   // Spell charges

@@ -1,6 +1,7 @@
 export interface DamageBonus {
   dice: string; // "1d6", "2d6", etc.
   type: string; // "fire", "cold", "radiant", etc.
+  conditional?: boolean; // true if only works vs specific creatures (dragons, giants, etc.)
 }
 
 export interface SpellCharge {
@@ -16,6 +17,7 @@ export interface CombatFeatures {
   acBonus?: number;
   savingThrowBonus?: number;
   charges?: SpellCharge[];
+  resistances?: string[]; // Damage types resisted: "fire", "cold", "all", etc.
 }
 
 export interface RibbonFeatures {

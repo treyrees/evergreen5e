@@ -92,6 +92,7 @@ export default function CalculatorPage() {
   );
   const [acBonus, setAcBonus] = useState(0);
   const [savingThrowBonus, setSavingThrowBonus] = useState(0);
+  const [resistances, setResistances] = useState<string[]>([]);
   const [charges, setCharges] = useState<SpellCharge[]>([]);
   const [attunement, setAttunement] = useState(false);
 
@@ -112,10 +113,11 @@ export default function CalculatorPage() {
       damageBonus,
       acBonus: acBonus > 0 ? acBonus : undefined,
       savingThrowBonus: savingThrowBonus > 0 ? savingThrowBonus : undefined,
+      resistances: resistances.length > 0 ? resistances : undefined,
       charges: charges.length > 0 ? charges : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, charges, attunement]);
+  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, charges, attunement]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
 
@@ -261,6 +263,7 @@ export default function CalculatorPage() {
                             ? {
                                 dice: e.target.value,
                                 type: damageBonus?.type || 'fire',
+                                conditional: damageBonus?.conditional || false,
                               }
                             : undefined
                         )
@@ -290,6 +293,25 @@ export default function CalculatorPage() {
                       </select>
                     )}
                   </div>
+                  {damageBonus && (
+                    <div className="mt-2 flex items-center">
+                      <input
+                        type="checkbox"
+                        id="conditional-damage"
+                        checked={damageBonus.conditional || false}
+                        onChange={(e) =>
+                          setDamageBonus({ ...damageBonus, conditional: e.target.checked })
+                        }
+                        className="mr-2 h-4 w-4 text-emerald-600 rounded"
+                      />
+                      <label
+                        htmlFor="conditional-damage"
+                        className="text-sm text-slate-600 dark:text-slate-400"
+                      >
+                        Conditional (only vs specific creatures, e.g. dragons/giants)
+                      </label>
+                    </div>
+                  )}
                 </div>
 
                 {/* AC Bonus */}
@@ -334,6 +356,50 @@ export default function CalculatorPage() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Damage Resistances */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Damage Resistances
+                  </label>
+                  <select
+                    multiple
+                    value={resistances}
+                    onChange={(e) =>
+                      setResistances(
+                        Array.from(e.target.selectedOptions, (option) => option.value)
+                      )
+                    }
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    size={5}
+                  >
+                    {DAMAGE_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                  {resistances.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {resistances.map((res) => (
+                        <span
+                          key={res}
+                          className="inline-flex items-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-xs px-2 py-1 rounded"
+                        >
+                          {res}
+                          <button
+                            onClick={() =>
+                              setResistances(resistances.filter((r) => r !== res))
+                            }
+                            className="ml-1 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Spells & Spell-Like Abilities */}

@@ -54,7 +54,8 @@
       "damageBonus": {
         "dice": "1d6",
         "type": "cold"
-      }
+      },
+      "resistances": ["fire"]
     }
   },
   {
@@ -261,7 +262,8 @@
     "rarity": "rare",
     "attunement": true,
     "combat": {
-      "enhancement": 0
+      "enhancement": 0,
+      "resistances": ["acid"]
     }
   },
   {
@@ -376,7 +378,8 @@
       "enhancement": 1,
       "damageBonus": {
         "dice": "2d6",
-        "type": "slashing"
+        "type": "slashing",
+        "conditional": true
       }
     }
   },
@@ -389,7 +392,8 @@
       "enhancement": 1,
       "damageBonus": {
         "dice": "3d6",
-        "type": "slashing"
+        "type": "slashing",
+        "conditional": true
       }
     }
   },
