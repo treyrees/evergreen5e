@@ -703,13 +703,8 @@ export default function CalculatorPage() {
                   <div className="text-emerald-400 font-bold mb-2">
                     📊 SUGGESTED RARITY
                   </div>
-                  <div className="space-y-2">
-                    <div className="text-2xl font-bold text-white">
-                      {results.suggestedRarity}
-                    </div>
-                    <div className="text-xs text-slate-300">
-                      {results.explanation}
-                    </div>
+                  <div className="text-2xl font-bold text-white">
+                    {results.suggestedRarity}
                   </div>
                 </div>
 
