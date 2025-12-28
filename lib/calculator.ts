@@ -88,6 +88,21 @@ function getItemCategory(baseItem: string): string {
 }
 
 /**
+ * Check if a category is a weapon (melee or ranged)
+ */
+function isWeaponCategory(category: string): boolean {
+  return category === 'melee-weapon' || category === 'ranged-weapon';
+}
+
+/**
+ * Check if an item category has limited anchors (should expand search earlier)
+ */
+function isLimitedCategory(category: string): boolean {
+  // Ranged weapons, implements, and accessories have very few SRD items
+  return category === 'ranged-weapon' || category === 'implement' || category === 'accessory';
+}
+
+/**
  * Check if an item is a generic +X item (used as fallback only)
  */
 function isGenericItem(item: MagicItem): boolean {
@@ -254,6 +269,32 @@ export function findAnchorItem(
     );
   }
 
+  // Priority 2.5: For limited categories, expand to related items
+  if (!anchor && userItem.baseItem) {
+    const userCategory = getItemCategory(userItem.baseItem);
+    if (isLimitedCategory(userCategory)) {
+      anchor = findClosestInCandidates(
+        namedItems.filter((item) => {
+          const itemCategory = getItemCategory(item.baseItem);
+          // Ranged weapons can compare with melee weapons
+          if (userCategory === 'ranged-weapon' && itemCategory === 'melee-weapon') {
+            return true;
+          }
+          // Implements can compare with weapons
+          if (userCategory === 'implement' && isWeaponCategory(itemCategory)) {
+            return true;
+          }
+          // Accessories can compare with weapons and implements
+          if (userCategory === 'accessory' && (isWeaponCategory(itemCategory) || itemCategory === 'implement')) {
+            return true;
+          }
+          return false;
+        }),
+        userScore
+      );
+    }
+  }
+
   // Priority 3: Any named item
   if (!anchor) {
     anchor = findClosestInCandidates(namedItems, userScore);
@@ -336,8 +377,8 @@ export function findTopAnchorItems(
   });
 
   // Priority 2: Named items with same category
+  const userCategory = userItem.baseItem ? getItemCategory(userItem.baseItem) : 'other';
   if (userItem.baseItem) {
-    const userCategory = getItemCategory(userItem.baseItem);
     const priority2 = namedItems.filter(
       (item) =>
         getItemCategory(item.baseItem) === userCategory &&
@@ -354,8 +395,44 @@ export function findTopAnchorItems(
     });
   }
 
+  // Priority 2.5: For limited categories, expand to related items
+  // (e.g., ranged weapons can compare with melee weapons, implements with weapons, etc.)
+  if (isLimitedCategory(userCategory)) {
+    const priority2_5 = namedItems.filter((item) => {
+      const itemCategory = getItemCategory(item.baseItem);
+      if (item.baseItem === userItem.baseItem || itemCategory === userCategory) {
+        return false; // Already included in priority 1 or 2
+      }
+      // Ranged weapons can compare with melee weapons (both are weapons)
+      if (userCategory === 'ranged-weapon' && itemCategory === 'melee-weapon') {
+        return true;
+      }
+      // Melee weapons can compare with ranged weapons (for low ranged item count)
+      if (userCategory === 'melee-weapon' && itemCategory === 'ranged-weapon') {
+        return true;
+      }
+      // Implements can compare with weapons
+      if (userCategory === 'implement' && isWeaponCategory(itemCategory)) {
+        return true;
+      }
+      // Accessories can compare with weapons and implements
+      if (userCategory === 'accessory' && (isWeaponCategory(itemCategory) || itemCategory === 'implement')) {
+        return true;
+      }
+      return false;
+    });
+    priority2_5.forEach((item) => {
+      const score = calculateCombatScore(item.combat);
+      candidates.push({
+        item,
+        score,
+        scoreDiff: Math.abs(score - userScore),
+        priority: 2.5,
+      });
+    });
+  }
+
   // Priority 3: Any other named item
-  const userCategory = userItem.baseItem ? getItemCategory(userItem.baseItem) : 'other';
   const priority3 = namedItems.filter(
     (item) =>
       item.baseItem !== userItem.baseItem &&
