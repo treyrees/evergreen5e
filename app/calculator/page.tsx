@@ -926,9 +926,9 @@ export default function CalculatorPage() {
                         })();
 
                         return (
-                          <div key={index} className={`${index > 0 ? 'border-t border-slate-700 pt-4' : ''} bg-slate-800/30 rounded-lg p-3`}>
+                          <div key={index} className={`${index > 0 ? 'border-t border-slate-700 pt-6 mt-6' : ''} bg-slate-800/30 rounded-lg p-4`}>
                             {/* Anchor Header */}
-                            <div className="mb-3 pb-2 border-b border-slate-700/50">
+                            <div className="mb-4 pb-3 border-b border-slate-700/50">
                               <div className="text-white font-semibold text-base flex items-center gap-1 mb-1">
                                 <span className="text-emerald-400 text-xs font-mono">#{index + 1}</span>
                                 <span>{anchor.name}</span>
@@ -944,47 +944,109 @@ export default function CalculatorPage() {
                               </div>
                             </div>
 
-                            {/* Combat Features */}
-                            <div className="mb-3">
-                              <div className="text-emerald-400 text-xs font-semibold mb-1">Features</div>
-                              <div className="text-xs text-slate-300 space-y-0.5 pl-2">
-                                {anchor.combat.enhancement > 0 && (
-                                  <div>+{anchor.combat.enhancement} enhancement</div>
-                                )}
-                                {anchor.combat.damageBonus && (
-                                  <div>
-                                    {anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}
-                                    {anchor.combat.damageBonus.conditional && <span className="text-yellow-400 ml-1">(conditional)</span>}
-                                  </div>
-                                )}
-                                {anchor.combat.acBonus && <div>+{anchor.combat.acBonus} AC</div>}
-                                {anchor.combat.savingThrowBonus && <div>+{anchor.combat.savingThrowBonus} saves</div>}
-                                {anchor.combat.abilityScoreSetter && (
-                                  <div>{anchor.combat.abilityScoreSetter.ability} set to {anchor.combat.abilityScoreSetter.setValue}</div>
-                                )}
-                                {anchor.combat.abilityScoreBonus && (
-                                  <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
-                                )}
-                                {anchor.combat.flight && (
-                                  <div>
-                                    Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}
-                                  </div>
-                                )}
-                                {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
-                                  <div>Resist: {anchor.combat.resistances.join(', ')}</div>
-                                )}
-                                {anchor.combat.charges && (
-                                  <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
-                                )}
-                                {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && (
-                                  <div className="text-slate-500 italic">No measurable combat features</div>
-                                )}
+                            {/* Side-by-Side Comparison */}
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              {/* Left Column: Your Item */}
+                              <div className="bg-blue-900/10 border border-blue-700/30 rounded p-3">
+                                <div className="text-blue-300 text-xs font-semibold mb-2 flex items-center gap-1">
+                                  <span>⚔️</span>
+                                  <span>YOUR ITEM</span>
+                                </div>
+                                <div className="text-[10px] text-slate-400 mb-2">
+                                  <span className="font-mono">{results.combatScore.toFixed(1)} pts</span>
+                                  {' • '}
+                                  <span>{results.suggestedRarity}</span>
+                                </div>
+                                <div className="text-xs text-slate-300 space-y-1">
+                                  {enhancement > 0 && <div>+{enhancement} enhancement</div>}
+                                  {damageBonus && (
+                                    <div>
+                                      {damageBonus.dice} {damageBonus.type}
+                                      {damageBonus.frequency === 'per-turn' && <span className="text-yellow-400 text-[10px] ml-1">(per-turn)</span>}
+                                      {damageBonus.conditional && <span className="text-yellow-400 text-[10px] ml-1">(conditional)</span>}
+                                      {damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
+                                    </div>
+                                  )}
+                                  {acBonus > 0 && <div>+{acBonus} AC</div>}
+                                  {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves</div>}
+                                  {abilityScoreSetter && (
+                                    <div>{abilityScoreSetter.ability} set to {abilityScoreSetter.setValue}</div>
+                                  )}
+                                  {abilityScoreBonus && (
+                                    <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
+                                  )}
+                                  {flight && (
+                                    <div>
+                                      Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}
+                                    </div>
+                                  )}
+                                  {resistances.length > 0 && (
+                                    <div>Resist: {resistances.join(', ')}</div>
+                                  )}
+                                  {abilities.length > 0 && (
+                                    <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>
+                                  )}
+                                  {maxCharges > 0 && (
+                                    <div>{maxCharges} max charges</div>
+                                  )}
+                                  {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !flight && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
+                                    <div className="text-slate-500 italic text-[10px]">No combat features</div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Right Column: Anchor Item */}
+                              <div className="bg-emerald-900/10 border border-emerald-700/30 rounded p-3">
+                                <div className="text-emerald-300 text-xs font-semibold mb-2 flex items-center gap-1">
+                                  <span>⚓</span>
+                                  <span>ANCHOR</span>
+                                </div>
+                                <div className="text-[10px] text-slate-400 mb-2">
+                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span>
+                                  {' • '}
+                                  <span>{anchor.rarity}</span>
+                                </div>
+                                <div className="text-xs text-slate-300 space-y-1">
+                                  {anchor.combat.enhancement > 0 && (
+                                    <div>+{anchor.combat.enhancement} enhancement</div>
+                                  )}
+                                  {anchor.combat.damageBonus && (
+                                    <div>
+                                      {anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}
+                                      {anchor.combat.damageBonus.frequency === 'per-turn' && <span className="text-yellow-400 text-[10px] ml-1">(per-turn)</span>}
+                                      {anchor.combat.damageBonus.conditional && <span className="text-yellow-400 text-[10px] ml-1">(conditional)</span>}
+                                      {anchor.combat.damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
+                                    </div>
+                                  )}
+                                  {anchor.combat.acBonus && <div>+{anchor.combat.acBonus} AC</div>}
+                                  {anchor.combat.savingThrowBonus && <div>+{anchor.combat.savingThrowBonus} saves</div>}
+                                  {anchor.combat.abilityScoreSetter && (
+                                    <div>{anchor.combat.abilityScoreSetter.ability} set to {anchor.combat.abilityScoreSetter.setValue}</div>
+                                  )}
+                                  {anchor.combat.abilityScoreBonus && (
+                                    <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
+                                  )}
+                                  {anchor.combat.flight && (
+                                    <div>
+                                      Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}
+                                    </div>
+                                  )}
+                                  {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
+                                    <div>Resist: {anchor.combat.resistances.join(', ')}</div>
+                                  )}
+                                  {anchor.combat.charges && (
+                                    <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
+                                  )}
+                                  {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && (
+                                    <div className="text-slate-500 italic text-[10px]">No combat features</div>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
                             {/* Warning explanation for flagged items */}
                             {(warnings.hasNumerical || warnings.hasSpecial || warnings.hasCommunity) && (
-                              <div className={`mb-3 rounded p-2 ${
+                              <div className={`mb-4 rounded p-2 ${
                                 warnings.hasNumerical
                                   ? 'bg-blue-900/20 border border-blue-700/30'
                                   : warnings.hasSpecial
@@ -1002,31 +1064,37 @@ export default function CalculatorPage() {
                               </div>
                             )}
 
-                            {/* Comparison */}
-                            <div className="bg-slate-900/50 rounded p-2">
-                              <div className="text-xs font-semibold text-slate-400 mb-1">
-                                Comparison
+                            {/* Diff Section */}
+                            <div className="bg-slate-900/50 rounded p-3 border border-slate-700/50">
+                              <div className="text-xs font-semibold text-slate-300 mb-2">
+                                📊 DIFFERENCES
                               </div>
-                              <div className="text-xs space-y-0.5">
+                              <div className="text-xs space-y-1">
+                                {/* Power Comparison */}
                                 {comparison.type === 'stronger' && (
                                   <div className="text-yellow-400 font-medium">
-                                    ↑ {comparison.scoreDifference.toFixed(1)} pts stronger
+                                    ⬆️ Your item is {comparison.scoreDifference.toFixed(1)} pts stronger
                                   </div>
                                 )}
                                 {comparison.type === 'weaker' && (
                                   <div className="text-blue-400 font-medium">
-                                    ↓ {Math.abs(comparison.scoreDifference).toFixed(1)} pts weaker
+                                    ⬇️ Your item is {Math.abs(comparison.scoreDifference).toFixed(1)} pts weaker
                                   </div>
                                 )}
                                 {comparison.type === 'equal' && (
                                   <div className="text-emerald-400 font-medium">
-                                    ≈ Equal power
+                                    ≈ Equal power level
                                   </div>
                                 )}
+
+                                {/* Feature Differences */}
                                 {comparison.details.length > 0 && (
-                                  <div className="mt-1 pt-1 border-t border-slate-700/50 text-slate-400 space-y-0.5">
+                                  <div className="mt-2 pt-2 border-t border-slate-700/50 text-slate-400 space-y-1">
                                     {comparison.details.map((detail, idx) => (
-                                      <div key={idx}>• {detail}</div>
+                                      <div key={idx} className="flex items-start gap-1">
+                                        <span className="text-slate-500">•</span>
+                                        <span>{detail}</span>
+                                      </div>
                                     ))}
                                   </div>
                                 )}
