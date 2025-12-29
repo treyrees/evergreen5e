@@ -1320,15 +1320,16 @@ export default function CalculatorPage() {
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Damage Type Multipliers:</div>
                       <div>• Strong (fewer resistances): Force ×1.2, Psychic ×1.15, Radiant ×1.1</div>
-                      <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid ×1.0</div>
-                      <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7, Physical ×0.85</div>
+                      <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid, Physical ×1.0</div>
+                      <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7</div>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Ability Scores:</div>
-                      <div>• Setter (19): 2.5 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
+                      <div>• Setter (19): 1.5 pts | Setter (20): 2.0 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
+                      <div className="text-slate-500 pl-2">Ability multipliers: CON ×1.34, DEX ×1.17, others ×1.0</div>
                       <div>• Bonus: ×0.75 per point (e.g., +2 bonus = 1.5 pts)</div>
                     </div>
 
@@ -1344,7 +1345,7 @@ export default function CalculatorPage() {
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Resistances:</div>
-                      <div>• 0.5 points per damage type resisted</div>
+                      <div>• 2.0 points per damage type resisted</div>
                     </div>
 
                     <div className="space-y-1">
