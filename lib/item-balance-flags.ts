@@ -149,10 +149,10 @@ export function getItemExplanation(itemName: string): string {
 
   // Bonus effects beyond base damage
   if (itemName === 'Giant Slayer') {
-    return '+1 weapon with 2d6 conditional vs giants (~1.7 pts base). Bonus +0.3 for DC 15 STR knockdown (prone) vs giants.';
+    return '+1 weapon with 2d6 conditional vs giants (~1.7 pts base). Bonus +0.35 for DC 15 STR knockdown (prone) vs giants.';
   }
   if (itemName === 'Mace of Smiting') {
-    return '+1 weapon with 2d6 conditional vs constructs (~1.7 pts base). Bonus +0.3 for +4d6 on crit and auto-destroy under 25 HP.';
+    return '+1 weapon with 2d6 conditional vs constructs (~1.7 pts base). Bonus +0.35 for +4d6 on crit and auto-destroy under 25 HP.';
   }
   if (itemName === 'Sword of Sharpness') {
     return 'Modeled as +3 equivalent (3.0 pts base) for +4d6 on crit. Bonus +0.25 for limb-severing on nat 20.';

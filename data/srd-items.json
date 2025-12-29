@@ -323,7 +323,7 @@
     "rarity": "rare",
     "attunement": false,
     "dndbeyondSlug": "5388-giant-slayer",
-    "overrideBonus": 0.3,
+    "overrideBonus": 0.35,
     "combat": {
       "enhancement": 1,
       "damageBonus": {
@@ -332,7 +332,7 @@
         "conditionalType": "creature-rare"
       }
     },
-    "description": "+1 weapon with 2d6 conditional vs giants (~1.7 pts base). Override +0.3 for DC 15 STR knockdown (prone) vs giants."
+    "description": "+1 weapon with 2d6 conditional vs giants (~1.7 pts base). Override +0.35 for DC 15 STR knockdown (prone) vs giants."
   },
   {
     "name": "Dragon Slayer",
@@ -388,7 +388,7 @@
     "rarity": "rare",
     "attunement": false,
     "dndbeyondSlug": "4671-mace-of-smiting",
-    "overrideBonus": 0.3,
+    "overrideBonus": 0.35,
     "combat": {
       "enhancement": 1,
       "damageBonus": {
@@ -397,7 +397,7 @@
         "conditionalType": "creature-rare"
       }
     },
-    "description": "+1 weapon with 2d6 conditional vs constructs (~1.7 pts base). Override +0.3 for +4d6 on crit vs constructs and auto-destroy under 25 HP."
+    "description": "+1 weapon with 2d6 conditional vs constructs (~1.7 pts base). Override +0.35 for +4d6 on crit vs constructs and auto-destroy under 25 HP."
   },
   {
     "name": "Trident of Fish Command",

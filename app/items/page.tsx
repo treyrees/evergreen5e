@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import srdItems from '@/data/srd-items.json';
 import { MagicItem } from '@/types/magic-item';
-import { getItemScore } from '@/lib/calculator';
+import { getItemScore, scoreToRarity } from '@/lib/calculator';
 import { getWarningIndicator } from '@/lib/item-balance-flags';
 
 export default function ItemsPage() {
@@ -14,14 +14,7 @@ export default function ItemsPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
-  // Calculate rarity from score
-  const getCalculatedRarity = (score: number): string => {
-    if (score < 1) return 'Common';
-    if (score < 2) return 'Uncommon';
-    if (score < 3) return 'Rare';
-    if (score < 4) return 'Very Rare';
-    return 'Legendary';
-  };
+  // Calculate rarity from score (using shared function with hasCombatFeatures bump)
 
   // Format effects list
   const getEffectsList = (item: MagicItem): string[] => {
@@ -106,7 +99,7 @@ export default function ItemsPage() {
     return srdItems.map(item => {
       const magicItem = item as MagicItem;
       const score = getItemScore(magicItem);
-      const calculatedRarity = getCalculatedRarity(score);
+      const calculatedRarity = scoreToRarity(score, score > 0);
       const effects = getEffectsList(magicItem);
       const discrepancyCategory = getDiscrepancyCategory(item.name);
       return {
