@@ -62,11 +62,11 @@ export const COMMUNITY_NOTES = new Set([
   // Official seems too LOW (item is stronger than rarity suggests)
   'Cloak of Protection',       // Calc 2.0 pts (Rare) but official Uncommon
   'Sun Blade',                 // Calc 3.0+ pts (Very Rare) but official Rare - community agrees it's powerful
-  'Wand of Magic Missiles',    // Calc 0.8 pts (Common) but official Uncommon - auto-hit may justify bump
 
   // Official seems too HIGH (item is weaker than rarity suggests)
   'Vicious Weapon',            // Calc 0.1 pts (Common) but official Rare - 5% proc is ~3x weaker than +1
-  'Frost Brand',               // Calc 1.5 pts (Uncommon) but official Very Rare - compare to Flame Tongue
+  'Wand of Magic Missiles',    // Calc 0.8 pts (Common) but official Uncommon - auto-hit may justify bump
+  'Winged Boots',              // Calc 0.8 pts (Common) but official Uncommon - flight value hard to quantify
 
   // Character-dependent value (stat setters)
   'Headband of Intellect',     // INT 19 - value depends entirely on your starting INT
@@ -141,7 +141,7 @@ export function getItemExplanation(itemName: string): string {
 
   // Complex effects (negative bonuses for limitations)
   if (itemName === 'Staff of Power') {
-    return '+2 enhancement, +2 AC, +2 saves (7.0 pts base). Bonus -3.5 for spellcaster-only attunement (limits to ~40% of builds).';
+    return '+2 enhancement, +2 AC, +2 saves (7.0 pts base). Bonus -3.5 for spellcaster-only attunement. Community consensus: appropriately balanced at Very Rare—class restriction and hand-occupation are key constraints.';
   }
   if (itemName === 'Defender') {
     return '+3 enhancement and +3 AC (7.5 pts base). Bonus -2.25 for transfer limitation—must split the bonus each turn, can\'t have both.';
@@ -175,8 +175,8 @@ export function getItemExplanation(itemName: string): string {
   if (itemName === 'Vicious Weapon') {
     return '+2d6 on nat 20 only = 0.1 pts (Common). Official: Rare. At 5% crit rate, this averages +0.35 damage/hit—roughly 3× weaker than +1.';
   }
-  if (itemName === 'Frost Brand') {
-    return '1d6 cold + fire resistance = 1.5 pts (Uncommon). Official: Very Rare. Compare to Flame Tongue (2d6 fire = 2.0 pts, Rare)—significantly overpriced.';
+  if (itemName === 'Winged Boots') {
+    return '30 ft fly speed, 4 hrs/day = 0.8 pts (Common). Official: Uncommon. Flight is valuable but hard to quantify—our model may undervalue it.';
   }
 
   // Character-dependent stat setters

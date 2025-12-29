@@ -1007,7 +1007,9 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   anchorComparison: AnchorComparison | null;
   anchorIsUnbalanced: boolean;
 } {
-  const combatScore = item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  // Include overrideBonus in the score calculation
+  const baseScore = item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  const combatScore = baseScore + (item.overrideBonus ?? 0);
   const hasCombatFeatures = combatScore > 0;
   const combatRarity = scoreToRarity(combatScore, hasCombatFeatures);
   const ribbonCount = countRibbons(item.ribbons);
