@@ -430,9 +430,11 @@ export function calculateCombatScore(combat: CombatFeatures): number {
         const burstUses = combat.chargePool.maxCharges / ability.chargesPerUse;
 
         // Sustained uses: what you get back per day
+        // If no recharge specified (0/0), assume conservative 1 charge/day
+        // This encourages users to fill in actual recharge rates
         const sustainedUses = dailyRecharge > 0
           ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / ability.chargesPerUse
-          : burstUses; // If no recharge info, assume full pool available
+          : 1 / ability.chargesPerUse;
 
         // Blend burst and sustained: burst matters more for powerful spells
         // Level 3 spell: ~45% burst weight (8 Fireballs in a boss fight is huge)
