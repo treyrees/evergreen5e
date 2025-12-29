@@ -29,6 +29,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cinzel.variable} ${dmSans.variable}`}>
       <body className="antialiased">
+        {/* Ambient drifting motes */}
+        <div className="ambient-motes" aria-hidden="true">
+          <div className="mote" />
+          <div className="mote" />
+          <div className="mote" />
+          <div className="mote" />
+          <div className="mote" />
+        </div>
         {children}
       </body>
     </html>
