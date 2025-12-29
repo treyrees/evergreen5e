@@ -71,7 +71,7 @@ export function hasCommunityNotes(itemName: string): boolean {
 export function getItemExplanation(itemName: string): string {
   // Numerical edge cases
   if (itemName === 'Vicious Weapon') {
-    return '+2d6 damage on natural 20 (critical-only bonus not fully weighted)';
+    return '+2d6 damage on natural 20 (5% proc rate = ~0.35 damage/attack, now quantified)';
   }
   if (itemName === 'Oathbow') {
     return '+3d6 vs sworn enemy (conditional damage undervalued despite frequency)';

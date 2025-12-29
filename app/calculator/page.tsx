@@ -354,27 +354,46 @@ export default function CalculatorPage() {
                   </div>
                   {damageBonus && (
                     <div className="mt-2 space-y-2">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-hit' })}
-                          className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                            (damageBonus.frequency || 'per-hit') === 'per-hit'
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                          }`}
+                      {!damageBonus.vicious && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-hit' })}
+                            className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                              (damageBonus.frequency || 'per-hit') === 'per-hit'
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                            }`}
+                          >
+                            Per Hit
+                          </button>
+                          <button
+                            onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-turn' })}
+                            className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                              damageBonus.frequency === 'per-turn'
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                            }`}
+                          >
+                            Once Per Turn
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="vicious-damage"
+                          checked={damageBonus.vicious || false}
+                          onChange={(e) =>
+                            setDamageBonus({ ...damageBonus, vicious: e.target.checked })
+                          }
+                          className="mr-2 h-4 w-4 text-emerald-600 rounded"
+                        />
+                        <label
+                          htmlFor="vicious-damage"
+                          className="text-sm text-slate-600 dark:text-slate-400"
                         >
-                          Per Hit
-                        </button>
-                        <button
-                          onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-turn' })}
-                          className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                            damageBonus.frequency === 'per-turn'
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                          }`}
-                        >
-                          Once Per Turn
-                        </button>
+                          Vicious (only on natural 20 / crits, ~0.35 dmg/attack)
+                        </label>
                       </div>
                       <div className="flex items-center">
                         <input
@@ -1109,6 +1128,7 @@ export default function CalculatorPage() {
                         <div className="text-emerald-400 font-semibold">Damage Dice:</div>
                         <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts, 1d12 = 1.75 pts</div>
                         <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
+                        <div className="text-yellow-400">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
                         <div className="text-yellow-400">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
                         <div className="text-yellow-400">• Conditional damage: ×0.25 (only vs specific creatures)</div>
                       </div>
