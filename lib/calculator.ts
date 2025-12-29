@@ -165,6 +165,53 @@ function isGenericItem(item: MagicItem): boolean {
 }
 
 /**
+ * Check if a user item is "simple" - only has +N enhancement (weapons) or +N AC (armor/shields)
+ * with no attunement and no other combat features. Simple in, simple out.
+ */
+function isSimpleItem(userItem: Partial<MagicItem>): { isSimple: boolean; enhancementLevel: number; type: 'weapon' | 'armor' | 'shield' | null } {
+  if (!userItem.combat) return { isSimple: false, enhancementLevel: 0, type: null };
+  if (userItem.attunement) return { isSimple: false, enhancementLevel: 0, type: null };
+
+  const combat = userItem.combat;
+  const broadCategory = userItem.baseItem ? getBroadCategory(userItem.baseItem) : 'trinket';
+
+  // Check for any "extra" features that make it not simple
+  const hasExtraFeatures =
+    combat.damageBonus !== undefined ||
+    combat.resistances !== undefined ||
+    combat.charges !== undefined ||
+    combat.chargePool !== undefined ||
+    combat.abilityScoreSetter !== undefined ||
+    combat.abilityScoreBonus !== undefined ||
+    combat.flight !== undefined ||
+    combat.advantage !== undefined ||
+    combat.reactionAC !== undefined ||
+    combat.bonusActionDamage !== undefined ||
+    combat.conditionInfliction !== undefined;
+
+  if (hasExtraFeatures) return { isSimple: false, enhancementLevel: 0, type: null };
+
+  // For weapons: only enhancement bonus
+  if (broadCategory === 'weapon') {
+    const enhancement = combat.enhancement || 0;
+    if (enhancement >= 1 && enhancement <= 3 && !combat.acBonus && !combat.savingThrowBonus) {
+      return { isSimple: true, enhancementLevel: enhancement, type: 'weapon' };
+    }
+  }
+
+  // For armor: only AC bonus (no enhancement on armor)
+  if (broadCategory === 'armor') {
+    const acBonus = combat.acBonus || 0;
+    const isShield = userItem.baseItem === 'shield';
+    if (acBonus >= 1 && acBonus <= 3 && !combat.enhancement && !combat.savingThrowBonus) {
+      return { isSimple: true, enhancementLevel: acBonus, type: isShield ? 'shield' : 'armor' };
+    }
+  }
+
+  return { isSimple: false, enhancementLevel: 0, type: null };
+}
+
+/**
  * Get the score for an item, using overrideScore if available
  */
 export function getItemScore(item: Partial<MagicItem>): number {
@@ -589,9 +636,14 @@ export function findTopAnchorItems(
   const namedItems = allItems.filter(item => !isGenericItem(item));
   const genericItems = allItems.filter(item => isGenericItem(item));
 
+  // Check if this is a "simple" item (only +N enhancement/AC, no attunement)
+  // Simple in, simple out - prioritize the matching generic item
+  const simpleCheck = isSimpleItem(userItem);
+
   // Collect all candidates with their scores and priority level
   // Priority philosophy: Named items with similar mechanics > generic items
   // BUT score proximity gates priority - a 2pt difference demotes even perfect matches
+  // EXCEPTION: Simple items get their matching generic prioritized first
   const candidates: Array<{
     item: MagicItem;
     score: number;
@@ -671,11 +723,25 @@ export function findTopAnchorItems(
     // A +2 Weapon that's 0.1 pts away beats a named item that's 2 pts away
     let basePriority = sameBroadCategory ? 9 : 10;
 
+    // SIMPLE IN, SIMPLE OUT: If user made a simple +N item, the matching generic is #1
+    // e.g., +3 longsword → show "+3 Weapon" first
+    if (simpleCheck.isSimple && sameBroadCategory) {
+      const expectedGenericName = `+${simpleCheck.enhancementLevel} ${
+        simpleCheck.type === 'weapon' ? 'Weapon' :
+        simpleCheck.type === 'shield' ? 'Shield' : 'Armor'
+      }`;
+      if (item.name === expectedGenericName) {
+        basePriority = 0;  // Highest priority - this IS what they're making
+      }
+    }
+
     // Generics get a bonus for being close - they're reliable anchors
-    if (scoreDiff < 0.2) {
-      basePriority = sameBroadCategory ? 4 : 5;  // Exact score match is valuable
-    } else if (scoreDiff < CLOSE_THRESHOLD) {
-      basePriority = sameBroadCategory ? 6 : 7;  // Close score is good
+    if (basePriority > 0) {  // Don't override the simple match priority
+      if (scoreDiff < 0.2) {
+        basePriority = sameBroadCategory ? 4 : 5;  // Exact score match is valuable
+      } else if (scoreDiff < CLOSE_THRESHOLD) {
+        basePriority = sameBroadCategory ? 6 : 7;  // Close score is good
+      }
     }
 
     candidates.push({

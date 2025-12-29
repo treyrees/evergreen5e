@@ -23,6 +23,22 @@ function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: num
   return <motion.span>{display}</motion.span>;
 }
 
+// Capitalize rarity for display (e.g., "very rare" → "Very Rare")
+function capitalizeRarity(rarity: string): string {
+  return rarity.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+// Get rarity color class based on rarity tier (case-insensitive)
+function getRarityColorClass(rarity: string): string {
+  const r = rarity.toLowerCase();
+  if (r === 'common') return 'text-slate-300';
+  if (r === 'uncommon') return 'text-green-400';
+  if (r === 'rare') return 'text-blue-400';
+  if (r === 'very rare') return 'text-purple-400';
+  if (r === 'legendary') return 'text-orange-400';
+  return 'text-slate-300';
+}
+
 const BASE_ITEMS = {
   'Melee Weapons (Simple)': [
     'club',
@@ -900,13 +916,7 @@ export default function CalculatorPage() {
                       <AnimatedNumber value={results.combatScore} /> pts
                     </span>
                   </div>
-                  <div className={`text-2xl font-bold ${
-                    results.suggestedRarity === 'Common' ? 'text-slate-200' :
-                    results.suggestedRarity === 'Uncommon' ? 'text-green-400' :
-                    results.suggestedRarity === 'Rare' ? 'text-blue-400' :
-                    results.suggestedRarity === 'Very Rare' ? 'text-purple-400' :
-                    results.suggestedRarity === 'Legendary' ? 'text-orange-400' : 'text-white'
-                  }`}>
+                  <div className={`text-2xl font-bold ${getRarityColorClass(results.suggestedRarity)}`}>
                     {results.suggestedRarity}
                   </div>
                 </div>
@@ -950,19 +960,14 @@ export default function CalculatorPage() {
                             {/* Side-by-Side Battle Cards */}
                             <div className="grid grid-cols-2">
                               {/* LEFT: Your Item (Deep Blue) */}
-                              <div className="bg-blue-950/50 border-r border-slate-600 p-4">
+                              <div className="bg-blue-950/50 border-r border-slate-600 p-4 relative">
+                                {attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-blue-800/50">
                                   <span className="text-blue-400 text-lg">⚔️</span>
                                   <span className="text-blue-300 font-bold">{itemName || 'YOUR ITEM'}</span>
                                 </div>
                                 <div className="text-sm text-blue-200 mb-3">
-                                  <span className="font-mono"><AnimatedNumber value={results.combatScore} /> pts</span> • <span className={`font-semibold ${
-                                    results.suggestedRarity === 'Common' ? 'text-slate-300' :
-                                    results.suggestedRarity === 'Uncommon' ? 'text-green-400' :
-                                    results.suggestedRarity === 'Rare' ? 'text-blue-400' :
-                                    results.suggestedRarity === 'Very Rare' ? 'text-purple-400' :
-                                    results.suggestedRarity === 'Legendary' ? 'text-orange-400' : 'text-blue-400'
-                                  }`}>{results.suggestedRarity}</span>
+                                  <span className="font-mono"><AnimatedNumber value={results.combatScore} /> pts</span> • <span className={`font-semibold ${getRarityColorClass(results.suggestedRarity)}`}>{results.suggestedRarity}</span>
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
                                   <div className="text-blue-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
@@ -996,7 +1001,8 @@ export default function CalculatorPage() {
                               </div>
 
                               {/* RIGHT: Reference Item (Vibrant Emerald) */}
-                              <div className="bg-emerald-950/50 p-4">
+                              <div className="bg-emerald-950/50 p-4 relative">
+                                {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-emerald-800/50">
                                   <span className="text-emerald-400 text-lg">{getItemEmoji(anchor.name)}</span>
                                   <span className="text-emerald-300 font-bold">#{index + 1} {anchor.name}</span>
@@ -1005,14 +1011,7 @@ export default function CalculatorPage() {
                                   {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
                                 </div>
                                 <div className="text-sm text-emerald-200 mb-3">
-                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${
-                                    anchor.rarity === 'Common' ? 'text-slate-300' :
-                                    anchor.rarity === 'Uncommon' ? 'text-green-400' :
-                                    anchor.rarity === 'Rare' ? 'text-blue-400' :
-                                    anchor.rarity === 'Very Rare' ? 'text-purple-400' :
-                                    anchor.rarity === 'Legendary' ? 'text-orange-400' : 'text-emerald-400'
-                                  }`}>{anchor.rarity}</span>
-                                  {anchor.attunement && <span className="text-emerald-600 ml-1">• Attunement</span>}
+                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${getRarityColorClass(anchor.rarity)}`}>{capitalizeRarity(anchor.rarity)}</span>
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
                                   <div className="text-emerald-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
