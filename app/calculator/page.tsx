@@ -889,83 +889,55 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Anchor Items - References for Comparison */}
+                {/* HEAD TO HEAD - Battle Card Comparison */}
                 {topAnchors.length > 0 && (
                   <div className="border-t border-slate-700 pt-4">
-                    <div className="text-emerald-400 font-bold mb-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">⚓</span>
-                        <span>ANCHOR ITEMS</span>
+                    {/* Section Header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-white font-bold text-lg flex items-center gap-2">
+                        <span>⚔️</span>
+                        <span>HEAD TO HEAD</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setNumAnchorsToShow(Math.max(1, numAnchorsToShow - 1))}
                           disabled={numAnchorsToShow <= 1}
-                          className="w-6 h-6 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white text-sm"
+                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
                         >
                           −
                         </button>
-                        <span className="text-xs text-slate-400 w-3 text-center">{numAnchorsToShow}</span>
+                        <span className="text-sm text-slate-300 font-mono w-4 text-center">{numAnchorsToShow}</span>
                         <button
                           onClick={() => setNumAnchorsToShow(Math.min(3, numAnchorsToShow + 1))}
                           disabled={numAnchorsToShow >= 3}
-                          className="w-6 h-6 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white text-sm"
+                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
                         >
                           +
                         </button>
                       </div>
                     </div>
 
-                    <div className="space-y-6">
+                    {/* Stacked Anchor Comparisons */}
+                    <div className="space-y-4">
                       {topAnchors.slice(0, numAnchorsToShow).map((anchorData, index) => {
                         const { anchor, anchorScore, comparison } = anchorData;
                         const warnings = getWarningIndicator(anchor.name);
 
-                        // Check if anchor is unbalanced
-                        const isUnbalanced = anchor.rarity && (() => {
-                          const rarityOrder = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
-                          const anchorCalculatedRarity = anchorScore < 1 ? 'Common' :
-                            anchorScore < 2 ? 'Uncommon' :
-                            anchorScore < 3 ? 'Rare' :
-                            anchorScore < 4 ? 'Very Rare' : 'Legendary';
-                          const idx1 = rarityOrder.findIndex(r => r.toLowerCase() === anchorCalculatedRarity.toLowerCase());
-                          const idx2 = rarityOrder.findIndex(r => r.toLowerCase() === anchor.rarity!.toLowerCase());
-                          return Math.abs(idx1 - idx2) >= 2;
-                        })();
-
                         return (
-                          <div key={index} className={`${index > 0 ? 'border-t border-slate-700 pt-6 mt-6' : ''} bg-slate-800/30 rounded-lg p-4`}>
-                            {/* Anchor Header */}
-                            <div className="mb-4 pb-3 border-b border-slate-700/50">
-                              <div className="text-white font-semibold text-base flex items-center gap-1 mb-1">
-                                <span className="text-emerald-400 text-xs font-mono">#{index + 1}</span>
-                                <span>{anchor.name}</span>
-                                {warnings.hasNumerical && <span title="Numerical edge case" className="text-base">{warnings.numericalIcon}</span>}
-                                {warnings.hasSpecial && <span title="Special mechanics" className="text-base">{warnings.specialIcon}</span>}
-                                {warnings.hasCommunity && <span title="Community note" className="text-base">{warnings.communityIcon}</span>}
-                              </div>
-                              <div className="text-xs text-slate-400">
-                                <span className="text-emerald-300">{anchor.rarity?.toUpperCase()}</span>
-                                {' • '}
-                                <span className="font-mono">{anchorScore.toFixed(1)} pts</span>
-                                {anchor.attunement && ' • Attunement'}
-                              </div>
-                            </div>
-
-                            {/* Side-by-Side Comparison */}
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                              {/* Left Column: Your Item */}
-                              <div className="bg-blue-900/10 border border-blue-700/30 rounded p-3">
-                                <div className="text-blue-300 text-xs font-semibold mb-2 flex items-center gap-1">
-                                  <span>⚔️</span>
-                                  <span>YOUR ITEM</span>
+                          <div key={index} className="rounded-lg overflow-hidden border border-slate-600">
+                            {/* Side-by-Side Battle Cards */}
+                            <div className="grid grid-cols-2">
+                              {/* LEFT: Your Item (Deep Blue) */}
+                              <div className="bg-blue-950/50 border-r border-slate-600 p-4">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-blue-800/50">
+                                  <span className="text-blue-400 text-lg">⚔️</span>
+                                  <span className="text-blue-300 font-bold">YOUR ITEM</span>
                                 </div>
-                                <div className="text-[10px] text-slate-400 mb-2">
-                                  <span className="font-mono">{results.combatScore.toFixed(1)} pts</span>
-                                  {' • '}
-                                  <span>{results.suggestedRarity}</span>
+                                <div className="text-sm text-blue-200 font-mono mb-3">
+                                  {results.combatScore.toFixed(1)} pts • <span className="text-blue-400">{results.suggestedRarity}</span>
                                 </div>
-                                <div className="text-xs text-slate-300 space-y-1">
+                                <div className="text-xs text-slate-300 space-y-1.5">
+                                  <div className="text-blue-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
                                   {enhancement > 0 && <div>+{enhancement} enhancement</div>}
                                   {damageBonus && (
                                     <div>
@@ -984,45 +956,39 @@ export default function CalculatorPage() {
                                     <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
                                   )}
                                   {flight && (
-                                    <div>
-                                      Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}
-                                    </div>
+                                    <div>Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}</div>
                                   )}
-                                  {resistances.length > 0 && (
-                                    <div>Resist: {resistances.join(', ')}</div>
-                                  )}
-                                  {abilities.length > 0 && (
-                                    <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>
-                                  )}
-                                  {maxCharges > 0 && (
-                                    <div>{maxCharges} max charges</div>
-                                  )}
+                                  {resistances.length > 0 && <div>Resist: {resistances.join(', ')}</div>}
+                                  {abilities.length > 0 && <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>}
+                                  {maxCharges > 0 && <div>{maxCharges} max charges</div>}
                                   {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !flight && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
-                                    <div className="text-slate-500 italic text-[10px]">No combat features</div>
+                                    <div className="text-slate-500 italic">No combat features</div>
                                   )}
                                 </div>
                               </div>
 
-                              {/* Right Column: Anchor Item */}
-                              <div className="bg-emerald-900/10 border border-emerald-700/30 rounded p-3">
-                                <div className="text-emerald-300 text-xs font-semibold mb-2 flex items-center gap-1">
-                                  <span>⚓</span>
-                                  <span>ANCHOR</span>
+                              {/* RIGHT: Anchor Item (Vibrant Emerald) */}
+                              <div className="bg-emerald-950/50 p-4">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-emerald-800/50">
+                                  <span className="text-emerald-400 text-lg">⚓</span>
+                                  <span className="text-emerald-300 font-bold">#{index + 1} {anchor.name}</span>
+                                  {warnings.hasSpecial && <span title="Special mechanics" className="text-sm">⭐</span>}
+                                  {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}
+                                  {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
                                 </div>
-                                <div className="text-[10px] text-slate-400 mb-2">
-                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span>
-                                  {' • '}
-                                  <span>{anchor.rarity}</span>
+                                <div className="text-sm text-emerald-200 font-mono mb-3">
+                                  {anchorScore.toFixed(1)} pts • <span className="text-emerald-400">{anchor.rarity}</span>
+                                  {anchor.attunement && <span className="text-emerald-600 ml-1">• Attunement</span>}
                                 </div>
-                                <div className="text-xs text-slate-300 space-y-1">
-                                  {anchor.combat.enhancement > 0 && (
-                                    <div>+{anchor.combat.enhancement} enhancement</div>
-                                  )}
+                                <div className="text-xs text-slate-300 space-y-1.5">
+                                  <div className="text-emerald-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
+                                  {anchor.combat.enhancement > 0 && <div>+{anchor.combat.enhancement} enhancement</div>}
                                   {anchor.combat.damageBonus && (
                                     <div>
                                       {anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}
                                       {anchor.combat.damageBonus.frequency === 'per-turn' && <span className="text-yellow-400 text-[10px] ml-1">(per-turn)</span>}
                                       {anchor.combat.damageBonus.conditional && <span className="text-yellow-400 text-[10px] ml-1">(conditional)</span>}
+                                      {anchor.combat.damageBonus.conditionalType && <span className="text-yellow-400 text-[10px] ml-1">({anchor.combat.damageBonus.conditionalType})</span>}
                                       {anchor.combat.damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
                                     </div>
                                   )}
@@ -1035,96 +1001,69 @@ export default function CalculatorPage() {
                                     <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
                                   )}
                                   {anchor.combat.flight && (
-                                    <div>
-                                      Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}
-                                    </div>
+                                    <div>Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}</div>
                                   )}
                                   {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
                                     <div>Resist: {anchor.combat.resistances.join(', ')}</div>
                                   )}
-                                  {anchor.combat.charges && (
-                                    <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
-                                  )}
+                                  {anchor.combat.charges && <div>{anchor.combat.charges.length} spell charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>}
                                   {anchor.combat.advantage && anchor.combat.advantage.length > 0 && (
-                                    <div>Adv: {anchor.combat.advantage.join(', ')}</div>
+                                    <div>Advantage: {anchor.combat.advantage.join(', ')}</div>
                                   )}
-                                  {anchor.combat.reactionAC && (
-                                    <div>+{anchor.combat.reactionAC.bonus} AC (reaction)</div>
-                                  )}
+                                  {anchor.combat.reactionAC && <div>+{anchor.combat.reactionAC.bonus} AC (reaction)</div>}
                                   {anchor.combat.bonusActionDamage && (
                                     <div>Bash: {anchor.combat.bonusActionDamage.dice}{anchor.combat.bonusActionDamage.flatBonus ? `+${anchor.combat.bonusActionDamage.flatBonus}` : ''} {anchor.combat.bonusActionDamage.type}</div>
                                   )}
                                   {anchor.combat.conditionInfliction && (
                                     <div>{anchor.combat.conditionInfliction.condition} (DC {anchor.combat.conditionInfliction.dc})</div>
                                   )}
-                                  {anchor.combat.damageTypeOverride && (
-                                    <div>Type: {anchor.combat.damageTypeOverride}</div>
-                                  )}
-                                  {anchor.combat.handsFreeDef && (
-                                    <div>Hands-free defense</div>
-                                  )}
-                                  {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && !anchor.combat.advantage && !anchor.combat.reactionAC && !anchor.combat.bonusActionDamage && !anchor.combat.conditionInfliction && !anchor.combat.damageTypeOverride && !anchor.combat.handsFreeDef && (
-                                    <div className="text-slate-500 italic text-[10px]">No combat features</div>
+                                  {anchor.combat.damageTypeOverride && <div>Damage type: {anchor.combat.damageTypeOverride}</div>}
+                                  {anchor.combat.handsFreeDef && <div>Hands-free defense</div>}
+                                  {/* Special Mechanics inline badge */}
+                                  {(warnings.hasSpecial || warnings.hasNumerical || warnings.hasCommunity) && (
+                                    <div className="mt-2 pt-2 border-t border-emerald-800/30">
+                                      <div className="text-[10px] text-purple-300 italic">
+                                        {warnings.hasSpecial && '⭐ '}
+                                        {warnings.hasNumerical && '🔢 '}
+                                        {warnings.hasCommunity && '💬 '}
+                                        {anchor.description || warnings.explanation}
+                                      </div>
+                                    </div>
                                   )}
                                 </div>
                               </div>
                             </div>
 
-                            {/* Warning explanation for flagged items */}
-                            {(warnings.hasNumerical || warnings.hasSpecial || warnings.hasCommunity) && (
-                              <div className={`mb-4 rounded p-2 ${
-                                warnings.hasNumerical
-                                  ? 'bg-blue-900/20 border border-blue-700/30'
-                                  : warnings.hasSpecial
-                                  ? 'bg-purple-900/20 border border-purple-700/30'
-                                  : 'bg-slate-900/20 border border-slate-700/30'
-                              }`}>
-                                <div className={`text-xs italic ${
-                                  warnings.hasNumerical ? 'text-blue-300' : warnings.hasSpecial ? 'text-purple-300' : 'text-slate-300'
-                                }`}>
-                                  {warnings.hasNumerical && '🔢 '}
-                                  {warnings.hasSpecial && '⭐ '}
-                                  {warnings.hasCommunity && '💬 '}
-                                  {anchor.description || warnings.explanation}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Diff Section */}
-                            <div className="bg-slate-900/50 rounded p-3 border border-slate-700/50">
-                              <div className="text-xs font-semibold text-slate-300 mb-2">
-                                📊 DIFFERENCES
-                              </div>
-                              <div className="text-xs space-y-1">
-                                {/* Power Comparison */}
+                            {/* DIFFERENCES Bar (Full Width Bottom) */}
+                            <div className="bg-slate-900 border-t border-slate-600 px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <span className="text-slate-400 text-xs font-semibold uppercase tracking-wide">Δ</span>
                                 {comparison.type === 'stronger' && (
-                                  <div className="text-yellow-400 font-medium">
+                                  <span className="text-yellow-400 text-sm font-medium">
                                     ⬆️ Your item is {comparison.scoreDifference.toFixed(1)} pts stronger
-                                  </div>
+                                  </span>
                                 )}
                                 {comparison.type === 'weaker' && (
-                                  <div className="text-blue-400 font-medium">
+                                  <span className="text-blue-400 text-sm font-medium">
                                     ⬇️ Your item is {Math.abs(comparison.scoreDifference).toFixed(1)} pts weaker
-                                  </div>
+                                  </span>
                                 )}
                                 {comparison.type === 'equal' && (
-                                  <div className="text-emerald-400 font-medium">
+                                  <span className="text-emerald-400 text-sm font-medium">
                                     ≈ Equal power level
-                                  </div>
-                                )}
-
-                                {/* Feature Differences */}
-                                {comparison.details.length > 0 && (
-                                  <div className="mt-2 pt-2 border-t border-slate-700/50 text-slate-400 space-y-1">
-                                    {comparison.details.map((detail, idx) => (
-                                      <div key={idx} className="flex items-start gap-1">
-                                        <span className="text-slate-500">•</span>
-                                        <span>{detail}</span>
-                                      </div>
-                                    ))}
-                                  </div>
+                                  </span>
                                 )}
                               </div>
+                              {comparison.details.length > 0 && (
+                                <div className="mt-2 text-xs text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
+                                  {comparison.details.slice(0, 4).map((detail, idx) => (
+                                    <span key={idx}>• {detail}</span>
+                                  ))}
+                                  {comparison.details.length > 4 && (
+                                    <span className="text-slate-600">+{comparison.details.length - 4} more</span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
