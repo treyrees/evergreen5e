@@ -358,7 +358,7 @@
   },
   {
     "name": "Trident of Fish Command",
-    "baseItem": "longsword",
+    "baseItem": "trident",
     "rarity": "uncommon",
     "attunement": true,
     "combat": {

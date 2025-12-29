@@ -8,7 +8,7 @@
  * Mathematical mismatches: Items in SRD where our calculation differs by 2+ tiers
  * These are items where the combat math doesn't match the stated rarity
  * Updated with new features: abilityScoreSetter, flight, and manual overrides
- * Current accuracy: 58.9% exact matches, 3.6% off by 2+ tiers (2 items out of 56)
+ * Current accuracy: 46.5% exact matches, 4.7% off by 2+ tiers (2 items out of 43)
  */
 export const MATHEMATICAL_MISMATCHES = new Set([
   'Vicious Weapon',            // Rare → Common (0 pts) - nat 20 only damage not valued
@@ -28,17 +28,14 @@ export const COMMUNITY_MISMATCHES = new Set([
   'Broom of Flying',           // Uncommon, should be Rare - unlimited flight, no attunement
   'Winged Boots',              // Uncommon, should be Rare - "greatest uncommon item in DMG"
   'Ring of Spell Storing',     // Rare - considered very powerful, breaks action economy
-  'Bag of Holding',            // Uncommon - trivializes encumbrance, high utility
   'Cloak of Displacement',     // Rare - disadvantage on all attacks is very strong
   'Headband of Intellect',     // Uncommon - sets INT to 19, massive for non-casters
   'Gauntlets of Ogre Power',   // Uncommon - sets STR to 19, massive for non-martials
   'Amulet of Health',          // Rare - sets CON to 19, but also flagged mathematically
 
-  // Underpowered for rarity
-  'Potion of Flying',          // Very Rare - 1 hour flight, worse than uncommon options
-  'Rope of Entanglement',      // Rare - "not among the most impressive"
+  // Underpowered for rarity (or has special mechanics not captured in math)
+  'Vorpal Sword',              // Legendary - decapitation ability not modeled, shows as Very Rare
   'Wings of Flying',           // Rare - time limited, inferior to Broom of Flying
-  'Mace of Terror',            // Rare - fear effect with saves, limited uses
   'Trident of Fish Command',   // Uncommon - very niche, only controls fish
 ]);
 
