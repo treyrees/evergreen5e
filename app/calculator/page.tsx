@@ -874,7 +874,7 @@ export default function CalculatorPage() {
 
           {/* Right Column - Results */}
           <div className="lg:sticky lg:top-8 h-fit">
-            <div className="relative bg-slate-900 text-slate-100 rounded-lg shadow-xl p-6 font-mono text-sm">
+            <div className="relative bg-slate-900 text-slate-100 rounded-lg shadow-xl p-6 text-sm">
               {/* Blur overlay when no attributes selected */}
               {!hasSelectedAttributes && (
                 <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
@@ -900,9 +900,14 @@ export default function CalculatorPage() {
                       <AnimatedNumber value={results.combatScore} /> pts
                     </span>
                   </div>
-                  <div className="text-2xl font-bold text-white relative inline-block">
-                    <span className="relative z-10">{results.suggestedRarity}</span>
-                    <span className="absolute inset-0 rarity-shimmer rounded" />
+                  <div className={`text-2xl font-bold ${
+                    results.suggestedRarity === 'Common' ? 'text-slate-200' :
+                    results.suggestedRarity === 'Uncommon' ? 'text-green-400' :
+                    results.suggestedRarity === 'Rare' ? 'text-blue-400' :
+                    results.suggestedRarity === 'Very Rare' ? 'text-purple-400' :
+                    results.suggestedRarity === 'Legendary' ? 'text-orange-400' : 'text-white'
+                  }`}>
+                    {results.suggestedRarity}
                   </div>
                 </div>
 
@@ -950,8 +955,14 @@ export default function CalculatorPage() {
                                   <span className="text-blue-400 text-lg">⚔️</span>
                                   <span className="text-blue-300 font-bold">{itemName || 'YOUR ITEM'}</span>
                                 </div>
-                                <div className="text-sm text-blue-200 font-mono mb-3">
-                                  <AnimatedNumber value={results.combatScore} /> pts • <span className="text-blue-400">{results.suggestedRarity}</span>
+                                <div className="text-sm text-blue-200 mb-3">
+                                  <span className="font-mono"><AnimatedNumber value={results.combatScore} /> pts</span> • <span className={`font-semibold ${
+                                    results.suggestedRarity === 'Common' ? 'text-slate-300' :
+                                    results.suggestedRarity === 'Uncommon' ? 'text-green-400' :
+                                    results.suggestedRarity === 'Rare' ? 'text-blue-400' :
+                                    results.suggestedRarity === 'Very Rare' ? 'text-purple-400' :
+                                    results.suggestedRarity === 'Legendary' ? 'text-orange-400' : 'text-blue-400'
+                                  }`}>{results.suggestedRarity}</span>
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
                                   <div className="text-blue-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
@@ -993,8 +1004,14 @@ export default function CalculatorPage() {
                                   {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}
                                   {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
                                 </div>
-                                <div className="text-sm text-emerald-200 font-mono mb-3">
-                                  {anchorScore.toFixed(1)} pts • <span className="text-emerald-400">{anchor.rarity}</span>
+                                <div className="text-sm text-emerald-200 mb-3">
+                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${
+                                    anchor.rarity === 'Common' ? 'text-slate-300' :
+                                    anchor.rarity === 'Uncommon' ? 'text-green-400' :
+                                    anchor.rarity === 'Rare' ? 'text-blue-400' :
+                                    anchor.rarity === 'Very Rare' ? 'text-purple-400' :
+                                    anchor.rarity === 'Legendary' ? 'text-orange-400' : 'text-emerald-400'
+                                  }`}>{anchor.rarity}</span>
                                   {anchor.attunement && <span className="text-emerald-600 ml-1">• Attunement</span>}
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
@@ -1057,12 +1074,12 @@ export default function CalculatorPage() {
                                 <span className="text-slate-400 text-xs font-semibold uppercase tracking-wide">Δ</span>
                                 {comparison.type === 'stronger' && (
                                   <span className="text-yellow-400 text-sm font-medium">
-                                    ⬆️ Your item is {comparison.scoreDifference.toFixed(1)} pts stronger
+                                    ⬆️ Your item is <span className="font-mono">{comparison.scoreDifference.toFixed(1)}</span> pts stronger
                                   </span>
                                 )}
                                 {comparison.type === 'weaker' && (
                                   <span className="text-blue-400 text-sm font-medium">
-                                    ⬇️ Your item is {Math.abs(comparison.scoreDifference).toFixed(1)} pts weaker
+                                    ⬇️ Your item is <span className="font-mono">{Math.abs(comparison.scoreDifference).toFixed(1)}</span> pts weaker
                                   </span>
                                 )}
                                 {comparison.type === 'equal' && (
