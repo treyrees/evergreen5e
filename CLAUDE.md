@@ -60,7 +60,7 @@ Score proximity gating adds penalties:
 ### 2024 SRD Upgrade (Latest)
 - **Updated Vicious Weapon to 2024 SRD**: Now correctly modeled as +2d6 on every hit (not crit-only like 2014). Calculates as 2.0 pts (Rare) ✓
 - **Fixed physical damage type multipliers**: Magic weapons deal magical slashing/piercing/bludgeoning which bypasses "resistance to non-magical attacks". Changed from 0.85× to 1.0×.
-- **Accuracy now 96%**: Up from 84%. Only 2 items remain off by 1 tier (both known community notes).
+- **Accuracy now 98%**: Up from 84%. Only 1 item remains off by 1 tier (Cloak of Protection - known WotC imbalance).
 
 ### Balance Formula Improvements
 - **Fixed Wish/high-level spell scoring**: Charge pool abilities now use the same non-linear spell level scaling as legacy charges (Level 9 = 20 effective value, not 9). A "Wish once per day" glove now correctly scores as Legendary (~4.0 pts) instead of Uncommon (~1.8 pts).
@@ -97,6 +97,6 @@ There will be TypeScript errors related to Google Fonts (next/font/google). **Do
 
 The calculator prioritizes:
 1. **Transparency** - All formulas are visible in the Formula Details section
-2. **Accuracy** - 96% match rate against official SRD item rarities (2024 SRD)
+2. **Accuracy** - 98% match rate against official SRD item rarities (2024 SRD)
 3. **Honesty** - Items with known WotC balance oddities are flagged with Community Notes
 4. **Client-side** - All logic runs in-browser with no external dependencies
