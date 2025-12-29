@@ -58,6 +58,7 @@ export const COMMUNITY_NOTES = new Set([
 
   // Official seems too HIGH (item is weaker than rarity suggests)
   'Wings of Flying',           // Calc 1.0 pts (Uncommon) but official Rare - limited 1hr flight is weak
+  'Vicious Weapon',            // Calc 0.1 pts (Common) but official Rare - 5% proc is ~3x weaker than +1
 ]);
 
 /**
@@ -135,6 +136,9 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Wings of Flying') {
     return 'Limited flight (1 hr/day). Calc: 1.0 pts (Uncommon), official: Rare. Community consensus: weak for Rare tier.';
+  }
+  if (itemName === 'Vicious Weapon') {
+    return '+2d6 on nat 20 only = 0.1 pts (Common). Official: Rare. At 5% crit rate, this averages +0.35 damage/hit—roughly 3× weaker than a +1 weapon.';
   }
 
   return '';
