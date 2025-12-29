@@ -36,12 +36,12 @@ Rarity thresholds (in points):
 
 Key scoring values:
 - Enhancement bonus: 1.0 pts per +1
-- AC bonus: 1.0 pts per +1
+- AC bonus: 1.0 pts per +1 on armor/shields, **1.5 pts per +1 on other items** (stacks with armor)
 - Saving throw bonus: 1.0 pts per +1 (all saves)
 - Damage dice: Varies by die size and damage type
 - Conditional damage: Multiplied by frequency (creature-common: 0.6×, creature-rare: 0.4×, sworn-enemy: 0.6×, environmental: 0.25×)
 - Vicious damage: ×0.05 (5% crit proc rate)
-- Charged abilities: Blended burst/sustained scoring based on spell level
+- Charged abilities: Blended burst/sustained scoring, high-level spells scale non-linearly (Lv6→7, Lv7→10, Lv8→14, Lv9→20 effective value)
 
 ### Similarity Algorithm
 
@@ -57,6 +57,10 @@ Score proximity gating adds penalties:
 - >2.5 pts: +6 priority penalty
 
 ## Recent Work (December 2024)
+
+### Balance Formula Improvements (Latest)
+- **Fixed Wish/high-level spell scoring**: Charge pool abilities now use the same non-linear spell level scaling as legacy charges (Level 9 = 20 effective value, not 9). A "Wish once per day" glove now correctly scores as Legendary (~4.0 pts) instead of Uncommon (~1.8 pts).
+- **AC stacking multiplier**: AC bonuses on non-armor items (weapons, rings, cloaks, etc.) now score at 1.5× because they stack with armor and break bounded accuracy. Example: +2 AC on a ring = 3.0 pts instead of 2.0 pts.
 
 ### UI Improvements
 - Renamed "HEAD TO HEAD" section to "What's Similar?"

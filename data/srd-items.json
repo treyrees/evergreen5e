@@ -230,6 +230,8 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "5384-defender",
+    "overrideScore": 5.25,
+    "description": "Transfer bonus: You can shift any amount of the +3 from attack/damage to AC each turn, but cannot have both simultaneously. Score reduced to 0.7× combined value.",
     "combat": {
       "enhancement": 3,
       "acBonus": 3

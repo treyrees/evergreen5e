@@ -1299,7 +1299,8 @@ export default function CalculatorPage() {
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Base Values:</div>
                       <div>• Enhancement: 1 point per +1</div>
-                      <div>• AC Bonus: 1 point per +1</div>
+                      <div>• AC Bonus: 1 pt/+1 on armor/shields, <span className="text-amber-400">1.5 pt/+1 on other items</span></div>
+                      <div className="text-slate-500 pl-2 text-[10px]">(Non-armor AC stacks with armor, breaking bounded accuracy)</div>
                       <div>• Saving Throw Bonus: 1 point per +1</div>
                     </div>
 

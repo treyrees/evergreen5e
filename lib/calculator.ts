@@ -206,14 +206,21 @@ export function getItemScore(item: Partial<MagicItem>): number {
   if (item.overrideScore !== undefined) {
     return item.overrideScore;
   }
-  return item.combat ? calculateCombatScore(item.combat) : 0;
+  return item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
 }
 
 /**
  * Calculate combat power score from combat features
+ * @param combat - The combat features to score
+ * @param baseItem - Optional base item type (used for AC stacking calculations)
  */
-export function calculateCombatScore(combat: CombatFeatures): number {
+export function calculateCombatScore(combat: CombatFeatures, baseItem?: string): number {
   let score = 0;
+
+  // Determine if this is an armor/shield item (AC doesn't stack) or other (AC stacks)
+  // AC on non-armor items is more valuable because it stacks with armor+shield
+  const isArmorOrShield = baseItem && ['armor (light)', 'armor (medium)', 'armor (heavy)', 'shield'].includes(baseItem);
+  const acStackingMultiplier = isArmorOrShield ? 1.0 : 1.5;
 
   // Enhancement bonus (with optional "Sometimes" multiplier)
   const enhancementMultiplier = combat.enhancementMultiplier ?? 1.0;
@@ -264,9 +271,11 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   }
 
   // AC bonus (with optional "Sometimes" multiplier)
+  // AC on non-armor items (weapons, rings, cloaks) is worth more because it stacks with armor
+  // This reflects bounded accuracy - stacking AC from multiple sources breaks encounter math
   if (combat.acBonus) {
     const acMultiplier = combat.acBonusMultiplier ?? 1.0;
-    score += combat.acBonus * acMultiplier;
+    score += combat.acBonus * acMultiplier * acStackingMultiplier;
   }
 
   // Saving throw bonus (with optional "Sometimes" multiplier)
@@ -506,6 +515,22 @@ export function calculateCombatScore(combat: CombatFeatures): number {
 
   // Charge pool (new intuitive format)
   if (combat.chargePool && combat.chargePool.abilities.length > 0) {
+    // Effective spell level values - high level spells are exponentially more valuable
+    // Same scale as legacy charges format for consistency
+    // Calibrated so Wish (9th, ~1 use) contributes ~4.0 pts toward Legendary
+    const CHARGE_POOL_SPELL_VALUES: Record<number, number> = {
+      0: 0.1,   // Cantrips
+      1: 1,     // Magic Missile, Shield
+      2: 2,     // Scorching Ray, Hold Person
+      3: 3,     // Fireball, Lightning Bolt
+      4: 4,     // Polymorph, Wall of Fire
+      5: 5,     // Cone of Cold, Hold Monster
+      6: 7,     // Chain Lightning, Disintegrate (1.17× level)
+      7: 10,    // Finger of Death, Plane Shift (1.43× level)
+      8: 14,    // Dominate Monster, Power Word Stun (1.75× level)
+      9: 20,    // Wish, Meteor Swarm (2.22× level) - campaign-defining
+    };
+
     // Calculate sustainable daily charges (what you can expect to use each day on average)
     // Assumes 2 short rests per adventuring day (standard D&D assumption)
     const dailyRecharge =
@@ -531,10 +556,13 @@ export function calculateCombatScore(combat: CombatFeatures): number {
         const burstWeight = Math.min(0.5, ability.spellLevel * 0.15);
         const effectiveUses = sustainedUses * (1 - burstWeight) + burstUses * burstWeight;
 
+        // Use effective spell level (high-level spells scale non-linearly)
+        const effectiveLevel = CHARGE_POOL_SPELL_VALUES[ability.spellLevel] ?? ability.spellLevel;
+
         // Multiplier tuned to balance charge-based items appropriately
         // Calibrated so Wand of Fireballs (level 3, ~4 uses/day) ≈ 2.4 pts
         const multiplier = 0.20;
-        score += ability.spellLevel * effectiveUses * multiplier;
+        score += effectiveLevel * effectiveUses * multiplier;
       }
     }
   }
@@ -612,7 +640,7 @@ export function findAnchorItem(
     return { anchor: null, anchorScore: 0, comparison: null };
   }
 
-  const userScore = calculateCombatScore(userItem.combat);
+  const userScore = calculateCombatScore(userItem.combat, userItem.baseItem);
   const allItems = srdItems as MagicItem[];
   const userBroadCategory = userItem.baseItem ? getBroadCategory(userItem.baseItem) : 'trinket';
   const userAttunement = userItem.attunement || false;
@@ -664,7 +692,7 @@ export function findAnchorItem(
   }
 
   // Calculate detailed comparison
-  const anchorScore = calculateCombatScore(anchor.combat);
+  const anchorScore = calculateCombatScore(anchor.combat, anchor.baseItem);
   const scoreDiff = userScore - anchorScore;
   const comparison = compareToAnchor(userItem, anchor, scoreDiff);
 
@@ -701,11 +729,11 @@ export function findTopAnchorItems(
     return [];
   }
 
-  const userScore = calculateCombatScore(userItem.combat);
+  const userScore = calculateCombatScore(userItem.combat, userItem.baseItem);
   const allItems = srdItems as MagicItem[];
   const userBroadCategory = userItem.baseItem ? getBroadCategory(userItem.baseItem) : 'trinket';
   const userAttunement = userItem.attunement || false;
-  const userRarity = getSuggestedRarity({ combat: userItem.combat }).suggestedRarity;
+  const userRarity = getSuggestedRarity({ combat: userItem.combat, baseItem: userItem.baseItem }).suggestedRarity;
   const userRarityTier = getRarityTierIndex(userRarity);
 
   // Check if this is a "simple" item (only +N enhancement/AC, no attunement)
@@ -825,7 +853,7 @@ function findClosestInCandidates(
   let smallestDiff = Infinity;
 
   for (const item of candidates) {
-    const itemScore = calculateCombatScore(item.combat);
+    const itemScore = calculateCombatScore(item.combat, item.baseItem);
     const diff = Math.abs(itemScore - targetScore);
 
     if (diff < smallestDiff) {
@@ -980,7 +1008,7 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   anchorComparison: AnchorComparison | null;
   anchorIsUnbalanced: boolean;
 } {
-  const combatScore = item.combat ? calculateCombatScore(item.combat) : 0;
+  const combatScore = item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
   const hasCombatFeatures = combatScore > 0;
   const combatRarity = scoreToRarity(combatScore, hasCombatFeatures);
   const ribbonCount = countRibbons(item.ribbons);
