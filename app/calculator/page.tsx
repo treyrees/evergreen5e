@@ -596,6 +596,35 @@ export default function CalculatorPage() {
                     For non-spell abilities, estimate equivalent spell level (0 for cantrip-like, 1-9 for leveled spells)
                   </p>
 
+                  {/* Collapsible Helper Guide */}
+                  <details className="mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md select-none">
+                      📖 How to Estimate Spell Levels
+                    </summary>
+                    <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2 border-t border-blue-200 dark:border-blue-800">
+                      <p className="font-semibold">
+                        Even if your ability isn't technically a spell, find a similar spell to estimate its power.
+                      </p>
+                      <div className="space-y-1.5">
+                        <div>
+                          <span className="font-semibold text-blue-700 dark:text-blue-300">Level 0 (Cantrip):</span> Minor effects, unlimited use. Tiny damage (1d6-1d10), simple utility.
+                        </div>
+                        <div>
+                          <span className="font-semibold text-emerald-700 dark:text-emerald-300">Level 3 Breakpoint:</span> First major power spike. Heavy damage (8d6 like Fireball), strong conditions, flight.
+                        </div>
+                        <div>
+                          <span className="font-semibold text-amber-700 dark:text-amber-300">Level 6 Breakpoint:</span> Devastating effects. Massive damage (10d6-12d6), powerful control, disintegration.
+                        </div>
+                        <div>
+                          <span className="font-semibold text-red-700 dark:text-red-300">Level 9 Breakpoint:</span> Reality-warping power. Meteor Swarm (40d6), Time Stop, Wish.
+                        </div>
+                      </div>
+                      <p className="pt-2 text-slate-600 dark:text-slate-400 italic border-t border-blue-200 dark:border-blue-700">
+                        Examples: Lightning bolt from sword? Level 3. Flames add 1d6 fire? Level 1. Item polymorphs self? Level 4.
+                      </p>
+                    </div>
+                  </details>
+
                   {/* Charge Pool Configuration */}
                   {(maxCharges > 0 || chargesPerShortRest > 0 || chargesPerLongRest > 0 || abilities.length > 0) && (
                     <div className="mb-4">
