@@ -62,8 +62,7 @@ export const NUMERICAL_EDGE_CASES = new Set<string>([
  */
 export const COMMUNITY_NOTES = new Set([
   // Official seems too LOW (item is stronger than rarity suggests)
-  'Cloak of Protection',       // Calc 2.0 pts (Rare) but official Uncommon
-  'Sun Blade',                 // Calc 3.0+ pts (Very Rare) but official Rare - community agrees it's powerful
+  'Cloak of Protection',       // Calc 2.5 pts (Rare) but official Uncommon
 
   // Official seems too HIGH (item is weaker than rarity suggests)
   'Wand of Magic Missiles',    // Calc 0.8 pts (Common) but official Uncommon - auto-hit may justify bump
@@ -168,10 +167,7 @@ export function getItemExplanation(itemName: string): string {
   // === COMMUNITY NOTES (no override, just explanation) ===
 
   if (itemName === 'Cloak of Protection') {
-    return '+1 AC and +1 all saves = 2.0 pts (Rare). Official: Uncommon. WotC underpriced this—compare to Ring of Protection (identical, but Rare).';
-  }
-  if (itemName === 'Sun Blade') {
-    return 'Our math: ~3.0 pts (Very Rare). Official: Rare. +2 to hit, radiant damage, +1d8 vs undead. Community agrees it punches above its weight.';
+    return '+1 AC and +1 all saves = 2.5 pts (Rare). Official: Uncommon. WotC underpriced this—compare to Ring of Protection (identical, but Rare).';
   }
   if (itemName === 'Wand of Magic Missiles') {
     return '4× level 1 spell/day = 0.8 pts (Common). Official: Uncommon. Auto-hit reliability (no attack roll, no save) may justify the bump.';
