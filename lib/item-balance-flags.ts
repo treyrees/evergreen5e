@@ -27,10 +27,12 @@ export const SPECIAL_MECHANICS = new Set([
   // Defensive special mechanics
   'Gloves of Missile Snaring', // Deflect ranged attacks (reaction-based)
   'Shield of the Cavalier',    // Push/prone + Protective Field not quantified
+  'Cloak of Displacement',     // Disadvantage on attacks (conditional, turns off when hit)
 
   // Complex stacking or restrictions
   'Staff of Power',            // +2 to attack/damage/AC/saves (spellcaster-only attunement)
   'Defender',                  // Transfer bonus between attack/damage and AC
+  'Holy Avenger',              // Aura: advantage on saves vs spells for allies within 10ft
 
   // Bonus effects beyond base damage
   'Giant Slayer',              // Knockdown effect vs giants
@@ -138,6 +140,9 @@ export function getItemExplanation(itemName: string): string {
   if (itemName === 'Shield of the Cavalier') {
     return 'Math captures +2 AC and bonus action bash (3.2 pts). NOT quantified: push 10ft, prone if smaller, and Protective Field. Actual value likely higher.';
   }
+  if (itemName === 'Cloak of Displacement') {
+    return 'Grants disadvantage on attacks against you—turns off when hit, resets at start of your next turn. Similar to Blur spell but permanent/self-resetting. Override +2.0 targets Rare; effect is hard to quantify but roughly equivalent to +2-3 effective AC with a conditional downside.';
+  }
 
   // Complex effects (negative bonuses for limitations)
   if (itemName === 'Staff of Power') {
@@ -145,6 +150,9 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Defender') {
     return '+3 enhancement and +3 AC (7.5 pts base). Bonus -2.25 for transfer limitation—must split the bonus each turn, can\'t have both.';
+  }
+  if (itemName === 'Holy Avenger') {
+    return '+3 sword with 2d10 radiant vs fiends/undead (~5.0 pts base). Bonus +0.5 for 10-ft aura granting advantage on saves vs spells to you and all allies. Paladin-only attunement limits availability but doesn\'t reduce power for paladins. Community consensus: quintessential paladin weapon, appropriately Legendary.';
   }
 
   // Bonus effects beyond base damage
