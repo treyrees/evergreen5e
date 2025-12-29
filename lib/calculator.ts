@@ -358,10 +358,11 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     }
   }
 
-  // Damage resistances - each resistance is worth 2.0 points
-  // Increased from 1.5 to 2.0 to better match official rarities (Armor of Resistance, Frost Brand)
+  // Damage resistances - each resistance is worth 0.5 points
+  // A single resistance is situational (depends on enemy damage types)
+  // Multiple resistances stack in value but one alone is minor utility
   if (combat.resistances && combat.resistances.length > 0) {
-    score += combat.resistances.length * 2.0;
+    score += combat.resistances.length * 0.5;
   }
 
   // Spell charges (legacy format)
