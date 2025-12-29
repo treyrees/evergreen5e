@@ -122,11 +122,11 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "5397-vorpal-sword",
-    "overrideScore": 4.0,
+    "overrideBonus": 1.0,
     "combat": {
       "enhancement": 3
     },
-    "description": "Can decapitate creatures on natural 20 (DC 15 save). This instant-kill ability makes it far more powerful than its +3 enhancement suggests."
+    "description": "+3 sword (3.0 pts base). Override +1.0 for decapitation on nat 20—instant kill with no save for most creatures."
   },
   {
     "name": "Oathbow",
@@ -168,11 +168,11 @@
     "rarity": "very rare",
     "attunement": true,
     "dndbeyondSlug": "5394-nine-lives-stealer",
-    "overrideScore": 3.5,
+    "overrideBonus": 1.5,
     "combat": {
       "enhancement": 2
     },
-    "description": "+2 sword with 9 charges. On natural 20 vs creature with < 100 HP, DC 15 CON save or instant death. Save-or-die mechanic worth ~1.5 pts beyond the +2."
+    "description": "+2 sword (2.0 pts base). Override +1.5 for save-or-die on nat 20 vs creatures under 100 HP (DC 15 CON or instant death)."
   },
   {
     "name": "Animated Shield",
@@ -230,8 +230,8 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "5384-defender",
-    "overrideScore": 5.25,
-    "description": "Transfer bonus: You can shift any amount of the +3 from attack/damage to AC each turn, but cannot have both simultaneously. Score reduced to 0.7× combined value.",
+    "overrideBonus": -2.25,
+    "description": "+3 enhancement and +3 AC calculates as 7.5 pts, but you must split the bonus each turn—can't have both simultaneously. Override -2.25 (0.7× penalty) for transfer limitation.",
     "combat": {
       "enhancement": 3,
       "acBonus": 3
@@ -243,13 +243,13 @@
     "rarity": "very rare",
     "attunement": true,
     "dndbeyondSlug": "9229098-staff-of-power",
-    "overrideScore": 3.5,
+    "overrideBonus": -3.5,
     "combat": {
       "enhancement": 2,
       "acBonus": 2,
       "savingThrowBonus": 2
     },
-    "description": "+2 attack/damage, +2 AC, +2 saves calculates as 6.0 pts (Legendary), but requires attunement by a spellcaster (limits to ~40% of builds). Also has 20 charges for various spells. The sheer versatility and class restriction justify Very Rare."
+    "description": "+2 enhancement, +2 AC, +2 saves calculates as 7.0 pts (Legendary). Override -3.5 for spellcaster-only attunement (limits to ~40% of builds)."
   },
   {
     "name": "Wand of Fireballs",
@@ -311,11 +311,11 @@
     "rarity": "very rare",
     "attunement": true,
     "dndbeyondSlug": "4744-rod-of-absorption",
-    "overrideScore": 3.0,
+    "overrideBonus": 3.0,
     "combat": {
       "enhancement": 0
     },
-    "description": "Absorbs spells targeting you, negating effects and storing energy. Defensive utility estimated at 3.0 pts (Very Rare tier)."
+    "description": "No quantifiable combat stats. Override +3.0 for spell absorption—negates spells targeting you and stores energy for later use."
   },
   {
     "name": "Giant Slayer",
@@ -323,7 +323,7 @@
     "rarity": "rare",
     "attunement": false,
     "dndbeyondSlug": "5388-giant-slayer",
-    "overrideScore": 2.0,
+    "overrideBonus": 0.3,
     "combat": {
       "enhancement": 1,
       "damageBonus": {
@@ -332,7 +332,7 @@
         "conditionalType": "creature-rare"
       }
     },
-    "description": "Quantifiable: 1.7 pts (+1, conditional 2d6). Special Effect: +0.3 pts for DC 15 STR knockdown vs giants (prone). Total: 2.0 pts (Rare)."
+    "description": "+1 weapon with 2d6 conditional vs giants (~1.7 pts base). Override +0.3 for DC 15 STR knockdown (prone) vs giants."
   },
   {
     "name": "Dragon Slayer",
@@ -371,7 +371,7 @@
     "rarity": "rare",
     "attunement": true,
     "dndbeyondSlug": "4670-mace-of-disruption",
-    "overrideScore": 2.0,
+    "overrideBonus": 0.7,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -380,7 +380,7 @@
         "conditionalType": "creature-common"
       }
     },
-    "description": "Quantifiable: 1.3 pts (conditional 2d6 radiant). Special Effect: +0.7 pts for save-or-destroy vs undead/fiends under 25 HP. Total: 2.0 pts (Rare)."
+    "description": "2d6 radiant conditional vs undead/fiends (~1.3 pts base). Override +0.7 for save-or-destroy effect vs targets under 25 HP."
   },
   {
     "name": "Mace of Smiting",
@@ -388,7 +388,7 @@
     "rarity": "rare",
     "attunement": false,
     "dndbeyondSlug": "4671-mace-of-smiting",
-    "overrideScore": 2.0,
+    "overrideBonus": 0.3,
     "combat": {
       "enhancement": 1,
       "damageBonus": {
@@ -397,7 +397,7 @@
         "conditionalType": "creature-rare"
       }
     },
-    "description": "Quantifiable: 1.7 pts (+1, conditional 2d6). Special Effect: +0.3 pts for +4d6 on crit vs constructs and auto-destroy under 25 HP on crit. Total: 2.0 pts (Rare)."
+    "description": "+1 weapon with 2d6 conditional vs constructs (~1.7 pts base). Override +0.3 for +4d6 on crit vs constructs and auto-destroy under 25 HP."
   },
   {
     "name": "Trident of Fish Command",
@@ -466,11 +466,11 @@
     "rarity": "very rare",
     "attunement": true,
     "dndbeyondSlug": "5391-sword-of-sharpness",
-    "overrideScore": 3.25,
+    "overrideBonus": 0.25,
     "combat": {
       "enhancement": 3
     },
-    "description": "Modeled as +3 enhancement (3.0 pts) for the +4d6 on crit. Override +0.25 pts for limb-severing effect on nat 20 (non-quantifiable instant disable). Total: 3.25 pts (Very Rare)."
+    "description": "Modeled as +3 equivalent (3.0 pts base) for +4d6 on crit. Override +0.25 for limb-severing on nat 20—non-quantifiable instant disable."
   },
   {
     "name": "Boots of Speed",
@@ -478,11 +478,11 @@
     "rarity": "rare",
     "attunement": true,
     "dndbeyondSlug": "4589-boots-of-speed",
-    "overrideScore": 2.0,
+    "overrideBonus": 2.0,
     "combat": {
       "enhancement": 0
     },
-    "description": "Click heels to double walking speed for 10 min, bonus action. Opportunity attacks have disadvantage against you. Mobility advantage is powerful. Officially Rare."
+    "description": "No quantifiable combat stats. Override +2.0 for doubled movement speed and disadvantage on opportunity attacks against you."
   },
   {
     "name": "Gloves of Missile Snaring",
@@ -490,11 +490,11 @@
     "rarity": "uncommon",
     "attunement": true,
     "dndbeyondSlug": "4646-gloves-of-missile-snaring",
-    "overrideScore": 1.0,
+    "overrideBonus": 1.0,
     "combat": {
       "enhancement": 0
     },
-    "description": "Use reaction to reduce ranged weapon damage by 1d10+DEX, catch if reduced to 0. Situational defensive ability worth ~1.0 pt (Uncommon)."
+    "description": "No quantifiable combat stats. Override +1.0 for reaction to reduce ranged weapon damage by 1d10+DEX (catch if reduced to 0)."
   },
   {
     "name": "Amulet of Health",
@@ -589,11 +589,11 @@
     "rarity": "rare",
     "attunement": true,
     "dndbeyondSlug": "4730-ring-of-spell-storing",
-    "overrideScore": 2.5,
+    "overrideBonus": 2.5,
     "combat": {
       "enhancement": 0
     },
-    "description": "Stores 5 levels of spells. Action economy advantage estimated at 2.5 pts (high Rare tier)."
+    "description": "No quantifiable combat stats. Override +2.5 for storing up to 5 spell levels—breaks action economy with pre-cast buffs."
   },
   {
     "name": "Cloak of Displacement",
@@ -692,10 +692,10 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "5347-cloak-of-invisibility",
-    "overrideScore": 4.0,
+    "overrideBonus": 4.0,
     "combat": {
       "enhancement": 0
     },
-    "description": "Has 3 charges that regain 1d3 daily at dawn. Use 1 charge to become Invisible for 1 hour. Invisibility estimated at 4.0 pts (Legendary tier) due to tactical advantage."
+    "description": "No quantifiable combat stats. Override +4.0 for invisibility (3 charges, 1hr each)—tactical advantage on attacks and stealth is campaign-defining."
   }
 ]

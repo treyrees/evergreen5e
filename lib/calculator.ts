@@ -200,13 +200,12 @@ function isSimpleItem(userItem: Partial<MagicItem>): { isSimple: boolean; enhanc
 }
 
 /**
- * Get the score for an item, using overrideScore if available
+ * Get the score for an item, adding overrideBonus for special mechanics
  */
 export function getItemScore(item: Partial<MagicItem>): number {
-  if (item.overrideScore !== undefined) {
-    return item.overrideScore;
-  }
-  return item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  const baseScore = item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  const bonus = item.overrideBonus ?? 0;
+  return baseScore + bonus;
 }
 
 /**
