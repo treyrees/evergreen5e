@@ -24,12 +24,20 @@ export default function Home() {
           </p>
         </div>
 
-        <Link
-          href="/calculator"
-          className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-8 py-4 rounded-lg transition-colors shadow-md hover:shadow-lg"
-        >
-          Balance Item
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href="/calculator"
+            className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-8 py-4 rounded-lg transition-colors shadow-md hover:shadow-lg"
+          >
+            Balance Item
+          </Link>
+          <Link
+            href="/items"
+            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-lg transition-colors shadow-md hover:shadow-lg"
+          >
+            📚 Browse Items Database
+          </Link>
+        </div>
 
         <div className="pt-8 text-sm text-slate-500 dark:text-slate-500">
           <p>

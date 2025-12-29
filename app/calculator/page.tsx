@@ -193,12 +193,20 @@ export default function CalculatorPage() {
               Find the right rarity for your creation
             </p>
           </div>
-          <Link
-            href="/"
-            className="text-emerald-600 hover:text-emerald-700 font-medium"
-          >
-            ← Back to Home
-          </Link>
+          <div className="flex gap-4">
+            <Link
+              href="/items"
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              📚 View All Items
+            </Link>
+            <Link
+              href="/"
+              className="text-emerald-600 hover:text-emerald-700 font-medium"
+            >
+              ← Back to Home
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

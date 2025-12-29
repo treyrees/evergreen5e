@@ -1,0 +1,330 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import srdItems from '@/data/srd-items.json';
+import { MagicItem } from '@/types/magic-item';
+import { getItemScore } from '@/lib/calculator';
+
+export default function ItemsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [rarityFilter, setRarityFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'bookRarity' | 'calcRarity' | 'points'>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Calculate rarity from score
+  const getCalculatedRarity = (score: number): string => {
+    if (score < 1) return 'Common';
+    if (score < 2) return 'Uncommon';
+    if (score < 3) return 'Rare';
+    if (score < 4) return 'Very Rare';
+    return 'Legendary';
+  };
+
+  // Format effects list
+  const getEffectsList = (item: MagicItem): string[] => {
+    const effects: string[] = [];
+
+    if (item.combat.enhancement > 0) {
+      effects.push(`+${item.combat.enhancement} enhancement`);
+    }
+    if (item.combat.damageBonus) {
+      let dmgText = `${item.combat.damageBonus.dice} ${item.combat.damageBonus.type}`;
+      if (item.combat.damageBonus.conditional) dmgText += ' (conditional)';
+      if (item.combat.damageBonus.vicious) dmgText += ' (vicious)';
+      if (item.combat.damageBonus.frequency === 'per-turn') dmgText += ' (per-turn)';
+      effects.push(dmgText);
+    }
+    if (item.combat.acBonus) {
+      effects.push(`+${item.combat.acBonus} AC`);
+    }
+    if (item.combat.savingThrowBonus) {
+      effects.push(`+${item.combat.savingThrowBonus} saves`);
+    }
+    if (item.combat.abilityScoreSetter) {
+      effects.push(`${item.combat.abilityScoreSetter.ability} → ${item.combat.abilityScoreSetter.setValue}`);
+    }
+    if (item.combat.abilityScoreBonus) {
+      effects.push(`+${item.combat.abilityScoreBonus.bonus} ${item.combat.abilityScoreBonus.ability}`);
+    }
+    if (item.combat.flight) {
+      effects.push(item.combat.flight.duration === 'unlimited'
+        ? 'Flight (unlimited)'
+        : `Flight (${item.combat.flight.hoursPerDay} hrs/day)`);
+    }
+    if (item.combat.resistances && item.combat.resistances.length > 0) {
+      effects.push(`Resist: ${item.combat.resistances.join(', ')}`);
+    }
+    if (item.combat.charges && item.combat.charges.length > 0) {
+      item.combat.charges.forEach(charge => {
+        effects.push(`${charge.spell} (${charge.usesPerDay}/day)`);
+      });
+    }
+
+    return effects;
+  };
+
+  // Process items with scores
+  const itemsWithScores = useMemo(() => {
+    return srdItems.map(item => {
+      const magicItem = item as MagicItem;
+      const score = getItemScore(magicItem);
+      const calculatedRarity = getCalculatedRarity(score);
+      const effects = getEffectsList(magicItem);
+      return {
+        ...item,
+        score,
+        calculatedRarity,
+        effects,
+      };
+    });
+  }, []);
+
+  // Filter and sort items
+  const filteredAndSortedItems = useMemo(() => {
+    let filtered = itemsWithScores;
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.effects.some(effect => effect.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    // Apply rarity filter
+    if (rarityFilter !== 'all') {
+      filtered = filtered.filter(item =>
+        item.rarity?.toLowerCase() === rarityFilter.toLowerCase()
+      );
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+
+      switch (sortBy) {
+        case 'name':
+          compareValue = a.name.localeCompare(b.name);
+          break;
+        case 'bookRarity':
+          const rarityOrder = ['common', 'uncommon', 'rare', 'very rare', 'legendary'];
+          const aIdx = rarityOrder.indexOf(a.rarity?.toLowerCase() || '');
+          const bIdx = rarityOrder.indexOf(b.rarity?.toLowerCase() || '');
+          compareValue = aIdx - bIdx;
+          break;
+        case 'calcRarity':
+          const calcRarityOrder = ['common', 'uncommon', 'rare', 'very rare', 'legendary'];
+          const aCalcIdx = calcRarityOrder.indexOf(a.calculatedRarity.toLowerCase());
+          const bCalcIdx = calcRarityOrder.indexOf(b.calculatedRarity.toLowerCase());
+          compareValue = aCalcIdx - bCalcIdx;
+          break;
+        case 'points':
+          compareValue = a.score - b.score;
+          break;
+      }
+
+      return sortDirection === 'asc' ? compareValue : -compareValue;
+    });
+
+    return filtered;
+  }, [itemsWithScores, searchTerm, rarityFilter, sortBy, sortDirection]);
+
+  // Get rarity color
+  const getRarityColor = (rarity: string): string => {
+    switch (rarity.toLowerCase()) {
+      case 'common': return 'text-slate-400';
+      case 'uncommon': return 'text-green-400';
+      case 'rare': return 'text-blue-400';
+      case 'very rare': return 'text-purple-400';
+      case 'legendary': return 'text-orange-400';
+      default: return 'text-slate-300';
+    }
+  };
+
+  // Check if rarities match
+  const raritiesMatch = (bookRarity: string, calcRarity: string): boolean => {
+    return bookRarity.toLowerCase() === calcRarity.toLowerCase();
+  };
+
+  const handleSort = (column: 'name' | 'bookRarity' | 'calcRarity' | 'points') => {
+    if (sortBy === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortDirection('asc');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-emerald-400 mb-2">
+            📚 Magic Items Database
+          </h1>
+          <p className="text-slate-400">
+            Searchable table of all {srdItems.length} SRD magic items with calculated power levels
+          </p>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-slate-800/50 rounded-lg p-4 mb-6 flex flex-wrap gap-4">
+          {/* Search */}
+          <div className="flex-1 min-w-[200px]">
+            <label className="text-xs text-slate-400 mb-1 block">Search</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search items or effects..."
+              className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+
+          {/* Rarity Filter */}
+          <div className="w-48">
+            <label className="text-xs text-slate-400 mb-1 block">Filter by Rarity</label>
+            <select
+              value={rarityFilter}
+              onChange={(e) => setRarityFilter(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+            >
+              <option value="all">All Rarities</option>
+              <option value="common">Common</option>
+              <option value="uncommon">Uncommon</option>
+              <option value="rare">Rare</option>
+              <option value="very rare">Very Rare</option>
+              <option value="legendary">Legendary</option>
+            </select>
+          </div>
+
+          {/* Results count */}
+          <div className="flex items-end">
+            <div className="text-sm text-slate-400">
+              Showing {filteredAndSortedItems.length} of {srdItems.length} items
+            </div>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-slate-800/30 rounded-lg overflow-hidden border border-slate-700">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-900/50 border-b border-slate-700">
+                <tr>
+                  <th
+                    className="text-left p-3 text-emerald-400 font-semibold cursor-pointer hover:bg-slate-800/50"
+                    onClick={() => handleSort('name')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Name
+                      {sortBy === 'name' && (
+                        <span className="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    className="text-left p-3 text-emerald-400 font-semibold cursor-pointer hover:bg-slate-800/50"
+                    onClick={() => handleSort('bookRarity')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Book Rarity
+                      {sortBy === 'bookRarity' && (
+                        <span className="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    className="text-left p-3 text-emerald-400 font-semibold cursor-pointer hover:bg-slate-800/50"
+                    onClick={() => handleSort('calcRarity')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Calculated Rarity
+                      {sortBy === 'calcRarity' && (
+                        <span className="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                      )}
+                    </div>
+                  </th>
+                  <th className="text-left p-3 text-emerald-400 font-semibold">
+                    Quantifiable Effects
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAndSortedItems.map((item, index) => {
+                  const match = raritiesMatch(item.rarity || '', item.calculatedRarity);
+
+                  return (
+                    <tr
+                      key={index}
+                      className="border-b border-slate-700/50 hover:bg-slate-800/30"
+                    >
+                      {/* Name */}
+                      <td className="p-3">
+                        <div className="font-medium text-white">{item.name}</div>
+                        <div className="text-xs text-slate-400">{item.baseItem}</div>
+                        {item.attunement && (
+                          <div className="text-xs text-yellow-400 mt-0.5">Requires Attunement</div>
+                        )}
+                      </td>
+
+                      {/* Book Rarity */}
+                      <td className="p-3">
+                        <div className={`font-medium ${getRarityColor(item.rarity || '')}`}>
+                          {item.rarity?.toUpperCase()}
+                        </div>
+                      </td>
+
+                      {/* Calculated Rarity + Points */}
+                      <td className="p-3">
+                        <div className={`font-medium ${getRarityColor(item.calculatedRarity)}`}>
+                          {item.calculatedRarity.toUpperCase()}
+                        </div>
+                        <div className="text-xs text-slate-400 font-mono">
+                          {item.score.toFixed(1)} pts
+                        </div>
+                        {!match && (
+                          <div className="text-xs text-orange-400 mt-0.5">
+                            ⚠️ Discrepancy
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Effects */}
+                      <td className="p-3">
+                        {item.effects.length > 0 ? (
+                          <div className="space-y-0.5">
+                            {item.effects.map((effect, idx) => (
+                              <div key={idx} className="text-slate-300 text-xs">
+                                • {effect}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-slate-500 italic text-xs">
+                            No quantifiable effects
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Back to Calculator */}
+        <div className="mt-6 text-center">
+          <a
+            href="/calculator"
+            className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded font-semibold transition-colors"
+          >
+            ← Back to Calculator
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
