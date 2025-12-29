@@ -326,7 +326,6 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
-    "overrideScore": 2.0,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -335,7 +334,7 @@
         "vicious": true
       }
     },
-    "description": "+2d6 damage on natural 20 only. Math says 0.1 pts (5% proc), but crit-fishing builds (Champion, Assassin) and psychological 'big moment' value justify Rare."
+    "description": "WotC IMBALANCE: +2d6 on nat 20 only = 0.1 pts (Common). WotC says Rare. At 5% proc rate, this is one of the weakest Rare items in the SRD."
   },
   {
     "name": "Mace of Disruption",

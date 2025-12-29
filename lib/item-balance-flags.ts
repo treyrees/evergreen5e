@@ -38,15 +38,15 @@ export const SPECIAL_MECHANICS = new Set([
  * These items can be quantified, but their value varies wildly based on how often
  * the condition triggers in your specific campaign
  *
- * NOTE: Many items previously here now use conditionalType for proper calculation:
+ * NOTE: Most items previously here now calculate correctly:
  * - Oathbow → sworn-enemy (0.6×)
  * - Giant Slayer, Dragon Slayer, Mace of Smiting → creature-rare (0.4×)
  * - Mace of Disruption → creature-common (0.6×)
  * - Dagger of Venom, Javelin of Lightning → spell level adjusted
+ * - Vicious Weapon → vicious checkbox (×0.05 for 5% crit proc)
  */
-export const NUMERICAL_EDGE_CASES = new Set([
-  // Critical-only effects - uses override because value is highly build-dependent
-  'Vicious Weapon',            // +2d6 on nat 20 only (override: 2.0 pts)
+export const NUMERICAL_EDGE_CASES = new Set<string>([
+  // Currently empty - all items now calculate correctly with conditionalType or vicious flag
 ]);
 
 /**
@@ -131,17 +131,6 @@ export function getItemExplanation(itemName: string): string {
   if (itemName === 'Sun Blade') {
     return '+2 sword with 1d8 radiant is 3.25 pts (VR calc) but official Rare. Finesse on longsword has hidden build value.';
   }
-
-  // === NUMERICAL EDGE CASES ===
-
-  if (itemName === 'Vicious Weapon') {
-    return '+2d6 on natural 20 only (5% proc). Uses override because value ranges from ~0.1 pts (normal builds) to ~1.0+ pts (crit-fishing Champion/Assassin).';
-  }
-  // Most conditional damage items now calculate correctly using conditionalType:
-  // - Oathbow uses sworn-enemy (0.6×)
-  // - Giant Slayer, Dragon Slayer, Mace of Smiting use creature-rare (0.4×)
-  // - Mace of Disruption uses creature-common (0.6×)
-  // - Dagger of Venom, Javelin of Lightning use adjusted spell levels
 
   // === COMMUNITY NOTES ===
 
