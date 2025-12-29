@@ -359,11 +359,10 @@
       "enhancement": 0,
       "damageBonus": {
         "dice": "2d6",
-        "type": "slashing",
-        "vicious": true
+        "type": "slashing"
       }
     },
-    "description": "WotC IMBALANCE: +2d6 on nat 20 only = 0.1 pts (Common). WotC says Rare. At 5% proc rate, this is one of the weakest Rare items in the SRD."
+    "description": "2024 SRD: +2d6 damage on every hit (no longer crit-only like 2014). No attunement required."
   },
   {
     "name": "Mace of Disruption",

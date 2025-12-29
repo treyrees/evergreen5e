@@ -50,7 +50,7 @@ export const SPECIAL_MECHANICS = new Set([
  * - Giant Slayer, Dragon Slayer, Mace of Smiting → creature-rare (0.4×)
  * - Mace of Disruption → creature-common (0.6×)
  * - Dagger of Venom, Javelin of Lightning → spell level adjusted
- * - Vicious Weapon → vicious checkbox (×0.05 for 5% crit proc)
+ * - Vicious Weapon → 2024 SRD: now hits every time (no longer crit-only)
  */
 export const NUMERICAL_EDGE_CASES = new Set<string>([
   // Currently empty - all items now calculate correctly with conditionalType or vicious flag
@@ -66,7 +66,6 @@ export const COMMUNITY_NOTES = new Set([
   'Sun Blade',                 // Calc 3.0+ pts (Very Rare) but official Rare - community agrees it's powerful
 
   // Official seems too HIGH (item is weaker than rarity suggests)
-  'Vicious Weapon',            // Calc 0.1 pts (Common) but official Rare - 5% proc is ~3x weaker than +1
   'Wand of Magic Missiles',    // Calc 0.8 pts (Common) but official Uncommon - auto-hit may justify bump
   'Winged Boots',              // Calc 0.8 pts (Common) but official Uncommon - flight value hard to quantify
 
@@ -179,9 +178,6 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Wings of Flying') {
     return '60 ft fly speed, 1 hour/day. With speed+duration model: 1.0 × 2.0 = 2.0 pts (Rare).';
-  }
-  if (itemName === 'Vicious Weapon') {
-    return '+2d6 on nat 20 only = 0.1 pts (Common). Official: Rare. At 5% crit rate, this averages +0.35 damage/hit—roughly 3× weaker than +1.';
   }
   if (itemName === 'Winged Boots') {
     return '30 ft fly speed, 4 hrs/day = 0.8 pts (Common). Official: Uncommon. Flight is valuable but hard to quantify—our model may undervalue it.';
