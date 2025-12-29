@@ -101,7 +101,8 @@
         "dice": "1d8",
         "type": "radiant"
       }
-    }
+    },
+    "description": "Calc: Very Rare (3.25 pts). Official: Rare. The finesse property on a longsword has hidden build value not captured by our formula. Commonly considered underpriced."
   },
   {
     "name": "Vorpal Sword",
@@ -124,11 +125,10 @@
       "damageBonus": {
         "dice": "3d6",
         "type": "piercing",
-        "conditionalType": "rival"
+        "conditionalType": "sworn-enemy"
       },
       "advantage": ["attack"]
-    },
-    "description": "Sworn enemy (1 target/dawn) gets +3d6 damage and you have advantage. Rival conditional = 0.3× multiplier since only one target at a time."
+    }
   },
   {
     "name": "Dagger of Venom",
@@ -145,8 +145,7 @@
           "recharge": "long rest"
         }
       ]
-    },
-    "description": "1/day coat blade with poison: +2d10 poison damage and DC 15 CON or poisoned 1 min. Modeled as level 5 spell equivalent (damage + condition + DC 15)."
+    }
   },
   {
     "name": "Nine Lives Stealer",
@@ -202,7 +201,8 @@
       "acBonus": 1,
       "savingThrowBonus": 1,
       "enhancement": 0
-    }
+    },
+    "description": "Calc: Rare (2.0 pts). Official: Uncommon. +1 AC and +1 all saves stacks with everything unlike armor bonuses. Commonly considered underpriced."
   },
   {
     "name": "Defender",
@@ -276,7 +276,8 @@
         }
       ],
       "enhancement": 0
-    }
+    },
+    "description": "Calc: Common (0.8 pts). Official: Uncommon. Auto-hit damage has hidden value beyond raw numbers. Also has 7 charges with upcast option."
   },
   {
     "name": "Rod of Absorption",
@@ -302,7 +303,7 @@
         "conditionalType": "creature-rare"
       }
     },
-    "description": "+1 weapon, +2d6 vs giants + DC 15 STR or prone. Giants are less common than undead/fiends (creature-rare = 0.4×)."
+    "description": "Calc: Uncommon (1.47 pts). Official: Rare. Creature-type bonuses historically valued higher by WotC than raw math suggests. Also grants knockdown effect vs giants."
   },
   {
     "name": "Dragon Slayer",
@@ -316,8 +317,7 @@
         "type": "slashing",
         "conditionalType": "creature-rare"
       }
-    },
-    "description": "+1 weapon, +3d6 vs dragons. Dragons are iconic but less frequent encounters (creature-rare = 0.4×)."
+    }
   },
   {
     "name": "Vicious Weapon",
@@ -348,7 +348,7 @@
         "conditionalType": "creature-common"
       }
     },
-    "description": "+2d6 radiant vs undead/fiends, creatures with <25 HP destroyed on failed save. Undead/fiends are common campaign threats (creature-common = 0.6×)."
+    "description": "Calc: Uncommon (0.84 pts). Official: Rare. Has save-or-destroy effect vs undead/fiends under 25 HP that we can't quantify. Also sheds light."
   },
   {
     "name": "Mace of Smiting",
@@ -363,7 +363,7 @@
         "conditionalType": "creature-rare"
       }
     },
-    "description": "+1 mace, +2d6 vs constructs (+4d6 on crit vs constructs). Constructs are less common (creature-rare = 0.4×). Also has extra crit damage."
+    "description": "Calc: Uncommon (1.47 pts). Official: Rare. Has +4d6 on crit vs constructs and auto-destroys construct under 25 HP on crit—effects we can't fully quantify."
   },
   {
     "name": "Trident of Fish Command",
@@ -389,8 +389,7 @@
           "recharge": "long rest"
         }
       ]
-    },
-    "description": "1/day transform into lightning bolt: 4d6 lightning in 120ft line (DC 13). Modeled as level 5 spell equivalent for reliable daily AoE damage."
+    }
   },
   {
     "name": "Luck Blade",
@@ -408,8 +407,7 @@
           "recharge": "long rest"
         }
       ]
-    },
-    "description": "+1 weapon, +1 saves, can reroll 1 attack/check/save per day, and has 1d4-1 Wish charges (non-recharging). Level 9 spell scaling makes this calculate correctly as Legendary."
+    }
   },
   {
     "name": "Holy Avenger",
@@ -510,7 +508,8 @@
       "flight": {
         "duration": "unlimited"
       }
-    }
+    },
+    "description": "Calc: Rare (2.0 pts). Official: Uncommon. No attunement + unlimited flight is very strong. Commonly considered underpriced at Uncommon."
   },
   {
     "name": "Winged Boots",
@@ -536,7 +535,8 @@
         "duration": "limited",
         "hoursPerDay": 1.5
       }
-    }
+    },
+    "description": "Calc: Uncommon (1.0 pts). Official: Rare. Limited flight (1 hr/day) is weak for Rare tier. Community consensus: overpriced."
   },
   {
     "name": "Ring of Spell Storing",

@@ -215,7 +215,7 @@ export function calculateCombatScore(combat: CombatFeatures): number {
       const conditionalMultipliers: Record<string, number> = {
         'creature-common': 0.6,   // Undead, fiends, humanoids - frequent
         'creature-rare': 0.4,     // Giants, dragons, constructs - less common
-        'rival': 0.3,             // Sworn enemy / single target (Oathbow)
+        'sworn-enemy': 0.6,       // Single declared target (Oathbow) - always active in combat
         'environmental': 0.25,    // "In darkness", "underwater", situational
       };
       diceValue *= conditionalMultipliers[combat.damageBonus.conditionalType] || 0.5;

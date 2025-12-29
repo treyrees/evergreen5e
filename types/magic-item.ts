@@ -2,7 +2,7 @@
 export type ConditionalType =
   | 'creature-common'  // Undead, fiends, humanoids - frequent encounters (0.6×)
   | 'creature-rare'    // Giants, dragons, constructs - less common (0.4×)
-  | 'rival'            // Sworn enemy / single target at a time - Oathbow style (0.3×)
+  | 'sworn-enemy'      // Single declared target - Oathbow style (0.6×)
   | 'environmental';   // "In darkness", "underwater", "against surprised" (0.25×)
 
 export interface DamageBonus {

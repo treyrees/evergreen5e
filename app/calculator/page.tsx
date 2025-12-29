@@ -626,16 +626,16 @@ export default function CalculatorPage() {
                   {/* Collapsible Helper Guide */}
                   <details className="mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md select-none">
-                      📖 Spell Level Reference
+                      📖 Guide to custom abilities: Estimating power in terms of spell level
                     </summary>
                     <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2 border-t border-blue-200 dark:border-blue-800">
                       <div className="space-y-1.5 mb-3">
                         <p className="font-semibold text-sm">
-                          Find a spell with similar effects.
+                          Find the spell most similar to your desired custom effect. Use that spell level.
                         </p>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400">
                           Think abstractly: "mass control" → enchantment spells. "Damage over time" → conjuration/evocation.
-                          Reskin freely—a sword shooting lightning bolts is mechanically identical to casting <em>Lightning Bolt</em>.
+                          Reskin freely—a sword shooting columns of thunder is mechanically identical to casting <em>Lightning Bolt</em>.
                         </p>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400">
                           <strong>Damage types:</strong> Fire, cold, lightning, acid, thunder, necrotic are mechanically similar—choose the spell that matches your flavor.
@@ -1235,7 +1235,7 @@ export default function CalculatorPage() {
                       <div className="text-yellow-400">• Conditional damage by type:</div>
                       <div className="text-yellow-400 pl-2">- Creature-common (undead, fiends): ×0.6</div>
                       <div className="text-yellow-400 pl-2">- Creature-rare (giants, dragons): ×0.4</div>
-                      <div className="text-yellow-400 pl-2">- Rival (sworn enemy): ×0.3</div>
+                      <div className="text-yellow-400 pl-2">- Sworn-enemy (declared target): ×0.6</div>
                       <div className="text-yellow-400 pl-2">- Environmental (darkness, water): ×0.25</div>
                     </div>
 

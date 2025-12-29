@@ -39,9 +39,9 @@ export const SPECIAL_MECHANICS = new Set([
  * the condition triggers in your specific campaign
  *
  * NOTE: Many items previously here now use conditionalType for proper calculation:
+ * - Oathbow → sworn-enemy (0.6×)
  * - Giant Slayer, Dragon Slayer, Mace of Smiting → creature-rare (0.4×)
  * - Mace of Disruption → creature-common (0.6×)
- * - Oathbow → rival (0.3×)
  * - Dagger of Venom, Javelin of Lightning → spell level adjusted
  */
 export const NUMERICAL_EDGE_CASES = new Set([
@@ -138,7 +138,7 @@ export function getItemExplanation(itemName: string): string {
     return '+2d6 on natural 20 only (5% proc). Uses override because value ranges from ~0.1 pts (normal builds) to ~1.0+ pts (crit-fishing Champion/Assassin).';
   }
   // Most conditional damage items now calculate correctly using conditionalType:
-  // - Oathbow uses rival (0.3×)
+  // - Oathbow uses sworn-enemy (0.6×)
   // - Giant Slayer, Dragon Slayer, Mace of Smiting use creature-rare (0.4×)
   // - Mace of Disruption uses creature-common (0.6×)
   // - Dagger of Venom, Javelin of Lightning use adjusted spell levels
