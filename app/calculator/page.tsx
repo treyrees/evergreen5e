@@ -1045,7 +1045,25 @@ export default function CalculatorPage() {
                                   {anchor.combat.charges && (
                                     <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
                                   )}
-                                  {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && (
+                                  {anchor.combat.advantage && anchor.combat.advantage.length > 0 && (
+                                    <div>Adv: {anchor.combat.advantage.join(', ')}</div>
+                                  )}
+                                  {anchor.combat.reactionAC && (
+                                    <div>+{anchor.combat.reactionAC.bonus} AC (reaction)</div>
+                                  )}
+                                  {anchor.combat.bonusActionDamage && (
+                                    <div>Bash: {anchor.combat.bonusActionDamage.dice}{anchor.combat.bonusActionDamage.flatBonus ? `+${anchor.combat.bonusActionDamage.flatBonus}` : ''} {anchor.combat.bonusActionDamage.type}</div>
+                                  )}
+                                  {anchor.combat.conditionInfliction && (
+                                    <div>{anchor.combat.conditionInfliction.condition} (DC {anchor.combat.conditionInfliction.dc})</div>
+                                  )}
+                                  {anchor.combat.damageTypeOverride && (
+                                    <div>Type: {anchor.combat.damageTypeOverride}</div>
+                                  )}
+                                  {anchor.combat.handsFreeDef && (
+                                    <div>Hands-free defense</div>
+                                  )}
+                                  {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && !anchor.combat.advantage && !anchor.combat.reactionAC && !anchor.combat.bonusActionDamage && !anchor.combat.conditionInfliction && !anchor.combat.damageTypeOverride && !anchor.combat.handsFreeDef && (
                                     <div className="text-slate-500 italic text-[10px]">No combat features</div>
                                   )}
                                 </div>
@@ -1250,13 +1268,37 @@ export default function CalculatorPage() {
                       <div className="space-y-1 pt-2 border-t border-slate-700/50">
                         <div className="text-emerald-400 font-semibold">Warning Indicators:</div>
                         <div className="text-blue-400">
-                          <span className="font-bold">🔢</span> Numerical edge case: Conditional bonuses we haven't weighed YET—rare/conditional enough to compare at your own discretion only. (Some items lack individual explainers)
+                          <span className="font-bold">🔢</span> Numerical edge case: Conditional bonuses we haven&apos;t weighed YET—rare/conditional enough to compare at your own discretion only. (Some items lack individual explainers)
                         </div>
                         <div className="text-purple-400">
-                          <span className="font-bold">⭐</span> Special mechanics: Non-numerical benefits our math can't quantify (e.g., instant kill)
+                          <span className="font-bold">⭐</span> Special mechanics: Non-numerical benefits our math can&apos;t quantify (e.g., instant kill)
                         </div>
                         <div className="text-slate-300">
                           <span className="font-bold">💬</span> Community note: Well-established consensus about balance (often stronger OR weaker than rated)
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 pt-3 border-t border-slate-700/50">
+                        <div className="text-emerald-400 font-semibold">Discrepancy Guidance:</div>
+                        <div className="space-y-2">
+                          <div className="bg-purple-900/20 border border-purple-700/30 rounded p-2">
+                            <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
+                            <div className="text-slate-300">
+                              These items grant bonuses that can&apos;t be expressed in numbers. Understand the item&apos;s effect and add something similar of your own to match the anchor!
+                            </div>
+                          </div>
+                          <div className="bg-blue-900/20 border border-blue-700/30 rounded p-2">
+                            <div className="text-blue-400 font-semibold mb-1">🔢 Numerical Edge Case</div>
+                            <div className="text-slate-300">
+                              These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.
+                            </div>
+                          </div>
+                          <div className="bg-slate-800/50 border border-slate-600/30 rounded p-2">
+                            <div className="text-slate-300 font-semibold mb-1">💬 Community Note</div>
+                            <div className="text-slate-400">
+                              This item is probably underpowered. Take this reference with a grain of salt.
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

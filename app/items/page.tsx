@@ -62,6 +62,32 @@ export default function ItemsPage() {
       });
     }
 
+    // New SRD 5.2.1 mechanics
+    if (item.combat.advantage && item.combat.advantage.length > 0) {
+      effects.push(`Advantage: ${item.combat.advantage.join(', ')}`);
+    }
+    if (item.combat.reactionAC) {
+      const uses = item.combat.reactionAC.usesPerShortRest
+        ? `${item.combat.reactionAC.usesPerShortRest}/SR`
+        : item.combat.reactionAC.unlimited
+        ? 'unlimited'
+        : '';
+      effects.push(`+${item.combat.reactionAC.bonus} AC (reaction${uses ? ', ' + uses : ''})`);
+    }
+    if (item.combat.bonusActionDamage) {
+      const flat = item.combat.bonusActionDamage.flatBonus ? `+${item.combat.bonusActionDamage.flatBonus}` : '';
+      effects.push(`Bash: ${item.combat.bonusActionDamage.dice}${flat} ${item.combat.bonusActionDamage.type}`);
+    }
+    if (item.combat.conditionInfliction) {
+      effects.push(`${item.combat.conditionInfliction.condition} (DC ${item.combat.conditionInfliction.dc} ${item.combat.conditionInfliction.save})`);
+    }
+    if (item.combat.damageTypeOverride) {
+      effects.push(`Damage type: ${item.combat.damageTypeOverride}`);
+    }
+    if (item.combat.handsFreeDef) {
+      effects.push('Hands-free defense');
+    }
+
     return effects;
   };
 

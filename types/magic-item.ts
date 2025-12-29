@@ -42,6 +42,40 @@ export interface Flight {
   requiresAction?: boolean; // bonus action to activate
 }
 
+// Reaction-based AC bonus (e.g., Quarterstaff of the Acrobat's Attack Deflection)
+export interface ReactionAC {
+  bonus: number; // AC bonus when used (e.g., +5)
+  usesPerShortRest?: number; // Times usable per short rest (if limited)
+  usesPerLongRest?: number; // Times usable per long rest (if limited)
+  unlimited?: boolean; // If true, can be used every reaction
+}
+
+// Bonus action damage (e.g., Shield of the Cavalier's Forceful Bash)
+export interface BonusActionDamage {
+  dice: string; // "2d6", etc.
+  flatBonus?: number; // Fixed bonus like +2
+  type: string; // Damage type
+}
+
+// Condition infliction on attacks (e.g., Energy Bow's Restraint)
+export interface ConditionInfliction {
+  condition: string; // "restrained", "prone", "frightened", etc.
+  save: string; // "STR", "DEX", "CON", etc.
+  dc: number; // Save DC
+}
+
+// Advantage types for checks and saves
+export type AdvantageType =
+  | 'initiative' // Advantage on Initiative rolls
+  | 'perception' // Advantage on Perception checks
+  | 'acrobatics' // Advantage on Acrobatics checks
+  | 'stealth' // Advantage on Stealth checks
+  | 'attack' // Advantage on attack rolls
+  | 'saves' // Advantage on all saving throws
+  | 'dex-saves' // Advantage on DEX saves
+  | 'str-saves' // Advantage on STR saves
+  | 'con-saves'; // Advantage on CON saves
+
 export interface CombatFeatures {
   enhancement: number; // 0, 1, 2, 3
   damageBonus?: DamageBonus;
@@ -53,6 +87,14 @@ export interface CombatFeatures {
   abilityScoreSetter?: AbilityScoreSetter; // Sets ability score to fixed value (e.g., Gauntlets of Ogre Power set STR to 19)
   abilityScoreBonus?: AbilityScoreBonus; // Adds bonus to ability score (e.g., Headband of Intellect +2)
   flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots)
+
+  // New SRD 5.2.1 mechanics
+  advantage?: AdvantageType[]; // Advantage on specific checks/saves (e.g., Sentinel Shield: initiative, perception)
+  reactionAC?: ReactionAC; // Reaction-based AC bonus (e.g., Quarterstaff of the Acrobat: +5 AC)
+  bonusActionDamage?: BonusActionDamage; // Damage as bonus action (e.g., Shield of the Cavalier bash)
+  conditionInfliction?: ConditionInfliction; // Inflict conditions on attacks (e.g., Energy Bow restraint)
+  damageTypeOverride?: string; // Override weapon's damage type (e.g., Energy Bow: force instead of piercing)
+  handsFreeDef?: boolean; // Animated Shield: provides defense without using a hand
 }
 
 export interface RibbonFeatures {

@@ -101,14 +101,6 @@
         "dice": "1d8",
         "type": "radiant"
       }
-    },
-    "ribbons": {
-      "cosmetic": [
-        "Sheds bright light 15ft, dim light 15ft"
-      ],
-      "utilitySpells": [
-        "Functions as finesse weapon"
-      ]
     }
   },
   {
@@ -116,6 +108,7 @@
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
+    "overrideScore": 4.0,
     "combat": {
       "enhancement": 3
     },
@@ -130,8 +123,10 @@
       "enhancement": 0,
       "damageBonus": {
         "dice": "3d6",
-        "type": "piercing"
-      }
+        "type": "piercing",
+        "conditional": true
+      },
+      "advantage": ["attack"]
     }
   },
   {
@@ -156,9 +151,11 @@
     "baseItem": "rapier",
     "rarity": "very rare",
     "attunement": true,
+    "overrideScore": 3.5,
     "combat": {
       "enhancement": 2
-    }
+    },
+    "description": "+2 sword with 9 charges. On natural 20 vs creature with < 100 HP, DC 15 CON save or instant death. Save-or-die mechanic worth ~1.5 pts beyond the +2."
   },
   {
     "name": "Animated Shield",
@@ -166,9 +163,10 @@
     "rarity": "very rare",
     "attunement": true,
     "combat": {
-      "acBonus": 2,
-      "enhancement": 0
-    }
+      "enhancement": 0,
+      "handsFreeDef": true
+    },
+    "description": "Shield that animates and defends you, freeing your hands for two-handed weapons or dual wielding. Provides base shield AC without occupying a hand."
   },
   {
     "name": "Armor of Resistance",
@@ -327,8 +325,7 @@
         "type": "slashing",
         "vicious": true
       }
-    },
-    "description": "Deals +2d6 damage on natural 20s (5% of attacks). Expected value: ~0.35 damage/attack."
+    }
   },
   {
     "name": "Mace of Disruption",
@@ -351,12 +348,6 @@
     "attunement": false,
     "combat": {
       "enhancement": 1
-    },
-    "ribbons": {
-      "utilitySpells": [
-        "+2 enhancement vs constructs",
-        "+2d6 damage on nat 20 vs constructs"
-      ]
     }
   },
   {
@@ -430,22 +421,22 @@
     "baseItem": "boots",
     "rarity": "rare",
     "attunement": true,
-    "overrideScore": 1.5,
+    "overrideScore": 2.0,
     "combat": {
-      "acBonus": 0,
       "enhancement": 0
     },
-    "description": "Doubles movement speed and grants advantage on Dex saves. Movement/mobility value estimated at 1.5 pts (low Rare tier)."
+    "description": "Click heels to double walking speed for 10 min, bonus action. Opportunity attacks have disadvantage against you. Mobility advantage is powerful. Officially Rare."
   },
   {
     "name": "Gloves of Missile Snaring",
     "baseItem": "gloves",
     "rarity": "uncommon",
     "attunement": true,
+    "overrideScore": 1.0,
     "combat": {
-      "acBonus": 0,
       "enhancement": 0
-    }
+    },
+    "description": "Use reaction to reduce ranged weapon damage by 1d10+DEX, catch if reduced to 0. Situational defensive ability worth ~1.0 pt (Uncommon)."
   },
   {
     "name": "Amulet of Health",
@@ -552,18 +543,14 @@
     "attunement": true,
     "combat": {
       "enhancement": 1,
-      "damageBonus": {
-        "dice": "0",
-        "type": "force"
+      "damageTypeOverride": "force",
+      "conditionInfliction": {
+        "condition": "restrained",
+        "save": "STR",
+        "dc": 15
       }
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Deals Force damage instead of Piercing",
-        "Arrow of Restraint (DC 15 STR save or Restrained)",
-        "Emits bright light 20ft, dim light 20ft"
-      ]
-    }
+    "description": "+1 longbow. Deals Force instead of Piercing. Arrow of Restraint: DC 15 STR or Restrained 1 min. Arrow of Transport: teleport willing creature 60ft. Energy Ladder: create 60ft ladder on wall."
   },
   {
     "name": "Quarterstaff of the Acrobat",
@@ -571,16 +558,14 @@
     "rarity": "very rare",
     "attunement": false,
     "combat": {
-      "enhancement": 2
+      "enhancement": 2,
+      "advantage": ["acrobatics"],
+      "reactionAC": {
+        "bonus": 5,
+        "usesPerShortRest": 1
+      }
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Can change form (6-inch rod, 10-foot pole, or quarterstaff)",
-        "Advantage on Dexterity (Acrobatics) checks",
-        "Attack Deflection: +5 AC as reaction (1/short rest)",
-        "Thrown property 30/120 feet"
-      ]
-    }
+    "description": "+2 quarterstaff. Shape-changing (rod/pole/staff). Advantage on Acrobatics. Attack Deflection: +5 AC as reaction. Topple mastery. Returns after thrown."
   },
   {
     "name": "Sentinel Shield",
@@ -589,14 +574,9 @@
     "attunement": false,
     "combat": {
       "enhancement": 0,
-      "acBonus": 2
+      "advantage": ["initiative", "perception"]
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Advantage on Initiative rolls",
-        "Advantage on Wisdom (Perception) checks"
-      ]
-    }
+    "description": "Shield with advantage on Initiative and Perception. No magical AC bonus beyond base shield."
   },
   {
     "name": "Shield of the Cavalier",
@@ -605,14 +585,14 @@
     "attunement": false,
     "combat": {
       "enhancement": 0,
-      "acBonus": 4
+      "acBonus": 2,
+      "bonusActionDamage": {
+        "dice": "2d6",
+        "flatBonus": 2,
+        "type": "force"
+      }
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Forceful Bash: 2d6+2 + STR modifier force damage, push 10ft",
-        "Protective Field: 5-foot emanation like Otiluke's Resilient Sphere"
-      ]
-    }
+    "description": "+2 AC bonus (beyond base shield). Forceful Bash: 2d6+2+STR force, push 10ft, prone if smaller. Protective Field: 5ft emanation like Otiluke's."
   },
   {
     "name": "Thunderous Greatclub",
@@ -629,13 +609,6 @@
         "dice": "1d8",
         "type": "thunder"
       }
-    },
-    "ribbons": {
-      "utilitySpells": [
-        "Clap of Thunder: 30-foot cone, DC 15 STR save or Prone",
-        "Earthquake: 50-foot radius seismic disturbance",
-        "+3d8 thunder damage vs objects"
-      ]
     }
   },
   {

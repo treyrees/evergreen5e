@@ -13,13 +13,11 @@
  * Note: Not all items here have individual warning explainers
  */
 export const NUMERICAL_EDGE_CASES = new Set([
-  'Vicious Weapon',            // +2d6 on nat 20 - we don't track critical-only bonuses
-  'Oathbow',                   // +3d6 vs sworn enemy - we mark conditional but undervalues it
-  'Nine Lives Stealer',        // Drains life force on nat 20 - instant kill effect on crit
-  'Dragon Slayer',             // +3d6 vs dragons - conditional damage undervalued
-  'Giant Slayer',              // +2d6 vs giants - conditional damage undervalued
-  'Mace of Disruption',        // +2d6 radiant vs undead/fiends - conditional damage undervalued
-  'Mace of Smiting',           // +2 enhancement + crit bonus vs constructs - conditional effects
+  'Vicious Weapon',            // +2d6 on nat 20 - crit-fishing synergy undervalued
+  'Oathbow',                   // +3d6 + advantage vs sworn enemy - ignores cover benefit
+  'Giant Slayer',              // +2d6 vs giants + prone effect undervalued
+  'Mace of Disruption',        // 2d6 radiant vs undead/fiends + destroy effect undervalued
+  'Mace of Smiting',           // +1 that becomes +3 vs constructs + crit bonus undervalued
   'Sun Blade',                 // Radiant damage multiplier may overvalue this item
 ]);
 
@@ -30,22 +28,13 @@ export const NUMERICAL_EDGE_CASES = new Set([
  */
 export const SPECIAL_MECHANICS = new Set([
   'Vorpal Sword',              // Decapitation on nat 20 (instant kill) - can't model
-  'Luck Blade',                // Wish spell (1d4-1 uses) - utility beyond numbers
+  'Nine Lives Stealer',        // Save-or-die on nat 20 - can't model
   'Rod of Absorption',         // Absorbs spells targeting you - defensive utility
   'Boots of Speed',            // Doubles movement + Dex save advantage - mobility value
-  'Wand of Fireballs',         // Spell charges not valued in our math
-  'Wand of Lightning Bolts',   // Spell charges not valued in our math
-  'Wand of Magic Missiles',    // Spell charges not valued in our math
-  'Javelin of Lightning',      // Single-use spell charge not valued
-  'Dagger of Venom',           // Poison charge not valued properly
-  'Gloves of Missile Snaring', // Defensive utility not quantified
-  'Animated Shield',           // Special activation mechanic
-  'Staff of Power',            // Overvalued - powerful but scored too high
-  'Energy Bow',                // Force damage + restraint arrow - special abilities
-  'Quarterstaff of the Acrobat', // +5 AC reaction (1/rest) not fully valued
-  'Sentinel Shield',           // Advantage on Initiative not quantified
-  'Shield of the Cavalier',    // Force bash damage + protective field not quantified
-  'Cloak of Invisibility',     // Invisibility charges - tactical advantage
+  'Gloves of Missile Snaring', // Catch and deflect ranged attacks - defensive utility
+  'Cloak of Invisibility',     // Tactical invisibility - can't fully model
+  'Dagger of Venom',           // Poisoned condition value not captured
+  'Staff of Power',            // Stacking bonuses + spellcaster attunement overvalued
 ]);
 
 /**
@@ -54,15 +43,10 @@ export const SPECIAL_MECHANICS = new Set([
  * Sources: EN World, D&D Beyond, Giant in the Playground, Quora discussions
  */
 export const COMMUNITY_NOTES = new Set([
-  'Broom of Flying',           // Uncommon but should be Rare - unlimited flight, no attunement
-  'Winged Boots',              // Uncommon but should be Rare - "greatest uncommon in DMG"
-  'Ring of Spell Storing',     // Rare - very powerful, breaks action economy
-  'Cloak of Displacement',     // Rare - disadvantage on all attacks is very strong
-  'Wings of Flying',           // Rare but time-limited, inferior to Broom of Flying
-  'Trident of Fish Command',   // Uncommon but very niche (only controls fish)
-  'Armor of Resistance',       // Rare - single resistance undervalued by our math
-  'Frost Brand',               // Very Rare - fire resistance + damage undervalued
-  'Cloak of Protection',       // Uncommon - AC + saves bonus undervalued
+  'Broom of Flying',           // Uncommon but calculates Rare - unlimited flight undervalued
+  'Wings of Flying',           // Rare but calculates Uncommon - limited flight overvalued
+  'Cloak of Protection',       // Uncommon but calculates Rare - stacking bonuses overvalued
+  'Ring of Spell Storing',     // Breaks action economy - utility beyond numbers
 ]);
 
 /**
@@ -92,110 +76,62 @@ export function hasCommunityNotes(itemName: string): boolean {
 export function getItemExplanation(itemName: string): string {
   // Numerical edge cases
   if (itemName === 'Vicious Weapon') {
-    return '+2d6 damage on natural 20 (5% proc rate = ~0.35 damage/attack, now quantified)';
+    return '+2d6 damage on natural 20 (5% proc rate = ~0.09 pts). Math shows Uncommon but official is Rare. Crit-fishing synergy (Champion, Hexblade) and psychological value not captured.';
   }
   if (itemName === 'Oathbow') {
-    return '+3d6 vs sworn enemy (conditional damage undervalued despite frequency)';
-  }
-  if (itemName === 'Nine Lives Stealer') {
-    return 'Drains life force on nat 20 (instant kill effect on crit not fully weighted)';
-  }
-  if (itemName === 'Dragon Slayer') {
-    return '+3d6 vs dragons (conditional damage heavily discounted at ×0.25, but dragons are common high-CR enemies)';
+    return '+3d6 + attack advantage vs sworn enemy calculates as 2.77 pts (Rare) but official is Very Rare. Ignores cover/invisibility benefits not modeled.';
   }
   if (itemName === 'Giant Slayer') {
-    return '+2d6 vs giants (conditional damage heavily discounted at ×0.25, but giants are common enemies)';
+    return '+1 weapon + 2d6 vs giants calculates as 1.85 pts (Uncommon) but official is Rare. Prone effect on hit and common giant encounters make it stronger.';
   }
   if (itemName === 'Mace of Disruption') {
-    return '+2d6 radiant vs undead/fiends (conditional damage + radiant type undervalued for common enemy types)';
+    return '2d6 radiant vs undead/fiends calculates as 1.1 pts (Uncommon) but official is Rare. Destroy effect on targets with 25 HP or less not modeled.';
   }
   if (itemName === 'Mace of Smiting') {
-    return '+2 enhancement and +2d6 crit damage vs constructs (conditional bonuses not fully valued)';
+    return '+1 mace calculates as 1.0 pts (Uncommon) but official is Rare. Becomes +3 vs constructs, extra crit damage, and construct destruction not modeled.';
   }
   if (itemName === 'Sun Blade') {
-    return '+2 enhancement + 1d8 radiant (our radiant ×1.1 multiplier may overvalue this to 3.38 pts, pushing it to Very Rare when official is Rare)';
+    return '+2 enhancement + 1d8 radiant calculates as 3.38 pts (Very Rare) but official is Rare. Our radiant ×1.1 multiplier may overvalue this item.';
   }
 
   // Special mechanics
   if (itemName === 'Vorpal Sword') {
-    return 'Decapitation on nat 20 (instant kill effect can\'t be modeled)';
+    return 'Decapitation on nat 20 (instant kill effect can\'t be modeled). Override score used.';
   }
-  if (itemName === 'Luck Blade') {
-    return 'Grants Wish spell 1d4-1 times (utility beyond combat math)';
+  if (itemName === 'Nine Lives Stealer') {
+    return 'Drains life force on nat 20 (save-or-die effect can\'t be modeled). Override score used.';
   }
   if (itemName === 'Rod of Absorption') {
-    return 'Absorbs spells targeting you (defensive utility not quantified)';
+    return 'Absorbs spells targeting you (defensive utility not quantified). Override score used.';
   }
   if (itemName === 'Boots of Speed') {
-    return 'Doubles movement + Dex save advantage (mobility value not quantified)';
-  }
-  if (itemName === 'Wand of Fireballs') {
-    return 'Casts Fireball (3rd level spell, 4 uses/day) - spell charges not valued in our combat math';
-  }
-  if (itemName === 'Wand of Lightning Bolts') {
-    return 'Casts Lightning Bolt (3rd level spell, 4 uses/day) - spell charges not valued in our combat math';
-  }
-  if (itemName === 'Wand of Magic Missiles') {
-    return 'Casts Magic Missile (1st level spell, 4 uses/day) - spell charges not valued in our combat math';
-  }
-  if (itemName === 'Javelin of Lightning') {
-    return 'Single-use Lightning Bolt effect (4d6 damage, DC 13) - spell charge not valued in our math';
-  }
-  if (itemName === 'Dagger of Venom') {
-    return 'Poison coating (2d10, DC 15, 1/day) - charge-based damage not properly valued';
+    return 'Doubles movement + Dex save advantage (mobility value not quantified). Override score used.';
   }
   if (itemName === 'Gloves of Missile Snaring') {
-    return 'Catch and deflect ranged attacks (defensive utility not quantified in our math)';
-  }
-  if (itemName === 'Animated Shield') {
-    return 'Bonus action to float and protect you (hands-free AC bonus mechanic not fully valued)';
-  }
-  if (itemName === 'Staff of Power') {
-    return '+2 to attack/damage/AC/saves scores as 6.0 (Legendary tier), but official is Very Rare - our math may overvalue stacking bonuses';
-  }
-  if (itemName === 'Energy Bow') {
-    return '+1 bow that deals Force damage instead of Piercing, with Arrow of Restraint (DC 15 STR save) - force damage type and restraint ability add tactical value beyond +1 enhancement';
-  }
-  if (itemName === 'Quarterstaff of the Acrobat') {
-    return '+2 weapon with Attack Deflection (+5 AC as reaction, 1/short rest) - the occasional defensive boost adds value beyond our +2 enhancement calculation';
-  }
-  if (itemName === 'Sentinel Shield') {
-    return 'Shield with advantage on Initiative rolls and Perception checks - combat initiative advantage not quantified in our math';
-  }
-  if (itemName === 'Shield of the Cavalier') {
-    return '+2 AC shield (total +4) with Forceful Bash (2d6+2+STR force damage) and Protective Field - offensive capabilities beyond standard shield not quantified';
+    return 'Catch and deflect ranged attacks (defensive utility not quantified). Override score used.';
   }
   if (itemName === 'Cloak of Invisibility') {
-    return 'Legendary cloak with 3 charges for Invisibility (1 hour each, regain 1d3/day) - tactical invisibility advantage estimated at 4.0 pts';
+    return 'Tactical invisibility with charges (strategic value can\'t be quantified). Override score used.';
+  }
+  if (itemName === 'Dagger of Venom') {
+    return '+1 dagger with poison coating (2d10 + poisoned condition, DC 15, 1/day) calculates as 1.4 pts (Uncommon) but official is Rare. The poisoned condition value not captured.';
+  }
+  if (itemName === 'Staff of Power') {
+    return '+2 to attack/damage/AC/saves calculates as 6.0 pts (Legendary), but official is Very Rare. Stacking bonuses + spellcaster attunement requirement make the official rating appropriate.';
   }
 
   // Community notes
   if (itemName === 'Broom of Flying') {
-    return 'Uncommon but widely considered Rare-tier (unlimited flight, no attunement)';
-  }
-  if (itemName === 'Winged Boots') {
-    return 'Uncommon but widely considered Rare-tier ("greatest uncommon in DMG")';
-  }
-  if (itemName === 'Ring of Spell Storing') {
-    return 'Very powerful for Rare tier (breaks action economy)';
-  }
-  if (itemName === 'Cloak of Displacement') {
-    return 'Very strong for Rare tier (disadvantage on all attacks against you)';
+    return 'Unlimited flight calculates as 2.0 pts (Rare) but official is Uncommon. Flight without attunement is very powerful.';
   }
   if (itemName === 'Wings of Flying') {
-    return 'Weak for Rare tier (time-limited, inferior to Broom of Flying)';
-  }
-  if (itemName === 'Trident of Fish Command') {
-    return 'Weak for Uncommon (very niche - only controls fish)';
-  }
-  if (itemName === 'Armor of Resistance') {
-    return 'Single damage resistance valued at 1.5 pts (Uncommon), but official is Rare - resistances may be undervalued';
-  }
-  if (itemName === 'Frost Brand') {
-    return '1d6 cold damage + fire resistance valued at 2.5 pts (Rare), but official is Very Rare - resistance + damage combo undervalued';
+    return 'Limited flight (1 hour/day) calculates as 1.0 pts (Uncommon) but official is Rare. Flight value may be underestimated relative to Fly spell (3rd level).';
   }
   if (itemName === 'Cloak of Protection') {
-    return '+1 AC and +1 to all saves valued at 2.0 pts (Rare), but official is Uncommon - our math may overvalue stacking bonuses';
+    return '+1 AC and +1 to all saves calculates as 2.0 pts (Rare), but official is Uncommon. Our math may overvalue stacking bonuses.';
+  }
+  if (itemName === 'Ring of Spell Storing') {
+    return 'Stores up to 5 levels of spells (breaks action economy, utility beyond combat math). Override score used.';
   }
 
   return '';
