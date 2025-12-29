@@ -204,17 +204,10 @@ export default function CalculatorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Form */}
           <div className="space-y-6">
-            {/* Item Builder */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">
-                Item Builder
-              </h2>
               <div className="space-y-6">
                 {/* Basic Info Section */}
                 <div className="space-y-4 pb-6 border-b border-slate-200 dark:border-slate-700">
-                  <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                    Basic Info
-                  </h3>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Item Name
@@ -269,9 +262,6 @@ export default function CalculatorPage() {
 
                 {/* Combat Features Section */}
                 <div className="space-y-6">
-                  <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                    Combat Features
-                  </h3>
                   {/* Attack/Damage Bonus */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -428,98 +418,102 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Ability Score Setter */}
+                {/* Ability Score */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Set Ability Score
+                    Ability Score
                   </label>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 italic">
-                    Sets a specific ability score to a fixed value (e.g., Gauntlets of Ogre Power set STR to 19)
+                    {abilityScoreSetter
+                      ? 'Sets ability to fixed value (e.g., Gauntlets of Ogre Power set STR to 19)'
+                      : abilityScoreBonus
+                      ? 'Adds bonus to ability (e.g., +2 INT)'
+                      : 'Choose to set ability to a value or add a bonus'}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
+                    {/* Mode selector */}
                     <select
-                      value={abilityScoreSetter?.ability || ''}
+                      value={
+                        abilityScoreSetter ? 'set' :
+                        abilityScoreBonus ? 'bonus' :
+                        ''
+                      }
                       onChange={(e) => {
                         if (e.target.value === '') {
                           setAbilityScoreSetter(undefined);
-                        } else {
-                          setAbilityScoreSetter({
-                            ability: e.target.value as AbilityScoreSetter['ability'],
-                            setValue: abilityScoreSetter?.setValue || 19
-                          });
-                        }
-                      }}
-                      className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                    >
-                      <option value="">None</option>
-                      <option value="STR">Strength</option>
-                      <option value="DEX">Dexterity</option>
-                      <option value="CON">Constitution</option>
-                      <option value="INT">Intelligence</option>
-                      <option value="WIS">Wisdom</option>
-                      <option value="CHA">Charisma</option>
-                    </select>
-                    {abilityScoreSetter && (
-                      <input
-                        type="number"
-                        min="1"
-                        max="30"
-                        value={abilityScoreSetter.setValue}
-                        onChange={(e) => setAbilityScoreSetter({
-                          ...abilityScoreSetter,
-                          setValue: parseInt(e.target.value) || 19
-                        })}
-                        className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                        placeholder="19"
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Ability Score Bonus */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Add to Ability Score
-                  </label>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 italic">
-                    Adds a bonus to an ability score (e.g., Headband of Intellect +2 INT)
-                  </p>
-                  <div className="flex gap-2">
-                    <select
-                      value={abilityScoreBonus?.ability || ''}
-                      onChange={(e) => {
-                        if (e.target.value === '') {
                           setAbilityScoreBonus(undefined);
-                        } else {
+                        } else if (e.target.value === 'set') {
+                          setAbilityScoreBonus(undefined);
+                          setAbilityScoreSetter({
+                            ability: abilityScoreSetter?.ability || 'STR',
+                            setValue: 19
+                          });
+                        } else if (e.target.value === 'bonus') {
+                          setAbilityScoreSetter(undefined);
                           setAbilityScoreBonus({
-                            ability: e.target.value as AbilityScoreBonus['ability'],
-                            bonus: abilityScoreBonus?.bonus || 2
+                            ability: abilityScoreBonus?.ability || 'STR',
+                            bonus: 2
                           });
                         }
                       }}
-                      className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                     >
-                      <option value="">None</option>
-                      <option value="STR">Strength</option>
-                      <option value="DEX">Dexterity</option>
-                      <option value="CON">Constitution</option>
-                      <option value="INT">Intelligence</option>
-                      <option value="WIS">Wisdom</option>
-                      <option value="CHA">Charisma</option>
+                      <option value="">No Ability Score Bonus</option>
+                      <option value="set">Set ability to value</option>
+                      <option value="bonus">Add bonus to ability</option>
                     </select>
-                    {abilityScoreBonus && (
-                      <input
-                        type="number"
-                        min="1"
-                        max="12"
-                        value={abilityScoreBonus.bonus}
-                        onChange={(e) => setAbilityScoreBonus({
-                          ...abilityScoreBonus,
-                          bonus: parseInt(e.target.value) || 2
-                        })}
-                        className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                        placeholder="+2"
-                      />
+
+                    {/* Ability and value inputs */}
+                    {(abilityScoreSetter || abilityScoreBonus) && (
+                      <div className="flex gap-2">
+                        <select
+                          value={abilityScoreSetter?.ability || abilityScoreBonus?.ability || ''}
+                          onChange={(e) => {
+                            const ability = e.target.value as AbilityScoreSetter['ability'];
+                            if (abilityScoreSetter) {
+                              setAbilityScoreSetter({ ...abilityScoreSetter, ability });
+                            } else if (abilityScoreBonus) {
+                              setAbilityScoreBonus({ ...abilityScoreBonus, ability });
+                            }
+                          }}
+                          className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                        >
+                          <option value="STR">Strength</option>
+                          <option value="DEX">Dexterity</option>
+                          <option value="CON">Constitution</option>
+                          <option value="INT">Intelligence</option>
+                          <option value="WIS">Wisdom</option>
+                          <option value="CHA">Charisma</option>
+                        </select>
+                        {abilityScoreSetter && (
+                          <input
+                            type="number"
+                            min="1"
+                            max="30"
+                            value={abilityScoreSetter.setValue}
+                            onChange={(e) => setAbilityScoreSetter({
+                              ...abilityScoreSetter,
+                              setValue: parseInt(e.target.value) || 19
+                            })}
+                            className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                            placeholder="19"
+                          />
+                        )}
+                        {abilityScoreBonus && (
+                          <input
+                            type="number"
+                            min="1"
+                            max="12"
+                            value={abilityScoreBonus.bonus}
+                            onChange={(e) => setAbilityScoreBonus({
+                              ...abilityScoreBonus,
+                              bonus: parseInt(e.target.value) || 2
+                            })}
+                            className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                            placeholder="+2"
+                          />
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
