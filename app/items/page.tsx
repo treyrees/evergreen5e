@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import srdItems from '@/data/srd-items.json';
 import { MagicItem } from '@/types/magic-item';
 import { getItemScore } from '@/lib/calculator';
+import { getWarningIndicator } from '@/lib/item-balance-flags';
 
 export default function ItemsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,6 +64,15 @@ export default function ItemsPage() {
     return effects;
   };
 
+  // Get discrepancy category
+  const getDiscrepancyCategory = (itemName: string): string => {
+    const warnings = getWarningIndicator(itemName);
+    if (warnings.hasNumerical) return 'Numerical Edge Case';
+    if (warnings.hasSpecial) return 'Special Mechanics';
+    if (warnings.hasCommunity) return 'Community Note';
+    return '';
+  };
+
   // Process items with scores
   const itemsWithScores = useMemo(() => {
     return srdItems.map(item => {
@@ -70,11 +80,13 @@ export default function ItemsPage() {
       const score = getItemScore(magicItem);
       const calculatedRarity = getCalculatedRarity(score);
       const effects = getEffectsList(magicItem);
+      const discrepancyCategory = getDiscrepancyCategory(item.name);
       return {
         ...item,
         score,
         calculatedRarity,
         effects,
+        discrepancyCategory,
       };
     });
   }, []);
@@ -249,6 +261,9 @@ export default function ItemsPage() {
                   <th className="text-left p-3 text-emerald-400 font-semibold">
                     Quantifiable Effects
                   </th>
+                  <th className="text-left p-3 text-emerald-400 font-semibold">
+                    Discrepancy Category
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -305,6 +320,31 @@ export default function ItemsPage() {
                           <div className="text-slate-500 italic text-xs">
                             No quantifiable effects
                           </div>
+                        )}
+                      </td>
+
+                      {/* Discrepancy Category */}
+                      <td className="p-3">
+                        {item.discrepancyCategory ? (
+                          <div className="text-xs">
+                            {item.discrepancyCategory === 'Numerical Edge Case' && (
+                              <span className="inline-flex items-center gap-1 text-blue-400">
+                                🔢 {item.discrepancyCategory}
+                              </span>
+                            )}
+                            {item.discrepancyCategory === 'Special Mechanics' && (
+                              <span className="inline-flex items-center gap-1 text-purple-400">
+                                ⭐ {item.discrepancyCategory}
+                              </span>
+                            )}
+                            {item.discrepancyCategory === 'Community Note' && (
+                              <span className="inline-flex items-center gap-1 text-slate-300">
+                                💬 {item.discrepancyCategory}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-slate-500 text-xs">—</div>
                         )}
                       </td>
                     </tr>
