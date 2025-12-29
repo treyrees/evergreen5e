@@ -1087,6 +1087,23 @@ export default function CalculatorPage() {
                                   {warnings.hasCommunity && '💬 '}
                                   {anchor.description || warnings.explanation}
                                 </div>
+                                <div className={`text-[10px] mt-2 pt-2 border-t ${
+                                  warnings.hasNumerical
+                                    ? 'text-blue-400/80 border-blue-700/30'
+                                    : warnings.hasSpecial
+                                    ? 'text-purple-400/80 border-purple-700/30'
+                                    : 'text-slate-400/80 border-slate-700/30'
+                                }`}>
+                                  {warnings.hasSpecial && (
+                                    <span>💡 <strong>Special mechanics</strong>: These items grant bonuses that can&apos;t be expressed in numbers. Understand the item&apos;s effect and add something similar of your own to match the anchor!</span>
+                                  )}
+                                  {warnings.hasNumerical && !warnings.hasSpecial && (
+                                    <span>💡 <strong>Numerical edge case</strong>: These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.</span>
+                                  )}
+                                  {warnings.hasCommunity && !warnings.hasSpecial && !warnings.hasNumerical && (
+                                    <span>💡 <strong>Community note</strong>: This item is probably underpowered. Take this reference with a grain of salt.</span>
+                                  )}
+                                </div>
                               </div>
                             )}
 
