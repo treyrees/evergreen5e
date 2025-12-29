@@ -57,7 +57,7 @@ export default function RootLayout({
               {/* Elixir/potion bottle icon */}
               <path d="M9 2v2H8a1 1 0 00-1 1v1.5a1.5 1.5 0 001.5 1.5h.5v1.17A6.5 6.5 0 005 15.5V19a3 3 0 003 3h8a3 3 0 003-3v-3.5a6.5 6.5 0 00-4-6.33V9h.5a1.5 1.5 0 001.5-1.5V6a1 1 0 00-1-1h-1V2H9zm1 7.83V9h4v.83a6.5 6.5 0 012 2.17H8a6.5 6.5 0 012-2.17zM8 14h8v5a1 1 0 01-1 1H9a1 1 0 01-1-1v-5z" />
             </svg>
-            Support this project
+            Buy the forgemaster another mead!
           </a>
         </footer>
       </body>
