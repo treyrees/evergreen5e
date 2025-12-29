@@ -661,10 +661,10 @@ export default function CalculatorPage() {
                     </div>
                   </div>
 
-                  {/* Permanent Buffs - Collapsible */}
-                  <details className="bg-slate-700/30 border border-slate-600 rounded-md">
+                  {/* Senses & Movement - Collapsible */}
+                  <details className="bg-slate-700/30 border border-slate-600 rounded-md font-sans">
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
-                      Passive Benefits
+                      Senses & Movement
                     </summary>
                     <div className="px-3 pb-3 pt-2 border-t border-slate-600">
                       <div className="grid grid-cols-2 gap-2">
@@ -732,7 +732,7 @@ export default function CalculatorPage() {
                   </details>
 
                   {/* Damage Resistances - Collapsible */}
-                  <details className="bg-slate-700/30 border border-slate-600 rounded-md">
+                  <details className="bg-slate-700/30 border border-slate-600 rounded-md font-sans">
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
                       Damage Resistances
                       {resistances.length > 0 && (
@@ -1248,7 +1248,7 @@ export default function CalculatorPage() {
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Resistances:</div>
-                      <div>• 2.0 points per damage type resisted</div>
+                      <div>• 0.5 points per damage type resisted</div>
                     </div>
 
                     <div className="space-y-1">
