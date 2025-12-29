@@ -602,11 +602,27 @@ export default function CalculatorPage() {
                       📖 Spell Level Reference
                     </summary>
                     <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2 border-t border-blue-200 dark:border-blue-800">
-                      <p className="font-semibold text-sm mb-1">
-                        Find a spell with similar effects.
-                      </p>
+                      <div className="space-y-1.5 mb-3">
+                        <p className="font-semibold text-sm">
+                          Find a spell with similar effects.
+                        </p>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                          Think abstractly: "mass control" → enchantment spells. "Damage over time" → conjuration/evocation.
+                          Reskin freely—a sword shooting lightning bolts is mechanically identical to casting <em>Lightning Bolt</em>.
+                        </p>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                          <strong>Search tip:</strong> Browse by spell school (abjuration, conjuration, divination, enchantment, evocation, illusion, necromancy, transmutation).
+                        </p>
+                        <p className="text-[10px] text-blue-600 dark:text-blue-400">
+                          → <a href="https://www.dndbeyond.com/sources/dnd/free-rules/spells" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-800 dark:hover:text-blue-300">5e SRD Spells (D&D Beyond)</a> or see DMG/PHB spell lists
+                        </p>
+                      </div>
 
                       <div className="space-y-1.5 bg-white dark:bg-slate-800/50 rounded p-2 border border-blue-100 dark:border-blue-900 text-[11px]">
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 italic mb-1 pb-1 border-b border-slate-200 dark:border-slate-700">
+                          Spell slots: Lv1-5 have multiple slots/day. <strong>Lv6+ only ONE slot each.</strong> Items that bypass this scarcity are very powerful.
+                        </div>
+
                         <div>
                           <span className="font-semibold text-slate-700 dark:text-slate-300">Level 0</span>
                           <span className="text-slate-500"> • ~0 pts</span>
@@ -616,13 +632,13 @@ export default function CalculatorPage() {
                         <div>
                           <span className="font-semibold text-slate-700 dark:text-slate-300">Level 1-2</span>
                           <span className="text-slate-500"> • ~0.25-0.5 pts</span>
-                          <span className="text-slate-600 dark:text-slate-400"> — 2d6-4d6, single target. (Magic Missile, Scorching Ray, Invisibility)</span>
+                          <span className="text-slate-600 dark:text-slate-400"> — 2d6-4d6, single target. Multiple slots/day. (Magic Missile, Scorching Ray, Invisibility)</span>
                         </div>
 
                         <div className="bg-emerald-50 dark:bg-emerald-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-emerald-500">
                           <div>
                             <span className="font-semibold text-emerald-700 dark:text-emerald-300">⚡ Level 3</span>
-                            <span className="text-emerald-600 dark:text-emerald-400"> • ~0.75 pts • 5th level characters</span>
+                            <span className="text-emerald-600 dark:text-emerald-400"> • ~0.75 pts • 5th level characters • Multiple slots</span>
                           </div>
                           <div className="text-emerald-700 dark:text-emerald-300 font-medium mt-0.5">
                             AoE unlocks: 8d6 in 20ft sphere (Fireball) or 100ft line (Lightning Bolt). Hits 3-6 enemies = 3x damage.
@@ -632,25 +648,25 @@ export default function CalculatorPage() {
                         <div>
                           <span className="font-semibold text-slate-700 dark:text-slate-300">Level 4-5</span>
                           <span className="text-slate-500"> • ~1.0-1.25 pts</span>
-                          <span className="text-slate-600 dark:text-slate-400"> — 8d8, large AoE. (Wall of Fire, Cone of Cold, Polymorph)</span>
+                          <span className="text-slate-600 dark:text-slate-400"> — 8d8, large AoE. Multiple slots/day. (Wall of Fire, Cone of Cold, Polymorph)</span>
                         </div>
 
                         <div className="bg-amber-50 dark:bg-amber-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-amber-500">
                           <span className="font-semibold text-amber-700 dark:text-amber-300">Level 6</span>
-                          <span className="text-amber-600 dark:text-amber-400"> • ~1.5 pts • 11th level characters • 1 slot/day</span>
-                          <span className="text-amber-700 dark:text-amber-300"> — 10d8. (Chain Lightning, Disintegrate)</span>
+                          <span className="text-amber-600 dark:text-amber-400"> • ~1.5 pts • 11th level • ONE slot/day</span>
+                          <span className="text-amber-700 dark:text-amber-300"> — 10d8. Scarcity begins. (Chain Lightning, Disintegrate)</span>
                         </div>
 
                         <div>
                           <span className="font-semibold text-slate-700 dark:text-slate-300">Level 7-8</span>
-                          <span className="text-slate-500"> • ~1.75-2.0 pts • 1 slot/day each</span>
+                          <span className="text-slate-500"> • ~1.75-2.0 pts • ONE slot each</span>
                           <span className="text-slate-600 dark:text-slate-400"> — (Finger of Death, Dominate Monster)</span>
                         </div>
 
                         <div className="bg-red-50 dark:bg-red-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-red-500">
                           <span className="font-semibold text-red-700 dark:text-red-300">Level 9</span>
-                          <span className="text-red-600 dark:text-red-400"> • ~2.5 pts • 17th level characters • ONE slot/day</span>
-                          <span className="text-red-700 dark:text-red-300"> — 40d6. (Meteor Swarm, Wish)</span>
+                          <span className="text-red-600 dark:text-red-400"> • ~2.5 pts • 17th level • ONE slot forever</span>
+                          <span className="text-red-700 dark:text-red-300"> — 40d6. Never get more slots. (Meteor Swarm, Wish)</span>
                         </div>
                       </div>
 
