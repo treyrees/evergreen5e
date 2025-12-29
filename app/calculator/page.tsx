@@ -182,6 +182,7 @@ export default function CalculatorPage() {
   const [showChargeForm, setShowChargeForm] = useState(false);
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
   // Generate random placeholder after mount to avoid hydration mismatch
   const [randomPlaceholder, setRandomPlaceholder] = useState('');
   useEffect(() => {
@@ -755,7 +756,7 @@ export default function CalculatorPage() {
                             onChange={(e) => setFlightEnabled(e.target.checked)}
                             className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
                           />
-                          <span className="text-sm text-slate-300">🦅 Flight</span>
+                          <span className="text-sm text-slate-300">Flight</span>
                         </label>
                         {flightEnabled && (
                           <div className="mt-2 ml-6 grid grid-cols-2 gap-2">
@@ -1127,6 +1128,8 @@ export default function CalculatorPage() {
                         const { anchor, anchorScore, comparison } = anchorData;
                         const warnings = getWarningIndicator(anchor.name);
                         const scoreDiff = results.combatScore - anchorScore;
+                        const hasWarnings = warnings.hasSpecial || warnings.hasCommunity;
+                        const isExpanded = expandedItemInfo === anchor.name;
 
                         return (
                           <div key={index} className={`rounded-lg overflow-hidden border-2 ${getMedalBorderClass(index)}`}>
@@ -1136,7 +1139,7 @@ export default function CalculatorPage() {
                               <div className={`${getRarityBgClass(results.suggestedRarity)} p-3 border-r border-slate-700`}>
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-slate-200 font-semibold text-sm truncate">{itemName || 'Your Item'}</span>
-                                  {attunement && <span title="Requires Attunement" className="text-xs">🏆</span>}
+                                  {attunement && <span title="Requires Attunement" className="text-[10px] px-1 py-0.5 bg-violet-900/50 text-violet-300 rounded">A</span>}
                                 </div>
                                 <div className="text-xs mb-2">
                                   <span className="font-mono text-slate-300"><AnimatedNumber value={results.combatScore} /> pts</span>
@@ -1161,9 +1164,16 @@ export default function CalculatorPage() {
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>
                                   <div className="flex items-center gap-1">
-                                    {warnings.hasSpecial && <span title="Special mechanics" className="text-[10px]">⭐</span>}
-                                    {warnings.hasCommunity && <span title="Community note" className="text-[10px]">💬</span>}
-                                    {anchor.attunement && <span title="Requires Attunement" className="text-xs">🏆</span>}
+                                    {hasWarnings && (
+                                      <button
+                                        onClick={() => setExpandedItemInfo(isExpanded ? null : anchor.name)}
+                                        title="View notes"
+                                        className="text-[10px] px-1 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded transition-colors"
+                                      >
+                                        ℹ
+                                      </button>
+                                    )}
+                                    {anchor.attunement && <span title="Requires Attunement" className="text-[10px] px-1 py-0.5 bg-violet-900/50 text-violet-300 rounded">A</span>}
                                   </div>
                                 </div>
                                 <div className="text-xs mb-2">
@@ -1185,6 +1195,17 @@ export default function CalculatorPage() {
                                 </div>
                               </div>
                             </div>
+
+                            {/* Expanded Info Panel */}
+                            {isExpanded && warnings.explanation && (
+                              <div className="bg-slate-800 px-3 py-2 border-t border-slate-700">
+                                <div className="text-[11px] text-slate-400">
+                                  {warnings.hasSpecial && <span className="text-amber-400">⭐ Special: </span>}
+                                  {warnings.hasCommunity && <span className="text-sky-400">💬 Note: </span>}
+                                  {warnings.explanation}
+                                </div>
+                              </div>
+                            )}
 
                             {/* Difference Summary */}
                             <div className="bg-slate-900/50 px-3 py-2 border-t border-slate-700">
