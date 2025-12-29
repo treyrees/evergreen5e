@@ -1,47 +1,69 @@
 /**
  * Three types of item balance warnings:
- * 1. Special mechanics - Non-numerical benefits (flight, invisibility, instant kill)
- * 2. Numerical edge cases - Conditional bonuses dependent on setting/campaign
- * 3. Community notes - Override used but value suggests underpowered for tier
+ * 1. Special mechanics - Non-numerical benefits (flight, invisibility, instant kill, action economy)
+ * 2. Numerical edge cases - Conditional bonuses dependent on setting/campaign frequency
+ * 3. Community notes - Items where official rarity doesn't match calculated value (over/underpowered)
  */
 
 /**
  * Special mechanics: Items with non-numerical benefits our math can't quantify
- * Examples: Flight, invisibility, instant kill, spell absorption, action economy
+ * Examples: Flight, invisibility, instant kill, spell absorption, action economy, special restrictions
  */
 export const SPECIAL_MECHANICS = new Set([
-  'Vorpal Sword',              // Instant kill on nat 20
+  // Instant-kill or save-or-die effects
+  'Vorpal Sword',              // Decapitation on nat 20
   'Nine Lives Stealer',        // Save-or-die on nat 20
+
+  // Spell absorption/storage/action economy
   'Rod of Absorption',         // Absorbs spells targeting you
-  'Boots of Speed',            // Doubled movement + advantage
-  'Gloves of Missile Snaring', // Deflect ranged attacks
+  'Ring of Spell Storing',     // Stores 5 spell levels (breaks action economy)
+  'Luck Blade',                // Can cast Wish (ultimate spell)
+
+  // Tactical mobility and positioning
+  'Boots of Speed',            // Doubled movement + disadvantage on opportunity attacks
+  'Broom of Flying',           // Unlimited flight (official Uncommon but calc says Rare)
   'Cloak of Invisibility',     // Tactical invisibility
-  'Ring of Spell Storing',     // Breaks action economy
-  'Broom of Flying',           // Unlimited flight
-  'Staff of Power',            // Complex stacking bonuses
-  'Sun Blade',                 // Finesse longsword + radiant
-  'Cloak of Protection',       // Stacking AC + all saves
+
+  // Defensive special mechanics
+  'Gloves of Missile Snaring', // Deflect ranged attacks (reaction-based)
+  'Cloak of Protection',       // +1 AC and +1 all saves stacks with everything
+
+  // Complex stacking or restrictions
+  'Staff of Power',            // +2 to attack/damage/AC/saves (spellcaster-only attunement)
+  'Sun Blade',                 // Finesse property on longsword + radiant damage type
 ]);
 
 /**
  * Numerical edge cases: Conditional bonuses dependent on setting/campaign
- * Examples: +damage vs specific creatures, crit-only effects, 1/day abilities
+ * These items can be quantified, but their value varies wildly based on how often
+ * the condition triggers in your specific campaign
  */
 export const NUMERICAL_EDGE_CASES = new Set([
+  // Critical-only effects (5% base proc rate, higher with crit-fishing builds)
   'Vicious Weapon',            // +2d6 on nat 20 only
-  'Oathbow',                   // +3d6 vs sworn enemy only
+
+  // Creature-type conditional damage
+  'Oathbow',                   // +3d6 + advantage vs sworn enemy only
   'Giant Slayer',              // +2d6 vs giants only + prone
-  'Mace of Disruption',        // 2d6 vs undead/fiends only + destroy
-  'Mace of Smiting',           // +3 vs constructs only + crit bonus
-  'Dagger of Venom',           // 1/day poison + condition
+  'Dragon Slayer',             // +3d6 vs dragons only
+  'Mace of Disruption',        // 2d6 radiant vs undead/fiends + possible destruction
+  'Mace of Smiting',           // +3 vs constructs only + extra crit damage
+
+  // Limited use abilities
+  'Dagger of Venom',           // 2d10 poison + condition, but only 1/day
+  'Javelin of Lightning',      // 4d6 line damage, but only 1/day
 ]);
 
 /**
- * Community notes: Items where our value is lower than book rarity
- * Community consensus suggests these items are underpowered for their tier
+ * Community notes: Items where official rarity seems misaligned with power level
+ * These use overrideScore or are known balance oddities in official 5e
  */
 export const COMMUNITY_NOTES = new Set([
-  'Wings of Flying',           // Calc 1.0 (Uncommon) but official Rare - limited flight weak for tier
+  // Official seems too LOW (item is stronger than rarity suggests)
+  // (none currently - most "underpriced" items have Special Mechanics flags)
+
+  // Official seems too HIGH (item is weaker than rarity suggests)
+  'Wings of Flying',           // Calc 1.0 pts (Uncommon) but official Rare - limited 1hr flight is weak
 ]);
 
 /**
@@ -69,64 +91,85 @@ export function hasCommunityNotes(itemName: string): boolean {
  * Get explanation for why an item is flagged
  */
 export function getItemExplanation(itemName: string): string {
-  // Special mechanics
+  // === SPECIAL MECHANICS ===
+
+  // Instant-kill effects
   if (itemName === 'Vorpal Sword') {
-    return 'Decapitation on nat 20 (instant kill). Override score used.';
+    return 'Decapitates on nat 20 (instant kill, no save for most creatures). Power level is campaign-defining.';
   }
   if (itemName === 'Nine Lives Stealer') {
-    return 'Drains life force on nat 20 (save-or-die). Override score used.';
+    return 'Drains life force on nat 20 vs <100 HP (DC 15 CON or die). Save-or-die adds ~1.5 pts beyond +2.';
   }
+
+  // Action economy and spell effects
   if (itemName === 'Rod of Absorption') {
-    return 'Absorbs spells targeting you. Override score used.';
-  }
-  if (itemName === 'Boots of Speed') {
-    return 'Doubles movement + Dex save advantage. Override score used.';
-  }
-  if (itemName === 'Gloves of Missile Snaring') {
-    return 'Catch and deflect ranged attacks. Override score used.';
-  }
-  if (itemName === 'Cloak of Invisibility') {
-    return 'Tactical invisibility with charges. Override score used.';
+    return 'Absorbs spells targeting you, negating effects. Defensive utility is extremely campaign-dependent.';
   }
   if (itemName === 'Ring of Spell Storing') {
-    return 'Stores up to 5 spell levels (breaks action economy). Override score used.';
+    return 'Stores up to 5 spell levels. Breaks action economy by allowing pre-cast buffs or extra spell slots.';
+  }
+  if (itemName === 'Luck Blade') {
+    return 'Can cast Wish (1d4-1 times). The Wish spell alone makes this Legendary regardless of +1 bonus.';
+  }
+
+  // Mobility
+  if (itemName === 'Boots of Speed') {
+    return 'Click heels to double speed for 10 min. Opportunity attacks have disadvantage. Mobility is hard to price.';
   }
   if (itemName === 'Broom of Flying') {
-    return 'Unlimited flight calculates as 2.0 pts (Rare) but official is Uncommon. Flight is hard to quantify.';
+    return 'Unlimited flight calculates as 2.0 pts (Rare) but official is Uncommon. No attunement makes it accessible.';
   }
-  if (itemName === 'Staff of Power') {
-    return '+2 to attack/damage/AC/saves calculates as 6.0 pts (Legendary), but official is Very Rare. Spellcaster attunement limits value.';
+  if (itemName === 'Cloak of Invisibility') {
+    return 'Tactical invisibility (3 charges, 1hr each). Invisibility advantage on attacks/stealth is campaign-defining.';
   }
-  if (itemName === 'Sun Blade') {
-    return '+2 finesse longsword + 1d8 radiant calculates as 3.38 pts (Very Rare) but official is Rare. Finesse + radiant hard to value.';
+
+  // Defensive
+  if (itemName === 'Gloves of Missile Snaring') {
+    return 'Reaction to reduce ranged weapon damage by 1d10+DEX. Situational but can completely negate hits.';
   }
   if (itemName === 'Cloak of Protection') {
-    return '+1 AC and +1 to all saves calculates as 2.0 pts (Rare), but official is Uncommon. Stacking bonuses hard to value.';
+    return '+1 AC and +1 all saves is 2.0 pts (Rare calc) but official Uncommon. Stacks with everything unlike most AC.';
   }
 
-  // Numerical edge cases
+  // Complex effects
+  if (itemName === 'Staff of Power') {
+    return '+2 to attack/damage/AC/saves is 6.0 pts (Legendary calc) but official Very Rare. Spellcaster-only attunement limits audience significantly.';
+  }
+  if (itemName === 'Sun Blade') {
+    return '+2 sword with 1d8 radiant is 3.25 pts (VR calc) but official Rare. Finesse on longsword has hidden build value.';
+  }
+
+  // === NUMERICAL EDGE CASES ===
+
   if (itemName === 'Vicious Weapon') {
-    return '+2d6 on natural 20 only (5% proc). Calc: 0.09 pts (Uncommon), official: Rare. Value depends on crit-fishing builds.';
+    return '+2d6 on natural 20 only (5% proc). Value ranges from ~0.1 pts (normal) to ~1.0+ pts (crit-fishing Champion).';
   }
   if (itemName === 'Oathbow') {
-    return '+3d6 + advantage vs sworn enemy. Calc: 2.77 pts (Rare), official: Very Rare. Value depends on campaign.';
+    return '+3d6 + advantage vs sworn enemy (1 target/dawn). Calc: 2.0 pts (Rare), official: Very Rare. Value depends on campaign pacing.';
   }
   if (itemName === 'Giant Slayer') {
-    return '+1 weapon + 2d6 vs giants + prone. Calc: 1.85 pts (Uncommon), official: Rare. Value depends on giant encounters.';
+    return '+1 weapon + 2d6 vs giants + prone. Calc: 2.0 pts (Rare), matches official. Value depends on giant frequency.';
+  }
+  if (itemName === 'Dragon Slayer') {
+    return '+1 weapon + 3d6 vs dragons. Calc: 2.5 pts (Rare), matches official. Value depends on dragon frequency.';
   }
   if (itemName === 'Mace of Disruption') {
-    return '2d6 radiant vs undead/fiends + destroy. Calc: 1.1 pts (Uncommon), official: Rare. Value depends on undead campaign.';
+    return '2d6 radiant vs undead/fiends + possible destruction. Calc: 1.0 pts (Uncommon), official Rare. Undead campaign = much higher.';
   }
   if (itemName === 'Mace of Smiting') {
-    return '+1 mace, +3 vs constructs + crit bonus. Calc: 1.0 pts (Uncommon), official: Rare. Value depends on construct encounters.';
+    return '+1 mace, +3 vs constructs + crit bonus. Calc: 1.0 pts (Uncommon), official Rare. Construct campaign = higher value.';
   }
   if (itemName === 'Dagger of Venom') {
-    return '+1 dagger + 2d10 poison + poisoned (1/day). Calc: 1.4 pts (Uncommon), official: Rare. Situational use.';
+    return '+1 dagger + 2d10 poison + poisoned (1/day). The once-per-day limit makes daily value low despite burst potential.';
+  }
+  if (itemName === 'Javelin of Lightning') {
+    return '4d6 lightning line (1/day recharge at dawn). Calc: 0.6 pts, official Uncommon. Single daily use limits value.';
   }
 
-  // Community notes
+  // === COMMUNITY NOTES ===
+
   if (itemName === 'Wings of Flying') {
-    return 'Limited flight (1 hr/day). Calc: 1.0 pts (Uncommon), official: Rare. Community considers this weak for Rare tier.';
+    return 'Limited flight (1 hr/day). Calc: 1.0 pts (Uncommon), official: Rare. Community consensus: weak for Rare tier.';
   }
 
   return '';

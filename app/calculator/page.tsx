@@ -1257,7 +1257,7 @@ export default function CalculatorPage() {
 
                     <div className="space-y-1">
                       <div className="text-emerald-400 font-semibold">Resistances:</div>
-                      <div>• 1.5 points per damage type resisted</div>
+                      <div>• 2.0 points per damage type resisted</div>
                     </div>
 
                     <div className="space-y-1">
@@ -1273,6 +1273,16 @@ export default function CalculatorPage() {
                       <div className="text-emerald-400 font-semibold">Rarity Thresholds:</div>
                       <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
                       <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Attunement:</div>
+                      <div className="text-slate-300 text-[11px]">
+                        Attunement does <span className="text-yellow-400">not</span> modify scores. Official 5e pricing is inconsistent—Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
+                      </div>
+                      <div className="text-slate-500 italic text-[10px] mt-1">
+                        When comparing, prioritize anchors with matching attunement. The 3-slot limit means attunement is an &quot;opportunity cost&quot; that varies by build.
+                      </div>
                     </div>
                   </div>
 
