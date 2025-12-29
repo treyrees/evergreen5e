@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, useSpring, useTransform } from 'framer-motion';
+import { motion, useSpring, useTransform, AnimatePresence } from 'framer-motion';
 import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty } from '@/types/magic-item';
 import {
   getSuggestedRarity,
@@ -96,6 +96,13 @@ const BASE_ITEMS = {
   ],
 };
 
+// Helper to check if a base item is a weapon
+const WEAPON_ITEMS = new Set([
+  ...BASE_ITEMS['Melee Weapons (Simple)'],
+  ...BASE_ITEMS['Melee Weapons (Martial)'],
+  ...BASE_ITEMS['Ranged Weapons'],
+]);
+
 const DAMAGE_DICE = ['1d4', '1d6', '1d8', '1d10', '2d6', '2d8', '3d6', '3d8', '4d6'];
 
 const DAMAGE_TYPES = [
@@ -154,11 +161,15 @@ export default function CalculatorPage() {
   useEffect(() => {
     setRandomPlaceholder(generateRandomItemName());
   }, []);
+
   const [newAbility, setNewAbility] = useState<ChargedAbility>({
     spell: '',
     spellLevel: 0,
     chargesPerUse: 1,
   });
+
+  // Check if selected base item is a weapon
+  const isWeaponSelected = useMemo(() => WEAPON_ITEMS.has(baseItem), [baseItem]);
 
   // Check if any combat attributes are selected (for blur effect)
   const hasPermanentBuffs = Object.values(permanentBuffs).some(v => v === true);
@@ -175,9 +186,10 @@ export default function CalculatorPage() {
       abilityScoreSetter !== undefined ||
       abilityScoreBonus !== undefined ||
       hasPermanentBuffs ||
-      weaponProperties.length > 0
+      weaponProperties.length > 0 ||
+      resistances.length > 0
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, weaponProperties]);
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, weaponProperties, resistances]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
@@ -263,7 +275,14 @@ export default function CalculatorPage() {
                   </label>
                   <select
                     value={baseItem}
-                    onChange={(e) => setBaseItem(e.target.value)}
+                    onChange={(e) => {
+                      const newItem = e.target.value;
+                      setBaseItem(newItem);
+                      // Clear weapon properties when switching to a non-weapon
+                      if (!WEAPON_ITEMS.has(newItem)) {
+                        setWeaponProperties([]);
+                      }
+                    }}
                     className="w-full px-4 py-2.5 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   >
                     <option value="" disabled className="text-slate-500">
@@ -488,42 +507,51 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Weapon Properties - Added Properties */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-3">
-                    Added Weapon Properties
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {([
-                      { id: 'finesse', label: 'Finesse', tooltip: 'Use DEX or STR for attacks' },
-                      { id: 'light', label: 'Light', tooltip: 'Enables two-weapon fighting' },
-                      { id: 'reach', label: 'Reach', tooltip: '+5 feet reach on attacks' },
-                      { id: 'thrown', label: 'Thrown', tooltip: 'Can throw for ranged attack' },
-                      { id: 'versatile', label: 'Versatile', tooltip: 'Use with one or two hands' },
-                      { id: 'heavy-two-handed', label: 'Heavy / Two-Handed', tooltip: 'Heavy or requires two hands' },
-                    ] as const).map((prop) => (
-                      <label
-                        key={prop.id}
-                        className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors"
-                        title={prop.tooltip}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={weaponProperties.includes(prop.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setWeaponProperties([...weaponProperties, prop.id]);
-                            } else {
-                              setWeaponProperties(weaponProperties.filter(p => p !== prop.id));
-                            }
-                          }}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">{prop.label}</span>
+                {/* Weapon Properties - Added Properties (only for weapons) */}
+                <AnimatePresence>
+                  {isWeaponSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    >
+                      <label className="block text-sm font-medium text-slate-300 mb-3">
+                        Added Weapon Properties
                       </label>
-                    ))}
-                  </div>
-                </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {([
+                          { id: 'finesse', label: 'Finesse', tooltip: 'Use DEX or STR for attacks' },
+                          { id: 'light', label: 'Light', tooltip: 'Enables two-weapon fighting' },
+                          { id: 'reach', label: 'Reach', tooltip: '+5 feet reach on attacks' },
+                          { id: 'thrown', label: 'Thrown', tooltip: 'Can throw for ranged attack' },
+                          { id: 'versatile', label: 'Versatile', tooltip: 'Use with one or two hands' },
+                          { id: 'heavy-two-handed', label: 'Heavy / Two-Handed', tooltip: 'Heavy or requires two hands' },
+                        ] as const).map((prop) => (
+                          <label
+                            key={prop.id}
+                            className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors"
+                            title={prop.tooltip}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={weaponProperties.includes(prop.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setWeaponProperties([...weaponProperties, prop.id]);
+                                } else {
+                                  setWeaponProperties(weaponProperties.filter(p => p !== prop.id));
+                                }
+                              }}
+                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                            />
+                            <span className="text-sm text-slate-300">{prop.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
@@ -535,13 +563,13 @@ export default function CalculatorPage() {
               >
                 <div>
                   <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Passive Abilities</span>
-                  <span className="ml-2 text-xs text-slate-500">Senses, Stats, & Movement</span>
+                  <span className="ml-2 text-xs text-slate-500">Senses, Stats, Resistances, & Movement</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showAdvancedOptions ? '−' : '+'}</span>
               </button>
 
               {showAdvancedOptions && (
-                <div className="px-5 pb-5 space-y-5 border-t border-slate-700">
+                <div className="px-5 pb-5 space-y-4 border-t border-slate-700">
                   {/* Ability Score */}
                   <div className="pt-4">
                     <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -633,73 +661,111 @@ export default function CalculatorPage() {
                     </div>
                   </div>
 
-                  {/* Permanent Buffs - Compact Grid */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-3">
+                  {/* Permanent Buffs - Collapsible */}
+                  <details className="bg-slate-700/30 border border-slate-600 rounded-md">
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
                       Passive Benefits
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.flight || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Flight</span>
-                      </label>
+                    </summary>
+                    <div className="px-3 pb-3 pt-2 border-t border-slate-600">
+                      <div className="grid grid-cols-2 gap-2">
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.flight || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Flight</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.darkvision || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, darkvision: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Darkvision</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.darkvision || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, darkvision: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Darkvision</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.speedBonus || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">+10 ft Speed</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.speedBonus || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">+10 ft Speed</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.blindsight || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, blindsight: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Blindsight</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.blindsight || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, blindsight: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Blindsight</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.climbBurrow || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, climbBurrow: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Climb/Burrow</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.climbBurrow || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, climbBurrow: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Climb/Burrow</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.tremorsense || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, tremorsense: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Tremorsense</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.tremorsense || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, tremorsense: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Tremorsense</span>
+                        </label>
+                      </div>
                     </div>
-                  </div>
+                  </details>
+
+                  {/* Damage Resistances - Collapsible */}
+                  <details className="bg-slate-700/30 border border-slate-600 rounded-md">
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
+                      Damage Resistances
+                      {resistances.length > 0 && (
+                        <span className="ml-2 text-xs text-slate-500">({resistances.length} selected)</span>
+                      )}
+                    </summary>
+                    <div className="px-3 pb-3 pt-2 border-t border-slate-600">
+                      <div className="grid grid-cols-2 gap-2">
+                        {DAMAGE_TYPES.map((type) => (
+                          <label
+                            key={type}
+                            className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={resistances.includes(type)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setResistances([...resistances, type]);
+                                } else {
+                                  setResistances(resistances.filter(r => r !== type));
+                                }
+                              }}
+                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                            />
+                            <span className="text-sm text-slate-300">
+                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </details>
                 </div>
               )}
             </div>
@@ -962,7 +1028,7 @@ export default function CalculatorPage() {
                             <div className="grid grid-cols-2">
                               {/* LEFT: Your Item */}
                               <div className="bg-slate-700/50 border-r border-slate-600 p-4 relative">
-                                {attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
+                                {attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🏆</span>}
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
                                   <span className="text-slate-400 text-lg">⚔️</span>
                                   <span className="text-slate-200 font-bold">{itemName || 'YOUR ITEM'}</span>
@@ -1006,7 +1072,7 @@ export default function CalculatorPage() {
 
                               {/* RIGHT: Reference Item */}
                               <div className="bg-slate-700/30 p-4 relative">
-                                {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
+                                {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🏆</span>}
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
                                   <span className="text-slate-400 text-lg">{getItemEmoji(anchor.name)}</span>
                                   <span className="text-slate-200 font-bold">#{index + 1} {anchor.name}</span>
