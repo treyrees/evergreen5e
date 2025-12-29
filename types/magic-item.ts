@@ -97,13 +97,12 @@ export type AdvantageType =
 // Weapon properties that can be added to magic weapons
 // These represent properties not normally on the base weapon type
 export type WeaponProperty =
-  | 'finesse'    // Use DEX or STR for attack/damage rolls
-  | 'heavy'      // Small/Tiny creatures have disadvantage (negative property)
-  | 'light'      // Enables two-weapon fighting
-  | 'reach'      // +5 feet reach on attacks and opportunity attacks
-  | 'thrown'     // Can throw for ranged attack
-  | 'two-handed' // Requires two hands (negative property)
-  | 'versatile'; // Can use with one or two hands
+  | 'finesse'         // Use DEX or STR for attack/damage rolls
+  | 'heavy-two-handed' // Heavy and/or Two-Handed (combined negative property)
+  | 'light'           // Enables two-weapon fighting
+  | 'reach'           // +5 feet reach on attacks and opportunity attacks
+  | 'thrown'          // Can throw for ranged attack
+  | 'versatile';      // Can use with one or two hands
 
 export interface CombatFeatures {
   enhancement: number; // 0, 1, 2, 3

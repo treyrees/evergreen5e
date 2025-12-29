@@ -149,10 +149,11 @@ export default function CalculatorPage() {
   const [showChargeForm, setShowChargeForm] = useState(false);
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-  // Generate random placeholder on first render (client-side only to avoid hydration mismatch)
-  const [randomPlaceholder] = useState(() =>
-    typeof window !== 'undefined' ? generateRandomItemName() : ''
-  );
+  // Generate random placeholder after mount to avoid hydration mismatch
+  const [randomPlaceholder, setRandomPlaceholder] = useState('');
+  useEffect(() => {
+    setRandomPlaceholder(generateRandomItemName());
+  }, []);
   const [newAbility, setNewAbility] = useState<ChargedAbility>({
     spell: '',
     spellLevel: 0,
@@ -252,7 +253,7 @@ export default function CalculatorPage() {
                     type="text"
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
-                    placeholder={randomPlaceholder || 'e.g., Sword of Flames'}
+                    placeholder={randomPlaceholder || 'Sword of Flames'}
                     className="w-full px-4 py-2.5 border border-slate-600 rounded-md bg-slate-900 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
@@ -502,8 +503,7 @@ export default function CalculatorPage() {
                       { id: 'reach', label: 'Reach', tooltip: '+5 feet reach on attacks', value: '+0.25' },
                       { id: 'thrown', label: 'Thrown', tooltip: 'Can throw for ranged attack', value: '+0.1' },
                       { id: 'versatile', label: 'Versatile', tooltip: 'Use with one or two hands', value: '+0.15' },
-                      { id: 'heavy', label: 'Heavy', tooltip: 'Small/Tiny have disadvantage', value: '-0.1' },
-                      { id: 'two-handed', label: 'Two-Handed', tooltip: 'Requires two hands', value: '-0.1' },
+                      { id: 'heavy-two-handed', label: 'Heavy / Two-Handed', tooltip: 'Heavy or requires two hands', value: '-0.15' },
                     ] as const).map((prop) => (
                       <label
                         key={prop.id}
@@ -543,7 +543,7 @@ export default function CalculatorPage() {
               >
                 <div>
                   <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Passive Abilities</span>
-                  <span className="ml-2 text-xs text-slate-500">Stats, Flight, Senses</span>
+                  <span className="ml-2 text-xs text-slate-500">Senses, Stats, & Movement</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showAdvancedOptions ? '−' : '+'}</span>
               </button>
