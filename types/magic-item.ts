@@ -45,8 +45,8 @@ export interface AbilityScoreBonus {
 }
 
 export interface Flight {
-  duration: 'unlimited' | 'limited';
-  hoursPerDay?: number; // if limited (deprecated: use flyDuration instead)
+  duration?: 'unlimited' | 'limited'; // deprecated: use flyDuration instead
+  hoursPerDay?: number; // deprecated: use flyDuration instead
   flySpeed?: number; // fly speed in feet (30, 50, 60, etc.)
   flyDuration?: number | 'unlimited'; // hours per day, or 'unlimited' for permanent
   requiresAction?: boolean; // bonus action to activate
