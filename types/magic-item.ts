@@ -94,6 +94,17 @@ export type AdvantageType =
   | 'str-saves' // Advantage on STR saves
   | 'con-saves'; // Advantage on CON saves
 
+// Weapon properties that can be added to magic weapons
+// These represent properties not normally on the base weapon type
+export type WeaponProperty =
+  | 'finesse'    // Use DEX or STR for attack/damage rolls
+  | 'heavy'      // Small/Tiny creatures have disadvantage (negative property)
+  | 'light'      // Enables two-weapon fighting
+  | 'reach'      // +5 feet reach on attacks and opportunity attacks
+  | 'thrown'     // Can throw for ranged attack
+  | 'two-handed' // Requires two hands (negative property)
+  | 'versatile'; // Can use with one or two hands
+
 export interface CombatFeatures {
   enhancement: number; // 0, 1, 2, 3
   damageBonus?: DamageBonus;
@@ -114,6 +125,9 @@ export interface CombatFeatures {
   conditionInfliction?: ConditionInfliction; // Inflict conditions on attacks (e.g., Energy Bow restraint)
   damageTypeOverride?: string; // Override weapon's damage type (e.g., Energy Bow: force instead of piercing)
   handsFreeDef?: boolean; // Animated Shield: provides defense without using a hand
+
+  // Weapon properties (for adding properties not normally on the base weapon)
+  weaponProperties?: WeaponProperty[]; // Added properties like finesse, reach, etc.
 }
 
 export interface RibbonFeatures {
