@@ -738,10 +738,10 @@ function compareToAnchor(
 
   if (userDmg && !anchorDmg) {
     const freqText = userFreq === 'per-turn' ? ' per turn' : '';
-    details.push(`has ${userDmg}${freqText} damage (anchor has none)`);
+    details.push(`has ${userDmg}${freqText} damage (reference has none)`);
   } else if (!userDmg && anchorDmg) {
     const freqText = anchorFreq === 'per-turn' ? ' per turn' : '';
-    details.push(`no damage bonus (anchor has ${anchorDmg}${freqText})`);
+    details.push(`no damage bonus (reference has ${anchorDmg}${freqText})`);
   } else if (userDmg && anchorDmg) {
     const userDmgValue = getDiceValue(userDmg);
     const anchorDmgValue = getDiceValue(anchorDmg);
@@ -749,7 +749,7 @@ function compareToAnchor(
     const anchorFreqText = anchorFreq === 'per-turn' ? ' per turn' : '';
 
     if (userDmg !== anchorDmg || userFreq !== anchorFreq) {
-      details.push(`${userDmg}${userFreqText} vs anchor's ${anchorDmg}${anchorFreqText} damage`);
+      details.push(`${userDmg}${userFreqText} vs reference's ${anchorDmg}${anchorFreqText} damage`);
     }
   }
 
@@ -768,75 +768,44 @@ function compareToAnchor(
   const userResistances = userCombat.resistances?.length || 0;
   const anchorResistances = anchorCombat.resistances?.length || 0;
   if (userResistances !== anchorResistances) {
-    if (userResistances > anchorResistances) {
-      details.push(`${userResistances} resistances (anchor has ${anchorResistances})`);
-    } else {
-      details.push(`${userResistances} resistances (anchor has ${anchorResistances})`);
-    }
+    details.push(`${userResistances} resistances (reference has ${anchorResistances})`);
   }
 
-  // Spell charges comparison (legacy format)
-  const userCharges = userCombat.charges?.length || 0;
-  const anchorCharges = anchorCombat.charges?.length || 0;
-  if (userCharges !== anchorCharges) {
-    if (userCharges > anchorCharges) {
-      details.push(`${userCharges} spell charges (anchor has ${anchorCharges})`);
-    } else {
-      details.push(`${userCharges} spell charges (anchor has ${anchorCharges})`);
-    }
-  }
-
-  // Charge pool comparison (new format)
+  // Charge pool comparison (new format) - takes priority over legacy charges
   const userPool = userCombat.chargePool;
   const anchorPool = anchorCombat.chargePool;
 
   if (userPool && userPool.abilities.length > 0) {
-    // Calculate sustainable daily charges (same logic as scoring)
-    const userDailyRecharge = userPool.chargesPerLongRest + (userPool.chargesPerShortRest * 2);
-    const userDailyCharges = Math.min(
-      userDailyRecharge > 0 ? userDailyRecharge : userPool.maxCharges,
-      userPool.maxCharges
-    );
+    // User has charge pool abilities - show a single clear summary
+    const abilityNames = userPool.abilities.map(a => a.spell).join(', ');
+    const maxLevel = Math.max(...userPool.abilities.map(a => a.spellLevel));
+    const levelText = maxLevel === 0 ? 'cantrip' : `up to level ${maxLevel}`;
 
-    // Describe each ability and its contribution
-    for (const ability of userPool.abilities) {
-      const usesPerDay = Math.floor(userDailyCharges / ability.chargesPerUse);
-      const spellLevelText = ability.spellLevel === 0 ? 'cantrip' : `level ${ability.spellLevel}`;
-
-      if (anchorPool && anchorPool.abilities.length > 0) {
-        // Compare to anchor's abilities
-        details.push(`${ability.spell} (${spellLevelText}, ~${usesPerDay}×/day)`);
-      } else {
-        // Anchor has no charge pool
-        details.push(`has ${ability.spell} (${spellLevelText}, ~${usesPerDay}×/day, anchor has none)`);
-      }
-    }
-
-    // Add charge pool summary
     if (!anchorPool || anchorPool.abilities.length === 0) {
-      if (userDailyRecharge > 0) {
-        details.push(`${userPool.maxCharges} max charges, ${userDailyRecharge}/day sustainable (anchor has no charges)`);
-      } else {
-        details.push(`${userPool.maxCharges} charges total (anchor has no charges)`);
-      }
+      // Reference has no charge pool
+      details.push(`${userPool.maxCharges} charges for ${userPool.abilities.length} spell${userPool.abilities.length > 1 ? 's' : ''} (${levelText})`);
     } else {
-      const anchorDailyRecharge = anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
-      const anchorDailyCharges = Math.min(
-        anchorDailyRecharge > 0 ? anchorDailyRecharge : anchorPool.maxCharges,
-        anchorPool.maxCharges
-      );
-      if (userDailyCharges !== anchorDailyCharges) {
-        details.push(`~${userDailyCharges} sustainable charges/day vs anchor's ~${anchorDailyCharges}`);
+      // Both have charge pools - compare
+      const anchorMaxLevel = Math.max(...anchorPool.abilities.map(a => a.spellLevel));
+      if (maxLevel !== anchorMaxLevel) {
+        details.push(`spells up to level ${maxLevel} vs reference's level ${anchorMaxLevel}`);
+      }
+      if (userPool.maxCharges !== anchorPool.maxCharges) {
+        details.push(`${userPool.maxCharges} max charges vs reference's ${anchorPool.maxCharges}`);
       }
     }
   } else if (anchorPool && anchorPool.abilities.length > 0) {
-    // User has no charge pool but anchor does
-    const anchorDailyRecharge = anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
-    const anchorDailyCharges = Math.min(
-      anchorDailyRecharge > 0 ? anchorDailyRecharge : anchorPool.maxCharges,
-      anchorPool.maxCharges
-    );
-    details.push(`no spell abilities (anchor has ~${anchorDailyCharges} sustainable charges/day)`);
+    // User has no charge pool but reference does
+    details.push(`no spell abilities (reference has ${anchorPool.abilities.length} spell${anchorPool.abilities.length > 1 ? 's' : ''})`);
+  }
+
+  // Spell charges comparison (legacy format) - only if user doesn't have chargePool
+  if (!userPool || userPool.abilities.length === 0) {
+    const userCharges = userCombat.charges?.length || 0;
+    const anchorCharges = anchorCombat.charges?.length || 0;
+    if (userCharges !== anchorCharges) {
+      details.push(`${userCharges} spell charges (reference has ${anchorCharges})`);
+    }
   }
 
   // Determine type
