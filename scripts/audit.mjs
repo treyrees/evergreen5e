@@ -4,10 +4,17 @@ import { readFileSync } from 'fs';
 const srdItems = JSON.parse(readFileSync('./data/srd-items.json', 'utf8'));
 
 // Inline calculator logic
-const DICE_VALUES = {
-  '1d4': 0.5, '1d6': 1, '1d8': 1.25, '1d10': 1.5,
-  '2d6': 2, '3d6': 3, '2d8': 2.5, '3d8': 3.75, '4d6': 4,
+const DIE_TYPE_VALUES = {
+  'd4': 0.5, 'd6': 1.0, 'd8': 1.25, 'd10': 1.5, 'd12': 1.75, 'd20': 2.5,
 };
+
+function getDiceValue(diceString) {
+  const match = diceString.match(/^(\d+)d(\d+)$/);
+  if (!match) return 0;
+  const numDice = parseInt(match[1]);
+  const dieType = `d${match[2]}`;
+  return numDice * (DIE_TYPE_VALUES[dieType] || 1.0);
+}
 
 const RECHARGE_MULTIPLIERS = {
   'long rest': 0.25,
@@ -22,7 +29,7 @@ function calculateCombatScore(combat) {
 
   // Damage bonus
   if (combat.damageBonus) {
-    let diceValue = DICE_VALUES[combat.damageBonus.dice] || 0;
+    let diceValue = getDiceValue(combat.damageBonus.dice);
     const frequency = combat.damageBonus.frequency || 'per-hit';
     if (frequency === 'per-turn') diceValue *= 0.4;
     if (combat.damageBonus.conditional) diceValue *= 0.25;

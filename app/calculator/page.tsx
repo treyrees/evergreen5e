@@ -289,27 +289,50 @@ export default function CalculatorPage() {
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Damage Bonus
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex gap-2">
                     <select
-                      value={damageBonus?.dice || ''}
-                      onChange={(e) =>
-                        setDamageBonus(
-                          e.target.value
-                            ? {
-                                dice: e.target.value,
-                                type: damageBonus?.type || 'fire',
-                                frequency: damageBonus?.frequency || 'per-hit',
-                                conditional: damageBonus?.conditional || false,
-                              }
-                            : undefined
-                        )
-                      }
-                      className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      value={damageBonus ? damageBonus.dice.split('d')[0] : ''}
+                      onChange={(e) => {
+                        if (e.target.value === '') {
+                          setDamageBonus(undefined);
+                        } else {
+                          const dieType = damageBonus?.dice.split('d')[1] || '6';
+                          setDamageBonus({
+                            dice: `${e.target.value}d${dieType}`,
+                            type: damageBonus?.type || 'fire',
+                            frequency: damageBonus?.frequency || 'per-hit',
+                            conditional: damageBonus?.conditional || false,
+                          });
+                        }
+                      }}
+                      className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                     >
-                      <option value="">None</option>
-                      {DAMAGE_DICE.map((dice) => (
-                        <option key={dice} value={dice}>
-                          {dice}
+                      <option value="">-</option>
+                      {[1, 2, 3, 4, 5, 6].map((num) => (
+                        <option key={num} value={num}>
+                          {num}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={damageBonus ? `d${damageBonus.dice.split('d')[1]}` : ''}
+                      onChange={(e) => {
+                        if (damageBonus && e.target.value) {
+                          const numDice = damageBonus.dice.split('d')[0];
+                          const dieType = e.target.value.substring(1);
+                          setDamageBonus({
+                            ...damageBonus,
+                            dice: `${numDice}d${dieType}`,
+                          });
+                        }
+                      }}
+                      className="w-24 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      disabled={!damageBonus}
+                    >
+                      <option value="">-</option>
+                      {['d4', 'd6', 'd8', 'd10', 'd12', 'd20'].map((die) => (
+                        <option key={die} value={die}>
+                          {die}
                         </option>
                       ))}
                     </select>
@@ -319,7 +342,7 @@ export default function CalculatorPage() {
                         onChange={(e) =>
                           setDamageBonus({ ...damageBonus, type: e.target.value })
                         }
-                        className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                        className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                       >
                         {DAMAGE_TYPES.map((type) => (
                           <option key={type} value={type}>

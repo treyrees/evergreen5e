@@ -1,17 +1,39 @@
 import { CombatFeatures, Rarity, MagicItem } from '@/types/magic-item';
 import srdItems from '@/data/srd-items.json';
 
-// Dice value mapping
+// Calculate dice value dynamically based on number and type
+// Base values per die type (relative to d6 = 1.0)
+const DIE_TYPE_VALUES: Record<string, number> = {
+  'd4': 0.5,    // 2.5 avg vs 3.5 for d6
+  'd6': 1.0,    // baseline
+  'd8': 1.25,   // 4.5 avg vs 3.5 for d6
+  'd10': 1.5,   // 5.5 avg vs 3.5 for d6
+  'd12': 1.75,  // 6.5 avg vs 3.5 for d6
+  'd20': 2.5,   // 10.5 avg (rarely used for damage, but supported)
+};
+
+function getDiceValue(diceString: string): number {
+  const match = diceString.match(/^(\d+)d(\d+)$/);
+  if (!match) return 0;
+
+  const numDice = parseInt(match[1]);
+  const dieType = `d${match[2]}`;
+  const baseValue = DIE_TYPE_VALUES[dieType] || 1.0;
+
+  return numDice * baseValue;
+}
+
+// Legacy lookup for backward compatibility
 const DICE_VALUES: Record<string, number> = {
-  '1d4': 0.5,
-  '1d6': 1,
-  '1d8': 1.25,
-  '1d10': 1.5,
-  '2d6': 2,
-  '3d6': 3,
-  '2d8': 2.5,
-  '3d8': 3.75,
-  '4d6': 4,
+  '1d4': getDiceValue('1d4'),
+  '1d6': getDiceValue('1d6'),
+  '1d8': getDiceValue('1d8'),
+  '1d10': getDiceValue('1d10'),
+  '2d6': getDiceValue('2d6'),
+  '3d6': getDiceValue('3d6'),
+  '2d8': getDiceValue('2d8'),
+  '3d8': getDiceValue('3d8'),
+  '4d6': getDiceValue('4d6'),
 };
 
 // Recharge frequency multipliers
@@ -131,7 +153,7 @@ export function calculateCombatScore(combat: CombatFeatures): number {
 
   // Damage bonus
   if (combat.damageBonus?.dice) {
-    let diceValue = DICE_VALUES[combat.damageBonus.dice] || 0;
+    let diceValue = getDiceValue(combat.damageBonus.dice);
 
     // Frequency multiplier
     // - per-hit (default): 1.0 - applies to every attack
@@ -522,8 +544,8 @@ function compareToAnchor(
     const freqText = anchorFreq === 'per-turn' ? ' per turn' : '';
     details.push(`no damage bonus (anchor has ${anchorDmg}${freqText})`);
   } else if (userDmg && anchorDmg) {
-    const userDmgValue = DICE_VALUES[userDmg] || 0;
-    const anchorDmgValue = DICE_VALUES[anchorDmg] || 0;
+    const userDmgValue = getDiceValue(userDmg);
+    const anchorDmgValue = getDiceValue(anchorDmg);
     const userFreqText = userFreq === 'per-turn' ? ' per turn' : '';
     const anchorFreqText = anchorFreq === 'per-turn' ? ' per turn' : '';
 
