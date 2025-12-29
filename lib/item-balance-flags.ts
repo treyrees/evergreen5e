@@ -55,7 +55,7 @@ export const NUMERICAL_EDGE_CASES = new Set<string>([
 export const COMMUNITY_NOTES = new Set([
   // Official seems too LOW (item is stronger than rarity suggests)
   'Cloak of Protection',       // Calc 2.0 pts (Rare) but official Uncommon
-  'Sun Blade',                 // Calc 3.0+ pts (Very Rare) matches official - widely considered powerful
+  'Sun Blade',                 // Calc 3.0+ pts (Very Rare) but official Rare - community agrees it's powerful
 
   // Official seems too HIGH (item is weaker than rarity suggests)
   'Wings of Flying',           // Calc 1.0 pts (Uncommon) but official Rare - limited 1hr flight is weak
@@ -136,7 +136,7 @@ export function getItemExplanation(itemName: string): string {
     return '+1 AC and +1 all saves = 2.0 pts (Rare). Official: Uncommon. WotC underpriced this—compare to Ring of Protection (identical, but Rare).';
   }
   if (itemName === 'Sun Blade') {
-    return 'The Sun Blade is widely regarded as one of the strongest Very Rare weapons. +2 to hit, 1d8 radiant (bypasses most resistances), +1d8 vs undead, finesse, and creates sunlight. Our math scores it at ~3.0 pts—barely Very Rare—which aligns with community consensus that it\'s at the top of its tier.';
+    return 'Official: Rare. Our math: ~3.0 pts (Very Rare). +2 to hit, 1d8 radiant, +1d8 vs undead, finesse, and creates sunlight. The community widely agrees the Sun Blade punches above its weight class.';
   }
   if (itemName === 'Wings of Flying') {
     return 'Limited flight (1 hr/day). Calc: 1.0 pts (Uncommon), official: Rare. Community consensus: weak for Rare tier.';
