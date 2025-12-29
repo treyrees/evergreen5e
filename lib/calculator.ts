@@ -200,13 +200,12 @@ function isSimpleItem(userItem: Partial<MagicItem>): { isSimple: boolean; enhanc
 }
 
 /**
- * Get the score for an item, using overrideScore if available
+ * Get the score for an item, adding overrideBonus for special mechanics
  */
 export function getItemScore(item: Partial<MagicItem>): number {
-  if (item.overrideScore !== undefined) {
-    return item.overrideScore;
-  }
-  return item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  const baseScore = item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  const bonus = item.overrideBonus ?? 0;
+  return baseScore + bonus;
 }
 
 /**
@@ -1008,7 +1007,9 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
   anchorComparison: AnchorComparison | null;
   anchorIsUnbalanced: boolean;
 } {
-  const combatScore = item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  // Include overrideBonus in the score calculation
+  const baseScore = item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  const combatScore = baseScore + (item.overrideBonus ?? 0);
   const hasCombatFeatures = combatScore > 0;
   const combatRarity = scoreToRarity(combatScore, hasCombatFeatures);
   const ribbonCount = countRibbons(item.ribbons);

@@ -13,6 +13,7 @@ export const SPECIAL_MECHANICS = new Set([
   // Instant-kill or save-or-die effects
   'Vorpal Sword',              // Decapitation on nat 20
   'Nine Lives Stealer',        // Save-or-die on nat 20
+  'Mace of Disruption',        // Save-or-destroy vs undead/fiends under 25 HP
 
   // Spell absorption/storage/action economy
   'Rod of Absorption',         // Absorbs spells targeting you
@@ -29,6 +30,12 @@ export const SPECIAL_MECHANICS = new Set([
 
   // Complex stacking or restrictions
   'Staff of Power',            // +2 to attack/damage/AC/saves (spellcaster-only attunement)
+  'Defender',                  // Transfer bonus between attack/damage and AC
+
+  // Bonus effects beyond base damage
+  'Giant Slayer',              // Knockdown effect vs giants
+  'Mace of Smiting',           // Extra crit damage + auto-destroy constructs
+  'Sword of Sharpness',        // Limb-severing on nat 20
 ]);
 
 /**
@@ -58,6 +65,13 @@ export const COMMUNITY_NOTES = new Set([
 
   // Official seems too HIGH (item is weaker than rarity suggests)
   'Vicious Weapon',            // Calc 0.1 pts (Common) but official Rare - 5% proc is ~3x weaker than +1
+  'Wand of Magic Missiles',    // Calc 0.8 pts (Common) but official Uncommon - auto-hit may justify bump
+  'Winged Boots',              // Calc 0.8 pts (Common) but official Uncommon - flight value hard to quantify
+
+  // Character-dependent value (stat setters)
+  'Headband of Intellect',     // INT 19 - value depends entirely on your starting INT
+  'Gauntlets of Ogre Power',   // STR 19 - value depends entirely on your starting STR
+  'Amulet of Health',          // CON 19 - value depends entirely on your starting CON
 ]);
 
 /**
@@ -85,62 +99,95 @@ export function hasCommunityNotes(itemName: string): boolean {
  * Get explanation for why an item is flagged
  */
 export function getItemExplanation(itemName: string): string {
-  // === SPECIAL MECHANICS ===
+  // === SPECIAL MECHANICS (items with overrideBonus) ===
 
   // Instant-kill effects
   if (itemName === 'Vorpal Sword') {
-    return 'Decapitates on nat 20 (instant kill, no save for most creatures). Power level is campaign-defining.';
+    return '+3 sword (3.0 pts base). Bonus +1.0 for decapitation on nat 20—instant kill with no save for most creatures.';
   }
   if (itemName === 'Nine Lives Stealer') {
-    return 'Drains life force on nat 20 vs <100 HP (DC 15 CON or die). Save-or-die adds ~1.5 pts beyond +2.';
+    return '+2 sword (2.0 pts base). Bonus +1.5 for save-or-die on nat 20 vs creatures under 100 HP.';
+  }
+  if (itemName === 'Mace of Disruption') {
+    return '2d6 radiant vs undead/fiends (~1.3 pts base). Bonus +0.7 for save-or-destroy effect vs targets under 25 HP.';
   }
 
   // Action economy and spell effects
   if (itemName === 'Rod of Absorption') {
-    return 'Absorbs spells targeting you, negating effects. Defensive utility is extremely campaign-dependent.';
+    return 'No quantifiable combat stats. Bonus +3.0 for spell absorption—negates spells targeting you and stores energy.';
   }
   if (itemName === 'Ring of Spell Storing') {
-    return 'Stores up to 5 spell levels. Breaks action economy by allowing pre-cast buffs or extra spell slots.';
+    return 'No quantifiable combat stats. Bonus +2.5 for storing up to 5 spell levels—breaks action economy with pre-cast buffs.';
   }
-  // Luck Blade now calculates correctly using level 9 spell value for Wish
 
   // Mobility
   if (itemName === 'Boots of Speed') {
-    return 'Click heels to double speed for 10 min. Opportunity attacks have disadvantage. Mobility is hard to price.';
+    return 'No quantifiable combat stats. Bonus +2.0 for doubled movement speed and disadvantage on opportunity attacks.';
   }
   if (itemName === 'Broom of Flying') {
     return '50 ft fly speed, unlimited duration. With speed+duration model: 0.75 × 2.0 = 1.5 pts (Uncommon).';
   }
   if (itemName === 'Cloak of Invisibility') {
-    return 'Tactical invisibility (3 charges, 1hr each). Invisibility advantage on attacks/stealth is campaign-defining.';
+    return 'No quantifiable combat stats. Bonus +4.0 for invisibility (3 charges, 1hr each)—tactical advantage is campaign-defining.';
   }
 
   // Defensive
   if (itemName === 'Gloves of Missile Snaring') {
-    return 'Reaction to reduce ranged weapon damage by 1d10+DEX. Situational but can completely negate hits.';
+    return 'No quantifiable combat stats. Bonus +1.0 for reaction to reduce ranged damage by 1d10+DEX (catch if reduced to 0).';
   }
   if (itemName === 'Shield of the Cavalier') {
-    return 'Math captures +2 AC and bonus action bash (3.2 pts). NOT quantified: push 10ft, prone if smaller, and Protective Field (Otiluke\'s-style emanation). Actual value likely higher than calculated.';
+    return 'Math captures +2 AC and bonus action bash (3.2 pts). NOT quantified: push 10ft, prone if smaller, and Protective Field. Actual value likely higher.';
   }
 
-  // Complex effects
+  // Complex effects (negative bonuses for limitations)
   if (itemName === 'Staff of Power') {
-    return '+2 to attack/damage/AC/saves is 6.0 pts (Legendary calc) but official Very Rare. Spellcaster-only attunement limits audience significantly.';
+    return '+2 enhancement, +2 AC, +2 saves (7.0 pts base). Bonus -3.5 for spellcaster-only attunement. Community consensus: appropriately balanced at Very Rare—class restriction and hand-occupation are key constraints.';
+  }
+  if (itemName === 'Defender') {
+    return '+3 enhancement and +3 AC (7.5 pts base). Bonus -2.25 for transfer limitation—must split the bonus each turn, can\'t have both.';
   }
 
-  // === COMMUNITY NOTES ===
+  // Bonus effects beyond base damage
+  if (itemName === 'Giant Slayer') {
+    return '+1 weapon with 2d6 conditional vs giants (~1.7 pts base). Bonus +0.35 for DC 15 STR knockdown (prone) vs giants.';
+  }
+  if (itemName === 'Mace of Smiting') {
+    return '+1 weapon with 2d6 conditional vs constructs (~1.7 pts base). Bonus +0.35 for +4d6 on crit and auto-destroy under 25 HP.';
+  }
+  if (itemName === 'Sword of Sharpness') {
+    return 'Modeled as +3 equivalent (3.0 pts base) for +4d6 on crit. Bonus +0.25 for limb-severing on nat 20.';
+  }
+
+  // === COMMUNITY NOTES (no override, just explanation) ===
 
   if (itemName === 'Cloak of Protection') {
     return '+1 AC and +1 all saves = 2.0 pts (Rare). Official: Uncommon. WotC underpriced this—compare to Ring of Protection (identical, but Rare).';
   }
   if (itemName === 'Sun Blade') {
-    return 'Official: Rare. Our math: ~3.0 pts (Very Rare). +2 to hit, 1d8 radiant, +1d8 vs undead, finesse, and creates sunlight. The community widely agrees the Sun Blade punches above its weight class.';
+    return 'Our math: ~3.0 pts (Very Rare). Official: Rare. +2 to hit, radiant damage, +1d8 vs undead. Community agrees it punches above its weight.';
+  }
+  if (itemName === 'Wand of Magic Missiles') {
+    return '4× level 1 spell/day = 0.8 pts (Common). Official: Uncommon. Auto-hit reliability (no attack roll, no save) may justify the bump.';
   }
   if (itemName === 'Wings of Flying') {
     return '60 ft fly speed, 1 hour/day. With speed+duration model: 1.0 × 2.0 = 2.0 pts (Rare).';
   }
   if (itemName === 'Vicious Weapon') {
-    return '+2d6 on nat 20 only = 0.1 pts (Common). Official: Rare. At 5% crit rate, this averages +0.35 damage/hit—roughly 3× weaker than a +1 weapon.';
+    return '+2d6 on nat 20 only = 0.1 pts (Common). Official: Rare. At 5% crit rate, this averages +0.35 damage/hit—roughly 3× weaker than +1.';
+  }
+  if (itemName === 'Winged Boots') {
+    return '30 ft fly speed, 4 hrs/day = 0.8 pts (Common). Official: Uncommon. Flight is valuable but hard to quantify—our model may undervalue it.';
+  }
+
+  // Character-dependent stat setters
+  if (itemName === 'Headband of Intellect') {
+    return 'Sets INT to 19. Value is entirely character-dependent: amazing if your INT is 8-14, mediocre if 16+, useless if already 19+. Our formula assumes average benefit.';
+  }
+  if (itemName === 'Gauntlets of Ogre Power') {
+    return 'Sets STR to 19. Value is entirely character-dependent: amazing for low-STR casters/rogues, mediocre for fighters who already have 16+ STR. Our formula assumes average benefit.';
+  }
+  if (itemName === 'Amulet of Health') {
+    return 'Sets CON to 19. Value is entirely character-dependent: amazing if your CON is low, but most adventurers prioritize CON already. Our formula assumes average benefit.';
   }
 
   return '';

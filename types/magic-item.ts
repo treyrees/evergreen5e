@@ -152,7 +152,7 @@ export interface MagicItem {
   attunement: boolean;
   rarity?: string; // For SRD items
   manualRarity?: boolean; // If true, use official rarity instead of calculating
-  overrideScore?: number; // Manual point value for items with special effects we can't model
+  overrideBonus?: number; // Points ADDED to calculated score for special mechanics we can't model (can be negative for limitations)
   description?: string; // Explains unmodeled mechanics that affect item power
   dndbeyondSlug?: string; // D&D Beyond URL slug, e.g., "4774-sun-blade" for https://www.dndbeyond.com/magic-items/4774-sun-blade
 }
