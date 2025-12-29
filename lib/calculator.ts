@@ -159,11 +159,20 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     score += combat.savingThrowBonus;
   }
 
-  // Ability score setter - sets an ability score to a fixed value (e.g., STR to 19)
-  // This is worth 2.5 points because it's a massive boost for characters with low stats
-  // Equivalent to +4 to +9 in that ability score (affects AC, HP, attack, saves, DCs)
+  // Ability score setter - scales with the value it sets to
+  // Setting to 19 (+4 mod) is baseline, higher values are more powerful
   if (combat.abilityScoreSetter) {
-    score += 2.5;
+    const setValue = combat.abilityScoreSetter.setValue;
+    if (setValue >= 25) score += 4.0;      // +7 modifier (epic)
+    else if (setValue >= 23) score += 3.5; // +6 modifier (very powerful)
+    else if (setValue >= 21) score += 3.0; // +5 modifier (powerful)
+    else score += 2.5;                      // 19 or lower (+4 modifier, baseline)
+  }
+
+  // Ability score bonus - adds to existing score
+  // +2 ability = +1 modifier (affects multiple rolls) ≈ 0.75 pts per +1 ability
+  if (combat.abilityScoreBonus) {
+    score += combat.abilityScoreBonus.bonus * 0.75;
   }
 
   // Flight - one of the most powerful abilities in D&D

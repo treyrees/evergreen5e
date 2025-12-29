@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { MagicItem, DamageBonus, SpellCharge, ChargedAbility, ChargePool, AbilityScoreSetter, Flight } from '@/types/magic-item';
+import { MagicItem, DamageBonus, SpellCharge, ChargedAbility, ChargePool, AbilityScoreSetter, AbilityScoreBonus, Flight } from '@/types/magic-item';
 import {
   calculateCombatScore,
   getSuggestedRarity,
@@ -100,6 +100,9 @@ export default function CalculatorPage() {
   // Ability score setter state
   const [abilityScoreSetter, setAbilityScoreSetter] = useState<AbilityScoreSetter | undefined>(undefined);
 
+  // Ability score bonus state
+  const [abilityScoreBonus, setAbilityScoreBonus] = useState<AbilityScoreBonus | undefined>(undefined);
+
   // Flight state
   const [flight, setFlight] = useState<Flight | undefined>(undefined);
 
@@ -131,9 +134,10 @@ export default function CalculatorPage() {
       chargesPerLongRest > 0 ||
       abilities.length > 0 ||
       abilityScoreSetter !== undefined ||
+      abilityScoreBonus !== undefined ||
       flight !== undefined
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, flight]);
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, flight]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
@@ -145,6 +149,7 @@ export default function CalculatorPage() {
       savingThrowBonus: savingThrowBonus > 0 ? savingThrowBonus : undefined,
       resistances: resistances.length > 0 ? resistances : undefined,
       abilityScoreSetter,
+      abilityScoreBonus,
       flight,
       chargePool: (maxCharges > 0 || abilities.length > 0) ? {
         maxCharges,
@@ -154,7 +159,7 @@ export default function CalculatorPage() {
       } : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, flight, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement]);
+  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, abilityScoreBonus, flight, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -466,6 +471,54 @@ export default function CalculatorPage() {
                         })}
                         className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                         placeholder="19"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Ability Score Bonus */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Add to Ability Score
+                  </label>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 italic">
+                    Adds a bonus to an ability score (e.g., Headband of Intellect +2 INT)
+                  </p>
+                  <div className="flex gap-2">
+                    <select
+                      value={abilityScoreBonus?.ability || ''}
+                      onChange={(e) => {
+                        if (e.target.value === '') {
+                          setAbilityScoreBonus(undefined);
+                        } else {
+                          setAbilityScoreBonus({
+                            ability: e.target.value as AbilityScoreBonus['ability'],
+                            bonus: abilityScoreBonus?.bonus || 2
+                          });
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    >
+                      <option value="">None</option>
+                      <option value="STR">Strength</option>
+                      <option value="DEX">Dexterity</option>
+                      <option value="CON">Constitution</option>
+                      <option value="INT">Intelligence</option>
+                      <option value="WIS">Wisdom</option>
+                      <option value="CHA">Charisma</option>
+                    </select>
+                    {abilityScoreBonus && (
+                      <input
+                        type="number"
+                        min="1"
+                        max="12"
+                        value={abilityScoreBonus.bonus}
+                        onChange={(e) => setAbilityScoreBonus({
+                          ...abilityScoreBonus,
+                          bonus: parseInt(e.target.value) || 2
+                        })}
+                        className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                        placeholder="+2"
                       />
                     )}
                   </div>
@@ -788,6 +841,9 @@ export default function CalculatorPage() {
                                 {anchor.combat.abilityScoreSetter && (
                                   <div>{anchor.combat.abilityScoreSetter.ability} set to {anchor.combat.abilityScoreSetter.setValue}</div>
                                 )}
+                                {anchor.combat.abilityScoreBonus && (
+                                  <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
+                                )}
                                 {anchor.combat.flight && (
                                   <div>
                                     Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}
@@ -799,7 +855,7 @@ export default function CalculatorPage() {
                                 {anchor.combat.charges && (
                                   <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
                                 )}
-                                {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && (
+                                {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && (
                                   <div className="text-slate-500 italic">No measurable combat features</div>
                                 )}
                               </div>
@@ -880,6 +936,9 @@ export default function CalculatorPage() {
                           {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves</div>}
                           {abilityScoreSetter && (
                             <div>{abilityScoreSetter.ability} set to {abilityScoreSetter.setValue}</div>
+                          )}
+                          {abilityScoreBonus && (
+                            <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
                           )}
                           {flight && (
                             <div>

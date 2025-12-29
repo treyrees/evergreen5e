@@ -30,6 +30,11 @@ export interface AbilityScoreSetter {
   setValue: number; // 19, 21, 23, etc.
 }
 
+export interface AbilityScoreBonus {
+  ability: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+  bonus: number; // +2, +4, +6, etc.
+}
+
 export interface Flight {
   duration: 'unlimited' | 'limited';
   hoursPerDay?: number; // if limited
@@ -44,7 +49,8 @@ export interface CombatFeatures {
   charges?: SpellCharge[]; // Legacy format for existing SRD items
   chargePool?: ChargePool; // New intuitive format for user items
   resistances?: string[]; // Damage types resisted: "fire", "cold", "all", etc.
-  abilityScoreSetter?: AbilityScoreSetter; // Sets ability score to fixed value (e.g., Gauntlets of Ogre Power)
+  abilityScoreSetter?: AbilityScoreSetter; // Sets ability score to fixed value (e.g., Gauntlets of Ogre Power set STR to 19)
+  abilityScoreBonus?: AbilityScoreBonus; // Adds bonus to ability score (e.g., Headband of Intellect +2)
   flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots)
 }
 

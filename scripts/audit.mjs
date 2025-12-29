@@ -35,9 +35,18 @@ function calculateCombatScore(combat) {
   // Saving throw bonus
   score += combat.savingThrowBonus || 0;
 
-  // Ability score setter - sets an ability score to a fixed value (e.g., STR to 19)
+  // Ability score setter - scales with the value it sets to
   if (combat.abilityScoreSetter) {
-    score += 2.5;
+    const setValue = combat.abilityScoreSetter.setValue;
+    if (setValue >= 25) score += 4.0;      // +7 modifier (epic)
+    else if (setValue >= 23) score += 3.5; // +6 modifier (very powerful)
+    else if (setValue >= 21) score += 3.0; // +5 modifier (powerful)
+    else score += 2.5;                      // 19 or lower (+4 modifier, baseline)
+  }
+
+  // Ability score bonus - adds to existing score
+  if (combat.abilityScoreBonus) {
+    score += combat.abilityScoreBonus.bonus * 0.75;
   }
 
   // Flight - one of the most powerful abilities in D&D
