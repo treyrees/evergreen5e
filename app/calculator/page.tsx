@@ -144,6 +144,7 @@ export default function CalculatorPage() {
   const [numAnchorsToShow, setNumAnchorsToShow] = useState(1);
   const [showChargeForm, setShowChargeForm] = useState(false);
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [newAbility, setNewAbility] = useState<ChargedAbility>({
     spell: '',
     spellLevel: 0,
@@ -212,28 +213,17 @@ export default function CalculatorPage() {
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Magic Item Calculator
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Find the right rarity for your creation
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <Link
-              href="/items"
-              className="text-blue-600 hover:text-blue-700 font-medium btn-glow-blue px-3 py-1.5 rounded-md"
-            >
-              📚 View All Items
+        {/* Header - Minimal */}
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-slate-100">
+            Magic Item Calculator
+          </h1>
+          <div className="flex gap-4 text-sm">
+            <Link href="/items" className="text-slate-500 hover:text-slate-300 transition-colors">
+              Browse Items
             </Link>
-            <Link
-              href="/"
-              className="text-[#00d67e] hover:text-[#00ff96] font-medium btn-glow-emerald px-3 py-1.5 rounded-md"
-            >
-              ← Back to Home
+            <Link href="/" className="text-slate-500 hover:text-slate-300 transition-colors">
+              Home
             </Link>
           </div>
         </div>
@@ -241,16 +231,11 @@ export default function CalculatorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Form */}
           <div className="space-y-6">
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION 1: BASIC INFO
-            ═══════════════════════════════════════════════════════════════ */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-[#00d67e]">1.</span> Basic Info
-              </h2>
+            {/* Base Item Selection */}
+            <div className="bg-slate-800 rounded-lg p-5 border border-slate-700">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Item Name
                   </label>
                   <input
@@ -258,19 +243,19 @@ export default function CalculatorPage() {
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
                     placeholder="e.g., Sword of Flames"
-                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    className="w-full px-4 py-2.5 border border-slate-600 rounded-md bg-slate-900 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Base Item Type
                   </label>
                   <select
                     value={baseItem}
                     onChange={(e) => setBaseItem(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    className="w-full px-4 py-2.5 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   >
-                    <option value="" disabled className="text-slate-400">
+                    <option value="" disabled className="text-slate-500">
                       Select base item type...
                     </option>
                     {Object.entries(BASE_ITEMS).map(([category, items]) => (
@@ -284,46 +269,38 @@ export default function CalculatorPage() {
                     ))}
                   </select>
                 </div>
-                <div className="flex items-center">
+                <label className="flex items-center cursor-pointer group">
                   <input
                     type="checkbox"
-                    id="attunement"
                     checked={attunement}
                     onChange={(e) => setAttunement(e.target.checked)}
-                    className="mr-2 h-4 w-4 text-emerald-600 rounded"
+                    className="mr-2.5 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 focus:ring-emerald-500"
                   />
-                  <label
-                    htmlFor="attunement"
-                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
-                  >
+                  <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
                     Requires Attunement
-                  </label>
-                </div>
+                  </span>
+                </label>
               </div>
             </div>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION 2: NUMERICAL BONUSES
-            ═══════════════════════════════════════════════════════════════ */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-[#00d67e]">2.</span> Numerical Bonuses
-              </h2>
-              <div className="space-y-6">
-                  {/* Attack/Damage Bonus */}
+            {/* Combat Bonuses */}
+            <div className="bg-slate-800 rounded-lg p-5 border border-slate-700">
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4">Combat Bonuses</h2>
+              <div className="space-y-5">
+                  {/* Enhancement Bonus */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Attack/Damage Bonus
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Enhancement (+hit/+dmg)
                     </label>
                     <div className="flex gap-2">
                       {[0, 1, 2, 3].map((value) => (
                         <button
                           key={value}
                           onClick={() => setEnhancement(value)}
-                          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                          className={`px-4 py-2 rounded-md font-medium transition-all ${
                             enhancement === value
-                              ? 'bg-[#00d67e] text-white'
-                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                           }`}
                         >
                           +{value}
@@ -332,10 +309,10 @@ export default function CalculatorPage() {
                     </div>
                   </div>
 
-                  {/* Damage Bonus */}
+                  {/* Bonus Damage Dice */}
                   <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Damage Bonus
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Bonus Damage Dice
                   </label>
                   <div className="flex gap-2">
                     <select
@@ -353,7 +330,7 @@ export default function CalculatorPage() {
                           });
                         }
                       }}
-                      className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      className="w-20 px-3 py-2 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none"
                     >
                       <option value="">-</option>
                       {[1, 2, 3, 4, 5, 6].map((num) => (
@@ -374,7 +351,7 @@ export default function CalculatorPage() {
                           });
                         }
                       }}
-                      className="w-24 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      className="w-24 px-3 py-2 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none"
                       disabled={!damageBonus}
                     >
                       <option value="">-</option>
@@ -390,7 +367,7 @@ export default function CalculatorPage() {
                         onChange={(e) =>
                           setDamageBonus({ ...damageBonus, type: e.target.value })
                         }
-                        className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                        className="flex-1 px-3 py-2 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none"
                       >
                         {DAMAGE_TYPES.map((type) => (
                           <option key={type} value={type}>
@@ -401,473 +378,365 @@ export default function CalculatorPage() {
                     )}
                   </div>
                   {damageBonus && (
-                    <div className="mt-2 space-y-2">
+                    <div className="mt-3 space-y-2">
                       {!damageBonus.vicious && (
                         <div className="flex gap-2">
                           <button
                             onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-hit' })}
-                            className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                            className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-all ${
                               (damageBonus.frequency || 'per-hit') === 'per-hit'
-                                ? 'bg-[#00d67e] text-white'
-                                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                             }`}
                           >
                             Per Hit
                           </button>
                           <button
                             onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-turn' })}
-                            className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                            className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-all ${
                               damageBonus.frequency === 'per-turn'
-                                ? 'bg-[#00d67e] text-white'
-                                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                             }`}
                           >
                             Once Per Turn
                           </button>
                         </div>
                       )}
-                      <div className="flex items-center">
+                      <label className="flex items-center cursor-pointer group">
                         <input
                           type="checkbox"
-                          id="vicious-damage"
                           checked={damageBonus.vicious || false}
                           onChange={(e) =>
                             setDamageBonus({ ...damageBonus, vicious: e.target.checked })
                           }
-                          className="mr-2 h-4 w-4 text-emerald-600 rounded"
+                          className="mr-2.5 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
                         />
-                        <label
-                          htmlFor="vicious-damage"
-                          className="text-sm text-slate-600 dark:text-slate-400"
-                        >
-                          Vicious (only on natural 20 / crits, ~0.35 dmg/attack)
-                        </label>
-                      </div>
-                      <div className="flex items-center">
+                        <span className="text-sm text-slate-400 group-hover:text-slate-300">
+                          Vicious (crits only)
+                        </span>
+                      </label>
+                      <label className="flex items-center cursor-pointer group">
                         <input
                           type="checkbox"
-                          id="conditional-damage"
                           checked={damageBonus.conditional || false}
                           onChange={(e) =>
                             setDamageBonus({ ...damageBonus, conditional: e.target.checked })
                           }
-                          className="mr-2 h-4 w-4 text-emerald-600 rounded"
+                          className="mr-2.5 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
                         />
-                        <label
-                          htmlFor="conditional-damage"
-                          className="text-sm text-slate-600 dark:text-slate-400"
-                        >
-                          Conditional (only vs specific creatures, e.g. dragons/giants)
-                        </label>
-                      </div>
+                        <span className="text-sm text-slate-400 group-hover:text-slate-300">
+                          Conditional (vs specific creatures)
+                        </span>
+                      </label>
                     </div>
                   )}
                 </div>
 
-                {/* AC Bonus */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    AC Bonus
-                  </label>
-                  <div className="flex gap-2">
-                    {[0, 1, 2, 3].map((value) => (
-                      <button
-                        key={value}
-                        onClick={() => setAcBonus(value)}
-                        className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                          acBonus === value
-                            ? 'bg-[#00d67e] text-white'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                        }`}
-                      >
-                        +{value}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Saving Throw Bonus */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Saving Throw Bonus
-                  </label>
-                  <div className="flex gap-2">
-                    {[0, 1, 2, 3].map((value) => (
-                      <button
-                        key={value}
-                        onClick={() => setSavingThrowBonus(value)}
-                        className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                          savingThrowBonus === value
-                            ? 'bg-[#00d67e] text-white'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                        }`}
-                      >
-                        +{value}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION 3: ABILITY SCORE & PERMANENT BUFFS
-            ═══════════════════════════════════════════════════════════════ */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-[#00d67e]">3.</span> Ability Score & Permanent Buffs
-              </h2>
-              <div className="space-y-6">
-                {/* Ability Score */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Ability Score
-                  </label>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 italic">
-                    {abilityScoreSetter
-                      ? 'Sets ability to fixed value (e.g., Gauntlets of Ogre Power set STR to 19)'
-                      : abilityScoreBonus
-                      ? 'Adds bonus to ability (e.g., +2 INT)'
-                      : 'Choose to set ability to a value or add a bonus'}
-                  </p>
-                  <div className="space-y-2">
-                    {/* Mode selector */}
-                    <select
-                      value={
-                        abilityScoreSetter ? 'set' :
-                        abilityScoreBonus ? 'bonus' :
-                        ''
-                      }
-                      onChange={(e) => {
-                        if (e.target.value === '') {
-                          setAbilityScoreSetter(undefined);
-                          setAbilityScoreBonus(undefined);
-                        } else if (e.target.value === 'set') {
-                          setAbilityScoreBonus(undefined);
-                          setAbilityScoreSetter({
-                            ability: abilityScoreSetter?.ability || 'STR',
-                            setValue: 19
-                          });
-                        } else if (e.target.value === 'bonus') {
-                          setAbilityScoreSetter(undefined);
-                          setAbilityScoreBonus({
-                            ability: abilityScoreBonus?.ability || 'STR',
-                            bonus: 2
-                          });
-                        }
-                      }}
-                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                    >
-                      <option value="">No Ability Score Bonus</option>
-                      <option value="set">Set ability to value</option>
-                      <option value="bonus">Add bonus to ability</option>
-                    </select>
-
-                    {/* Ability and value inputs */}
-                    {(abilityScoreSetter || abilityScoreBonus) && (
-                      <div className="flex gap-2">
-                        <select
-                          value={abilityScoreSetter?.ability || abilityScoreBonus?.ability || ''}
-                          onChange={(e) => {
-                            const ability = e.target.value as AbilityScoreSetter['ability'];
-                            if (abilityScoreSetter) {
-                              setAbilityScoreSetter({ ...abilityScoreSetter, ability });
-                            } else if (abilityScoreBonus) {
-                              setAbilityScoreBonus({ ...abilityScoreBonus, ability });
-                            }
-                          }}
-                          className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                {/* Defensive Bonuses - Combined Row */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      AC Bonus
+                    </label>
+                    <div className="flex gap-1.5">
+                      {[0, 1, 2, 3].map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => setAcBonus(value)}
+                          className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
+                            acBonus === value
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          }`}
                         >
-                          <option value="STR">Strength</option>
-                          <option value="DEX">Dexterity</option>
-                          <option value="CON">Constitution</option>
-                          <option value="INT">Intelligence</option>
-                          <option value="WIS">Wisdom</option>
-                          <option value="CHA">Charisma</option>
-                        </select>
-                        {abilityScoreSetter && (
-                          <input
-                            type="number"
-                            min="1"
-                            max="30"
-                            value={abilityScoreSetter.setValue}
-                            onChange={(e) => setAbilityScoreSetter({
-                              ...abilityScoreSetter,
-                              setValue: parseInt(e.target.value) || 19
-                            })}
-                            className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                            placeholder="19"
-                          />
-                        )}
-                        {abilityScoreBonus && (
-                          <input
-                            type="number"
-                            min="1"
-                            max="12"
-                            value={abilityScoreBonus.bonus}
-                            onChange={(e) => setAbilityScoreBonus({
-                              ...abilityScoreBonus,
-                              bonus: parseInt(e.target.value) || 2
-                            })}
-                            className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                            placeholder="+2"
-                          />
-                        )}
-                      </div>
-                    )}
+                          +{value}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-
-                {/* Permanent Buffs */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Permanent Buffs
-                  </label>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
-                    Always-on passive benefits (flight, enhanced senses, speed)
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* LEFT COLUMN - Movement Capabilities */}
-                    {/* Flight */}
-                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={permanentBuffs.flight || false}
-                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
-                        className="h-4 w-4 text-emerald-600 rounded"
-                      />
-                      <div>
-                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span>🦅</span> Flight
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Permanent flying speed</div>
-                      </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Save Bonus
                     </label>
-
-                    {/* RIGHT COLUMN - Senses */}
-                    {/* Darkvision */}
-                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={permanentBuffs.darkvision || false}
-                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, darkvision: e.target.checked })}
-                        className="h-4 w-4 text-emerald-600 rounded"
-                      />
-                      <div>
-                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span>👁️</span> Darkvision
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">See 60 ft in darkness</div>
-                      </div>
-                    </label>
-
-                    {/* Speed Bonus */}
-                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={permanentBuffs.speedBonus || false}
-                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
-                        className="h-4 w-4 text-emerald-600 rounded"
-                      />
-                      <div>
-                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span>💨</span> Speed Bonus
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">+10 ft movement speed</div>
-                      </div>
-                    </label>
-
-                    {/* Blindsight */}
-                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={permanentBuffs.blindsight || false}
-                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, blindsight: e.target.checked })}
-                        className="h-4 w-4 text-emerald-600 rounded"
-                      />
-                      <div>
-                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span>🔮</span> Blindsight
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Perceive 30 ft without sight</div>
-                      </div>
-                    </label>
-
-                    {/* Climb/Burrow Speed */}
-                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={permanentBuffs.climbBurrow || false}
-                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, climbBurrow: e.target.checked })}
-                        className="h-4 w-4 text-emerald-600 rounded"
-                      />
-                      <div>
-                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span>🧗</span> Climb/Burrow
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Climb or burrow speed</div>
-                      </div>
-                    </label>
-
-                    {/* Tremorsense */}
-                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={permanentBuffs.tremorsense || false}
-                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, tremorsense: e.target.checked })}
-                        className="h-4 w-4 text-emerald-600 rounded"
-                      />
-                      <div>
-                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span>🌍</span> Tremorsense
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Sense 30 ft via vibrations</div>
-                      </div>
-                    </label>
+                    <div className="flex gap-1.5">
+                      {[0, 1, 2, 3].map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => setSavingThrowBonus(value)}
+                          className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
+                            savingThrowBonus === value
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          }`}
+                        >
+                          +{value}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION 4: SPELLS & SPELL-LIKE ABILITIES
-            ═══════════════════════════════════════════════════════════════ */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-[#00d67e]">4.</span> Spells & Spell-Like Abilities
-              </h2>
+            {/* Passive Abilities - Collapsible */}
+            <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+              <button
+                onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
+              >
+                <div>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Passive Abilities</span>
+                  <span className="ml-2 text-xs text-slate-500">Stats, Flight, Senses</span>
+                </div>
+                <span className="text-slate-500 text-lg">{showAdvancedOptions ? '−' : '+'}</span>
+              </button>
+
+              {showAdvancedOptions && (
+                <div className="px-5 pb-5 space-y-5 border-t border-slate-700">
+                  {/* Ability Score */}
+                  <div className="pt-4">
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Ability Score Modifier
+                    </label>
+                    <div className="space-y-2">
+                      <select
+                        value={
+                          abilityScoreSetter ? 'set' :
+                          abilityScoreBonus ? 'bonus' :
+                          ''
+                        }
+                        onChange={(e) => {
+                          if (e.target.value === '') {
+                            setAbilityScoreSetter(undefined);
+                            setAbilityScoreBonus(undefined);
+                          } else if (e.target.value === 'set') {
+                            setAbilityScoreBonus(undefined);
+                            setAbilityScoreSetter({
+                              ability: abilityScoreSetter?.ability || 'STR',
+                              setValue: 19
+                            });
+                          } else if (e.target.value === 'bonus') {
+                            setAbilityScoreSetter(undefined);
+                            setAbilityScoreBonus({
+                              ability: abilityScoreBonus?.ability || 'STR',
+                              bonus: 2
+                            });
+                          }
+                        }}
+                        className="w-full px-4 py-2.5 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                      >
+                        <option value="">None</option>
+                        <option value="set">Set to value (e.g., STR 19)</option>
+                        <option value="bonus">Add bonus (e.g., +2 INT)</option>
+                      </select>
+
+                      {(abilityScoreSetter || abilityScoreBonus) && (
+                        <div className="flex gap-2">
+                          <select
+                            value={abilityScoreSetter?.ability || abilityScoreBonus?.ability || ''}
+                            onChange={(e) => {
+                              const ability = e.target.value as AbilityScoreSetter['ability'];
+                              if (abilityScoreSetter) {
+                                setAbilityScoreSetter({ ...abilityScoreSetter, ability });
+                              } else if (abilityScoreBonus) {
+                                setAbilityScoreBonus({ ...abilityScoreBonus, ability });
+                              }
+                            }}
+                            className="flex-1 px-3 py-2 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                          >
+                            <option value="STR">Strength</option>
+                            <option value="DEX">Dexterity</option>
+                            <option value="CON">Constitution</option>
+                            <option value="INT">Intelligence</option>
+                            <option value="WIS">Wisdom</option>
+                            <option value="CHA">Charisma</option>
+                          </select>
+                          {abilityScoreSetter && (
+                            <input
+                              type="number"
+                              min="1"
+                              max="30"
+                              value={abilityScoreSetter.setValue}
+                              onChange={(e) => setAbilityScoreSetter({
+                                ...abilityScoreSetter,
+                                setValue: parseInt(e.target.value) || 19
+                              })}
+                              className="w-20 px-3 py-2 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                              placeholder="19"
+                            />
+                          )}
+                          {abilityScoreBonus && (
+                            <input
+                              type="number"
+                              min="1"
+                              max="12"
+                              value={abilityScoreBonus.bonus}
+                              onChange={(e) => setAbilityScoreBonus({
+                                ...abilityScoreBonus,
+                                bonus: parseInt(e.target.value) || 2
+                              })}
+                              className="w-20 px-3 py-2 border border-slate-600 rounded-md bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                              placeholder="+2"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Permanent Buffs - Compact Grid */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-3">
+                      Passive Benefits
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={permanentBuffs.flight || false}
+                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className="text-sm text-slate-300">Flight</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={permanentBuffs.darkvision || false}
+                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, darkvision: e.target.checked })}
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className="text-sm text-slate-300">Darkvision</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={permanentBuffs.speedBonus || false}
+                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className="text-sm text-slate-300">+10 ft Speed</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={permanentBuffs.blindsight || false}
+                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, blindsight: e.target.checked })}
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className="text-sm text-slate-300">Blindsight</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={permanentBuffs.climbBurrow || false}
+                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, climbBurrow: e.target.checked })}
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className="text-sm text-slate-300">Climb/Burrow</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={permanentBuffs.tremorsense || false}
+                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, tremorsense: e.target.checked })}
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className="text-sm text-slate-300">Tremorsense</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Spells & Abilities */}
+            <div className="bg-slate-800 rounded-lg p-5 border border-slate-700">
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4">Spells & Abilities</h2>
               <div className="space-y-4">
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
-                  For non-spell abilities, estimate equivalent spell level (0 for cantrip-like, 1-9 for leveled spells)
-                </p>
 
                   {/* Collapsible Helper Guide */}
-                  <details className="mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md select-none">
-                      📖 Guide to custom abilities: Estimating power in terms of spell level
+                  <details className="mb-3 bg-slate-700/30 border border-slate-600 rounded-md">
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
+                      Spell Level Guide
                     </summary>
-                    <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2 border-t border-blue-200 dark:border-blue-800">
-                      <div className="space-y-1.5 mb-3">
-                        <p className="font-semibold text-sm">
-                          Find the spell most similar to your desired custom effect. Use that spell level.
-                        </p>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                          Think abstractly: &quot;mass control&quot; → enchantment spells. &quot;Damage over time&quot; → conjuration/evocation.
-                          Reskin freely—a sword shooting columns of thunder is mechanically identical to casting <em>Lightning Bolt</em>.
-                        </p>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                          <strong>Damage types:</strong> Fire, cold, lightning, acid, thunder, necrotic are mechanically similar—choose the spell that matches your flavor.
-                          <strong>Conditions:</strong> Paralyzed, frightened, stunned, restrained are similarly debilitating—find a spell with the closest match.
-                        </p>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                          <strong>Search tip:</strong> Browse by spell school (abjuration, conjuration, divination, enchantment, evocation, illusion, necromancy, transmutation).
-                        </p>
-                        <p className="text-[10px] text-blue-600 dark:text-blue-400">
-                          → <a href="https://www.dndbeyond.com/sources/dnd/free-rules/spells" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-800 dark:hover:text-blue-300">5e SRD Spells (D&D Beyond)</a> or see DMG/PHB spell lists
-                        </p>
-                      </div>
+                    <div className="px-3 py-3 text-xs text-slate-300 space-y-2 border-t border-slate-600">
+                      <p className="text-slate-400 text-[11px] mb-2">
+                        Find the spell most similar to your custom effect. Use that spell level.
+                      </p>
 
-                      <div className="space-y-1.5 bg-white dark:bg-slate-800/50 rounded p-2 border border-blue-100 dark:border-blue-900 text-[11px]">
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 italic mb-1 pb-1 border-b border-slate-200 dark:border-slate-700">
-                          Higher spell levels require higher character levels to access. <strong>Lv6+ spells are only available to full casters</strong> and are often much more scarce and adventure-defining—items granting them should have very limited uses.
+                      <div className="space-y-1 text-[11px]">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Level 0 (Cantrip)</span>
+                          <span className="text-slate-500">Light, Mage Hand</span>
                         </div>
-
-                        <div>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">Level 0</span>
-                          <span className="text-slate-500"> • ~0 pts</span>
-                          <span className="text-slate-600 dark:text-slate-400"> — Unlimited use. 1d6-1d10 damage. (Light, Mage Hand)</span>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Level 1-2</span>
+                          <span className="text-slate-500">Magic Missile, Invisibility</span>
                         </div>
-
-                        <div>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">Level 1-2</span>
-                          <span className="text-slate-500"> • ~0.25-0.5 pts • 1st-3rd level</span>
-                          <span className="text-slate-600 dark:text-slate-400"> — 2d6-4d6, single target. (Magic Missile, Scorching Ray, Invisibility)</span>
+                        <div className="flex justify-between text-emerald-400">
+                          <span>Level 3 (AoE unlocks)</span>
+                          <span className="text-emerald-500">Fireball, Lightning Bolt</span>
                         </div>
-
-                        <div className="bg-emerald-50 dark:bg-emerald-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-emerald-500">
-                          <div>
-                            <span className="font-semibold text-emerald-700 dark:text-emerald-300">⚡ Level 3</span>
-                            <span className="text-emerald-600 dark:text-emerald-400"> • ~0.75 pts • 5th level characters</span>
-                          </div>
-                          <div className="text-emerald-700 dark:text-emerald-300 font-medium mt-0.5">
-                            AoE unlocks: 8d6 in 20ft sphere (Fireball) or 100ft line (Lightning Bolt). Hits 3-6 enemies = 3x damage.
-                          </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Level 4-5</span>
+                          <span className="text-slate-500">Wall of Fire, Polymorph</span>
                         </div>
-
-                        <div>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">Level 4-5</span>
-                          <span className="text-slate-500"> • ~1.0-1.25 pts • 7th-9th level</span>
-                          <span className="text-slate-600 dark:text-slate-400"> — 8d8, large AoE. (Wall of Fire, Cone of Cold, Polymorph)</span>
-                        </div>
-
-                        <div className="bg-amber-50 dark:bg-amber-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-amber-500">
-                          <span className="font-semibold text-amber-700 dark:text-amber-300">Level 6</span>
-                          <span className="text-amber-600 dark:text-amber-400"> • ~1.5 pts • 11th level characters</span>
-                          <span className="text-amber-700 dark:text-amber-300"> — 10d8. Very powerful. (Chain Lightning, Disintegrate)</span>
-                        </div>
-
-                        <div>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">Level 7-8</span>
-                          <span className="text-slate-500"> • ~1.75-2.0 pts • 13th-15th level</span>
-                          <span className="text-slate-600 dark:text-slate-400"> — High-tier magic. (Finger of Death, Dominate Monster)</span>
-                        </div>
-
-                        <div className="bg-red-50 dark:bg-red-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-red-500">
-                          <span className="font-semibold text-red-700 dark:text-red-300">Level 9</span>
-                          <span className="text-red-600 dark:text-red-400"> • ~2.5 pts • 17th level characters</span>
-                          <span className="text-red-700 dark:text-red-300"> — 40d6. Epic magic. (Meteor Swarm, Wish)</span>
+                        <div className="flex justify-between text-amber-400">
+                          <span>Level 6+</span>
+                          <span className="text-amber-500">Disintegrate, Wish</span>
                         </div>
                       </div>
 
-                      <p className="text-slate-600 dark:text-slate-400 italic text-[10px] mt-1">
-                        Ex: Sword shoots lightning? Lv3. Adds 1d6 fire? Lv1. Polymorphs you? Lv4.
+                      <p className="text-slate-500 italic text-[10px] pt-2 border-t border-slate-600">
+                        Sword shoots lightning? Lv3. Adds 1d6 fire? Lv1.
                       </p>
                     </div>
                   </details>
 
                   {/* Charge Pool Configuration */}
                   {(maxCharges > 0 || chargesPerShortRest > 0 || chargesPerLongRest > 0 || abilities.length > 0) && (
-                    <div className="mb-4">
-                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                    <div className="mb-4 p-3 bg-slate-700/30 rounded border border-slate-600">
+                      <label className="block text-xs font-medium text-slate-400 mb-2">
                         Charge Pool
                       </label>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Max Charges
-                          </label>
+                          <label className="block text-[10px] text-slate-500 mb-1">Max</label>
                           <input
                             type="number"
                             min="0"
                             value={maxCharges}
                             onChange={(e) => setMaxCharges(parseInt(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="7"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Per Short Rest
-                          </label>
+                          <label className="block text-[10px] text-slate-500 mb-1">Short Rest</label>
                           <input
                             type="number"
                             min="0"
                             value={chargesPerShortRest}
                             onChange={(e) => setChargesPerShortRest(parseInt(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="0"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Per Long Rest
-                          </label>
+                          <label className="block text-[10px] text-slate-500 mb-1">Long Rest</label>
                           <input
                             type="number"
                             min="0"
                             value={chargesPerLongRest}
                             onChange={(e) => setChargesPerLongRest(parseInt(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="4"
                           />
                         </div>
@@ -881,15 +750,15 @@ export default function CalculatorPage() {
                       {abilities.map((ability, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between bg-slate-50 dark:bg-slate-700 p-3 rounded-md"
+                          className="flex items-center justify-between bg-slate-700/50 p-3 rounded border border-slate-600"
                         >
-                          <div className="text-sm text-slate-700 dark:text-slate-300">
+                          <div className="text-sm text-slate-300">
                             <span className="font-medium">{ability.spell}</span>
-                            {' (Level '}{ability.spellLevel}{', '}{ability.chargesPerUse} charge{ability.chargesPerUse !== 1 ? 's' : ''} per use)
+                            <span className="text-slate-500"> Lv{ability.spellLevel}, {ability.chargesPerUse}ch</span>
                           </div>
                           <button
                             onClick={() => removeAbility(index)}
-                            className="text-red-600 hover:text-red-700 text-sm font-medium"
+                            className="text-slate-500 hover:text-red-400 text-sm transition-colors"
                           >
                             Remove
                           </button>
@@ -900,7 +769,7 @@ export default function CalculatorPage() {
 
                   {/* Add Ability Form */}
                   {showChargeForm ? (
-                    <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-md">
+                    <div className="space-y-3 p-4 bg-slate-700/50 rounded border border-slate-600">
                       <input
                         type="text"
                         value={newAbility.spell}
@@ -908,13 +777,11 @@ export default function CalculatorPage() {
                           setNewAbility({ ...newAbility, spell: e.target.value })
                         }
                         placeholder="Spell/Ability name"
-                        className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                        className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                       />
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Spell Level (0-9)
-                          </label>
+                          <label className="block text-[10px] text-slate-500 mb-1">Spell Level</label>
                           <input
                             type="number"
                             min="0"
@@ -926,14 +793,12 @@ export default function CalculatorPage() {
                                 spellLevel: parseInt(e.target.value) || 0,
                               })
                             }
-                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
-                            placeholder="0 = cantrip"
+                            className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
+                            placeholder="0-9"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Charges Per Use
-                          </label>
+                          <label className="block text-[10px] text-slate-500 mb-1">Charges/Use</label>
                           <input
                             type="number"
                             min="1"
@@ -944,20 +809,20 @@ export default function CalculatorPage() {
                                 chargesPerUse: parseInt(e.target.value) || 1,
                               })
                             }
-                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
+                            className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                           />
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <button
                           onClick={addAbility}
-                          className="flex-1 px-4 py-2 bg-[#00d67e] text-white rounded-md hover:bg-[#00b368] text-sm font-medium btn-glow-emerald"
+                          className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 text-sm font-medium transition-colors"
                         >
-                          Add Ability
+                          Add
                         </button>
                         <button
                           onClick={() => setShowChargeForm(false)}
-                          className="px-4 py-2 bg-slate-300 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-400 dark:hover:bg-slate-500 text-sm font-medium"
+                          className="px-4 py-2 bg-slate-600 text-slate-300 rounded hover:bg-slate-500 text-sm transition-colors"
                         >
                           Cancel
                         </button>
@@ -966,7 +831,7 @@ export default function CalculatorPage() {
                   ) : (
                     <button
                       onClick={() => setShowChargeForm(true)}
-                      className="w-full px-4 py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-400 hover:border-[#00d67e] hover:text-[#00d67e] transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
+                      className="w-full px-4 py-3 border border-dashed border-slate-600 rounded text-slate-500 hover:border-emerald-500 hover:text-emerald-400 transition-colors"
                     >
                       + Add Spell or Ability
                     </button>
@@ -978,58 +843,59 @@ export default function CalculatorPage() {
           {/* Right Column - Results */}
           <div className="lg:sticky lg:top-8 h-fit">
             <div className="relative bg-slate-800 text-slate-100 rounded-lg shadow-xl p-6 text-sm border border-slate-700">
-              {/* Blur overlay when no attributes selected */}
+              {/* Empty state when no attributes selected */}
               {!hasSelectedAttributes && (
-                <div className="absolute inset-0 bg-slate-800/90 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-                  <div className="text-center px-6">
-                    <div className="text-xl font-bold text-slate-400">
-                      Select a base item type and at least one attribute
+                <div className="absolute inset-0 bg-slate-800 rounded-lg flex items-center justify-center z-10">
+                  <div className="text-center px-8 py-12">
+                    <div className="text-4xl mb-4 opacity-30">⚔️</div>
+                    <div className="text-lg font-medium text-slate-400 mb-2">
+                      Configure Your Item
+                    </div>
+                    <div className="text-sm text-slate-500">
+                      Select a base item and add bonuses to see the suggested rarity
                     </div>
                   </div>
                 </div>
               )}
               <div className="border-b border-slate-600 pb-4 mb-4">
-                <div className="text-center text-lg font-bold">
-                  {currentItem.name?.toUpperCase() || 'UNNAMED ITEM'}
+                <div className="text-center text-lg font-bold text-slate-200">
+                  {currentItem.name?.toUpperCase() || 'YOUR ITEM'}
                 </div>
               </div>
 
               <div className="space-y-4">
                 {/* Suggested Rarity - THE ANSWER */}
-                <div className="bg-slate-700/50 border border-slate-600 rounded-md p-4 card-hover-lift">
-                  <div className="text-slate-300 font-bold mb-2 flex items-center justify-between">
-                    <span>📊 SUGGESTED RARITY</span>
-                    <span className="text-sm font-mono text-slate-400">
+                <div className="bg-slate-700/30 border border-slate-600 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Suggested Rarity</span>
+                    <span className="text-sm font-mono text-slate-500">
                       <AnimatedNumber value={results.combatScore} /> pts
                     </span>
                   </div>
-                  <div className={`text-2xl font-bold ${getRarityColorClass(results.suggestedRarity)}`}>
+                  <div className={`text-3xl font-bold ${getRarityColorClass(results.suggestedRarity)}`}>
                     {results.suggestedRarity}
                   </div>
                 </div>
 
                 {/* What's Similar? - Reference Item Comparison */}
                 {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
-                  <div className="border-t border-slate-600 pt-4">
+                  <div className="pt-2">
                     {/* Section Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="text-slate-200 font-bold text-lg flex items-center gap-2">
-                        <span>🔍</span>
-                        <span>What&apos;s Similar?</span>
-                      </div>
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Similar Items</span>
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() => setNumAnchorsToShow(Math.max(1, numAnchorsToShow - 1))}
                           disabled={numAnchorsToShow <= 1}
-                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
+                          className="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
                         >
                           −
                         </button>
-                        <span className="text-sm text-slate-400 font-mono w-4 text-center">{numAnchorsToShow}</span>
+                        <span className="text-xs text-slate-500 font-mono w-3 text-center">{numAnchorsToShow}</span>
                         <button
                           onClick={() => setNumAnchorsToShow(Math.min(3, numAnchorsToShow + 1))}
                           disabled={numAnchorsToShow >= 3}
-                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
+                          className="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
                         >
                           +
                         </button>
@@ -1206,15 +1072,15 @@ export default function CalculatorPage() {
           </div>
         </div>
 
-        {/* Advanced: Formula Details - Standalone Section */}
-        <div className="mt-8">
-          <div className="bg-slate-800 text-slate-100 rounded-lg shadow-xl font-mono text-sm border border-slate-700">
+        {/* Formula Details - Collapsed by default */}
+        <div className="mt-6">
+          <div className="bg-slate-800/50 text-slate-100 rounded-lg font-mono text-sm border border-slate-700">
             <button
               onClick={() => setShowFormulaDetails(!showFormulaDetails)}
-              className="w-full px-6 py-4 text-left text-slate-400 hover:text-slate-200 text-sm font-semibold flex items-center justify-between transition-colors"
+              className="w-full px-5 py-3 text-left text-slate-500 hover:text-slate-300 text-xs flex items-center justify-between transition-colors"
             >
-              <span>⚙️ Advanced: Formula Details</span>
-              <span className="text-xl">{showFormulaDetails ? '−' : '+'}</span>
+              <span>Formula Details</span>
+              <span>{showFormulaDetails ? '−' : '+'}</span>
             </button>
 
             {showFormulaDetails && (
