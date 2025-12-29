@@ -228,8 +228,9 @@ export function getItemScore(item: Partial<MagicItem>): number {
 export function calculateCombatScore(combat: CombatFeatures): number {
   let score = 0;
 
-  // Enhancement bonus
-  score += combat.enhancement;
+  // Enhancement bonus (with optional "Sometimes" multiplier)
+  const enhancementMultiplier = combat.enhancementMultiplier ?? 1.0;
+  score += combat.enhancement * enhancementMultiplier;
 
   // Damage bonus
   if (combat.damageBonus?.dice) {
@@ -275,14 +276,16 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     score += diceValue;
   }
 
-  // AC bonus
+  // AC bonus (with optional "Sometimes" multiplier)
   if (combat.acBonus) {
-    score += combat.acBonus;
+    const acMultiplier = combat.acBonusMultiplier ?? 1.0;
+    score += combat.acBonus * acMultiplier;
   }
 
-  // Saving throw bonus
+  // Saving throw bonus (with optional "Sometimes" multiplier)
   if (combat.savingThrowBonus) {
-    score += combat.savingThrowBonus;
+    const saveMultiplier = combat.savingThrowBonusMultiplier ?? 1.0;
+    score += combat.savingThrowBonus * saveMultiplier;
   }
 
   // Ability score setter - scales with value AND ability type
@@ -388,11 +391,12 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     }
   }
 
-  // Damage resistances - each resistance is worth 2.0 points
+  // Damage resistances - each resistance is worth 2.0 points (with optional "Sometimes" multiplier)
   // Armor of Resistance (single resistance, attunement) = Rare, confirming ~2.0 pts per resistance
   // Multiple resistances stack in value
   if (combat.resistances && combat.resistances.length > 0) {
-    score += combat.resistances.length * 2.0;
+    const resistMultiplier = combat.resistancesMultiplier ?? 1.0;
+    score += combat.resistances.length * 2.0 * resistMultiplier;
   }
 
   // Spell charges (legacy format)

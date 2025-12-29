@@ -125,12 +125,16 @@ export default function CalculatorPage() {
   const [itemName, setItemName] = useState('');
   const [baseItem, setBaseItem] = useState('');
   const [enhancement, setEnhancement] = useState(0);
+  const [enhancementSometimes, setEnhancementSometimes] = useState(false);
   const [damageBonus, setDamageBonus] = useState<DamageBonus | undefined>(
     undefined
   );
   const [acBonus, setAcBonus] = useState(0);
+  const [acBonusSometimes, setAcBonusSometimes] = useState(false);
   const [savingThrowBonus, setSavingThrowBonus] = useState(0);
+  const [saveBonusSometimes, setSaveBonusSometimes] = useState(false);
   const [resistances, setResistances] = useState<string[]>([]);
+  const [resistancesSometimes, setResistancesSometimes] = useState(false);
   const [attunement, setAttunement] = useState(false);
 
   // Ability score setter state
@@ -202,10 +206,14 @@ export default function CalculatorPage() {
     baseItem,
     combat: {
       enhancement,
+      enhancementMultiplier: enhancementSometimes ? 0.5 : undefined,
       damageBonus,
       acBonus: acBonus > 0 ? acBonus : undefined,
+      acBonusMultiplier: acBonusSometimes ? 0.5 : undefined,
       savingThrowBonus: savingThrowBonus > 0 ? savingThrowBonus : undefined,
+      savingThrowBonusMultiplier: saveBonusSometimes ? 0.5 : undefined,
       resistances: resistances.length > 0 ? resistances : undefined,
+      resistancesMultiplier: resistancesSometimes ? 0.5 : undefined,
       abilityScoreSetter,
       abilityScoreBonus,
       permanentBuffs: hasPermanentBuffs ? permanentBuffs : undefined,
@@ -222,7 +230,7 @@ export default function CalculatorPage() {
       weaponProperties: weaponProperties.length > 0 ? weaponProperties : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -249,7 +257,7 @@ export default function CalculatorPage() {
         {/* Header - Minimal */}
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-slate-100">
-            Magic Item Calculator
+            Evergreen5e Magic Item Balancer
           </h1>
           <div className="flex gap-4 text-sm">
             <Link href="/items" className="text-slate-500 hover:text-slate-300 transition-colors">
@@ -332,20 +340,36 @@ export default function CalculatorPage() {
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       Enhancement (+hit/+dmg)
                     </label>
-                    <div className="flex gap-2">
-                      {[0, 1, 2, 3].map((value) => (
-                        <button
-                          key={value}
-                          onClick={() => setEnhancement(value)}
-                          className={`px-4 py-2 rounded-md font-medium transition-all ${
-                            enhancement === value
-                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
-                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                          }`}
-                        >
-                          +{value}
-                        </button>
-                      ))}
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-2">
+                        {[0, 1, 2, 3].map((value) => (
+                          <button
+                            key={value}
+                            onClick={() => {
+                              setEnhancement(value);
+                              if (value === 0) setEnhancementSometimes(false);
+                            }}
+                            className={`px-4 py-2 rounded-md font-medium transition-all ${
+                              enhancement === value
+                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            }`}
+                          >
+                            +{value}
+                          </button>
+                        ))}
+                      </div>
+                      {enhancement > 0 && (
+                        <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={enhancementSometimes}
+                            onChange={(e) => setEnhancementSometimes(e.target.checked)}
+                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className={enhancementSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                        </label>
+                      )}
                     </div>
                   </div>
 
@@ -483,7 +507,10 @@ export default function CalculatorPage() {
                       {[0, 1, 2, 3].map((value) => (
                         <button
                           key={value}
-                          onClick={() => setAcBonus(value)}
+                          onClick={() => {
+                            setAcBonus(value);
+                            if (value === 0) setAcBonusSometimes(false);
+                          }}
                           className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
                             acBonus === value
                               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
@@ -494,6 +521,17 @@ export default function CalculatorPage() {
                         </button>
                       ))}
                     </div>
+                    {acBonus > 0 && (
+                      <label className="flex items-center gap-1.5 mt-2 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={acBonusSometimes}
+                          onChange={(e) => setAcBonusSometimes(e.target.checked)}
+                          className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className={acBonusSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                      </label>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -503,7 +541,10 @@ export default function CalculatorPage() {
                       {[0, 1, 2, 3].map((value) => (
                         <button
                           key={value}
-                          onClick={() => setSavingThrowBonus(value)}
+                          onClick={() => {
+                            setSavingThrowBonus(value);
+                            if (value === 0) setSaveBonusSometimes(false);
+                          }}
                           className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
                             savingThrowBonus === value
                               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
@@ -514,6 +555,17 @@ export default function CalculatorPage() {
                         </button>
                       ))}
                     </div>
+                    {savingThrowBonus > 0 && (
+                      <label className="flex items-center gap-1.5 mt-2 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={saveBonusSometimes}
+                          onChange={(e) => setSaveBonusSometimes(e.target.checked)}
+                          className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className={saveBonusSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                      </label>
+                    )}
                   </div>
                 </div>
 
@@ -781,7 +833,7 @@ export default function CalculatorPage() {
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
                       Damage Resistances
                       {resistances.length > 0 && (
-                        <span className="ml-2 text-xs text-slate-500">({resistances.length} selected)</span>
+                        <span className="ml-2 text-xs text-slate-500">({resistances.length} selected{resistancesSometimes ? ', sometimes' : ''})</span>
                       )}
                     </summary>
                     <div className="px-3 pb-3 pt-2 border-t border-slate-600">
@@ -799,6 +851,7 @@ export default function CalculatorPage() {
                                   setResistances([...resistances, type]);
                                 } else {
                                   setResistances(resistances.filter(r => r !== type));
+                                  if (resistances.length <= 1) setResistancesSometimes(false);
                                 }
                               }}
                               className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
@@ -809,6 +862,17 @@ export default function CalculatorPage() {
                           </label>
                         ))}
                       </div>
+                      {resistances.length > 0 && (
+                        <label className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-600 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={resistancesSometimes}
+                            onChange={(e) => setResistancesSometimes(e.target.checked)}
+                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className={resistancesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                        </label>
+                      )}
                     </div>
                   </details>
                 </div>
@@ -1083,7 +1147,7 @@ export default function CalculatorPage() {
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
                                   <div className="text-slate-400 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
-                                  {enhancement > 0 && <div>+{enhancement} enhancement</div>}
+                                  {enhancement > 0 && <div>+{enhancement} enhancement{enhancementSometimes && <span className="text-amber-400 text-[10px] ml-1">(sometimes)</span>}</div>}
                                   {damageBonus && (
                                     <div>
                                       {damageBonus.dice} {damageBonus.type}
@@ -1092,8 +1156,8 @@ export default function CalculatorPage() {
                                       {damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
                                     </div>
                                   )}
-                                  {acBonus > 0 && <div>+{acBonus} AC</div>}
-                                  {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves</div>}
+                                  {acBonus > 0 && <div>+{acBonus} AC{acBonusSometimes && <span className="text-amber-400 text-[10px] ml-1">(sometimes)</span>}</div>}
+                                  {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves{saveBonusSometimes && <span className="text-amber-400 text-[10px] ml-1">(sometimes)</span>}</div>}
                                   {abilityScoreSetter && (
                                     <div>{abilityScoreSetter.ability} set to {abilityScoreSetter.setValue}</div>
                                   )}
@@ -1106,7 +1170,7 @@ export default function CalculatorPage() {
                                   {permanentBuffs.speedBonus && <div>💨 +10 ft speed</div>}
                                   {permanentBuffs.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
                                   {permanentBuffs.climbBurrow && <div>🧗 Climb/Burrow speed</div>}
-                                  {resistances.length > 0 && <div>Resist: {resistances.join(', ')}</div>}
+                                  {resistances.length > 0 && <div>Resist: {resistances.join(', ')}{resistancesSometimes && <span className="text-amber-400 text-[10px] ml-1">(sometimes)</span>}</div>}
                                   {abilities.length > 0 && <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>}
                                   {maxCharges > 0 && <div>{maxCharges} max charges</div>}
                                   {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !hasPermanentBuffs && !flightEnabled && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
