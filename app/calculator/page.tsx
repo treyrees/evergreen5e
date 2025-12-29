@@ -601,65 +601,61 @@ export default function CalculatorPage() {
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md select-none">
                       📖 Spell Level Reference
                     </summary>
-                    <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2.5 border-t border-blue-200 dark:border-blue-800">
-                      <p className="font-semibold text-sm">
-                        Match your ability to a spell with similar effects, even if it's not technically casting a spell.
+                    <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2 border-t border-blue-200 dark:border-blue-800">
+                      <p className="font-semibold text-sm mb-1">
+                        Find a spell with similar effects.
                       </p>
 
-                      <div className="space-y-2 bg-white dark:bg-slate-800/50 rounded p-2 border border-blue-100 dark:border-blue-900">
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="flex-1">
-                            <div className="font-semibold text-slate-700 dark:text-slate-300">Level 0 (Cantrip) • Worth ~0 pts</div>
-                            <div className="text-slate-600 dark:text-slate-400">Unlimited use. 1d6-1d10 damage, 60ft range. Basic utility (light, mage hand).</div>
+                      <div className="space-y-1.5 bg-white dark:bg-slate-800/50 rounded p-2 border border-blue-100 dark:border-blue-900 text-[11px]">
+                        <div>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">Level 0</span>
+                          <span className="text-slate-500"> • ~0 pts</span>
+                          <span className="text-slate-600 dark:text-slate-400"> — Unlimited. 1d6-1d10 damage. (Light, Mage Hand)</span>
+                        </div>
+
+                        <div>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">Level 1-2</span>
+                          <span className="text-slate-500"> • ~0.25-0.5 pts</span>
+                          <span className="text-slate-600 dark:text-slate-400"> — 2d6-4d6, single target. (Magic Missile, Scorching Ray, Invisibility)</span>
+                        </div>
+
+                        <div className="bg-emerald-50 dark:bg-emerald-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-emerald-500">
+                          <div>
+                            <span className="font-semibold text-emerald-700 dark:text-emerald-300">⚡ Level 3</span>
+                            <span className="text-emerald-600 dark:text-emerald-400"> • ~0.75 pts • 5th level characters</span>
+                          </div>
+                          <div className="text-emerald-700 dark:text-emerald-300 font-medium mt-0.5">
+                            AoE unlocks: 8d6 in 20ft sphere (Fireball) or 100ft line (Lightning Bolt). Hits 3-6 enemies = 3x damage.
                           </div>
                         </div>
 
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="flex-1">
-                            <div className="font-semibold text-slate-700 dark:text-slate-300">Level 1-2 • Worth ~0.25-0.5 pts</div>
-                            <div className="text-slate-600 dark:text-slate-400">Available to level 1-3 characters. 2d6-4d6 damage, single target or 15ft cone. Cure Wounds, Invisibility.</div>
-                          </div>
+                        <div>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">Level 4-5</span>
+                          <span className="text-slate-500"> • ~1.0-1.25 pts</span>
+                          <span className="text-slate-600 dark:text-slate-400"> — 8d8, large AoE. (Wall of Fire, Cone of Cold, Polymorph)</span>
                         </div>
 
-                        <div className="flex justify-between items-start gap-2 bg-emerald-50 dark:bg-emerald-900/20 -mx-2 px-2 py-1.5 rounded border-l-2 border-emerald-500">
-                          <div className="flex-1">
-                            <div className="font-semibold text-emerald-700 dark:text-emerald-300">⚡ Level 3 • Worth ~0.75 pts</div>
-                            <div className="text-emerald-800 dark:text-emerald-200 font-medium">Unlocks at 5th level. AoE becomes standard: Fireball/Lightning Bolt deal 8d6 in 20ft sphere or 100ft line.</div>
-                            <div className="text-emerald-700 dark:text-emerald-300 text-[11px] mt-0.5">Why this matters: Hitting 3-6 enemies with one action = triple+ the single-target damage. Game changes here.</div>
-                          </div>
+                        <div className="bg-amber-50 dark:bg-amber-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-amber-500">
+                          <span className="font-semibold text-amber-700 dark:text-amber-300">Level 6</span>
+                          <span className="text-amber-600 dark:text-amber-400"> • ~1.5 pts • 11th level characters • 1 slot/day</span>
+                          <span className="text-amber-700 dark:text-amber-300"> — 10d8. (Chain Lightning, Disintegrate)</span>
                         </div>
 
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="flex-1">
-                            <div className="font-semibold text-slate-700 dark:text-slate-300">Level 4-5 • Worth ~1.0-1.25 pts</div>
-                            <div className="text-slate-600 dark:text-slate-400">Unlocks at 7th-9th level. Polymorph (CR 8 beasts), Wall of Fire (8d8), Cone of Cold (8d8 in 60ft cone).</div>
-                          </div>
+                        <div>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">Level 7-8</span>
+                          <span className="text-slate-500"> • ~1.75-2.0 pts • 1 slot/day each</span>
+                          <span className="text-slate-600 dark:text-slate-400"> — (Finger of Death, Dominate Monster)</span>
                         </div>
 
-                        <div className="flex justify-between items-start gap-2 bg-amber-50 dark:bg-amber-900/20 -mx-2 px-2 py-1.5 rounded border-l-2 border-amber-500">
-                          <div className="flex-1">
-                            <div className="font-semibold text-amber-700 dark:text-amber-300">Level 6 • Worth ~1.5 pts</div>
-                            <div className="text-amber-700 dark:text-amber-300">Unlocks at 11th level. Only 1 slot/day. Chain Lightning (10d8), Disintegrate (10d6+40, instant death), True Seeing.</div>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="flex-1">
-                            <div className="font-semibold text-slate-700 dark:text-slate-300">Level 7-8 • Worth ~1.75-2.0 pts</div>
-                            <div className="text-slate-600 dark:text-slate-400">Unlocks at 13th-15th level. Extremely limited (1-2 slots). Finger of Death, Dominate Monster, Earthquake.</div>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-start gap-2 bg-red-50 dark:bg-red-900/20 -mx-2 px-2 py-1.5 rounded border-l-2 border-red-500">
-                          <div className="flex-1">
-                            <div className="font-semibold text-red-700 dark:text-red-300">Level 9 • Worth ~2.5 pts</div>
-                            <div className="text-red-700 dark:text-red-300">Unlocks at 17th level. ONE slot per day. Meteor Swarm (40d6), Wish (any spell), Time Stop, True Polymorph.</div>
-                          </div>
+                        <div className="bg-red-50 dark:bg-red-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-red-500">
+                          <span className="font-semibold text-red-700 dark:text-red-300">Level 9</span>
+                          <span className="text-red-600 dark:text-red-400"> • ~2.5 pts • 17th level characters • ONE slot/day</span>
+                          <span className="text-red-700 dark:text-red-300"> — 40d6. (Meteor Swarm, Wish)</span>
                         </div>
                       </div>
 
-                      <p className="pt-2 text-slate-600 dark:text-slate-400 italic border-t border-blue-200 dark:border-blue-700 text-[11px]">
-                        Examples: Sword shoots a lightning bolt? Lv3 (AoE line). Sword adds 1d6 fire per hit? Lv1 (single target). Ring polymorphs you? Lv4.
+                      <p className="text-slate-600 dark:text-slate-400 italic text-[10px] mt-1">
+                        Ex: Sword shoots lightning? Lv3. Adds 1d6 fire? Lv1. Polymorphs you? Lv4.
                       </p>
                     </div>
                   </details>
