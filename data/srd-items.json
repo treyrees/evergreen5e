@@ -102,7 +102,7 @@
         "type": "radiant"
       }
     },
-    "description": "Formula: 3.4 pts (Very Rare). Official: Rare. Our math correctly values this—community consensus agrees Sun Blade is underpriced at Rare. The +2, radiant damage, and finesse on a longsword is Very Rare power."
+    "description": "WotC IMBALANCE: Formula says Very Rare (3.4 pts), WotC says Rare. By the standards established across dozens of other SRD items (+2 Weapon = Rare baseline, extra damage dice = tier bump), Sun Blade should be Very Rare. Community consensus confirms this is underpriced—one of the most commonly cited balance outliers in 5e."
   },
   {
     "name": "Vorpal Sword",
@@ -202,7 +202,7 @@
       "savingThrowBonus": 1,
       "enhancement": 0
     },
-    "description": "Calc: Rare (2.0 pts). Official: Uncommon. +1 AC and +1 all saves stacks with everything unlike armor bonuses. Commonly considered underpriced."
+    "description": "WotC IMBALANCE: Formula says Rare (2.0 pts), WotC says Uncommon. By the standards established by Ring of Protection (Rare: +1 AC, +1 saves, attunement), Cloak of Protection with identical stats should also be Rare. Community consensus confirms this is underpriced—frequently banned or restricted at tables due to its power-to-rarity ratio."
   },
   {
     "name": "Defender",
@@ -513,7 +513,7 @@
         "duration": "unlimited"
       }
     },
-    "description": "Calc: Rare (2.0 pts). Official: Uncommon. No attunement + unlimited flight is very strong. Commonly considered underpriced at Uncommon."
+    "description": "WotC IMBALANCE: Formula says Rare (2.0 pts), WotC says Uncommon. By the standards established by other flight items (Winged Boots = Uncommon with attunement + limited duration), unlimited flight without attunement should cost more. Community consensus confirms this is underpriced—trivializes many encounters and exploration challenges."
   },
   {
     "name": "Winged Boots",
@@ -540,7 +540,7 @@
         "hoursPerDay": 1.5
       }
     },
-    "description": "Calc: Uncommon (1.0 pts). Official: Rare. Limited flight (1 hr/day) is weak for Rare tier. Community consensus: overpriced."
+    "description": "WotC IMBALANCE: Formula says Uncommon (1.0 pts), WotC says Rare. By the standards established by Winged Boots (Uncommon: 4 hrs/day flight with attunement), Wings of Flying with only 1 hr/day should not cost a tier higher. Community consensus confirms this is overpriced—rarely chosen when other flight options exist."
   },
   {
     "name": "Ring of Spell Storing",
