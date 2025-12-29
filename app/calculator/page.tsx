@@ -186,9 +186,10 @@ export default function CalculatorPage() {
       abilityScoreSetter !== undefined ||
       abilityScoreBonus !== undefined ||
       hasPermanentBuffs ||
-      weaponProperties.length > 0
+      weaponProperties.length > 0 ||
+      resistances.length > 0
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, weaponProperties]);
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, weaponProperties, resistances]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
@@ -562,13 +563,13 @@ export default function CalculatorPage() {
               >
                 <div>
                   <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Passive Abilities</span>
-                  <span className="ml-2 text-xs text-slate-500">Senses, Stats, & Movement</span>
+                  <span className="ml-2 text-xs text-slate-500">Senses, Stats, Resistances, & Movement</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showAdvancedOptions ? '−' : '+'}</span>
               </button>
 
               {showAdvancedOptions && (
-                <div className="px-5 pb-5 space-y-5 border-t border-slate-700">
+                <div className="px-5 pb-5 space-y-4 border-t border-slate-700">
                   {/* Ability Score */}
                   <div className="pt-4">
                     <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -660,73 +661,111 @@ export default function CalculatorPage() {
                     </div>
                   </div>
 
-                  {/* Permanent Buffs - Compact Grid */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-3">
+                  {/* Permanent Buffs - Collapsible */}
+                  <details className="bg-slate-700/30 border border-slate-600 rounded-md">
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
                       Passive Benefits
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.flight || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Flight</span>
-                      </label>
+                    </summary>
+                    <div className="px-3 pb-3 pt-2 border-t border-slate-600">
+                      <div className="grid grid-cols-2 gap-2">
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.flight || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Flight</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.darkvision || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, darkvision: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Darkvision</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.darkvision || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, darkvision: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Darkvision</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.speedBonus || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">+10 ft Speed</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.speedBonus || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">+10 ft Speed</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.blindsight || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, blindsight: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Blindsight</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.blindsight || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, blindsight: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Blindsight</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.climbBurrow || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, climbBurrow: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Climb/Burrow</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.climbBurrow || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, climbBurrow: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Climb/Burrow</span>
+                        </label>
 
-                      <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={permanentBuffs.tremorsense || false}
-                          onChange={(e) => setPermanentBuffs({ ...permanentBuffs, tremorsense: e.target.checked })}
-                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-300">Tremorsense</span>
-                      </label>
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.tremorsense || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, tremorsense: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Tremorsense</span>
+                        </label>
+                      </div>
                     </div>
-                  </div>
+                  </details>
+
+                  {/* Damage Resistances - Collapsible */}
+                  <details className="bg-slate-700/30 border border-slate-600 rounded-md">
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
+                      Damage Resistances
+                      {resistances.length > 0 && (
+                        <span className="ml-2 text-xs text-slate-500">({resistances.length} selected)</span>
+                      )}
+                    </summary>
+                    <div className="px-3 pb-3 pt-2 border-t border-slate-600">
+                      <div className="grid grid-cols-2 gap-2">
+                        {DAMAGE_TYPES.map((type) => (
+                          <label
+                            key={type}
+                            className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={resistances.includes(type)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setResistances([...resistances, type]);
+                                } else {
+                                  setResistances(resistances.filter(r => r !== type));
+                                }
+                              }}
+                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                            />
+                            <span className="text-sm text-slate-300">
+                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </details>
                 </div>
               )}
             </div>
