@@ -86,6 +86,10 @@ npm run lint   # Run ESLint
 
 There will be TypeScript errors related to Google Fonts (next/font/google). **Do not attempt to fix these** - they are expected behavior in the development environment and do not affect functionality.
 
+### Build Failures
+
+**Do not run `npm run build`** - the build will fail due to network issues fetching Google Fonts in this environment. This is expected and does not indicate a problem with the code. Use `npm run lint` to verify code quality instead.
+
 ## Philosophy
 
 The calculator prioritizes:

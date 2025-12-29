@@ -616,6 +616,7 @@
     "baseItem": "longbow",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "9058960-energy-bow",
     "combat": {
       "enhancement": 1,
       "damageTypeOverride": "force",
@@ -632,6 +633,7 @@
     "baseItem": "quarterstaff",
     "rarity": "very rare",
     "attunement": false,
+    "dndbeyondSlug": "9058897-quarterstaff-of-the-acrobat",
     "combat": {
       "enhancement": 2,
       "advantage": ["acrobatics"],
@@ -659,6 +661,7 @@
     "baseItem": "shield",
     "rarity": "very rare",
     "attunement": false,
+    "dndbeyondSlug": "9058943-shield-of-the-cavalier",
     "combat": {
       "enhancement": 0,
       "acBonus": 2,
@@ -675,6 +678,7 @@
     "baseItem": "greatclub",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "9058872-thunderous-greatclub",
     "combat": {
       "enhancement": 0,
       "abilityScoreSetter": {
