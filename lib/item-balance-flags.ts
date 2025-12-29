@@ -27,6 +27,7 @@ export const SPECIAL_MECHANICS = new Set([
   // Defensive special mechanics
   'Gloves of Missile Snaring', // Deflect ranged attacks (reaction-based)
   'Cloak of Protection',       // +1 AC and +1 all saves stacks with everything
+  'Shield of the Cavalier',    // Push/prone + Protective Field not quantified
 
   // Complex stacking or restrictions
   'Staff of Power',            // +2 to attack/damage/AC/saves (spellcaster-only attunement)
@@ -122,6 +123,9 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Cloak of Protection') {
     return '+1 AC and +1 all saves is 2.0 pts (Rare calc) but official Uncommon. Stacks with everything unlike most AC.';
+  }
+  if (itemName === 'Shield of the Cavalier') {
+    return 'Math captures +2 AC and bonus action bash (3.2 pts). NOT quantified: push 10ft, prone if smaller, and Protective Field (Otiluke\'s-style emanation). Actual value likely higher than calculated.';
   }
 
   // Complex effects
