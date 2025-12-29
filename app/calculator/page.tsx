@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, useSpring, useTransform } from 'framer-motion';
 import { MagicItem, DamageBonus, SpellCharge, ChargedAbility, ChargePool, AbilityScoreSetter, AbilityScoreBonus, Flight } from '@/types/magic-item';
 import {
   calculateCombatScore,
@@ -9,6 +10,18 @@ import {
   findTopAnchorItems,
 } from '@/lib/calculator';
 import { getWarningIndicator, getItemEmoji } from '@/lib/item-balance-flags';
+
+// Animated number component for smooth score transitions
+function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: number }) {
+  const spring = useSpring(value, { stiffness: 100, damping: 20 });
+  const display = useTransform(spring, (current) => current.toFixed(decimals));
+
+  useEffect(() => {
+    spring.set(value);
+  }, [spring, value]);
+
+  return <motion.span>{display}</motion.span>;
+}
 
 const BASE_ITEMS = {
   'Melee Weapons (Simple)': [
@@ -196,13 +209,13 @@ export default function CalculatorPage() {
           <div className="flex gap-4">
             <Link
               href="/items"
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-blue-600 hover:text-blue-700 font-medium btn-glow-blue px-3 py-1.5 rounded-md"
             >
               📚 View All Items
             </Link>
             <Link
               href="/"
-              className="text-emerald-600 hover:text-emerald-700 font-medium"
+              className="text-emerald-600 hover:text-emerald-700 font-medium btn-glow-emerald px-3 py-1.5 rounded-md"
             >
               ← Back to Home
             </Link>
@@ -833,7 +846,7 @@ export default function CalculatorPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={addAbility}
-                          className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm font-medium"
+                          className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm font-medium btn-glow-emerald"
                         >
                           Add Ability
                         </button>
@@ -848,7 +861,7 @@ export default function CalculatorPage() {
                   ) : (
                     <button
                       onClick={() => setShowChargeForm(true)}
-                      className="w-full px-4 py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-400 hover:border-emerald-600 hover:text-emerald-600 transition-colors"
+                      className="w-full px-4 py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-400 hover:border-emerald-600 hover:text-emerald-600 transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
                     >
                       + Add Spell or Ability
                     </button>
@@ -880,12 +893,16 @@ export default function CalculatorPage() {
 
               <div className="space-y-4">
                 {/* Suggested Rarity - THE ANSWER */}
-                <div className="bg-emerald-900/30 border border-emerald-700 rounded-md p-4">
-                  <div className="text-emerald-400 font-bold mb-2">
-                    📊 SUGGESTED RARITY
+                <div className="bg-emerald-900/30 border border-emerald-700 rounded-md p-4 card-hover-lift">
+                  <div className="text-emerald-400 font-bold mb-2 flex items-center justify-between">
+                    <span>📊 SUGGESTED RARITY</span>
+                    <span className="text-sm font-mono text-emerald-300">
+                      <AnimatedNumber value={results.combatScore} /> pts
+                    </span>
                   </div>
-                  <div className="text-2xl font-bold text-white">
-                    {results.suggestedRarity}
+                  <div className="text-2xl font-bold text-white relative inline-block">
+                    <span className="relative z-10">{results.suggestedRarity}</span>
+                    <span className="absolute inset-0 rarity-shimmer rounded" />
                   </div>
                 </div>
 
@@ -924,7 +941,7 @@ export default function CalculatorPage() {
                         const warnings = getWarningIndicator(anchor.name);
 
                         return (
-                          <div key={index} className="rounded-lg overflow-hidden border border-slate-600">
+                          <div key={index} className="rounded-lg overflow-hidden border border-slate-600 card-hover-lift">
                             {/* Side-by-Side Battle Cards */}
                             <div className="grid grid-cols-2">
                               {/* LEFT: Your Item (Deep Blue) */}
@@ -934,7 +951,7 @@ export default function CalculatorPage() {
                                   <span className="text-blue-300 font-bold">{itemName || 'YOUR ITEM'}</span>
                                 </div>
                                 <div className="text-sm text-blue-200 font-mono mb-3">
-                                  {results.combatScore.toFixed(1)} pts • <span className="text-blue-400">{results.suggestedRarity}</span>
+                                  <AnimatedNumber value={results.combatScore} /> pts • <span className="text-blue-400">{results.suggestedRarity}</span>
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
                                   <div className="text-blue-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
