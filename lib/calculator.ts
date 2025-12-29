@@ -1,4 +1,4 @@
-import { CombatFeatures, Rarity, MagicItem, AdvantageType, PermanentBuffs, WeaponProperty } from '@/types/magic-item';
+import { CombatFeatures, Rarity, MagicItem, PermanentBuffs, WeaponProperty } from '@/types/magic-item';
 import srdItems from '@/data/srd-items.json';
 
 // Calculate dice value dynamically based on number and type
@@ -44,19 +44,6 @@ function getDiceValue(diceString: string): number {
 
   return numDice * baseValue;
 }
-
-// Legacy lookup for backward compatibility
-const DICE_VALUES: Record<string, number> = {
-  '1d4': getDiceValue('1d4'),
-  '1d6': getDiceValue('1d6'),
-  '1d8': getDiceValue('1d8'),
-  '1d10': getDiceValue('1d10'),
-  '2d6': getDiceValue('2d6'),
-  '3d6': getDiceValue('3d6'),
-  '2d8': getDiceValue('2d8'),
-  '3d8': getDiceValue('3d8'),
-  '4d6': getDiceValue('4d6'),
-};
 
 // Recharge frequency multipliers
 // These represent the value of spell abilities based on how often they recharge
@@ -756,7 +743,6 @@ export function findTopAnchorItems(
     }
 
     const sameAttunement = itemAttunement === userAttunement;
-    const sameRarity = rarityDiff === 0;
     const score = getItemScore(item);
     const scoreDiff = Math.abs(score - userScore);
 
@@ -887,8 +873,6 @@ function compareToAnchor(
     const freqText = anchorFreq === 'per-turn' ? ' per turn' : '';
     details.push(`no damage bonus (reference has ${anchorDmg}${freqText})`);
   } else if (userDmg && anchorDmg) {
-    const userDmgValue = getDiceValue(userDmg);
-    const anchorDmgValue = getDiceValue(anchorDmg);
     const userFreqText = userFreq === 'per-turn' ? ' per turn' : '';
     const anchorFreqText = anchorFreq === 'per-turn' ? ' per turn' : '';
 
@@ -921,7 +905,6 @@ function compareToAnchor(
 
   if (userPool && userPool.abilities.length > 0) {
     // User has charge pool abilities - show a single clear summary
-    const abilityNames = userPool.abilities.map(a => a.spell).join(', ');
     const maxLevel = Math.max(...userPool.abilities.map(a => a.spellLevel));
     const levelText = maxLevel === 0 ? 'cantrip' : `up to level ${maxLevel}`;
 

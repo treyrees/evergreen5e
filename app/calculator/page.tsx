@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, useSpring, useTransform, AnimatePresence } from 'framer-motion';
 import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty } from '@/types/magic-item';
@@ -8,7 +8,7 @@ import {
   getSuggestedRarity,
   findTopAnchorItems,
 } from '@/lib/calculator';
-import { getWarningIndicator, getItemEmoji } from '@/lib/item-balance-flags';
+import { getWarningIndicator } from '@/lib/item-balance-flags';
 import { generateRandomItemName } from '@/lib/item-name-generator';
 
 // Animated number component for smooth score transitions
@@ -121,8 +121,6 @@ const WEAPON_ITEMS = new Set([
   ...BASE_ITEMS['Ranged Weapons'],
 ]);
 
-const DAMAGE_DICE = ['1d4', '1d6', '1d8', '1d10', '2d6', '2d8', '3d6', '3d8', '4d6'];
-
 const DAMAGE_TYPES = [
   'fire',
   'cold',
@@ -186,6 +184,7 @@ export default function CalculatorPage() {
   // Generate random placeholder after mount to avoid hydration mismatch
   const [randomPlaceholder, setRandomPlaceholder] = useState('');
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time mount initialization
     setRandomPlaceholder(generateRandomItemName());
   }, []);
 
@@ -253,19 +252,33 @@ export default function CalculatorPage() {
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
 
+  // Track if this is the first rarity transition (slower) vs subsequent (faster)
+  const isFirstTransition = useRef(true);
+
   // Update body background based on rarity when item is populated
   useEffect(() => {
     if (hasSelectedAttributes) {
+      // First transition is 3s, subsequent are 1s
+      if (isFirstTransition.current) {
+        document.body.classList.remove('fast-transition');
+        isFirstTransition.current = false;
+      } else {
+        document.body.classList.add('fast-transition');
+      }
       // Set the rarity on the body to trigger the background color transition
       document.body.dataset.rarity = results.suggestedRarity.toLowerCase();
     } else {
       // Remove the rarity attribute to return to default purple
       delete document.body.dataset.rarity;
+      // Reset so next time attributes are added, we get slow transition again
+      isFirstTransition.current = true;
+      document.body.classList.remove('fast-transition');
     }
 
     // Cleanup on unmount - return to default purple
     return () => {
       delete document.body.dataset.rarity;
+      document.body.classList.remove('fast-transition');
     };
   }, [hasSelectedAttributes, results.suggestedRarity]);
 
