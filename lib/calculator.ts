@@ -1,4 +1,4 @@
-import { CombatFeatures, Rarity, MagicItem, AdvantageType, PermanentBuffs } from '@/types/magic-item';
+import { CombatFeatures, Rarity, MagicItem, AdvantageType, PermanentBuffs, WeaponProperty } from '@/types/magic-item';
 import srdItems from '@/data/srd-items.json';
 
 // Calculate dice value dynamically based on number and type
@@ -514,6 +514,25 @@ export function calculateCombatScore(combat: CombatFeatures): number {
         const multiplier = 0.20;
         score += ability.spellLevel * effectiveUses * multiplier;
       }
+    }
+  }
+
+  // Weapon properties (added properties not normally on the base weapon)
+  // These represent properties that enhance a weapon's versatility or combat value
+  // Values are relatively small since these are situational benefits
+  if (combat.weaponProperties && combat.weaponProperties.length > 0) {
+    const WEAPON_PROPERTY_VALUES: Record<WeaponProperty, number> = {
+      'finesse': 0.25,     // Use DEX or STR - flexibility for multi-stat builds
+      'heavy': -0.1,       // Disadvantage for Small/Tiny - negative property
+      'light': 0.2,        // Enables two-weapon fighting
+      'reach': 0.25,       // +5 feet reach - tactical positioning advantage
+      'thrown': 0.1,       // Can throw for ranged attack - minor versatility
+      'two-handed': -0.1,  // Requires two hands - opportunity cost (no shield)
+      'versatile': 0.15,   // One or two hands - flexibility in usage
+    };
+
+    for (const prop of combat.weaponProperties) {
+      score += WEAPON_PROPERTY_VALUES[prop] || 0;
     }
   }
 
