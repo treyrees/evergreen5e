@@ -490,24 +490,21 @@ export default function CalculatorPage() {
 
                 {/* Weapon Properties - Added Properties */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-3">
                     Added Weapon Properties
                   </label>
-                  <p className="text-xs text-slate-500 mb-3">
-                    Properties not normally on this weapon type
-                  </p>
                   <div className="grid grid-cols-2 gap-2">
                     {([
-                      { id: 'finesse', label: 'Finesse', tooltip: 'Use DEX or STR for attacks', value: '+0.25' },
-                      { id: 'light', label: 'Light', tooltip: 'Enables two-weapon fighting', value: '+0.2' },
-                      { id: 'reach', label: 'Reach', tooltip: '+5 feet reach on attacks', value: '+0.25' },
-                      { id: 'thrown', label: 'Thrown', tooltip: 'Can throw for ranged attack', value: '+0.1' },
-                      { id: 'versatile', label: 'Versatile', tooltip: 'Use with one or two hands', value: '+0.15' },
-                      { id: 'heavy-two-handed', label: 'Heavy / Two-Handed', tooltip: 'Heavy or requires two hands', value: '-0.15' },
+                      { id: 'finesse', label: 'Finesse', tooltip: 'Use DEX or STR for attacks' },
+                      { id: 'light', label: 'Light', tooltip: 'Enables two-weapon fighting' },
+                      { id: 'reach', label: 'Reach', tooltip: '+5 feet reach on attacks' },
+                      { id: 'thrown', label: 'Thrown', tooltip: 'Can throw for ranged attack' },
+                      { id: 'versatile', label: 'Versatile', tooltip: 'Use with one or two hands' },
+                      { id: 'heavy-two-handed', label: 'Heavy / Two-Handed', tooltip: 'Heavy or requires two hands' },
                     ] as const).map((prop) => (
                       <label
                         key={prop.id}
-                        className="flex items-center cursor-pointer group"
+                        className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors"
                         title={prop.tooltip}
                       >
                         <input
@@ -520,14 +517,9 @@ export default function CalculatorPage() {
                               setWeaponProperties(weaponProperties.filter(p => p !== prop.id));
                             }
                           }}
-                          className="mr-2 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
                         />
-                        <span className="text-sm text-slate-400 group-hover:text-slate-300">
-                          {prop.label}
-                        </span>
-                        <span className={`ml-auto text-xs ${prop.value.startsWith('-') ? 'text-red-400' : 'text-emerald-400'}`}>
-                          {prop.value}
-                        </span>
+                        <span className="text-sm text-slate-300">{prop.label}</span>
                       </label>
                     ))}
                   </div>
