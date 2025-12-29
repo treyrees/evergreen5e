@@ -9,6 +9,7 @@ import {
   findTopAnchorItems,
 } from '@/lib/calculator';
 import { getWarningIndicator, getItemEmoji } from '@/lib/item-balance-flags';
+import { generateRandomItemName } from '@/lib/item-name-generator';
 
 // Animated number component for smooth score transitions
 function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: number }) {
@@ -148,6 +149,10 @@ export default function CalculatorPage() {
   const [showChargeForm, setShowChargeForm] = useState(false);
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  // Generate random placeholder on first render (client-side only to avoid hydration mismatch)
+  const [randomPlaceholder] = useState(() =>
+    typeof window !== 'undefined' ? generateRandomItemName() : ''
+  );
   const [newAbility, setNewAbility] = useState<ChargedAbility>({
     spell: '',
     spellLevel: 0,
@@ -247,7 +252,7 @@ export default function CalculatorPage() {
                     type="text"
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
-                    placeholder="e.g., Sword of Flames"
+                    placeholder={randomPlaceholder || 'e.g., Sword of Flames'}
                     className="w-full px-4 py-2.5 border border-slate-600 rounded-md bg-slate-900 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
@@ -1125,7 +1130,7 @@ export default function CalculatorPage() {
 
         {/* Formula Details - Collapsed by default */}
         <div className="mt-6">
-          <div className="bg-slate-800/50 text-slate-100 rounded-lg font-mono text-sm border border-slate-700">
+          <div className="bg-slate-800/50 text-slate-100 rounded-lg text-sm border border-slate-700">
             <button
               onClick={() => setShowFormulaDetails(!showFormulaDetails)}
               className="w-full px-5 py-3 text-left text-slate-500 hover:text-slate-300 text-xs flex items-center justify-between transition-colors"
