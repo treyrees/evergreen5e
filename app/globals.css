@@ -26,3 +26,55 @@ body {
 h1, h2, h3 {
   font-family: var(--font-cinzel), Georgia, serif;
 }
+
+/* Rarity shimmer animation - subtle diagonal gradient slide */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.rarity-shimmer {
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.15) 40%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 60%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Button glow effects */
+.btn-glow-emerald {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-glow-emerald:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+}
+
+.btn-glow-blue {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-glow-blue:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+}
+
+/* Card hover lift effect */
+.card-hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
