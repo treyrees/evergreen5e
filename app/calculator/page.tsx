@@ -807,8 +807,14 @@ export default function CalculatorPage() {
 
                             {/* Description for unmodeled mechanics */}
                             {anchor.description && (
-                              <div className="mb-3 bg-cyan-900/20 border border-cyan-700/30 rounded p-2">
-                                <div className="text-xs text-cyan-300 italic">
+                              <div className={`mb-3 rounded p-2 ${
+                                warnings.hasMath
+                                  ? 'bg-cyan-900/20 border border-cyan-700/30'
+                                  : 'bg-amber-900/20 border border-amber-700/30'
+                              }`}>
+                                <div className={`text-xs italic ${
+                                  warnings.hasMath ? 'text-cyan-300' : 'text-amber-300'
+                                }`}>
                                   ⚠️ {anchor.description}
                                 </div>
                               </div>
