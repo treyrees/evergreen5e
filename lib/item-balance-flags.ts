@@ -30,7 +30,6 @@ export const SPECIAL_MECHANICS = new Set([
 
   // Complex stacking or restrictions
   'Staff of Power',            // +2 to attack/damage/AC/saves (spellcaster-only attunement)
-  'Sun Blade',                 // Finesse property on longsword + radiant damage type
 ]);
 
 /**
@@ -127,9 +126,6 @@ export function getItemExplanation(itemName: string): string {
   // Complex effects
   if (itemName === 'Staff of Power') {
     return '+2 to attack/damage/AC/saves is 6.0 pts (Legendary calc) but official Very Rare. Spellcaster-only attunement limits audience significantly.';
-  }
-  if (itemName === 'Sun Blade') {
-    return '+2 sword with 1d8 radiant is 3.25 pts (VR calc) but official Rare. Finesse on longsword has hidden build value.';
   }
 
   // === COMMUNITY NOTES ===

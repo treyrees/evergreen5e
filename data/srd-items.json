@@ -99,10 +99,13 @@
       "enhancement": 2,
       "damageBonus": {
         "dice": "1d8",
-        "type": "radiant"
-      }
+        "type": "radiant",
+        "conditional": true,
+        "conditionalType": "creature-common"
+      },
+      "damageTypeOverride": "radiant"
     },
-    "description": "WotC IMBALANCE: Formula says Very Rare (3.4 pts), WotC says Rare. By the standards established across dozens of other SRD items (+2 Weapon = Rare baseline, extra damage dice = tier bump), Sun Blade should be Very Rare. Community consensus confirms this is underpriced—one of the most commonly cited balance outliers in 5e."
+    "description": "+2 sword with radiant damage type, +1d8 vs undead. Finesse on longsword is a hidden perk for DEX builds but doesn't affect calculated score."
   },
   {
     "name": "Vorpal Sword",
