@@ -917,11 +917,6 @@ export default function CalculatorPage() {
                                 {warnings.hasSpecial && <span title="Special mechanics" className="text-base">{warnings.specialIcon}</span>}
                                 {warnings.hasCommunity && <span title="Community note" className="text-base">{warnings.communityIcon}</span>}
                               </div>
-                              {warnings.explanation && (
-                                <div className="text-xs text-amber-300 italic mb-1">
-                                  {warnings.explanation}
-                                </div>
-                              )}
                               <div className="text-xs text-slate-400">
                                 <span className="text-emerald-300">{anchor.rarity?.toUpperCase()}</span>
                                 {' • '}
@@ -968,8 +963,8 @@ export default function CalculatorPage() {
                               </div>
                             </div>
 
-                            {/* Description for unmodeled mechanics */}
-                            {anchor.description && (
+                            {/* Warning explanation for flagged items */}
+                            {(warnings.hasNumerical || warnings.hasSpecial || warnings.hasCommunity) && (
                               <div className={`mb-3 rounded p-2 ${
                                 warnings.hasNumerical
                                   ? 'bg-blue-900/20 border border-blue-700/30'
@@ -983,7 +978,7 @@ export default function CalculatorPage() {
                                   {warnings.hasNumerical && '🔢 '}
                                   {warnings.hasSpecial && '⭐ '}
                                   {warnings.hasCommunity && '💬 '}
-                                  {anchor.description}
+                                  {anchor.description || warnings.explanation}
                                 </div>
                               </div>
                             )}
