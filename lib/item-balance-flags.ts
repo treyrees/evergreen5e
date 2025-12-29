@@ -1,74 +1,88 @@
 /**
- * Lists of items flagged for balance issues
- * - Mathematical mismatches: Items where calculated rarity differs significantly from stated rarity
- * - Community mismatches: Items identified by D&D community as unbalanced for their rarity
+ * Three types of item balance warnings:
+ * 1. Numerical edge cases - Conditional bonuses we can't track
+ * 2. Special mechanics - Non-numerical benefits our math can't quantify
+ * 3. Community notes - Well-established consensus (often items stronger than rated)
  */
 
 /**
- * Mathematical mismatches: Items in SRD where our calculation differs by 2+ tiers
- * These are items where the combat math doesn't match the stated rarity
- * Updated with new features: abilityScoreSetter, flight, and manual overrides
- * Current accuracy: 46.5% exact matches, 4.7% off by 2+ tiers (2 items out of 43)
+ * Numerical edge cases: Items numerically stronger than our logic accounts for
+ * These have specific conditions that boost numbers beyond what we track
+ * Examples: +3d6 vs sworn enemy, +2d6 on natural 20
  */
-export const MATHEMATICAL_MISMATCHES = new Set([
-  'Vicious Weapon',            // Rare → Common (0 pts) - nat 20 only damage not valued
-  'Boots of Speed',            // Rare → Common (0 pts) - utility item, doubles speed
+export const NUMERICAL_EDGE_CASES = new Set([
+  'Vicious Weapon',            // +2d6 on nat 20 - we don't track critical-only bonuses
+  'Oathbow',                   // +3d6 vs sworn enemy - we mark conditional but undervalues it
 ]);
 
 /**
- * Community mismatches: Items identified by D&D community as poorly balanced
- * Sources:
- * - EN World forums: "Magic items are not particularly consistent in their Power vs Rarity"
- * - D&D Beyond discussions on flying item balance
- * - Quora discussions on overpowered/underpowered items for rarity
- * - Giant in the Playground "Sane Magic Item Prices" discussions
+ * Special mechanics: Items with non-numerical benefits our math can't quantify
+ * These have unique effects that can't be reduced to combat points
+ * Examples: Instant kill, wish spells, spell absorption
  */
-export const COMMUNITY_MISMATCHES = new Set([
-  // Overpowered for rarity
-  'Broom of Flying',           // Uncommon, should be Rare - unlimited flight, no attunement
-  'Winged Boots',              // Uncommon, should be Rare - "greatest uncommon item in DMG"
-  'Ring of Spell Storing',     // Rare - considered very powerful, breaks action economy
+export const SPECIAL_MECHANICS = new Set([
+  'Vorpal Sword',              // Decapitation on nat 20 (instant kill) - can't model
+  'Luck Blade',                // Wish spell (1d4-1 uses) - utility beyond numbers
+  'Rod of Absorption',         // Absorbs spells targeting you - defensive utility
+  'Boots of Speed',            // Doubles movement + Dex save advantage - mobility value
+]);
+
+/**
+ * Community consensus: Well-established community notes about balance
+ * These tend to be items the community considers stronger than their rarity
+ * Sources: EN World, D&D Beyond, Giant in the Playground, Quora discussions
+ */
+export const COMMUNITY_NOTES = new Set([
+  'Broom of Flying',           // Uncommon but should be Rare - unlimited flight, no attunement
+  'Winged Boots',              // Uncommon but should be Rare - "greatest uncommon in DMG"
+  'Ring of Spell Storing',     // Rare - very powerful, breaks action economy
   'Cloak of Displacement',     // Rare - disadvantage on all attacks is very strong
-  'Headband of Intellect',     // Uncommon - sets INT to 19, massive for non-casters
-  'Gauntlets of Ogre Power',   // Uncommon - sets STR to 19, massive for non-martials
-  'Amulet of Health',          // Rare - sets CON to 19, but also flagged mathematically
-
-  // Underpowered for rarity (or has special mechanics not captured in math)
-  'Vorpal Sword',              // Legendary - decapitation ability not modeled, shows as Very Rare
-  'Luck Blade',                // Legendary - Wish spell not modeled, shows as Uncommon
-  'Rod of Absorption',         // Very Rare - spell absorption not modeled, shows as Common
-  'Wings of Flying',           // Rare - time limited, inferior to Broom of Flying
-  'Trident of Fish Command',   // Uncommon - very niche, only controls fish
+  'Headband of Intellect',     // Uncommon - INT 19 is massive for non-casters
+  'Gauntlets of Ogre Power',   // Uncommon - STR 19 is massive for non-martials
+  'Amulet of Health',          // Rare - CON 19 is very strong
+  'Wings of Flying',           // Rare but time-limited, inferior to Broom of Flying
+  'Trident of Fish Command',   // Uncommon but very niche (only controls fish)
 ]);
 
 /**
- * Check if an item has a mathematical mismatch (our formula vs stated rarity)
+ * Check if an item has numerical edge cases
  */
-export function hasMathematicalMismatch(itemName: string): boolean {
-  return MATHEMATICAL_MISMATCHES.has(itemName);
+export function hasNumericalEdgeCases(itemName: string): boolean {
+  return NUMERICAL_EDGE_CASES.has(itemName);
 }
 
 /**
- * Check if an item has a community-identified mismatch
+ * Check if an item has special mechanics
  */
-export function hasCommunityMismatch(itemName: string): boolean {
-  return COMMUNITY_MISMATCHES.has(itemName);
+export function hasSpecialMechanics(itemName: string): boolean {
+  return SPECIAL_MECHANICS.has(itemName);
 }
 
 /**
- * Get warning indicator for an item
- * Returns object with warning type and display info
+ * Check if an item has community notes
+ */
+export function hasCommunityNotes(itemName: string): boolean {
+  return COMMUNITY_NOTES.has(itemName);
+}
+
+/**
+ * Get warning indicators for an item
+ * Returns object with all three warning types and display info
  */
 export function getWarningIndicator(itemName: string): {
-  hasMath: boolean;
+  hasNumerical: boolean;
+  hasSpecial: boolean;
   hasCommunity: boolean;
-  mathIcon: string;
+  numericalIcon: string;
+  specialIcon: string;
   communityIcon: string;
 } {
   return {
-    hasMath: hasMathematicalMismatch(itemName),
-    hasCommunity: hasCommunityMismatch(itemName),
-    mathIcon: '🔷', // Teal diamond for mathematical mismatch
-    communityIcon: '🟠', // Amber circle for community mismatch
+    hasNumerical: hasNumericalEdgeCases(itemName),
+    hasSpecial: hasSpecialMechanics(itemName),
+    hasCommunity: hasCommunityNotes(itemName),
+    numericalIcon: '🔢',  // Numbers for numerical edge cases
+    specialIcon: '⭐',    // Star for special mechanics
+    communityIcon: '💬', // Speech bubble for community notes
   };
 }

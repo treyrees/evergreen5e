@@ -894,11 +894,12 @@ export default function CalculatorPage() {
                           <div key={index} className={`${index > 0 ? 'border-t border-slate-700 pt-4' : ''} bg-slate-800/30 rounded-lg p-3`}>
                             {/* Anchor Header */}
                             <div className="mb-3 pb-2 border-b border-slate-700/50">
-                              <div className="text-white font-semibold text-base flex items-center gap-2 mb-1">
+                              <div className="text-white font-semibold text-base flex items-center gap-1 mb-1">
                                 <span className="text-emerald-400 text-xs font-mono">#{index + 1}</span>
                                 <span>{anchor.name}</span>
-                                {warnings.hasMath && <span title="Mathematical mismatch" className="text-cyan-400 font-bold">*</span>}
-                                {warnings.hasCommunity && <span title="Community mismatch" className="text-amber-400 font-bold">**</span>}
+                                {warnings.hasNumerical && <span title="Numerical edge case: Conditional bonuses we can't track" className="text-base">{warnings.numericalIcon}</span>}
+                                {warnings.hasSpecial && <span title="Special mechanics: Non-numerical benefits" className="text-base">{warnings.specialIcon}</span>}
+                                {warnings.hasCommunity && <span title="Community note: Commonly considered stronger/weaker than rated" className="text-base">{warnings.communityIcon}</span>}
                               </div>
                               <div className="text-xs text-slate-400">
                                 <span className="text-emerald-300">{anchor.rarity?.toUpperCase()}</span>
@@ -949,14 +950,19 @@ export default function CalculatorPage() {
                             {/* Description for unmodeled mechanics */}
                             {anchor.description && (
                               <div className={`mb-3 rounded p-2 ${
-                                warnings.hasMath
-                                  ? 'bg-cyan-900/20 border border-cyan-700/30'
-                                  : 'bg-amber-900/20 border border-amber-700/30'
+                                warnings.hasNumerical
+                                  ? 'bg-blue-900/20 border border-blue-700/30'
+                                  : warnings.hasSpecial
+                                  ? 'bg-purple-900/20 border border-purple-700/30'
+                                  : 'bg-slate-900/20 border border-slate-700/30'
                               }`}>
                                 <div className={`text-xs italic ${
-                                  warnings.hasMath ? 'text-cyan-300' : 'text-amber-300'
+                                  warnings.hasNumerical ? 'text-blue-300' : warnings.hasSpecial ? 'text-purple-300' : 'text-slate-300'
                                 }`}>
-                                  ⚠️ {anchor.description}
+                                  {warnings.hasNumerical && '🔢 '}
+                                  {warnings.hasSpecial && '⭐ '}
+                                  {warnings.hasCommunity && '💬 '}
+                                  {anchor.description}
                                 </div>
                               </div>
                             )}
