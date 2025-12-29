@@ -439,7 +439,8 @@
         "+4d6 slashing damage on nat 20",
         "Max damage vs objects"
       ]
-    }
+    },
+    "description": "ROUGH APPROXIMATION: Modeled as +3 enhancement (3.0 pts) even though it has no to-hit/damage bonus on paper. The +4d6 on crit and limb-severing effects roughly equate to +3 weapon value. Very Rare is correct but the math is an abstraction."
   },
   {
     "name": "Boots of Speed",
@@ -619,7 +620,7 @@
         "type": "force"
       }
     },
-    "description": "+2 AC bonus (beyond base shield). Forceful Bash: 2d6+2+STR force, push 10ft, prone if smaller. Protective Field: 5ft emanation like Otiluke's."
+    "description": "Formula: 3.2 pts (+2 AC, bonus action bash). Push/prone effects and Protective Field (Otiluke's-style emanation) not quantified, but math already reaches Very Rare. Conservative estimate—actual value likely higher."
   },
   {
     "name": "Thunderous Greatclub",
