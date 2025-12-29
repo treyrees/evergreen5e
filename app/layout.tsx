@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Evergreen 5e - Encyclopedic Magic Item Balancing",
-  description: "Balance custom D&D 5e magic items with educational anchor references from the SRD. Learn why items have certain rarities through direct comparison to known balanced items.",
+  title: "HomebrewQA - D&D 5e Magic Item Balance Calculator",
+  description: "Balance custom D&D 5e magic items using deterministic formulas. No AI or LLMs - pure math-based calculations with SRD anchor comparisons.",
 };
 
 export default function RootLayout({
