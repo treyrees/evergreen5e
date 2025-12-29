@@ -642,7 +642,7 @@ export default function CalculatorPage() {
                 className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
               >
                 <div>
-                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Passive Abilities</span>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Passive Abilities</span>
                   <span className="ml-2 text-xs text-slate-500">Senses, Stats, Resistances, & Movement</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showAdvancedOptions ? '−' : '+'}</span>
@@ -1164,7 +1164,19 @@ export default function CalculatorPage() {
                               {/* RIGHT: Reference Item */}
                               <div className={`${getRarityBgClass(anchor.rarity || 'common')} p-3`}>
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>
+                                  {anchor.dndbeyondSlug ? (
+                                    <a
+                                      href={`https://www.dndbeyond.com/magic-items/${anchor.dndbeyondSlug}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-slate-200 font-semibold text-sm truncate hover:underline hover:text-slate-100 transition-colors"
+                                      title="View on D&D Beyond"
+                                    >
+                                      {anchor.name}
+                                    </a>
+                                  ) : (
+                                    <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>
+                                  )}
                                   <div className="flex items-center gap-1">
                                     {hasWarnings && (
                                       <button

@@ -4,6 +4,7 @@
     "baseItem": "longsword",
     "rarity": "uncommon",
     "attunement": false,
+    "dndbeyondSlug": "5400-weapon-1",
     "combat": {
       "enhancement": 1
     }
@@ -13,6 +14,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "dndbeyondSlug": "5401-weapon-2",
     "combat": {
       "enhancement": 2
     }
@@ -22,6 +24,7 @@
     "baseItem": "longsword",
     "rarity": "very rare",
     "attunement": false,
+    "dndbeyondSlug": "5404-weapon-3",
     "combat": {
       "enhancement": 3
     }
@@ -31,6 +34,7 @@
     "baseItem": "armor (medium)",
     "rarity": "uncommon",
     "attunement": false,
+    "dndbeyondSlug": "5377-armor-1",
     "combat": {
       "enhancement": 0,
       "acBonus": 1
@@ -41,6 +45,7 @@
     "baseItem": "armor (medium)",
     "rarity": "rare",
     "attunement": false,
+    "dndbeyondSlug": "5378-armor-2",
     "combat": {
       "enhancement": 0,
       "acBonus": 2
@@ -51,6 +56,7 @@
     "baseItem": "armor (medium)",
     "rarity": "very rare",
     "attunement": false,
+    "dndbeyondSlug": "5379-armor-3",
     "combat": {
       "enhancement": 0,
       "acBonus": 3
@@ -61,6 +67,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "5386-flame-tongue",
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -79,6 +86,7 @@
     "baseItem": "longsword",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "5387-frost-brand",
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -95,6 +103,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4774-sun-blade",
     "combat": {
       "enhancement": 2,
       "damageBonus": {
@@ -112,6 +121,7 @@
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
+    "dndbeyondSlug": "5397-vorpal-sword",
     "overrideScore": 4.0,
     "combat": {
       "enhancement": 3
@@ -123,6 +133,7 @@
     "baseItem": "longbow",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "4686-oathbow",
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -138,6 +149,7 @@
     "baseItem": "dagger",
     "rarity": "rare",
     "attunement": false,
+    "dndbeyondSlug": "4613-dagger-of-venom",
     "combat": {
       "enhancement": 1,
       "charges": [
@@ -155,6 +167,7 @@
     "baseItem": "rapier",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "5394-nine-lives-stealer",
     "overrideScore": 3.5,
     "combat": {
       "enhancement": 2
@@ -166,6 +179,7 @@
     "baseItem": "shield",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "4571-animated-shield",
     "combat": {
       "enhancement": 0,
       "handsFreeDef": true
@@ -177,6 +191,7 @@
     "baseItem": "armor (medium)",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "5371-armor-of-resistance",
     "combat": {
       "enhancement": 0,
       "resistances": [
@@ -189,6 +204,7 @@
     "baseItem": "ring",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4726-ring-of-protection",
     "combat": {
       "acBonus": 1,
       "savingThrowBonus": 1,
@@ -200,6 +216,7 @@
     "baseItem": "cloak",
     "rarity": "uncommon",
     "attunement": true,
+    "dndbeyondSlug": "4607-cloak-of-protection",
     "combat": {
       "acBonus": 1,
       "savingThrowBonus": 1,
@@ -212,6 +229,7 @@
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
+    "dndbeyondSlug": "5384-defender",
     "combat": {
       "enhancement": 3,
       "acBonus": 3
@@ -222,6 +240,7 @@
     "baseItem": "staff",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "9229098-staff-of-power",
     "overrideScore": 3.5,
     "combat": {
       "enhancement": 2,
@@ -235,6 +254,7 @@
     "baseItem": "wand",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4791-wand-of-fireballs",
     "combat": {
       "charges": [
         {
@@ -252,6 +272,7 @@
     "baseItem": "wand",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4792-wand-of-lightning-bolts",
     "combat": {
       "charges": [
         {
@@ -269,6 +290,7 @@
     "baseItem": "wand",
     "rarity": "uncommon",
     "attunement": false,
+    "dndbeyondSlug": "4794-wand-of-magic-missiles",
     "overrideScore": 1.0,
     "combat": {
       "charges": [
@@ -288,6 +310,7 @@
     "baseItem": "rod",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "4744-rod-of-absorption",
     "overrideScore": 3.0,
     "combat": {
       "enhancement": 0
@@ -299,6 +322,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "dndbeyondSlug": "5388-giant-slayer",
     "overrideScore": 2.0,
     "combat": {
       "enhancement": 1,
@@ -315,6 +339,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "dndbeyondSlug": "5385-dragon-slayer",
     "combat": {
       "enhancement": 1,
       "damageBonus": {
@@ -329,6 +354,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "dndbeyondSlug": "5399-vicious-weapon",
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -344,6 +370,7 @@
     "baseItem": "mace",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4670-mace-of-disruption",
     "overrideScore": 2.0,
     "combat": {
       "enhancement": 0,
@@ -360,6 +387,7 @@
     "baseItem": "mace",
     "rarity": "rare",
     "attunement": false,
+    "dndbeyondSlug": "4671-mace-of-smiting",
     "overrideScore": 2.0,
     "combat": {
       "enhancement": 1,
@@ -376,6 +404,7 @@
     "baseItem": "trident",
     "rarity": "uncommon",
     "attunement": true,
+    "dndbeyondSlug": "4784-trident-of-fish-command",
     "combat": {
       "enhancement": 1
     }
@@ -385,6 +414,7 @@
     "baseItem": "javelin",
     "rarity": "uncommon",
     "attunement": false,
+    "dndbeyondSlug": "4667-javelin-of-lightning",
     "combat": {
       "enhancement": 0,
       "charges": [
@@ -402,6 +432,7 @@
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
+    "dndbeyondSlug": "5393-luck-blade",
     "combat": {
       "enhancement": 1,
       "savingThrowBonus": 1,
@@ -420,6 +451,7 @@
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
+    "dndbeyondSlug": "5389-holy-avenger",
     "combat": {
       "enhancement": 3,
       "damageBonus": {
@@ -433,6 +465,7 @@
     "baseItem": "longsword",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "5391-sword-of-sharpness",
     "combat": {
       "enhancement": 3
     },
@@ -449,6 +482,7 @@
     "baseItem": "boots",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4589-boots-of-speed",
     "overrideScore": 2.0,
     "combat": {
       "enhancement": 0
@@ -460,6 +494,7 @@
     "baseItem": "gloves",
     "rarity": "uncommon",
     "attunement": true,
+    "dndbeyondSlug": "4646-gloves-of-missile-snaring",
     "overrideScore": 1.0,
     "combat": {
       "enhancement": 0
@@ -471,6 +506,7 @@
     "baseItem": "amulet",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4568-amulet-of-health",
     "combat": {
       "enhancement": 0,
       "abilityScoreSetter": {
@@ -484,6 +520,7 @@
     "baseItem": "headband",
     "rarity": "uncommon",
     "attunement": true,
+    "dndbeyondSlug": "4652-headband-of-intellect",
     "combat": {
       "enhancement": 0,
       "abilityScoreSetter": {
@@ -497,6 +534,7 @@
     "baseItem": "gauntlets",
     "rarity": "uncommon",
     "attunement": true,
+    "dndbeyondSlug": "4641-gauntlets-of-ogre-power",
     "combat": {
       "enhancement": 0,
       "abilityScoreSetter": {
@@ -510,6 +548,7 @@
     "baseItem": "broom",
     "rarity": "uncommon",
     "attunement": false,
+    "dndbeyondSlug": "4597-broom-of-flying",
     "combat": {
       "enhancement": 0,
       "flight": {
@@ -524,6 +563,7 @@
     "baseItem": "boots",
     "rarity": "uncommon",
     "attunement": true,
+    "dndbeyondSlug": "4804-winged-boots",
     "combat": {
       "enhancement": 0,
       "flight": {
@@ -538,6 +578,7 @@
     "baseItem": "cloak",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4805-wings-of-flying",
     "combat": {
       "enhancement": 0,
       "flight": {
@@ -552,6 +593,7 @@
     "baseItem": "ring",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4730-ring-of-spell-storing",
     "overrideScore": 2.5,
     "combat": {
       "enhancement": 0
@@ -563,6 +605,7 @@
     "baseItem": "cloak",
     "rarity": "rare",
     "attunement": true,
+    "dndbeyondSlug": "4605-cloak-of-displacement",
     "combat": {
       "enhancement": 0,
       "acBonus": 2
@@ -573,6 +616,7 @@
     "baseItem": "longbow",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "9058960-energy-bow",
     "combat": {
       "enhancement": 1,
       "damageTypeOverride": "force",
@@ -589,6 +633,7 @@
     "baseItem": "quarterstaff",
     "rarity": "very rare",
     "attunement": false,
+    "dndbeyondSlug": "9058897-quarterstaff-of-the-acrobat",
     "combat": {
       "enhancement": 2,
       "advantage": ["acrobatics"],
@@ -604,6 +649,7 @@
     "baseItem": "shield",
     "rarity": "uncommon",
     "attunement": false,
+    "dndbeyondSlug": "5403-sentinel-shield",
     "combat": {
       "enhancement": 0,
       "advantage": ["initiative", "perception"]
@@ -615,6 +661,7 @@
     "baseItem": "shield",
     "rarity": "very rare",
     "attunement": false,
+    "dndbeyondSlug": "9058943-shield-of-the-cavalier",
     "combat": {
       "enhancement": 0,
       "acBonus": 2,
@@ -631,6 +678,7 @@
     "baseItem": "greatclub",
     "rarity": "very rare",
     "attunement": true,
+    "dndbeyondSlug": "9058872-thunderous-greatclub",
     "combat": {
       "enhancement": 0,
       "abilityScoreSetter": {
@@ -648,6 +696,7 @@
     "baseItem": "cloak",
     "rarity": "legendary",
     "attunement": true,
+    "dndbeyondSlug": "5347-cloak-of-invisibility",
     "overrideScore": 4.0,
     "combat": {
       "enhancement": 0
