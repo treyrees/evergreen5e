@@ -82,6 +82,10 @@ npm run build  # Production build
 npm run lint   # Run ESLint
 ```
 
+### Known TypeScript Warnings
+
+There will be TypeScript errors related to Google Fonts (next/font/google). **Do not attempt to fix these** - they are expected behavior in the development environment and do not affect functionality.
+
 ## Philosophy
 
 The calculator prioritizes:

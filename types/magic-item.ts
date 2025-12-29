@@ -57,6 +57,7 @@ export interface PermanentBuffs {
   blindsight?: boolean;       // Grants blindsight 30 ft (e.g., Robe of Eyes partial)
   speedBonus?: boolean;       // +10 ft movement speed (e.g., Boots of Striding)
   tremorsense?: boolean;      // Grants tremorsense 30 ft (e.g., rare earth-themed items)
+  climbBurrow?: boolean;      // Grants climb or burrow speed (e.g., Slippers of Spider Climbing)
 }
 
 // Reaction-based AC bonus (e.g., Quarterstaff of the Acrobat's Attack Deflection)

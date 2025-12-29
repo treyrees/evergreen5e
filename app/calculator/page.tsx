@@ -231,7 +231,7 @@ export default function CalculatorPage() {
             </Link>
             <Link
               href="/"
-              className="text-emerald-600 hover:text-emerald-700 font-medium btn-glow-emerald px-3 py-1.5 rounded-md"
+              className="text-[#00d67e] hover:text-[#00ff96] font-medium btn-glow-emerald px-3 py-1.5 rounded-md"
             >
               ← Back to Home
             </Link>
@@ -246,7 +246,7 @@ export default function CalculatorPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-emerald-600">1.</span> Basic Info
+                <span className="text-[#00d67e]">1.</span> Basic Info
               </h2>
               <div className="space-y-4">
                 <div>
@@ -307,7 +307,7 @@ export default function CalculatorPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-emerald-600">2.</span> Numerical Bonuses
+                <span className="text-[#00d67e]">2.</span> Numerical Bonuses
               </h2>
               <div className="space-y-6">
                   {/* Attack/Damage Bonus */}
@@ -322,7 +322,7 @@ export default function CalculatorPage() {
                           onClick={() => setEnhancement(value)}
                           className={`px-4 py-2 rounded-md font-medium transition-colors ${
                             enhancement === value
-                              ? 'bg-emerald-600 text-white'
+                              ? 'bg-[#00d67e] text-white'
                               : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                           }`}
                         >
@@ -408,7 +408,7 @@ export default function CalculatorPage() {
                             onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-hit' })}
                             className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                               (damageBonus.frequency || 'per-hit') === 'per-hit'
-                                ? 'bg-emerald-600 text-white'
+                                ? 'bg-[#00d67e] text-white'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                             }`}
                           >
@@ -418,7 +418,7 @@ export default function CalculatorPage() {
                             onClick={() => setDamageBonus({ ...damageBonus, frequency: 'per-turn' })}
                             className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                               damageBonus.frequency === 'per-turn'
-                                ? 'bg-emerald-600 text-white'
+                                ? 'bg-[#00d67e] text-white'
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                             }`}
                           >
@@ -476,7 +476,7 @@ export default function CalculatorPage() {
                         onClick={() => setAcBonus(value)}
                         className={`px-4 py-2 rounded-md font-medium transition-colors ${
                           acBonus === value
-                            ? 'bg-emerald-600 text-white'
+                            ? 'bg-[#00d67e] text-white'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                         }`}
                       >
@@ -498,7 +498,7 @@ export default function CalculatorPage() {
                         onClick={() => setSavingThrowBonus(value)}
                         className={`px-4 py-2 rounded-md font-medium transition-colors ${
                           savingThrowBonus === value
-                            ? 'bg-emerald-600 text-white'
+                            ? 'bg-[#00d67e] text-white'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                         }`}
                       >
@@ -515,7 +515,7 @@ export default function CalculatorPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-emerald-600">3.</span> Ability Score & Permanent Buffs
+                <span className="text-[#00d67e]">3.</span> Ability Score & Permanent Buffs
               </h2>
               <div className="space-y-6">
                 {/* Ability Score */}
@@ -627,6 +627,7 @@ export default function CalculatorPage() {
                     Always-on passive benefits (flight, enhanced senses, speed)
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* LEFT COLUMN - Movement Capabilities */}
                     {/* Flight */}
                     <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
                       <input
@@ -643,6 +644,7 @@ export default function CalculatorPage() {
                       </div>
                     </label>
 
+                    {/* RIGHT COLUMN - Senses */}
                     {/* Darkvision */}
                     <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
                       <input
@@ -656,6 +658,22 @@ export default function CalculatorPage() {
                           <span>👁️</span> Darkvision
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">See 60 ft in darkness</div>
+                      </div>
+                    </label>
+
+                    {/* Speed Bonus */}
+                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={permanentBuffs.speedBonus || false}
+                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
+                        className="h-4 w-4 text-emerald-600 rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                          <span>💨</span> Speed Bonus
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">+10 ft movement speed</div>
                       </div>
                     </label>
 
@@ -675,19 +693,19 @@ export default function CalculatorPage() {
                       </div>
                     </label>
 
-                    {/* Speed Bonus */}
+                    {/* Climb/Burrow Speed */}
                     <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
                       <input
                         type="checkbox"
-                        checked={permanentBuffs.speedBonus || false}
-                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
+                        checked={permanentBuffs.climbBurrow || false}
+                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, climbBurrow: e.target.checked })}
                         className="h-4 w-4 text-emerald-600 rounded"
                       />
                       <div>
                         <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span>💨</span> Speed Bonus
+                          <span>🧗</span> Climb/Burrow
                         </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">+10 ft movement speed</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Climb or burrow speed</div>
                       </div>
                     </label>
 
@@ -716,7 +734,7 @@ export default function CalculatorPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-emerald-600">4.</span> Spells & Spell-Like Abilities
+                <span className="text-[#00d67e]">4.</span> Spells & Spell-Like Abilities
               </h2>
               <div className="space-y-4">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
@@ -933,7 +951,7 @@ export default function CalculatorPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={addAbility}
-                          className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm font-medium btn-glow-emerald"
+                          className="flex-1 px-4 py-2 bg-[#00d67e] text-white rounded-md hover:bg-[#00b368] text-sm font-medium btn-glow-emerald"
                         >
                           Add Ability
                         </button>
@@ -948,7 +966,7 @@ export default function CalculatorPage() {
                   ) : (
                     <button
                       onClick={() => setShowChargeForm(true)}
-                      className="w-full px-4 py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-400 hover:border-emerald-600 hover:text-emerald-600 transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
+                      className="w-full px-4 py-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-400 hover:border-[#00d67e] hover:text-[#00d67e] transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
                     >
                       + Add Spell or Ability
                     </button>
@@ -959,10 +977,10 @@ export default function CalculatorPage() {
 
           {/* Right Column - Results */}
           <div className="lg:sticky lg:top-8 h-fit">
-            <div className="relative bg-slate-900 text-slate-100 rounded-lg shadow-xl p-6 text-sm">
+            <div className="relative bg-purple-950 text-slate-100 rounded-lg shadow-xl p-6 text-sm">
               {/* Blur overlay when no attributes selected */}
               {!hasSelectedAttributes && (
-                <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                <div className="absolute inset-0 bg-purple-950/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
                   <div className="text-center px-6">
                     <div className="text-xl font-bold text-slate-300">
                       Select a base item type and at least one attribute
@@ -970,7 +988,7 @@ export default function CalculatorPage() {
                   </div>
                 </div>
               )}
-              <div className="border-b border-slate-700 pb-4 mb-4">
+              <div className="border-b border-purple-800 pb-4 mb-4">
                 <div className="text-center text-lg font-bold">
                   {currentItem.name?.toUpperCase() || 'UNNAMED ITEM'}
                 </div>
@@ -978,10 +996,10 @@ export default function CalculatorPage() {
 
               <div className="space-y-4">
                 {/* Suggested Rarity - THE ANSWER */}
-                <div className="bg-emerald-900/30 border border-emerald-700 rounded-md p-4 card-hover-lift">
-                  <div className="text-emerald-400 font-bold mb-2 flex items-center justify-between">
+                <div className="bg-[#00d67e]/20 border border-[#00d67e] rounded-md p-4 card-hover-lift">
+                  <div className="text-[#00ff96] font-bold mb-2 flex items-center justify-between">
                     <span>📊 SUGGESTED RARITY</span>
-                    <span className="text-sm font-mono text-emerald-300">
+                    <span className="text-sm font-mono text-[#00ff96]">
                       <AnimatedNumber value={results.combatScore} /> pts
                     </span>
                   </div>
@@ -992,7 +1010,7 @@ export default function CalculatorPage() {
 
                 {/* What's Similar? - Reference Item Comparison */}
                 {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
-                  <div className="border-t border-slate-700 pt-4">
+                  <div className="border-t border-purple-800 pt-4">
                     {/* Section Header */}
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-white font-bold text-lg flex items-center gap-2">
@@ -1003,7 +1021,7 @@ export default function CalculatorPage() {
                         <button
                           onClick={() => setNumAnchorsToShow(Math.max(1, numAnchorsToShow - 1))}
                           disabled={numAnchorsToShow <= 1}
-                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
+                          className="w-7 h-7 flex items-center justify-center bg-purple-800 hover:bg-purple-700 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
                         >
                           −
                         </button>
@@ -1011,7 +1029,7 @@ export default function CalculatorPage() {
                         <button
                           onClick={() => setNumAnchorsToShow(Math.min(3, numAnchorsToShow + 1))}
                           disabled={numAnchorsToShow >= 3}
-                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
+                          className="w-7 h-7 flex items-center justify-center bg-purple-800 hover:bg-purple-700 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
                         >
                           +
                         </button>
@@ -1025,7 +1043,7 @@ export default function CalculatorPage() {
                         const warnings = getWarningIndicator(anchor.name);
 
                         return (
-                          <div key={index} className="rounded-lg overflow-hidden border border-slate-600 card-hover-lift">
+                          <div key={index} className="rounded-lg overflow-hidden border border-purple-700 card-hover-lift">
                             {/* Side-by-Side Battle Cards */}
                             <div className="grid grid-cols-2">
                               {/* LEFT: Your Item (Deep Blue) */}
@@ -1062,6 +1080,7 @@ export default function CalculatorPage() {
                                   {permanentBuffs.blindsight && <div>🔮 Blindsight 30 ft</div>}
                                   {permanentBuffs.speedBonus && <div>💨 +10 ft speed</div>}
                                   {permanentBuffs.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
+                                  {permanentBuffs.climbBurrow && <div>🧗 Climb/Burrow speed</div>}
                                   {resistances.length > 0 && <div>Resist: {resistances.join(', ')}</div>}
                                   {abilities.length > 0 && <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>}
                                   {maxCharges > 0 && <div>{maxCharges} max charges</div>}
@@ -1071,21 +1090,21 @@ export default function CalculatorPage() {
                                 </div>
                               </div>
 
-                              {/* RIGHT: Reference Item (Vibrant Emerald) */}
-                              <div className="bg-emerald-950/50 p-4 relative">
+                              {/* RIGHT: Reference Item (Hot Emerald) */}
+                              <div className="bg-[#00d67e]/10 p-4 relative">
                                 {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
-                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-emerald-800/50">
-                                  <span className="text-emerald-400 text-lg">{getItemEmoji(anchor.name)}</span>
-                                  <span className="text-emerald-300 font-bold">#{index + 1} {anchor.name}</span>
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#00d67e]/30">
+                                  <span className="text-[#00ff96] text-lg">{getItemEmoji(anchor.name)}</span>
+                                  <span className="text-[#00ff96] font-bold">#{index + 1} {anchor.name}</span>
                                   {warnings.hasSpecial && <span title="Special mechanics" className="text-sm">⭐</span>}
                                   {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}
                                   {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
                                 </div>
-                                <div className="text-sm text-emerald-200 mb-3">
+                                <div className="text-sm text-[#00ff96]/80 mb-3">
                                   <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${getRarityColorClass(anchor.rarity || 'common')}`}>{capitalizeRarity(anchor.rarity || 'common')}</span>
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
-                                  <div className="text-emerald-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
+                                  <div className="text-[#00ff96]/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
                                   {anchor.combat.enhancement > 0 && <div>+{anchor.combat.enhancement} enhancement</div>}
                                   {anchor.combat.damageBonus && (
                                     <div>
@@ -1112,6 +1131,7 @@ export default function CalculatorPage() {
                                   {anchor.combat.permanentBuffs?.blindsight && <div>🔮 Blindsight 30 ft</div>}
                                   {anchor.combat.permanentBuffs?.speedBonus && <div>💨 +10 ft speed</div>}
                                   {anchor.combat.permanentBuffs?.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
+                                  {anchor.combat.permanentBuffs?.climbBurrow && <div>🧗 Climb/Burrow speed</div>}
                                   {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
                                     <div>Resist: {anchor.combat.resistances.join(', ')}</div>
                                   )}
@@ -1130,7 +1150,7 @@ export default function CalculatorPage() {
                                   {anchor.combat.handsFreeDef && <div>Hands-free defense</div>}
                                   {/* Special Mechanics inline badge */}
                                   {(warnings.hasSpecial || warnings.hasNumerical || warnings.hasCommunity) && (
-                                    <div className="mt-2 pt-2 border-t border-emerald-800/30">
+                                    <div className="mt-2 pt-2 border-t border-[#00d67e]/20">
                                       <div className="text-[10px] text-purple-300 italic">
                                         {warnings.hasSpecial && '⭐ '}
                                         {warnings.hasNumerical && '🔢 '}
@@ -1144,7 +1164,7 @@ export default function CalculatorPage() {
                             </div>
 
                             {/* DIFFERENCES Bar (Full Width Bottom) */}
-                            <div className="bg-slate-900 border-t border-slate-600 px-4 py-3">
+                            <div className="bg-purple-950 border-t border-purple-700 px-4 py-3">
                               <div className="flex items-center gap-3">
                                 <span className="text-slate-400 text-xs font-semibold uppercase tracking-wide">Δ</span>
                                 {comparison.type === 'stronger' && (
@@ -1158,7 +1178,7 @@ export default function CalculatorPage() {
                                   </span>
                                 )}
                                 {comparison.type === 'equal' && (
-                                  <span className="text-emerald-400 text-sm font-medium">
+                                  <span className="text-[#00ff96] text-sm font-medium">
                                     ≈ Equal power level
                                   </span>
                                 )}
@@ -1188,10 +1208,10 @@ export default function CalculatorPage() {
 
         {/* Advanced: Formula Details - Standalone Section */}
         <div className="mt-8">
-          <div className="bg-slate-900 text-slate-100 rounded-lg shadow-xl font-mono text-sm">
+          <div className="bg-purple-950 text-slate-100 rounded-lg shadow-xl font-mono text-sm">
             <button
               onClick={() => setShowFormulaDetails(!showFormulaDetails)}
-              className="w-full px-6 py-4 text-left text-slate-400 hover:text-emerald-400 text-sm font-semibold flex items-center justify-between transition-colors"
+              className="w-full px-6 py-4 text-left text-slate-400 hover:text-[#00ff96] text-sm font-semibold flex items-center justify-between transition-colors"
             >
               <span>⚙️ Advanced: Formula Details</span>
               <span className="text-xl">{showFormulaDetails ? '−' : '+'}</span>
@@ -1202,14 +1222,14 @@ export default function CalculatorPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Base Values:</div>
+                      <div className="text-[#00ff96] font-semibold">Base Values:</div>
                       <div>• Enhancement: 1 point per +1</div>
                       <div>• AC Bonus: 1 point per +1</div>
                       <div>• Saving Throw Bonus: 1 point per +1</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Damage Dice:</div>
+                      <div className="text-[#00ff96] font-semibold">Damage Dice:</div>
                       <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts, 1d12 = 1.75 pts</div>
                       <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
                       <div className="text-yellow-400">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
@@ -1222,7 +1242,7 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Damage Type Multipliers:</div>
+                      <div className="text-[#00ff96] font-semibold">Damage Type Multipliers:</div>
                       <div>• Strong (fewer resistances): Force ×1.2, Psychic ×1.15, Radiant ×1.1</div>
                       <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid ×1.0</div>
                       <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7, Physical ×0.85</div>
@@ -1231,27 +1251,28 @@ export default function CalculatorPage() {
 
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Ability Scores:</div>
+                      <div className="text-[#00ff96] font-semibold">Ability Scores:</div>
                       <div>• Setter (19): 2.5 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
                       <div>• Bonus: ×0.75 per point (e.g., +2 bonus = 1.5 pts)</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Permanent Buffs:</div>
+                      <div className="text-[#00ff96] font-semibold">Permanent Buffs:</div>
                       <div>• Flight: 2.0 pts (tactical dominance, ranged immunity)</div>
                       <div>• Blindsight: 0.75 pts (see invisible, through illusions)</div>
                       <div>• Speed Bonus: 0.5 pts (+10 ft movement)</div>
                       <div>• Tremorsense: 0.5 pts (detect via vibrations)</div>
+                      <div>• Climb/Burrow: 0.5 pts (vertical/underground mobility)</div>
                       <div>• Darkvision: 0.25 pts (many races have this)</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Resistances:</div>
+                      <div className="text-[#00ff96] font-semibold">Resistances:</div>
                       <div>• 2.0 points per damage type resisted</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Spell/Ability Charges:</div>
+                      <div className="text-[#00ff96] font-semibold">Spell/Ability Charges:</div>
                       <div>• Formula: effective_level × uses_per_day × recharge_mult</div>
                       <div>• Dawn/Long Rest: ×0.1-0.2 | Short Rest: ×0.2-0.4</div>
                       <div className="text-cyan-400">• High-level spell scaling (effective value):</div>
@@ -1263,13 +1284,13 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Rarity Thresholds:</div>
+                      <div className="text-[#00ff96] font-semibold">Rarity Thresholds:</div>
                       <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
                       <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Attunement:</div>
+                      <div className="text-[#00ff96] font-semibold">Attunement:</div>
                       <div className="text-slate-300 text-[11px]">
                         Attunement does <span className="text-yellow-400">not</span> modify scores. Official 5e pricing is inconsistent—Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
                       </div>
@@ -1280,7 +1301,7 @@ export default function CalculatorPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="text-emerald-400 font-semibold">Reference Item Discrepancy Categories:</div>
+                    <div className="text-[#00ff96] font-semibold">Reference Item Discrepancy Categories:</div>
                     <div className="space-y-3">
                       <div className="bg-purple-900/20 border border-purple-700/30 rounded p-3">
                         <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>

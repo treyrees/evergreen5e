@@ -348,6 +348,7 @@ export function calculateCombatScore(combat: CombatFeatures): number {
       blindsight: 0.75,   // Rare and powerful - see invisible, through illusions
       speedBonus: 0.5,    // +10 ft movement is always useful; like Boots of Striding
       tremorsense: 0.5,   // Detect invisible/hidden creatures through ground vibration
+      climbBurrow: 0.5,   // Climb/burrow speed is useful for mobility; like Slippers of Spider Climbing
     };
 
     for (const [buff, enabled] of Object.entries(combat.permanentBuffs)) {
