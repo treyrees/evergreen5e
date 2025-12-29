@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import srdItems from '@/data/srd-items.json';
 import { MagicItem } from '@/types/magic-item';
 import { getItemScore } from '@/lib/calculator';
@@ -168,14 +169,14 @@ export default function ItemsPage() {
     return filtered;
   }, [itemsWithScores, searchTerm, rarityFilter, sortBy, sortDirection]);
 
-  // Get rarity color
+  // Get rarity color (matches calculator palette)
   const getRarityColor = (rarity: string): string => {
     switch (rarity.toLowerCase()) {
       case 'common': return 'text-slate-400';
-      case 'uncommon': return 'text-green-400';
-      case 'rare': return 'text-blue-400';
-      case 'very rare': return 'text-purple-400';
-      case 'legendary': return 'text-orange-400';
+      case 'uncommon': return 'text-emerald-400/80';
+      case 'rare': return 'text-sky-400/80';
+      case 'very rare': return 'text-violet-400/80';
+      case 'legendary': return 'text-amber-400/80';
       default: return 'text-slate-300';
     }
   };
@@ -205,101 +206,112 @@ export default function ItemsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-emerald-400 mb-2">
-            📚 Magic Items Database
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header - Minimal (matches calculator) */}
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-slate-100">
+            Magic Items Database
           </h1>
-          <p className="text-slate-400">
-            Searchable table of all {srdItems.length} SRD magic items with calculated power levels
-          </p>
+          <div className="flex gap-4 text-sm">
+            <Link href="/calculator" className="text-slate-500 hover:text-slate-300 transition-colors">
+              Calculator
+            </Link>
+            <Link href="/" className="text-slate-500 hover:text-slate-300 transition-colors">
+              Home
+            </Link>
+          </div>
         </div>
 
+        <p className="text-slate-400 text-sm mb-6">
+          Browse all {srdItems.length} SRD magic items with calculated power levels
+        </p>
+
         {/* Filters */}
-        <div className="bg-slate-800/50 rounded-lg p-4 mb-6 flex flex-wrap gap-4">
-          {/* Search */}
-          <div className="flex-1 min-w-[200px]">
-            <label className="text-xs text-slate-400 mb-1 block">Search</label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search items or effects..."
-              className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-            />
-          </div>
+        <div className="bg-slate-800 rounded-lg p-4 mb-6 border border-slate-700">
+          <div className="flex flex-wrap gap-4">
+            {/* Search */}
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-xs font-medium text-slate-400 mb-1.5 block uppercase tracking-wide">Search</label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search items or effects..."
+                className="w-full bg-slate-900 border border-slate-600 rounded-md px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
 
-          {/* Rarity Filter */}
-          <div className="w-48">
-            <label className="text-xs text-slate-400 mb-1 block">Filter by Rarity</label>
-            <select
-              value={rarityFilter}
-              onChange={(e) => setRarityFilter(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-            >
-              <option value="all">All Rarities</option>
-              <option value="common">Common</option>
-              <option value="uncommon">Uncommon</option>
-              <option value="rare">Rare</option>
-              <option value="very rare">Very Rare</option>
-              <option value="legendary">Legendary</option>
-            </select>
-          </div>
+            {/* Rarity Filter */}
+            <div className="w-48">
+              <label className="text-xs font-medium text-slate-400 mb-1.5 block uppercase tracking-wide">Rarity</label>
+              <select
+                value={rarityFilter}
+                onChange={(e) => setRarityFilter(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              >
+                <option value="all">All Rarities</option>
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="very rare">Very Rare</option>
+                <option value="legendary">Legendary</option>
+              </select>
+            </div>
 
-          {/* Results count */}
-          <div className="flex items-end">
-            <div className="text-sm text-slate-400">
-              Showing {filteredAndSortedItems.length} of {srdItems.length} items
+            {/* Results count */}
+            <div className="flex items-end pb-2">
+              <div className="text-sm text-slate-500">
+                {filteredAndSortedItems.length} of {srdItems.length} items
+              </div>
             </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-slate-800/30 rounded-lg overflow-hidden border border-slate-700">
+        <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-slate-900/70 border-b border-slate-700">
                 <tr>
                   <th
-                    className="text-left p-3 text-emerald-400 font-semibold cursor-pointer hover:bg-slate-800/50"
+                    className="text-left p-3 text-slate-400 font-semibold text-xs uppercase tracking-wide cursor-pointer hover:bg-slate-700/50 transition-colors"
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center gap-1">
                       Name
                       {sortBy === 'name' && (
-                        <span className="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        <span className="text-emerald-400">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                       )}
                     </div>
                   </th>
                   <th
-                    className="text-left p-3 text-emerald-400 font-semibold cursor-pointer hover:bg-slate-800/50"
+                    className="text-left p-3 text-slate-400 font-semibold text-xs uppercase tracking-wide cursor-pointer hover:bg-slate-700/50 transition-colors"
                     onClick={() => handleSort('bookRarity')}
                   >
                     <div className="flex items-center gap-1">
                       Book Rarity
                       {sortBy === 'bookRarity' && (
-                        <span className="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        <span className="text-emerald-400">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                       )}
                     </div>
                   </th>
                   <th
-                    className="text-left p-3 text-emerald-400 font-semibold cursor-pointer hover:bg-slate-800/50"
+                    className="text-left p-3 text-slate-400 font-semibold text-xs uppercase tracking-wide cursor-pointer hover:bg-slate-700/50 transition-colors"
                     onClick={() => handleSort('calcRarity')}
                   >
                     <div className="flex items-center gap-1">
                       Calculated Rarity
                       {sortBy === 'calcRarity' && (
-                        <span className="text-xs">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+                        <span className="text-emerald-400">{sortDirection === 'asc' ? '▲' : '▼'}</span>
                       )}
                     </div>
                   </th>
-                  <th className="text-left p-3 text-emerald-400 font-semibold">
+                  <th className="text-left p-3 text-slate-400 font-semibold text-xs uppercase tracking-wide">
                     Quantifiable Effects
                   </th>
-                  <th className="text-left p-3 text-emerald-400 font-semibold">
-                    Discrepancy Category
+                  <th className="text-left p-3 text-slate-400 font-semibold text-xs uppercase tracking-wide">
+                    Notes
                   </th>
                 </tr>
               </thead>
@@ -312,14 +324,14 @@ export default function ItemsPage() {
                   return (
                     <tr
                       key={index}
-                      className="border-b border-slate-700/50 hover:bg-slate-800/30"
+                      className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors"
                     >
                       {/* Name */}
                       <td className="p-3">
-                        <div className="font-medium text-white">{item.name}</div>
-                        <div className="text-xs text-slate-400">{item.baseItem}</div>
+                        <div className="font-medium text-slate-100">{item.name}</div>
+                        <div className="text-xs text-slate-500">{item.baseItem}</div>
                         {item.attunement && (
-                          <div className="text-xs text-yellow-400 mt-0.5">Requires Attunement</div>
+                          <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 bg-violet-900/50 text-violet-300 rounded">Attunement</span>
                         )}
                       </td>
 
@@ -335,12 +347,12 @@ export default function ItemsPage() {
                         <div className={`font-medium ${getRarityColor(item.calculatedRarity)}`}>
                           {item.calculatedRarity.toUpperCase()}
                         </div>
-                        <div className="text-xs text-slate-400 font-mono">
+                        <div className="text-xs text-slate-500 font-mono">
                           {item.score.toFixed(1)} pts
                         </div>
                         {!match && (
-                          <div className="text-xs text-orange-400 mt-0.5">
-                            ⚠️ Discrepancy
+                          <div className="text-[10px] text-amber-500/80 mt-0.5">
+                            ≠ Book rarity
                           </div>
                         )}
                       </td>
@@ -362,43 +374,43 @@ export default function ItemsPage() {
                         )}
                       </td>
 
-                      {/* Discrepancy Category */}
+                      {/* Notes (formerly Discrepancy Category) */}
                       <td className="p-3">
                         {item.discrepancyCategory ? (
                           <div className="text-xs">
                             <button
                               onClick={() => toggleRowExpansion(index)}
-                              className="w-full text-left hover:bg-slate-700/30 rounded p-1 transition-colors"
+                              className="text-left hover:bg-slate-700/30 rounded px-2 py-1 -mx-2 transition-colors"
                             >
                               <div className="flex items-center gap-2">
-                                <span className="text-slate-400 text-[10px]">
+                                <span className="text-slate-500 text-[10px]">
                                   {isExpanded ? '▼' : '▶'}
                                 </span>
                                 {item.discrepancyCategory === 'Numerical Edge Case' && (
-                                  <span className="inline-flex items-center gap-1 text-blue-400">
-                                    🔢 {item.discrepancyCategory}
+                                  <span className="inline-flex items-center gap-1 text-sky-400/80">
+                                    🔢 Edge Case
                                   </span>
                                 )}
                                 {item.discrepancyCategory === 'Special Mechanics' && (
-                                  <span className="inline-flex items-center gap-1 text-purple-400">
-                                    ⭐ {item.discrepancyCategory}
+                                  <span className="inline-flex items-center gap-1 text-amber-400/80">
+                                    ⭐ Special
                                   </span>
                                 )}
                                 {item.discrepancyCategory === 'Community Note' && (
-                                  <span className="inline-flex items-center gap-1 text-slate-300">
-                                    💬 {item.discrepancyCategory}
+                                  <span className="inline-flex items-center gap-1 text-slate-400">
+                                    💬 Note
                                   </span>
                                 )}
                               </div>
                             </button>
                             {isExpanded && warnings.explanation && (
-                              <div className="mt-2 pl-6 pr-2 text-slate-400 italic text-[11px] border-l-2 border-slate-600">
+                              <div className="mt-2 pl-5 pr-2 text-slate-400 text-[11px] border-l-2 border-slate-600">
                                 {warnings.explanation}
                               </div>
                             )}
                           </div>
                         ) : (
-                          <div className="text-slate-500 text-xs">—</div>
+                          <div className="text-slate-600 text-xs">—</div>
                         )}
                       </td>
                     </tr>
@@ -407,16 +419,6 @@ export default function ItemsPage() {
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* Back to Calculator */}
-        <div className="mt-6 text-center">
-          <a
-            href="/calculator"
-            className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded font-semibold transition-colors"
-          >
-            ← Back to Calculator
-          </a>
         </div>
       </div>
     </div>
