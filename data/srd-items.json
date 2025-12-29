@@ -392,7 +392,8 @@
     "attunement": true,
     "manualRarity": true,
     "combat": {
-      "enhancement": 1
+      "enhancement": 1,
+      "savingThrowBonus": 1
     },
     "description": "Grants +1 to saves and can cast Wish (1d4-1 times). The Wish spell alone makes this Legendary despite modest combat stats."
   },
