@@ -913,10 +913,15 @@ export default function CalculatorPage() {
                               <div className="text-white font-semibold text-base flex items-center gap-1 mb-1">
                                 <span className="text-emerald-400 text-xs font-mono">#{index + 1}</span>
                                 <span>{anchor.name}</span>
-                                {warnings.hasNumerical && <span title="Numerical edge case: Conditional bonuses we can't track" className="text-base">{warnings.numericalIcon}</span>}
-                                {warnings.hasSpecial && <span title="Special mechanics: Non-numerical benefits" className="text-base">{warnings.specialIcon}</span>}
-                                {warnings.hasCommunity && <span title="Community note: Commonly considered stronger/weaker than rated" className="text-base">{warnings.communityIcon}</span>}
+                                {warnings.hasNumerical && <span title="Numerical edge case" className="text-base">{warnings.numericalIcon}</span>}
+                                {warnings.hasSpecial && <span title="Special mechanics" className="text-base">{warnings.specialIcon}</span>}
+                                {warnings.hasCommunity && <span title="Community note" className="text-base">{warnings.communityIcon}</span>}
                               </div>
+                              {warnings.explanation && (
+                                <div className="text-xs text-amber-300 italic mb-1">
+                                  {warnings.explanation}
+                                </div>
+                              )}
                               <div className="text-xs text-slate-400">
                                 <span className="text-emerald-300">{anchor.rarity?.toUpperCase()}</span>
                                 {' • '}
@@ -1160,7 +1165,7 @@ export default function CalculatorPage() {
                           <span className="font-bold">⭐</span> Special mechanics: Non-numerical benefits our math can't quantify (e.g., instant kill)
                         </div>
                         <div className="text-slate-300">
-                          <span className="font-bold">💬</span> Community note: Well-established consensus about balance (often stronger than rated)
+                          <span className="font-bold">💬</span> Community note: Well-established consensus about balance (often stronger OR weaker than rated)
                         </div>
                       </div>
                     </div>

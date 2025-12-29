@@ -69,6 +69,67 @@ export function hasCommunityNotes(itemName: string): boolean {
 }
 
 /**
+ * Get explanation for why an item is flagged
+ */
+export function getItemExplanation(itemName: string): string {
+  // Numerical edge cases
+  if (itemName === 'Vicious Weapon') {
+    return '+2d6 damage on natural 20 (critical-only bonus not fully weighted)';
+  }
+  if (itemName === 'Oathbow') {
+    return '+3d6 vs sworn enemy (conditional damage undervalued despite frequency)';
+  }
+  if (itemName === 'Nine Lives Stealer') {
+    return 'Drains life force on nat 20 (instant kill effect on crit not fully weighted)';
+  }
+
+  // Special mechanics
+  if (itemName === 'Vorpal Sword') {
+    return 'Decapitation on nat 20 (instant kill effect can\'t be modeled)';
+  }
+  if (itemName === 'Luck Blade') {
+    return 'Grants Wish spell 1d4-1 times (utility beyond combat math)';
+  }
+  if (itemName === 'Rod of Absorption') {
+    return 'Absorbs spells targeting you (defensive utility not quantified)';
+  }
+  if (itemName === 'Boots of Speed') {
+    return 'Doubles movement + Dex save advantage (mobility value not quantified)';
+  }
+
+  // Community notes
+  if (itemName === 'Broom of Flying') {
+    return 'Uncommon but widely considered Rare-tier (unlimited flight, no attunement)';
+  }
+  if (itemName === 'Winged Boots') {
+    return 'Uncommon but widely considered Rare-tier ("greatest uncommon in DMG")';
+  }
+  if (itemName === 'Ring of Spell Storing') {
+    return 'Very powerful for Rare tier (breaks action economy)';
+  }
+  if (itemName === 'Cloak of Displacement') {
+    return 'Very strong for Rare tier (disadvantage on all attacks against you)';
+  }
+  if (itemName === 'Headband of Intellect') {
+    return 'Very strong for Uncommon (INT 19 is massive for non-casters)';
+  }
+  if (itemName === 'Gauntlets of Ogre Power') {
+    return 'Very strong for Uncommon (STR 19 is massive for non-martials)';
+  }
+  if (itemName === 'Amulet of Health') {
+    return 'Very strong for Rare (CON 19 adds significant HP and saves)';
+  }
+  if (itemName === 'Wings of Flying') {
+    return 'Weak for Rare tier (time-limited, inferior to Broom of Flying)';
+  }
+  if (itemName === 'Trident of Fish Command') {
+    return 'Weak for Uncommon (very niche - only controls fish)';
+  }
+
+  return '';
+}
+
+/**
  * Get warning indicators for an item
  * Returns object with all three warning types and display info
  */
@@ -79,6 +140,7 @@ export function getWarningIndicator(itemName: string): {
   numericalIcon: string;
   specialIcon: string;
   communityIcon: string;
+  explanation: string;
 } {
   return {
     hasNumerical: hasNumericalEdgeCases(itemName),
@@ -87,5 +149,6 @@ export function getWarningIndicator(itemName: string): {
     numericalIcon: '🔢',  // Numbers for numerical edge cases
     specialIcon: '⭐',    // Star for special mechanics
     communityIcon: '💬', // Speech bubble for community notes
+    explanation: getItemExplanation(itemName),
   };
 }
