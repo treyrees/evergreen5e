@@ -11,6 +11,7 @@ export default function ItemsPage() {
   const [rarityFilter, setRarityFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'name' | 'bookRarity' | 'calcRarity' | 'points'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
   // Calculate rarity from score
   const getCalculatedRarity = (score: number): string => {
@@ -167,6 +168,16 @@ export default function ItemsPage() {
     }
   };
 
+  const toggleRowExpansion = (index: number) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index);
+    } else {
+      newExpanded.add(index);
+    }
+    setExpandedRows(newExpanded);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8">
       <div className="max-w-7xl mx-auto">
@@ -269,6 +280,8 @@ export default function ItemsPage() {
               <tbody>
                 {filteredAndSortedItems.map((item, index) => {
                   const match = raritiesMatch(item.rarity || '', item.calculatedRarity);
+                  const warnings = getWarningIndicator(item.name);
+                  const isExpanded = expandedRows.has(index);
 
                   return (
                     <tr
@@ -327,20 +340,35 @@ export default function ItemsPage() {
                       <td className="p-3">
                         {item.discrepancyCategory ? (
                           <div className="text-xs">
-                            {item.discrepancyCategory === 'Numerical Edge Case' && (
-                              <span className="inline-flex items-center gap-1 text-blue-400">
-                                🔢 {item.discrepancyCategory}
-                              </span>
-                            )}
-                            {item.discrepancyCategory === 'Special Mechanics' && (
-                              <span className="inline-flex items-center gap-1 text-purple-400">
-                                ⭐ {item.discrepancyCategory}
-                              </span>
-                            )}
-                            {item.discrepancyCategory === 'Community Note' && (
-                              <span className="inline-flex items-center gap-1 text-slate-300">
-                                💬 {item.discrepancyCategory}
-                              </span>
+                            <button
+                              onClick={() => toggleRowExpansion(index)}
+                              className="w-full text-left hover:bg-slate-700/30 rounded p-1 transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-slate-400 text-[10px]">
+                                  {isExpanded ? '▼' : '▶'}
+                                </span>
+                                {item.discrepancyCategory === 'Numerical Edge Case' && (
+                                  <span className="inline-flex items-center gap-1 text-blue-400">
+                                    🔢 {item.discrepancyCategory}
+                                  </span>
+                                )}
+                                {item.discrepancyCategory === 'Special Mechanics' && (
+                                  <span className="inline-flex items-center gap-1 text-purple-400">
+                                    ⭐ {item.discrepancyCategory}
+                                  </span>
+                                )}
+                                {item.discrepancyCategory === 'Community Note' && (
+                                  <span className="inline-flex items-center gap-1 text-slate-300">
+                                    💬 {item.discrepancyCategory}
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                            {isExpanded && warnings.explanation && (
+                              <div className="mt-2 pl-6 pr-2 text-slate-400 italic text-[11px] border-l-2 border-slate-600">
+                                {warnings.explanation}
+                              </div>
                             )}
                           </div>
                         ) : (
