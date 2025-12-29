@@ -591,7 +591,7 @@ export function findTopAnchorItems(
 
   // Collect all candidates with their scores and priority level
   // Priority philosophy: Named items with similar mechanics > generic items
-  // Exact base item matches are most valuable for learning
+  // BUT score proximity gates priority - a 2pt difference demotes even perfect matches
   const candidates: Array<{
     item: MagicItem;
     score: number;
@@ -600,6 +600,12 @@ export function findTopAnchorItems(
   }> = [];
 
   const userRarity = getSuggestedRarity({ combat: userItem.combat }).suggestedRarity;
+
+  // Score proximity thresholds - items outside these ranges get deprioritized
+  // This prevents showing Oathbow (3.0 pts) to someone making a +1 longbow (1.0 pts)
+  const CLOSE_THRESHOLD = 0.75;   // Very close in power
+  const MEDIUM_THRESHOLD = 1.5;   // Same rarity tier usually
+  const FAR_THRESHOLD = 2.5;      // Different rarity tier
 
   // Process all named items first - these are the interesting comparisons
   namedItems.forEach((item) => {
@@ -615,30 +621,36 @@ export function findTopAnchorItems(
 
     const sameAttunement = itemAttunement === userAttunement;
     const exactBaseMatch = item.baseItem === userItem.baseItem;
-    const sameRarity = item.rarity.toLowerCase() === userRarity.toLowerCase();
+    const sameRarity = (item.rarity || '').toLowerCase() === userRarity.toLowerCase();
     const score = getItemScore(item);
     const scoreDiff = Math.abs(score - userScore);
 
-    let priority: number;
-
-    // Priority order: exact base item > same category > same rarity > other
-    // Attunement is a tiebreaker within each level, not a major factor
+    // Base priority from item relationship (lower = better)
+    let basePriority: number;
     if (exactBaseMatch) {
-      // Exact base item match is MOST valuable (Oathbow for longbow user)
-      priority = sameAttunement ? 1 : 2;
+      basePriority = sameAttunement ? 1 : 2;
     } else if (sameBroadCategory && sameRarity) {
-      // Same category AND same rarity tier
-      priority = sameAttunement ? 3 : 4;
+      basePriority = sameAttunement ? 3 : 4;
     } else if (sameBroadCategory) {
-      // Same category, different rarity
-      priority = sameAttunement ? 5 : 6;
+      basePriority = sameAttunement ? 5 : 6;
     } else if (sameRarity) {
-      // Different category, same rarity (still interesting comparison)
-      priority = 7;
+      basePriority = 7;
     } else {
-      // Different category and rarity
-      priority = 8;
+      basePriority = 8;
     }
+
+    // Score proximity penalty - large score gaps demote even "perfect" matches
+    // This makes a +1 longbow show +1 Weapon instead of far-off Oathbow
+    let scorePenalty = 0;
+    if (scoreDiff > FAR_THRESHOLD) {
+      scorePenalty = 6;  // Huge gap - demote significantly
+    } else if (scoreDiff > MEDIUM_THRESHOLD) {
+      scorePenalty = 3;  // Moderate gap - demote somewhat
+    } else if (scoreDiff > CLOSE_THRESHOLD) {
+      scorePenalty = 1;  // Small gap - minor penalty
+    }
+
+    const priority = basePriority + scorePenalty;
 
     candidates.push({
       item,
@@ -648,21 +660,29 @@ export function findTopAnchorItems(
     });
   });
 
-  // Process generic items last - fallback only
+  // Process generic items - these fill gaps when named items are too far
   genericItems.forEach((item) => {
     const score = getItemScore(item);
     const scoreDiff = Math.abs(score - userScore);
     const itemBroadCategory = getBroadCategory(item.baseItem);
     const sameBroadCategory = itemBroadCategory === userBroadCategory;
 
-    // Generic items always get lower priority than named items
-    const priority = sameBroadCategory ? 9 : 10;
+    // Generic items start at priority 9-10, but get boosted if very close in score
+    // A +2 Weapon that's 0.1 pts away beats a named item that's 2 pts away
+    let basePriority = sameBroadCategory ? 9 : 10;
+
+    // Generics get a bonus for being close - they're reliable anchors
+    if (scoreDiff < 0.2) {
+      basePriority = sameBroadCategory ? 4 : 5;  // Exact score match is valuable
+    } else if (scoreDiff < CLOSE_THRESHOLD) {
+      basePriority = sameBroadCategory ? 6 : 7;  // Close score is good
+    }
 
     candidates.push({
       item,
       score,
       scoreDiff,
-      priority,
+      priority: basePriority,
     });
   });
 
