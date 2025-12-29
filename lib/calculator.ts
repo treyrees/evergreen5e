@@ -590,6 +590,8 @@ export function findTopAnchorItems(
   const genericItems = allItems.filter(item => isGenericItem(item));
 
   // Collect all candidates with their scores and priority level
+  // Priority philosophy: Named items with similar mechanics > generic items
+  // Exact base item matches are most valuable for learning
   const candidates: Array<{
     item: MagicItem;
     score: number;
@@ -597,33 +599,9 @@ export function findTopAnchorItems(
     priority: number;
   }> = [];
 
-  // Process generic items first - exact score matches get highest priority
-  genericItems.forEach((item) => {
-    const score = getItemScore(item);
-    const scoreDiff = Math.abs(score - userScore);
-    const itemBroadCategory = getBroadCategory(item.baseItem);
-    const sameBroadCategory = itemBroadCategory === userBroadCategory;
+  const userRarity = getSuggestedRarity({ combat: userItem.combat }).suggestedRarity;
 
-    let priority: number;
-
-    // Exact score match gets top priority (perfect +1/+2/+3 match)
-    if (scoreDiff < 0.1 && sameBroadCategory) {
-      priority = 1;
-    } else if (sameBroadCategory) {
-      priority = 6;
-    } else {
-      priority = 7;
-    }
-
-    candidates.push({
-      item,
-      score,
-      scoreDiff,
-      priority,
-    });
-  });
-
-  // Process all named items and assign priorities
+  // Process all named items first - these are the interesting comparisons
   namedItems.forEach((item) => {
     const itemBroadCategory = getBroadCategory(item.baseItem);
     const itemAttunement = item.attunement || false;
@@ -636,27 +614,54 @@ export function findTopAnchorItems(
     }
 
     const sameAttunement = itemAttunement === userAttunement;
-    const exactMatch = item.baseItem === userItem.baseItem;
+    const exactBaseMatch = item.baseItem === userItem.baseItem;
+    const sameRarity = item.rarity.toLowerCase() === userRarity.toLowerCase();
+    const score = getItemScore(item);
+    const scoreDiff = Math.abs(score - userScore);
 
     let priority: number;
 
-    if (sameBroadCategory && sameAttunement && exactMatch) {
-      priority = 2; // Same category, same attunement, exact base item match
-    } else if (sameBroadCategory && sameAttunement) {
-      priority = 3; // Same category, same attunement
+    // Priority order: exact base item > same category > same rarity > other
+    // Attunement is a tiebreaker within each level, not a major factor
+    if (exactBaseMatch) {
+      // Exact base item match is MOST valuable (Oathbow for longbow user)
+      priority = sameAttunement ? 1 : 2;
+    } else if (sameBroadCategory && sameRarity) {
+      // Same category AND same rarity tier
+      priority = sameAttunement ? 3 : 4;
     } else if (sameBroadCategory) {
-      priority = 4; // Same category, different attunement
-    } else if (sameAttunement) {
-      priority = 5; // Different category, same attunement
+      // Same category, different rarity
+      priority = sameAttunement ? 5 : 6;
+    } else if (sameRarity) {
+      // Different category, same rarity (still interesting comparison)
+      priority = 7;
     } else {
-      priority = 8; // Different category, different attunement
+      // Different category and rarity
+      priority = 8;
     }
 
-    const score = getItemScore(item);
     candidates.push({
       item,
       score,
-      scoreDiff: Math.abs(score - userScore),
+      scoreDiff,
+      priority,
+    });
+  });
+
+  // Process generic items last - fallback only
+  genericItems.forEach((item) => {
+    const score = getItemScore(item);
+    const scoreDiff = Math.abs(score - userScore);
+    const itemBroadCategory = getBroadCategory(item.baseItem);
+    const sameBroadCategory = itemBroadCategory === userBroadCategory;
+
+    // Generic items always get lower priority than named items
+    const priority = sameBroadCategory ? 9 : 10;
+
+    candidates.push({
+      item,
+      score,
+      scoreDiff,
       priority,
     });
   });
