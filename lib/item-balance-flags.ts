@@ -13,6 +13,7 @@ export const SPECIAL_MECHANICS = new Set([
   // Instant-kill or save-or-die effects
   'Vorpal Sword',              // Decapitation on nat 20
   'Nine Lives Stealer',        // Save-or-die on nat 20
+  'Mace of Disruption',        // Save-or-destroy vs undead/fiends under 25 HP
 
   // Spell absorption/storage/action economy
   'Rod of Absorption',         // Absorbs spells targeting you
@@ -29,6 +30,12 @@ export const SPECIAL_MECHANICS = new Set([
 
   // Complex stacking or restrictions
   'Staff of Power',            // +2 to attack/damage/AC/saves (spellcaster-only attunement)
+  'Defender',                  // Transfer bonus between attack/damage and AC
+
+  // Bonus effects beyond base damage
+  'Giant Slayer',              // Knockdown effect vs giants
+  'Mace of Smiting',           // Extra crit damage + auto-destroy constructs
+  'Sword of Sharpness',        // Limb-severing on nat 20
 ]);
 
 /**
@@ -58,6 +65,12 @@ export const COMMUNITY_NOTES = new Set([
 
   // Official seems too HIGH (item is weaker than rarity suggests)
   'Vicious Weapon',            // Calc 0.1 pts (Common) but official Rare - 5% proc is ~3x weaker than +1
+  'Frost Brand',               // Calc 1.5 pts (Uncommon) but official Very Rare - compare to Flame Tongue
+
+  // Character-dependent value (stat setters)
+  'Headband of Intellect',     // INT 19 - value depends entirely on your starting INT
+  'Gauntlets of Ogre Power',   // STR 19 - value depends entirely on your starting STR
+  'Amulet of Health',          // CON 19 - value depends entirely on your starting CON
 ]);
 
 /**
@@ -127,6 +140,23 @@ export function getItemExplanation(itemName: string): string {
   if (itemName === 'Staff of Power') {
     return '+2 to attack/damage/AC/saves is 6.0 pts (Legendary calc) but official Very Rare. Spellcaster-only attunement limits audience significantly.';
   }
+  if (itemName === 'Defender') {
+    return '+3 enhancement and +3 AC calculates as 6.0 pts, but you can\'t use both simultaneously—must split the bonus each turn. Override: 5.25 pts (0.7× combined value) accounts for the transfer limitation.';
+  }
+
+  // Bonus effects beyond base damage
+  if (itemName === 'Giant Slayer') {
+    return '+1 weapon with 2d6 conditional vs giants (1.7 pts). Override +0.3 pts for DC 15 STR knockdown (prone) vs giants. Total: 2.0 pts (Rare).';
+  }
+  if (itemName === 'Mace of Disruption') {
+    return '2d6 radiant vs undead/fiends (1.3 pts). Override +0.7 pts for save-or-destroy effect vs targets under 25 HP. Total: 2.0 pts (Rare).';
+  }
+  if (itemName === 'Mace of Smiting') {
+    return '+1 weapon with 2d6 conditional vs constructs (1.7 pts). Override +0.3 pts for +4d6 on crit vs constructs and auto-destroy under 25 HP. Total: 2.0 pts (Rare).';
+  }
+  if (itemName === 'Sword of Sharpness') {
+    return 'Modeled as +3 equivalent (3.0 pts) for +4d6 on crit. Override +0.25 pts for limb-severing on nat 20—non-quantifiable instant disable effect. Total: 3.25 pts (Very Rare).';
+  }
 
   // === COMMUNITY NOTES ===
 
@@ -141,6 +171,20 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Vicious Weapon') {
     return '+2d6 on nat 20 only = 0.1 pts (Common). Official: Rare. At 5% crit rate, this averages +0.35 damage/hit—roughly 3× weaker than a +1 weapon.';
+  }
+  if (itemName === 'Frost Brand') {
+    return '1d6 cold + fire resistance = 1.5 pts (Uncommon). Official: Very Rare. Compare to Flame Tongue (2d6 fire = 2.0 pts, Rare)—Frost Brand appears significantly overpriced.';
+  }
+
+  // Character-dependent stat setters
+  if (itemName === 'Headband of Intellect') {
+    return 'Sets INT to 19. Value is entirely character-dependent: amazing if your INT is 8-14, mediocre if 16+, useless if already 19+. Our formula assumes average benefit.';
+  }
+  if (itemName === 'Gauntlets of Ogre Power') {
+    return 'Sets STR to 19. Value is entirely character-dependent: amazing for low-STR casters/rogues, mediocre for fighters who already have 16+ STR. Our formula assumes average benefit.';
+  }
+  if (itemName === 'Amulet of Health') {
+    return 'Sets CON to 19. Value is entirely character-dependent: amazing if your CON is low, but most adventurers prioritize CON already. Our formula assumes average benefit.';
   }
 
   return '';

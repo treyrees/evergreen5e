@@ -293,7 +293,6 @@
     "rarity": "uncommon",
     "attunement": false,
     "dndbeyondSlug": "4794-wand-of-magic-missiles",
-    "overrideScore": 1.0,
     "combat": {
       "charges": [
         {
@@ -304,8 +303,7 @@
         }
       ],
       "enhancement": 0
-    },
-    "description": "Quantifiable: 0.8 pts (4× level 1 spell/day). Special Effect: +0.2 pts for auto-hit reliability (no attack roll, no save). Total: 1.0 pts (Uncommon)."
+    }
   },
   {
     "name": "Rod of Absorption",
@@ -468,16 +466,11 @@
     "rarity": "very rare",
     "attunement": true,
     "dndbeyondSlug": "5391-sword-of-sharpness",
+    "overrideScore": 3.25,
     "combat": {
       "enhancement": 3
     },
-    "ribbons": {
-      "utilitySpells": [
-        "+4d6 slashing damage on nat 20",
-        "Max damage vs objects"
-      ]
-    },
-    "description": "ROUGH APPROXIMATION: Modeled as +3 enhancement (3.0 pts) even though it has no to-hit/damage bonus on paper. The +4d6 on crit and limb-severing effects roughly equate to +3 weapon value. Very Rare is correct but the math is an abstraction."
+    "description": "Modeled as +3 enhancement (3.0 pts) for the +4d6 on crit. Override +0.25 pts for limb-severing effect on nat 20 (non-quantifiable instant disable). Total: 3.25 pts (Very Rare)."
   },
   {
     "name": "Boots of Speed",
