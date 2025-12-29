@@ -39,6 +39,24 @@ function getRarityColorClass(rarity: string): string {
   return 'text-slate-400';
 }
 
+// Get muted rarity background class for comparison cards
+function getRarityBgClass(rarity: string): string {
+  const r = rarity.toLowerCase();
+  if (r === 'common') return 'bg-slate-700/30';
+  if (r === 'uncommon') return 'bg-emerald-950/20';
+  if (r === 'rare') return 'bg-sky-950/20';
+  if (r === 'very rare') return 'bg-violet-950/20';
+  if (r === 'legendary') return 'bg-amber-950/20';
+  return 'bg-slate-700/30';
+}
+
+// Get medal border class (gold/silver/bronze) for comparison ranking
+function getMedalBorderClass(index: number): string {
+  if (index === 0) return 'border-amber-500/60'; // Gold
+  if (index === 1) return 'border-slate-400/60'; // Silver
+  return 'border-amber-700/50'; // Bronze
+}
+
 const BASE_ITEMS = {
   'Melee Weapons (Simple)': [
     'club',
@@ -161,7 +179,6 @@ export default function CalculatorPage() {
   const [abilities, setAbilities] = useState<ChargedAbility[]>([]);
 
   // UI state
-  const [numAnchorsToShow, setNumAnchorsToShow] = useState(1);
   const [showChargeForm, setShowChargeForm] = useState(false);
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
@@ -1100,188 +1117,93 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* What's Similar? - Reference Item Comparison */}
+                {/* Similar Items - Reference Comparisons */}
                 {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
                   <div className="pt-2">
-                    {/* Section Header */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Similar Items</span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => setNumAnchorsToShow(Math.max(1, numAnchorsToShow - 1))}
-                          disabled={numAnchorsToShow <= 1}
-                          className="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
-                        >
-                          −
-                        </button>
-                        <span className="text-xs text-slate-500 font-mono w-3 text-center">{numAnchorsToShow}</span>
-                        <button
-                          onClick={() => setNumAnchorsToShow(Math.min(3, numAnchorsToShow + 1))}
-                          disabled={numAnchorsToShow >= 3}
-                          className="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
+                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide block mb-3">Similar Items</span>
 
-                    {/* Stacked Anchor Comparisons */}
-                    <div className="space-y-4">
-                      {topAnchors.slice(0, numAnchorsToShow).map((anchorData, index) => {
+                    <div className="space-y-3">
+                      {topAnchors.slice(0, 3).map((anchorData, index) => {
                         const { anchor, anchorScore, comparison } = anchorData;
                         const warnings = getWarningIndicator(anchor.name);
+                        const scoreDiff = results.combatScore - anchorScore;
 
                         return (
-                          <div key={index} className="rounded-lg overflow-hidden border border-slate-600 card-hover-lift">
-                            {/* Side-by-Side Battle Cards */}
+                          <div key={index} className={`rounded-lg overflow-hidden border-2 ${getMedalBorderClass(index)}`}>
+                            {/* Side-by-Side Cards */}
                             <div className="grid grid-cols-2">
                               {/* LEFT: Your Item */}
-                              <div className="bg-slate-700/50 border-r border-slate-600 p-4 relative">
-                                {attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🏆</span>}
-                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
-                                  <span className="text-slate-400 text-lg">⚔️</span>
-                                  <span className="text-slate-200 font-bold">{itemName || 'YOUR ITEM'}</span>
+                              <div className={`${getRarityBgClass(results.suggestedRarity)} p-3 border-r border-slate-700`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-slate-200 font-semibold text-sm truncate">{itemName || 'Your Item'}</span>
+                                  {attunement && <span title="Requires Attunement" className="text-xs">🏆</span>}
                                 </div>
-                                <div className="text-sm text-slate-300 mb-3">
-                                  <span className="font-mono"><AnimatedNumber value={results.combatScore} /> pts</span> • <span className={`font-semibold ${getRarityColorClass(results.suggestedRarity)}`}>{results.suggestedRarity}</span>
+                                <div className="text-xs mb-2">
+                                  <span className="font-mono text-slate-300"><AnimatedNumber value={results.combatScore} /> pts</span>
+                                  <span className="mx-1 text-slate-600">•</span>
+                                  <span className={`font-medium ${getRarityColorClass(results.suggestedRarity)}`}>{results.suggestedRarity}</span>
                                 </div>
-                                <div className="text-xs text-slate-300 space-y-1.5">
-                                  <div className="text-slate-400 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
-                                  {enhancement > 0 && <div>+{enhancement} enhancement{enhancementSometimes && <span className="text-amber-400 text-[10px] ml-1">(sometimes)</span>}</div>}
-                                  {damageBonus && (
-                                    <div>
-                                      {damageBonus.dice} {damageBonus.type}
-                                      {damageBonus.frequency === 'per-turn' && <span className="text-yellow-400 text-[10px] ml-1">(per-turn)</span>}
-                                      {damageBonus.conditional && <span className="text-yellow-400 text-[10px] ml-1">(conditional)</span>}
-                                      {damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
-                                    </div>
-                                  )}
-                                  {acBonus > 0 && <div>+{acBonus} AC{acBonusSometimes && <span className="text-amber-400 text-[10px] ml-1">(sometimes)</span>}</div>}
-                                  {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves{saveBonusSometimes && <span className="text-amber-400 text-[10px] ml-1">(sometimes)</span>}</div>}
-                                  {abilityScoreSetter && (
-                                    <div>{abilityScoreSetter.ability} set to {abilityScoreSetter.setValue}</div>
-                                  )}
-                                  {abilityScoreBonus && (
-                                    <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
-                                  )}
-                                  {flightEnabled && <div>🦅 Flight ({flySpeed} ft, {flyDuration === 'unlimited' ? 'unlimited' : `${flyDuration} hr/day`})</div>}
-                                  {permanentBuffs.darkvision && <div>👁️ Darkvision 60 ft</div>}
-                                  {permanentBuffs.blindsight && <div>🔮 Blindsight 30 ft</div>}
-                                  {permanentBuffs.speedBonus && <div>💨 +10 ft speed</div>}
-                                  {permanentBuffs.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
-                                  {permanentBuffs.climbBurrow && <div>🧗 Climb/Burrow speed</div>}
-                                  {resistances.length > 0 && <div>Resist: {resistances.join(', ')}{resistancesSometimes && <span className="text-amber-400 text-[10px] ml-1">(sometimes)</span>}</div>}
-                                  {abilities.length > 0 && <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>}
-                                  {maxCharges > 0 && <div>{maxCharges} max charges</div>}
-                                  {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !hasPermanentBuffs && !flightEnabled && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
-                                    <div className="text-slate-500 italic">No combat features</div>
-                                  )}
+                                <div className="text-[11px] text-slate-400 space-y-0.5">
+                                  {enhancement > 0 && <div>+{enhancement} enhancement{enhancementSometimes ? ' ½' : ''}</div>}
+                                  {damageBonus && <div>{damageBonus.dice} {damageBonus.type}{damageBonus.vicious ? ' (crit)' : ''}{damageBonus.frequency === 'per-turn' ? ' /turn' : ''}</div>}
+                                  {acBonus > 0 && <div>+{acBonus} AC{acBonusSometimes ? ' ½' : ''}</div>}
+                                  {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves{saveBonusSometimes ? ' ½' : ''}</div>}
+                                  {abilityScoreSetter && <div>{abilityScoreSetter.ability} → {abilityScoreSetter.setValue}</div>}
+                                  {flightEnabled && <div>Flight {flySpeed}ft {flyDuration === 'unlimited' ? '∞' : `${flyDuration}h`}</div>}
+                                  {resistances.length > 0 && <div>Resist: {resistances.join(', ')}{resistancesSometimes ? ' ½' : ''}</div>}
+                                  {abilities.length > 0 && <div>{abilities.length} spell{abilities.length > 1 ? 's' : ''}</div>}
+                                  {maxCharges > 0 && <div>{maxCharges} charges</div>}
                                 </div>
                               </div>
 
                               {/* RIGHT: Reference Item */}
-                              <div className="bg-slate-700/30 p-4 relative">
-                                {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🏆</span>}
-                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
-                                  <span className="text-slate-400 text-lg">{getItemEmoji(anchor.name)}</span>
-                                  <span className="text-slate-200 font-bold">#{index + 1} {anchor.name}</span>
-                                  {warnings.hasSpecial && <span title="Special mechanics" className="text-sm">⭐</span>}
-                                  {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}
-                                  {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
+                              <div className={`${getRarityBgClass(anchor.rarity || 'common')} p-3`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>
+                                  <div className="flex items-center gap-1">
+                                    {warnings.hasSpecial && <span title="Special mechanics" className="text-[10px]">⭐</span>}
+                                    {warnings.hasCommunity && <span title="Community note" className="text-[10px]">💬</span>}
+                                    {anchor.attunement && <span title="Requires Attunement" className="text-xs">🏆</span>}
+                                  </div>
                                 </div>
-                                <div className="text-sm text-slate-300 mb-3">
-                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${getRarityColorClass(anchor.rarity || 'common')}`}>{capitalizeRarity(anchor.rarity || 'common')}</span>
+                                <div className="text-xs mb-2">
+                                  <span className="font-mono text-slate-300">{anchorScore.toFixed(1)} pts</span>
+                                  <span className="mx-1 text-slate-600">•</span>
+                                  <span className={`font-medium ${getRarityColorClass(anchor.rarity || 'common')}`}>{capitalizeRarity(anchor.rarity || 'common')}</span>
                                 </div>
-                                <div className="text-xs text-slate-300 space-y-1.5">
-                                  <div className="text-slate-400 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
+                                <div className="text-[11px] text-slate-400 space-y-0.5">
                                   {anchor.combat.enhancement > 0 && <div>+{anchor.combat.enhancement} enhancement</div>}
-                                  {anchor.combat.damageBonus && (
-                                    <div>
-                                      {anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}
-                                      {anchor.combat.damageBonus.frequency === 'per-turn' && <span className="text-yellow-400 text-[10px] ml-1">(per-turn)</span>}
-                                      {anchor.combat.damageBonus.conditional && <span className="text-yellow-400 text-[10px] ml-1">(conditional)</span>}
-                                      {anchor.combat.damageBonus.conditionalType && <span className="text-yellow-400 text-[10px] ml-1">({anchor.combat.damageBonus.conditionalType})</span>}
-                                      {anchor.combat.damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
-                                    </div>
-                                  )}
+                                  {anchor.combat.damageBonus && <div>{anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}{anchor.combat.damageBonus.vicious ? ' (crit)' : ''}{anchor.combat.damageBonus.conditionalType ? ` (${anchor.combat.damageBonus.conditionalType})` : ''}</div>}
                                   {anchor.combat.acBonus && <div>+{anchor.combat.acBonus} AC</div>}
                                   {anchor.combat.savingThrowBonus && <div>+{anchor.combat.savingThrowBonus} saves</div>}
-                                  {anchor.combat.abilityScoreSetter && (
-                                    <div>{anchor.combat.abilityScoreSetter.ability} set to {anchor.combat.abilityScoreSetter.setValue}</div>
-                                  )}
-                                  {anchor.combat.abilityScoreBonus && (
-                                    <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
-                                  )}
-                                  {anchor.combat.flight && (
-                                    <div>🦅 Flight ({anchor.combat.flight.flySpeed || 30} ft, {anchor.combat.flight.flyDuration === 'unlimited' ? 'unlimited' : `${anchor.combat.flight.flyDuration || anchor.combat.flight.hoursPerDay || '?'} hr/day`})</div>
-                                  )}
-                                  {anchor.combat.permanentBuffs?.flight && !anchor.combat.flight && <div>🦅 Flight</div>}
-                                  {anchor.combat.permanentBuffs?.darkvision && <div>👁️ Darkvision 60 ft</div>}
-                                  {anchor.combat.permanentBuffs?.blindsight && <div>🔮 Blindsight 30 ft</div>}
-                                  {anchor.combat.permanentBuffs?.speedBonus && <div>💨 +10 ft speed</div>}
-                                  {anchor.combat.permanentBuffs?.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
-                                  {anchor.combat.permanentBuffs?.climbBurrow && <div>🧗 Climb/Burrow speed</div>}
-                                  {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
-                                    <div>Resist: {anchor.combat.resistances.join(', ')}</div>
-                                  )}
-                                  {anchor.combat.charges && <div>{anchor.combat.charges.length} spell charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>}
-                                  {anchor.combat.advantage && anchor.combat.advantage.length > 0 && (
-                                    <div>Advantage: {anchor.combat.advantage.join(', ')}</div>
-                                  )}
-                                  {anchor.combat.reactionAC && <div>+{anchor.combat.reactionAC.bonus} AC (reaction)</div>}
-                                  {anchor.combat.bonusActionDamage && (
-                                    <div>Bash: {anchor.combat.bonusActionDamage.dice}{anchor.combat.bonusActionDamage.flatBonus ? `+${anchor.combat.bonusActionDamage.flatBonus}` : ''} {anchor.combat.bonusActionDamage.type}</div>
-                                  )}
-                                  {anchor.combat.conditionInfliction && (
-                                    <div>{anchor.combat.conditionInfliction.condition} (DC {anchor.combat.conditionInfliction.dc})</div>
-                                  )}
-                                  {anchor.combat.damageTypeOverride && <div>Damage type: {anchor.combat.damageTypeOverride}</div>}
+                                  {anchor.combat.abilityScoreSetter && <div>{anchor.combat.abilityScoreSetter.ability} → {anchor.combat.abilityScoreSetter.setValue}</div>}
+                                  {anchor.combat.flight && <div>Flight {anchor.combat.flight.flySpeed || 30}ft {anchor.combat.flight.flyDuration === 'unlimited' ? '∞' : `${anchor.combat.flight.flyDuration || anchor.combat.flight.hoursPerDay}h`}</div>}
+                                  {anchor.combat.resistances && anchor.combat.resistances.length > 0 && <div>Resist: {anchor.combat.resistances.join(', ')}</div>}
+                                  {anchor.combat.charges && <div>{anchor.combat.charges.length} spell{anchor.combat.charges.length > 1 ? 's' : ''}</div>}
+                                  {anchor.combat.advantage && <div>Adv: {anchor.combat.advantage.join(', ')}</div>}
                                   {anchor.combat.handsFreeDef && <div>Hands-free defense</div>}
-                                  {/* Special Mechanics inline badge */}
-                                  {(warnings.hasSpecial || warnings.hasNumerical || warnings.hasCommunity) && (
-                                    <div className="mt-2 pt-2 border-t border-slate-600">
-                                      <div className="text-[10px] text-slate-400 italic">
-                                        {warnings.hasSpecial && '⭐ '}
-                                        {warnings.hasNumerical && '🔢 '}
-                                        {warnings.hasCommunity && '💬 '}
-                                        {anchor.description || warnings.explanation}
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
                               </div>
                             </div>
 
-                            {/* DIFFERENCES Bar (Full Width Bottom) */}
-                            <div className="bg-slate-800 border-t border-slate-600 px-4 py-3">
-                              <div className="flex items-center gap-3">
-                                <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Δ</span>
-                                {comparison.type === 'stronger' && (
-                                  <span className="text-amber-400/80 text-sm font-medium">
-                                    ⬆️ Your item is <span className="font-mono">{comparison.scoreDifference.toFixed(1)}</span> pts stronger
-                                  </span>
-                                )}
-                                {comparison.type === 'weaker' && (
-                                  <span className="text-sky-400/80 text-sm font-medium">
-                                    ⬇️ Your item is <span className="font-mono">{Math.abs(comparison.scoreDifference).toFixed(1)}</span> pts weaker
-                                  </span>
-                                )}
-                                {comparison.type === 'equal' && (
-                                  <span className="text-slate-300 text-sm font-medium">
-                                    ≈ Equal power level
-                                  </span>
-                                )}
-                              </div>
-                              {comparison.details.length > 0 && (
-                                <div className="mt-2 text-xs text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
-                                  {comparison.details.slice(0, 4).map((detail, idx) => (
-                                    <span key={idx}>• {detail}</span>
-                                  ))}
-                                  {comparison.details.length > 4 && (
-                                    <span className="text-slate-600">+{comparison.details.length - 4} more</span>
+                            {/* Difference Summary */}
+                            <div className="bg-slate-900/50 px-3 py-2 border-t border-slate-700">
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs">
+                                  {Math.abs(scoreDiff) < 0.3 ? (
+                                    <span className="text-slate-400">≈ Similar power</span>
+                                  ) : scoreDiff > 0 ? (
+                                    <span className="text-amber-400/90">+{scoreDiff.toFixed(1)} pts stronger</span>
+                                  ) : (
+                                    <span className="text-sky-400/90">{scoreDiff.toFixed(1)} pts weaker</span>
                                   )}
                                 </div>
-                              )}
+                                {Math.abs(scoreDiff) >= 0.3 && comparison.details.length > 0 && (
+                                  <div className="text-[10px] text-slate-500 truncate max-w-[60%] text-right">
+                                    {comparison.details[0]}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         );
