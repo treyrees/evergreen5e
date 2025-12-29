@@ -253,6 +253,22 @@ export default function CalculatorPage() {
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
 
+  // Update body background based on rarity when item is populated
+  useEffect(() => {
+    if (hasSelectedAttributes) {
+      // Set the rarity on the body to trigger the background color transition
+      document.body.dataset.rarity = results.suggestedRarity.toLowerCase();
+    } else {
+      // Remove the rarity attribute to return to default purple
+      delete document.body.dataset.rarity;
+    }
+
+    // Cleanup on unmount - return to default purple
+    return () => {
+      delete document.body.dataset.rarity;
+    };
+  }, [hasSelectedAttributes, results.suggestedRarity]);
+
   const addAbility = () => {
     if (newAbility.spell.trim()) {
       setAbilities([...abilities, newAbility]);

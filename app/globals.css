@@ -17,6 +17,16 @@
   }
 }
 
+/* Rarity background colors - deep, comfortable tones */
+:root {
+  --rarity-default: #1a0a2e;    /* Deep fantasy purple (starting state) */
+  --rarity-common: #2a2a2f;     /* Warm gray */
+  --rarity-uncommon: #0f2a1f;   /* Deep forest green */
+  --rarity-rare: #0f1a2f;       /* Deep blue */
+  --rarity-very-rare: #1a0a2e;  /* Back to purple - the "achievement" feeling */
+  --rarity-legendary: #2a1a0a;  /* Deep warm gold - never before seen, ultimate reward */
+}
+
 /* Custom hot emerald color for embellishments */
 :root {
   --hot-emerald: #00d67e;
@@ -25,9 +35,62 @@
 }
 
 body {
-  background: var(--background);
+  background: var(--rarity-default);
   color: var(--foreground);
   font-family: var(--font-dm-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 3s ease;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Rarity-based background colors (set via data-rarity attribute) */
+body[data-rarity="common"] {
+  background-color: var(--rarity-common);
+}
+body[data-rarity="uncommon"] {
+  background-color: var(--rarity-uncommon);
+}
+body[data-rarity="rare"] {
+  background-color: var(--rarity-rare);
+}
+body[data-rarity="very rare"] {
+  background-color: var(--rarity-very-rare);
+}
+body[data-rarity="legendary"] {
+  background-color: var(--rarity-legendary);
+}
+
+/* Vignette overlay - darkens edges, focuses attention to center */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.15) 70%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  z-index: 0;
+}
+
+/* Subtle noise grain texture overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Ensure main content appears above overlays */
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 h1, h2, h3 {
