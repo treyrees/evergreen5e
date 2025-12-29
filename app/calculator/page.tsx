@@ -1265,37 +1265,24 @@ export default function CalculatorPage() {
                         <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
                       </div>
 
-                      <div className="space-y-1 pt-2 border-t border-slate-700/50">
-                        <div className="text-emerald-400 font-semibold">Warning Indicators:</div>
-                        <div className="text-blue-400">
-                          <span className="font-bold">🔢</span> Numerical edge case: Conditional bonuses we haven&apos;t weighed YET—rare/conditional enough to compare at your own discretion only. (Some items lack individual explainers)
-                        </div>
-                        <div className="text-purple-400">
-                          <span className="font-bold">⭐</span> Special mechanics: Non-numerical benefits our math can&apos;t quantify (e.g., instant kill)
-                        </div>
-                        <div className="text-slate-300">
-                          <span className="font-bold">💬</span> Community note: Well-established consensus about balance (often stronger OR weaker than rated)
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 pt-3 border-t border-slate-700/50">
-                        <div className="text-emerald-400 font-semibold">Discrepancy Guidance:</div>
+                      <div className="space-y-2 pt-2 border-t border-slate-700/50">
+                        <div className="text-emerald-400 font-semibold">Anchor Discrepancy Categories:</div>
                         <div className="space-y-2">
                           <div className="bg-purple-900/20 border border-purple-700/30 rounded p-2">
                             <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
-                            <div className="text-slate-300">
+                            <div className="text-slate-300 text-[11px]">
                               These items grant bonuses that can&apos;t be expressed in numbers. Understand the item&apos;s effect and add something similar of your own to match the anchor!
                             </div>
                           </div>
                           <div className="bg-blue-900/20 border border-blue-700/30 rounded p-2">
                             <div className="text-blue-400 font-semibold mb-1">🔢 Numerical Edge Case</div>
-                            <div className="text-slate-300">
+                            <div className="text-slate-300 text-[11px]">
                               These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.
                             </div>
                           </div>
                           <div className="bg-slate-800/50 border border-slate-600/30 rounded p-2">
                             <div className="text-slate-300 font-semibold mb-1">💬 Community Note</div>
-                            <div className="text-slate-400">
+                            <div className="text-slate-400 text-[11px]">
                               This item is probably underpowered. Take this reference with a grain of salt.
                             </div>
                           </div>
