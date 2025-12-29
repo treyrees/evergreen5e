@@ -41,6 +41,11 @@ export const SPECIAL_MECHANICS = new Set([
   'Gloves of Missile Snaring', // Defensive utility not quantified
   'Animated Shield',           // Special activation mechanic
   'Staff of Power',            // Overvalued - powerful but scored too high
+  'Energy Bow',                // Force damage + restraint arrow - special abilities
+  'Quarterstaff of the Acrobat', // +5 AC reaction (1/rest) not fully valued
+  'Sentinel Shield',           // Advantage on Initiative not quantified
+  'Shield of the Cavalier',    // Force bash damage + protective field not quantified
+  'Cloak of Invisibility',     // Invisibility charges - tactical advantage
 ]);
 
 /**
@@ -147,6 +152,21 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Staff of Power') {
     return '+2 to attack/damage/AC/saves scores as 6.0 (Legendary tier), but official is Very Rare - our math may overvalue stacking bonuses';
+  }
+  if (itemName === 'Energy Bow') {
+    return '+1 bow that deals Force damage instead of Piercing, with Arrow of Restraint (DC 15 STR save) - force damage type and restraint ability add tactical value beyond +1 enhancement';
+  }
+  if (itemName === 'Quarterstaff of the Acrobat') {
+    return '+2 weapon with Attack Deflection (+5 AC as reaction, 1/short rest) - the occasional defensive boost adds value beyond our +2 enhancement calculation';
+  }
+  if (itemName === 'Sentinel Shield') {
+    return 'Shield with advantage on Initiative rolls and Perception checks - combat initiative advantage not quantified in our math';
+  }
+  if (itemName === 'Shield of the Cavalier') {
+    return '+2 AC shield (total +4) with Forceful Bash (2d6+2+STR force damage) and Protective Field - offensive capabilities beyond standard shield not quantified';
+  }
+  if (itemName === 'Cloak of Invisibility') {
+    return 'Legendary cloak with 3 charges for Invisibility (1 hour each, regain 1d3/day) - tactical invisibility advantage estimated at 4.0 pts';
   }
 
   // Community notes

@@ -544,5 +544,109 @@
       "enhancement": 0,
       "acBonus": 2
     }
+  },
+  {
+    "name": "Energy Bow",
+    "baseItem": "longbow",
+    "rarity": "very rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 1,
+      "damageBonus": {
+        "dice": "0",
+        "type": "force"
+      }
+    },
+    "ribbons": {
+      "utilitySpells": [
+        "Deals Force damage instead of Piercing",
+        "Arrow of Restraint (DC 15 STR save or Restrained)",
+        "Emits bright light 20ft, dim light 20ft"
+      ]
+    }
+  },
+  {
+    "name": "Quarterstaff of the Acrobat",
+    "baseItem": "quarterstaff",
+    "rarity": "very rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 2
+    },
+    "ribbons": {
+      "utilitySpells": [
+        "Can change form (6-inch rod, 10-foot pole, or quarterstaff)",
+        "Advantage on Dexterity (Acrobatics) checks",
+        "Attack Deflection: +5 AC as reaction (1/short rest)",
+        "Thrown property 30/120 feet"
+      ]
+    }
+  },
+  {
+    "name": "Sentinel Shield",
+    "baseItem": "shield",
+    "rarity": "uncommon",
+    "attunement": false,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 2
+    },
+    "ribbons": {
+      "utilitySpells": [
+        "Advantage on Initiative rolls",
+        "Advantage on Wisdom (Perception) checks"
+      ]
+    }
+  },
+  {
+    "name": "Shield of the Cavalier",
+    "baseItem": "shield",
+    "rarity": "very rare",
+    "attunement": false,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 4
+    },
+    "ribbons": {
+      "utilitySpells": [
+        "Forceful Bash: 2d6+2 + STR modifier force damage, push 10ft",
+        "Protective Field: 5-foot emanation like Otiluke's Resilient Sphere"
+      ]
+    }
+  },
+  {
+    "name": "Thunderous Greatclub",
+    "baseItem": "greatclub",
+    "rarity": "very rare",
+    "attunement": true,
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "STR",
+        "setValue": 20
+      },
+      "damageBonus": {
+        "dice": "1d8",
+        "type": "thunder"
+      }
+    },
+    "ribbons": {
+      "utilitySpells": [
+        "Clap of Thunder: 30-foot cone, DC 15 STR save or Prone",
+        "Earthquake: 50-foot radius seismic disturbance",
+        "+3d8 thunder damage vs objects"
+      ]
+    }
+  },
+  {
+    "name": "Cloak of Invisibility",
+    "baseItem": "cloak",
+    "rarity": "legendary",
+    "attunement": true,
+    "overrideScore": 4.0,
+    "combat": {
+      "enhancement": 0
+    },
+    "description": "Has 3 charges that regain 1d3 daily at dawn. Use 1 charge to become Invisible for 1 hour. Invisibility estimated at 4.0 pts (Legendary tier) due to tactical advantage."
   }
 ]
