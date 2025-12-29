@@ -1164,7 +1164,19 @@ export default function CalculatorPage() {
                               {/* RIGHT: Reference Item */}
                               <div className={`${getRarityBgClass(anchor.rarity || 'common')} p-3`}>
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>
+                                  {anchor.dndbeyondSlug ? (
+                                    <a
+                                      href={`https://www.dndbeyond.com/magic-items/${anchor.dndbeyondSlug}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-slate-200 font-semibold text-sm truncate hover:underline hover:text-slate-100 transition-colors"
+                                      title="View on D&D Beyond"
+                                    >
+                                      {anchor.name}
+                                    </a>
+                                  ) : (
+                                    <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>
+                                  )}
                                   <div className="flex items-center gap-1">
                                     {hasWarnings && (
                                       <button
