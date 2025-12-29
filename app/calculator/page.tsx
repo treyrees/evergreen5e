@@ -1271,7 +1271,7 @@ export default function CalculatorPage() {
                           <div className="bg-purple-900/20 border border-purple-700/30 rounded p-2">
                             <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
                             <div className="text-slate-300 text-[11px]">
-                              These items grant bonuses that can&apos;t be expressed in numbers. Understand the item&apos;s effect and add something similar of your own to match the anchor!
+                              These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the anchor!
                             </div>
                           </div>
                           <div className="bg-blue-900/20 border border-blue-700/30 rounded p-2">
