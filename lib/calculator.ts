@@ -1,4 +1,4 @@
-import { CombatFeatures, Rarity, MagicItem, AdvantageType } from '@/types/magic-item';
+import { CombatFeatures, Rarity, MagicItem, AdvantageType, PermanentBuffs } from '@/types/magic-item';
 import srdItems from '@/data/srd-items.json';
 
 // Calculate dice value dynamically based on number and type
@@ -184,6 +184,7 @@ function isSimpleItem(userItem: Partial<MagicItem>): { isSimple: boolean; enhanc
     combat.abilityScoreSetter !== undefined ||
     combat.abilityScoreBonus !== undefined ||
     combat.flight !== undefined ||
+    combat.permanentBuffs !== undefined ||
     combat.advantage !== undefined ||
     combat.reactionAC !== undefined ||
     combat.bonusActionDamage !== undefined ||
@@ -324,7 +325,7 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     score += combat.abilityScoreBonus.bonus * 0.75;
   }
 
-  // Flight - one of the most powerful abilities in D&D
+  // Flight - one of the most powerful abilities in D&D (legacy format)
   if (combat.flight) {
     if (combat.flight.duration === 'unlimited') {
       // Unlimited flight is extremely powerful (Broom of Flying should be Rare)
@@ -335,6 +336,24 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     } else {
       // Limited flight (1-2 hours/day like Wings of Flying)
       score += 1.0;
+    }
+  }
+
+  // Permanent Buffs - always-on passive benefits (new simplified format)
+  // These are permanent effects with no duration tracking
+  if (combat.permanentBuffs) {
+    const PERMANENT_BUFF_VALUES: Record<keyof PermanentBuffs, number> = {
+      flight: 2.0,        // Permanent flight is extremely powerful - tactical dominance
+      darkvision: 0.25,   // Useful but many races have it; like Goggles of Night (Uncommon)
+      blindsight: 0.75,   // Rare and powerful - see invisible, through illusions
+      speedBonus: 0.5,    // +10 ft movement is always useful; like Boots of Striding
+      tremorsense: 0.5,   // Detect invisible/hidden creatures through ground vibration
+    };
+
+    for (const [buff, enabled] of Object.entries(combat.permanentBuffs)) {
+      if (enabled && buff in PERMANENT_BUFF_VALUES) {
+        score += PERMANENT_BUFF_VALUES[buff as keyof PermanentBuffs];
+      }
     }
   }
 
@@ -967,7 +986,7 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
 
   // For now, ribbons don't affect rarity (as we're not implementing them yet)
   // But we'll return the structure for future use
-  let suggestedRarity = combatRarity;
+  const suggestedRarity = combatRarity;
   let explanation = `Based on ${combatScore.toFixed(1)} combat points, this item is ${combatRarity}.`;
 
   if (anchor && comparison) {

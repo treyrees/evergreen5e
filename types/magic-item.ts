@@ -50,6 +50,15 @@ export interface Flight {
   requiresAction?: boolean; // bonus action to activate
 }
 
+// Permanent buffs - always-on passive benefits
+export interface PermanentBuffs {
+  flight?: boolean;           // Grants permanent flight (e.g., Wings of Flying)
+  darkvision?: boolean;       // Grants darkvision 60 ft (e.g., Goggles of Night)
+  blindsight?: boolean;       // Grants blindsight 30 ft (e.g., Robe of Eyes partial)
+  speedBonus?: boolean;       // +10 ft movement speed (e.g., Boots of Striding)
+  tremorsense?: boolean;      // Grants tremorsense 30 ft (e.g., rare earth-themed items)
+}
+
 // Reaction-based AC bonus (e.g., Quarterstaff of the Acrobat's Attack Deflection)
 export interface ReactionAC {
   bonus: number; // AC bonus when used (e.g., +5)
@@ -94,7 +103,8 @@ export interface CombatFeatures {
   resistances?: string[]; // Damage types resisted: "fire", "cold", "all", etc.
   abilityScoreSetter?: AbilityScoreSetter; // Sets ability score to fixed value (e.g., Gauntlets of Ogre Power set STR to 19)
   abilityScoreBonus?: AbilityScoreBonus; // Adds bonus to ability score (e.g., Headband of Intellect +2)
-  flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots)
+  flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots) - LEGACY: use permanentBuffs.flight instead
+  permanentBuffs?: PermanentBuffs; // Always-on passive benefits (flight, senses, speed)
 
   // New SRD 5.2.1 mechanics
   advantage?: AdvantageType[]; // Advantage on specific checks/saves (e.g., Sentinel Shield: initiative, perception)

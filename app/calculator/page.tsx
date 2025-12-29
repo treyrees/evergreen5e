@@ -3,9 +3,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, useSpring, useTransform } from 'framer-motion';
-import { MagicItem, DamageBonus, SpellCharge, ChargedAbility, ChargePool, AbilityScoreSetter, AbilityScoreBonus, Flight } from '@/types/magic-item';
+import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs } from '@/types/magic-item';
 import {
-  calculateCombatScore,
   getSuggestedRarity,
   findTopAnchorItems,
 } from '@/lib/calculator';
@@ -132,8 +131,8 @@ export default function CalculatorPage() {
   // Ability score bonus state
   const [abilityScoreBonus, setAbilityScoreBonus] = useState<AbilityScoreBonus | undefined>(undefined);
 
-  // Flight state
-  const [flight, setFlight] = useState<Flight | undefined>(undefined);
+  // Permanent buffs state
+  const [permanentBuffs, setPermanentBuffs] = useState<PermanentBuffs>({});
 
   // Charge pool state (new intuitive system)
   const [maxCharges, setMaxCharges] = useState(0);
@@ -152,6 +151,7 @@ export default function CalculatorPage() {
   });
 
   // Check if any combat attributes are selected (for blur effect)
+  const hasPermanentBuffs = Object.values(permanentBuffs).some(v => v === true);
   const hasSelectedAttributes = useMemo(() => {
     return (
       enhancement > 0 ||
@@ -164,9 +164,9 @@ export default function CalculatorPage() {
       abilities.length > 0 ||
       abilityScoreSetter !== undefined ||
       abilityScoreBonus !== undefined ||
-      flight !== undefined
+      hasPermanentBuffs
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, flight]);
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
@@ -179,7 +179,7 @@ export default function CalculatorPage() {
       resistances: resistances.length > 0 ? resistances : undefined,
       abilityScoreSetter,
       abilityScoreBonus,
-      flight,
+      permanentBuffs: hasPermanentBuffs ? permanentBuffs : undefined,
       chargePool: (maxCharges > 0 || abilities.length > 0) ? {
         maxCharges,
         chargesPerShortRest,
@@ -188,7 +188,7 @@ export default function CalculatorPage() {
       } : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, abilityScoreBonus, flight, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement]);
+  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -241,64 +241,75 @@ export default function CalculatorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Form */}
           <div className="space-y-6">
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 1: BASIC INFO
+            ═══════════════════════════════════════════════════════════════ */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-              <div className="space-y-6">
-                {/* Basic Info Section */}
-                <div className="space-y-4 pb-6 border-b border-slate-200 dark:border-slate-700">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Item Name
-                    </label>
-                    <input
-                      type="text"
-                      value={itemName}
-                      onChange={(e) => setItemName(e.target.value)}
-                      placeholder="e.g., Sword of Flames"
-                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Base Item Type
-                    </label>
-                    <select
-                      value={baseItem}
-                      onChange={(e) => setBaseItem(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                    >
-                      <option value="" disabled className="text-slate-400">
-                        Select base item type...
-                      </option>
-                      {Object.entries(BASE_ITEMS).map(([category, items]) => (
-                        <optgroup key={category} label={category}>
-                          {items.map((item) => (
-                            <option key={item} value={item}>
-                              {item.charAt(0).toUpperCase() + item.slice(1)}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="attunement"
-                      checked={attunement}
-                      onChange={(e) => setAttunement(e.target.checked)}
-                      className="mr-2 h-4 w-4 text-emerald-600 rounded"
-                    />
-                    <label
-                      htmlFor="attunement"
-                      className="text-sm font-medium text-slate-700 dark:text-slate-300"
-                    >
-                      Requires Attunement
-                    </label>
-                  </div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <span className="text-emerald-600">1.</span> Basic Info
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Item Name
+                  </label>
+                  <input
+                    type="text"
+                    value={itemName}
+                    onChange={(e) => setItemName(e.target.value)}
+                    placeholder="e.g., Sword of Flames"
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Base Item Type
+                  </label>
+                  <select
+                    value={baseItem}
+                    onChange={(e) => setBaseItem(e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                  >
+                    <option value="" disabled className="text-slate-400">
+                      Select base item type...
+                    </option>
+                    {Object.entries(BASE_ITEMS).map(([category, items]) => (
+                      <optgroup key={category} label={category}>
+                        {items.map((item) => (
+                          <option key={item} value={item}>
+                            {item.charAt(0).toUpperCase() + item.slice(1)}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="attunement"
+                    checked={attunement}
+                    onChange={(e) => setAttunement(e.target.checked)}
+                    className="mr-2 h-4 w-4 text-emerald-600 rounded"
+                  />
+                  <label
+                    htmlFor="attunement"
+                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                  >
+                    Requires Attunement
+                  </label>
+                </div>
+              </div>
+            </div>
 
-                {/* Combat Features Section */}
-                <div className="space-y-6">
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 2: NUMERICAL BONUSES
+            ═══════════════════════════════════════════════════════════════ */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <span className="text-emerald-600">2.</span> Numerical Bonuses
+              </h2>
+              <div className="space-y-6">
                   {/* Attack/Damage Bonus */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -496,7 +507,17 @@ export default function CalculatorPage() {
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
 
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 3: ABILITY SCORE & PERMANENT BUFFS
+            ═══════════════════════════════════════════════════════════════ */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <span className="text-emerald-600">3.</span> Ability Score & Permanent Buffs
+              </h2>
+              <div className="space-y-6">
                 {/* Ability Score */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -597,60 +618,110 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Flight */}
+                {/* Permanent Buffs */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Flight
-                  </label>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 italic">
-                    Grants the ability to fly (e.g., Broom of Flying, Winged Boots)
-                  </p>
-                  <div className="space-y-2">
-                    <select
-                      value={flight?.duration || ''}
-                      onChange={(e) => {
-                        if (e.target.value === '') {
-                          setFlight(undefined);
-                        } else if (e.target.value === 'unlimited') {
-                          setFlight({ duration: 'unlimited' });
-                        } else {
-                          setFlight({ duration: 'limited', hoursPerDay: 4 });
-                        }
-                      }}
-                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                    >
-                      <option value="">No Flight</option>
-                      <option value="unlimited">Unlimited Flight</option>
-                      <option value="limited">Limited Flight (hours per day)</option>
-                    </select>
-                    {flight?.duration === 'limited' && (
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm text-slate-600 dark:text-slate-400">Hours per day:</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.5"
-                          value={flight.hoursPerDay || 4}
-                          onChange={(e) => setFlight({
-                            duration: 'limited',
-                            hoursPerDay: parseFloat(e.target.value) || 4
-                          })}
-                          className="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                          placeholder="4"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Spells & Spell-Like Abilities */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Spells & Spell-Like Abilities
+                    Permanent Buffs
                   </label>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
-                    For non-spell abilities, estimate equivalent spell level (0 for cantrip-like, 1-9 for leveled spells)
+                    Always-on passive benefits (flight, enhanced senses, speed)
                   </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Flight */}
+                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={permanentBuffs.flight || false}
+                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
+                        className="h-4 w-4 text-emerald-600 rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                          <span>🦅</span> Flight
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Permanent flying speed</div>
+                      </div>
+                    </label>
+
+                    {/* Darkvision */}
+                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={permanentBuffs.darkvision || false}
+                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, darkvision: e.target.checked })}
+                        className="h-4 w-4 text-emerald-600 rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                          <span>👁️</span> Darkvision
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">See 60 ft in darkness</div>
+                      </div>
+                    </label>
+
+                    {/* Blindsight */}
+                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={permanentBuffs.blindsight || false}
+                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, blindsight: e.target.checked })}
+                        className="h-4 w-4 text-emerald-600 rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                          <span>🔮</span> Blindsight
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Perceive 30 ft without sight</div>
+                      </div>
+                    </label>
+
+                    {/* Speed Bonus */}
+                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={permanentBuffs.speedBonus || false}
+                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, speedBonus: e.target.checked })}
+                        className="h-4 w-4 text-emerald-600 rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                          <span>💨</span> Speed Bonus
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">+10 ft movement speed</div>
+                      </div>
+                    </label>
+
+                    {/* Tremorsense */}
+                    <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={permanentBuffs.tremorsense || false}
+                        onChange={(e) => setPermanentBuffs({ ...permanentBuffs, tremorsense: e.target.checked })}
+                        className="h-4 w-4 text-emerald-600 rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                          <span>🌍</span> Tremorsense
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Sense 30 ft via vibrations</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ═══════════════════════════════════════════════════════════════
+                SECTION 4: SPELLS & SPELL-LIKE ABILITIES
+            ═══════════════════════════════════════════════════════════════ */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <span className="text-emerald-600">4.</span> Spells & Spell-Like Abilities
+              </h2>
+              <div className="space-y-4">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
+                  For non-spell abilities, estimate equivalent spell level (0 for cantrip-like, 1-9 for leveled spells)
+                </p>
 
                   {/* Collapsible Helper Guide */}
                   <details className="mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
@@ -663,7 +734,7 @@ export default function CalculatorPage() {
                           Find the spell most similar to your desired custom effect. Use that spell level.
                         </p>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                          Think abstractly: "mass control" → enchantment spells. "Damage over time" → conjuration/evocation.
+                          Think abstractly: &quot;mass control&quot; → enchantment spells. &quot;Damage over time&quot; → conjuration/evocation.
                           Reskin freely—a sword shooting columns of thunder is mechanically identical to casting <em>Lightning Bolt</em>.
                         </p>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400">
@@ -882,8 +953,6 @@ export default function CalculatorPage() {
                       + Add Spell or Ability
                     </button>
                   )}
-                </div>
-                </div>
               </div>
             </div>
           </div>
@@ -988,13 +1057,15 @@ export default function CalculatorPage() {
                                   {abilityScoreBonus && (
                                     <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
                                   )}
-                                  {flight && (
-                                    <div>Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}</div>
-                                  )}
+                                  {permanentBuffs.flight && <div>🦅 Flight</div>}
+                                  {permanentBuffs.darkvision && <div>👁️ Darkvision 60 ft</div>}
+                                  {permanentBuffs.blindsight && <div>🔮 Blindsight 30 ft</div>}
+                                  {permanentBuffs.speedBonus && <div>💨 +10 ft speed</div>}
+                                  {permanentBuffs.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
                                   {resistances.length > 0 && <div>Resist: {resistances.join(', ')}</div>}
                                   {abilities.length > 0 && <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>}
                                   {maxCharges > 0 && <div>{maxCharges} max charges</div>}
-                                  {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !flight && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
+                                  {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !hasPermanentBuffs && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
                                     <div className="text-slate-500 italic">No combat features</div>
                                   )}
                                 </div>
@@ -1011,7 +1082,7 @@ export default function CalculatorPage() {
                                   {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
                                 </div>
                                 <div className="text-sm text-emerald-200 mb-3">
-                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${getRarityColorClass(anchor.rarity)}`}>{capitalizeRarity(anchor.rarity)}</span>
+                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${getRarityColorClass(anchor.rarity || 'common')}`}>{capitalizeRarity(anchor.rarity || 'common')}</span>
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
                                   <div className="text-emerald-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
@@ -1034,8 +1105,13 @@ export default function CalculatorPage() {
                                     <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
                                   )}
                                   {anchor.combat.flight && (
-                                    <div>Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}</div>
+                                    <div>🦅 Flight{anchor.combat.flight.duration === 'limited' ? ` (${anchor.combat.flight.hoursPerDay} hrs/day)` : ''}</div>
                                   )}
+                                  {anchor.combat.permanentBuffs?.flight && !anchor.combat.flight && <div>🦅 Flight</div>}
+                                  {anchor.combat.permanentBuffs?.darkvision && <div>👁️ Darkvision 60 ft</div>}
+                                  {anchor.combat.permanentBuffs?.blindsight && <div>🔮 Blindsight 30 ft</div>}
+                                  {anchor.combat.permanentBuffs?.speedBonus && <div>💨 +10 ft speed</div>}
+                                  {anchor.combat.permanentBuffs?.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
                                   {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
                                     <div>Resist: {anchor.combat.resistances.join(', ')}</div>
                                   )}
@@ -1161,8 +1237,12 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-emerald-400 font-semibold">Flight:</div>
-                      <div>• Unlimited: 2.0 pts | Limited (4+ hrs/day): 1.5 pts | Limited (&lt;4 hrs): 1.0 pt</div>
+                      <div className="text-emerald-400 font-semibold">Permanent Buffs:</div>
+                      <div>• Flight: 2.0 pts (tactical dominance, ranged immunity)</div>
+                      <div>• Blindsight: 0.75 pts (see invisible, through illusions)</div>
+                      <div>• Speed Bonus: 0.5 pts (+10 ft movement)</div>
+                      <div>• Tremorsense: 0.5 pts (detect via vibrations)</div>
+                      <div>• Darkvision: 0.25 pts (many races have this)</div>
                     </div>
 
                     <div className="space-y-1">
