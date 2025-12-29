@@ -3,6 +3,7 @@ export interface DamageBonus {
   type: string; // "fire", "cold", "radiant", etc.
   frequency?: 'per-hit' | 'per-turn'; // per-hit (default) or once per turn
   conditional?: boolean; // true if only works vs specific creatures (dragons, giants, etc.)
+  vicious?: boolean; // true if damage only applies on natural 20 (critical hits)
 }
 
 export interface SpellCharge {
@@ -71,6 +72,7 @@ export interface MagicItem {
   attunement: boolean;
   rarity?: string; // For SRD items
   manualRarity?: boolean; // If true, use official rarity instead of calculating
+  overrideScore?: number; // Manual point value for items with special effects we can't model
   description?: string; // Explains unmodeled mechanics that affect item power
 }
 

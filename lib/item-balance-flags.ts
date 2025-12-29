@@ -40,9 +40,6 @@ export const COMMUNITY_NOTES = new Set([
   'Winged Boots',              // Uncommon but should be Rare - "greatest uncommon in DMG"
   'Ring of Spell Storing',     // Rare - very powerful, breaks action economy
   'Cloak of Displacement',     // Rare - disadvantage on all attacks is very strong
-  'Headband of Intellect',     // Uncommon - INT 19 is massive for non-casters
-  'Gauntlets of Ogre Power',   // Uncommon - STR 19 is massive for non-martials
-  'Amulet of Health',          // Rare - CON 19 is very strong
   'Wings of Flying',           // Rare but time-limited, inferior to Broom of Flying
   'Trident of Fish Command',   // Uncommon but very niche (only controls fish)
 ]);
@@ -109,15 +106,6 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Cloak of Displacement') {
     return 'Very strong for Rare tier (disadvantage on all attacks against you)';
-  }
-  if (itemName === 'Headband of Intellect') {
-    return 'Very strong for Uncommon (INT 19 is massive for non-casters)';
-  }
-  if (itemName === 'Gauntlets of Ogre Power') {
-    return 'Very strong for Uncommon (STR 19 is massive for non-martials)';
-  }
-  if (itemName === 'Amulet of Health') {
-    return 'Very strong for Rare (CON 19 adds significant HP and saves)';
   }
   if (itemName === 'Wings of Flying') {
     return 'Weak for Rare tier (time-limited, inferior to Broom of Flying)';

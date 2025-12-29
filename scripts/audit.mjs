@@ -28,6 +28,13 @@ const RECHARGE_MULTIPLIERS = {
   'short rest': 0.4,
 };
 
+function getItemScore(item) {
+  if (item.overrideScore !== undefined) {
+    return item.overrideScore;
+  }
+  return item.combat ? calculateCombatScore(item.combat) : 0;
+}
+
 function calculateCombatScore(combat) {
   let score = 0;
 
@@ -40,8 +47,17 @@ function calculateCombatScore(combat) {
     const damageType = combat.damageBonus.type.toLowerCase();
     const typeMultiplier = DAMAGE_TYPE_MULTIPLIERS[damageType] || 1.0;
     diceValue *= typeMultiplier;
-    const frequency = combat.damageBonus.frequency || 'per-hit';
-    if (frequency === 'per-turn') diceValue *= 0.4;
+
+    // Vicious (critical-only damage): only applies on natural 20 (5% of attacks)
+    if (combat.damageBonus.vicious) {
+      diceValue *= 0.05;
+    }
+    // Frequency multiplier (if not vicious)
+    else {
+      const frequency = combat.damageBonus.frequency || 'per-hit';
+      if (frequency === 'per-turn') diceValue *= 0.4;
+    }
+
     if (combat.damageBonus.conditional) diceValue *= 0.25;
     score += diceValue;
   }
@@ -141,7 +157,7 @@ function getRarityDistance(calculated, official) {
 const results = srdItems
   .filter(item => item.rarity)
   .map(item => {
-    const score = calculateCombatScore(item.combat);
+    const score = getItemScore(item);
     const hasCombatFeatures = score > 0;
     // For items with manual rarity override, use the official rarity instead of calculating
     const calculated = item.manualRarity ? item.rarity : scoreToRarity(score, hasCombatFeatures);

@@ -165,6 +165,16 @@ function isGenericItem(item: MagicItem): boolean {
 }
 
 /**
+ * Get the score for an item, using overrideScore if available
+ */
+export function getItemScore(item: Partial<MagicItem>): number {
+  if (item.overrideScore !== undefined) {
+    return item.overrideScore;
+  }
+  return item.combat ? calculateCombatScore(item.combat) : 0;
+}
+
+/**
  * Calculate combat power score from combat features
  */
 export function calculateCombatScore(combat: CombatFeatures): number {
@@ -183,12 +193,20 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     const typeMultiplier = DAMAGE_TYPE_MULTIPLIERS[damageType] || 1.0;
     diceValue *= typeMultiplier;
 
-    // Frequency multiplier
+    // Vicious (critical-only damage): only applies on natural 20 (5% of attacks)
+    // Average 2d6 = 7 damage, so expected value = 0.05 × 7 = 0.35
+    // We round to 0.5 to account for psychological impact and crit synergy
+    if (combat.damageBonus.vicious) {
+      diceValue *= 0.05; // Only applies 5% of the time
+    }
+    // Frequency multiplier (if not vicious)
     // - per-hit (default): 1.0 - applies to every attack
     // - per-turn: 0.4 - only applies once per turn (even with multiple attacks)
-    const frequency = combat.damageBonus.frequency || 'per-hit';
-    if (frequency === 'per-turn') {
-      diceValue *= 0.4;
+    else {
+      const frequency = combat.damageBonus.frequency || 'per-hit';
+      if (frequency === 'per-turn') {
+        diceValue *= 0.4;
+      }
     }
 
     // Conditional damage (only works vs specific creatures) is worth 25% of normal value
@@ -433,7 +451,7 @@ export function findTopAnchorItems(
 
   // Process generic items first - exact score matches get highest priority
   genericItems.forEach((item) => {
-    const score = calculateCombatScore(item.combat);
+    const score = getItemScore(item);
     const scoreDiff = Math.abs(score - userScore);
     const itemBroadCategory = getBroadCategory(item.baseItem);
     const sameBroadCategory = itemBroadCategory === userBroadCategory;
@@ -461,7 +479,14 @@ export function findTopAnchorItems(
   namedItems.forEach((item) => {
     const itemBroadCategory = getBroadCategory(item.baseItem);
     const itemAttunement = item.attunement || false;
-    const sameBroadCategory = itemBroadCategory === userBroadCategory;
+    let sameBroadCategory = itemBroadCategory === userBroadCategory;
+
+    // Special case: implements can also match weapons
+    const userCategory = getItemCategory(userItem.baseItem || '');
+    if (userCategory === 'implement' && itemBroadCategory === 'weapon') {
+      sameBroadCategory = true;
+    }
+
     const sameAttunement = itemAttunement === userAttunement;
     const exactMatch = item.baseItem === userItem.baseItem;
 
@@ -479,7 +504,7 @@ export function findTopAnchorItems(
       priority = 8; // Different category, different attunement
     }
 
-    const score = calculateCombatScore(item.combat);
+    const score = getItemScore(item);
     candidates.push({
       item,
       score,
