@@ -348,6 +348,7 @@ export function calculateCombatScore(combat: CombatFeatures): number {
       blindsight: 0.75,   // Rare and powerful - see invisible, through illusions
       speedBonus: 0.5,    // +10 ft movement is always useful; like Boots of Striding
       tremorsense: 0.5,   // Detect invisible/hidden creatures through ground vibration
+      climbBurrow: 0.5,   // Climb/burrow speed is useful for mobility; like Slippers of Spider Climbing
     };
 
     for (const [buff, enabled] of Object.entries(combat.permanentBuffs)) {
@@ -631,8 +632,22 @@ export function findAnchorItem(
 }
 
 /**
+ * Get the rarity tier index (0=Common, 1=Uncommon, 2=Rare, 3=Very Rare, 4=Legendary)
+ */
+function getRarityTierIndex(rarity: string): number {
+  const rarityOrder = ['common', 'uncommon', 'rare', 'very rare', 'legendary'];
+  return rarityOrder.indexOf(rarity.toLowerCase());
+}
+
+/**
  * Find top N anchor items for comparison
- * Prioritizes based on: broad category (weapon/armor/trinket), attunement, and score proximity
+ *
+ * Priority order (most important first):
+ * 1. Same rarity (HARD RULE: never show items 2+ rarities apart)
+ * 2. Same general class (weapon/armor/trinket)
+ * 3. Same attunement requirement
+ *
+ * Within same priority, prefer items with closer scores.
  */
 export function findTopAnchorItems(
   userItem: Partial<MagicItem>,
@@ -650,40 +665,37 @@ export function findTopAnchorItems(
   const allItems = srdItems as MagicItem[];
   const userBroadCategory = userItem.baseItem ? getBroadCategory(userItem.baseItem) : 'trinket';
   const userAttunement = userItem.attunement || false;
-
-  // Separate named items from generic +X items
-  const namedItems = allItems.filter(item => !isGenericItem(item));
-  const genericItems = allItems.filter(item => isGenericItem(item));
+  const userRarity = getSuggestedRarity({ combat: userItem.combat }).suggestedRarity;
+  const userRarityTier = getRarityTierIndex(userRarity);
 
   // Check if this is a "simple" item (only +N enhancement/AC, no attunement)
-  // Simple in, simple out - prioritize the matching generic item
   const simpleCheck = isSimpleItem(userItem);
 
   // Collect all candidates with their scores and priority level
-  // Priority philosophy: Named items with similar mechanics > generic items
-  // BUT score proximity gates priority - a 2pt difference demotes even perfect matches
-  // EXCEPTION: Simple items get their matching generic prioritized first
   const candidates: Array<{
     item: MagicItem;
     score: number;
     scoreDiff: number;
     priority: number;
+    rarityDiff: number;
   }> = [];
 
-  const userRarity = getSuggestedRarity({ combat: userItem.combat }).suggestedRarity;
+  // Process all items
+  allItems.forEach((item) => {
+    const itemRarity = item.rarity || 'common';
+    const itemRarityTier = getRarityTierIndex(itemRarity);
+    const rarityDiff = Math.abs(itemRarityTier - userRarityTier);
 
-  // Score proximity thresholds - items outside these ranges get deprioritized
-  // This prevents showing Oathbow (3.0 pts) to someone making a +1 longbow (1.0 pts)
-  const CLOSE_THRESHOLD = 0.75;   // Very close in power
-  const MEDIUM_THRESHOLD = 1.5;   // Same rarity tier usually
-  const FAR_THRESHOLD = 2.5;      // Different rarity tier
+    // HARD RULE: Never show items 2+ rarities apart
+    if (rarityDiff >= 2) {
+      return; // Skip this item entirely
+    }
 
-  // Process all named items first - these are the interesting comparisons
-  namedItems.forEach((item) => {
     const itemBroadCategory = getBroadCategory(item.baseItem);
     const itemAttunement = item.attunement || false;
-    let sameBroadCategory = itemBroadCategory === userBroadCategory;
+    const isGeneric = isGenericItem(item);
 
+    let sameBroadCategory = itemBroadCategory === userBroadCategory;
     // Special case: implements can also match weapons
     const userCategory = getItemCategory(userItem.baseItem || '');
     if (userCategory === 'implement' && itemBroadCategory === 'weapon') {
@@ -691,83 +703,50 @@ export function findTopAnchorItems(
     }
 
     const sameAttunement = itemAttunement === userAttunement;
-    const exactBaseMatch = item.baseItem === userItem.baseItem;
-    const sameRarity = (item.rarity || '').toLowerCase() === userRarity.toLowerCase();
+    const sameRarity = rarityDiff === 0;
     const score = getItemScore(item);
     const scoreDiff = Math.abs(score - userScore);
 
-    // Base priority from item relationship (lower = better)
-    let basePriority: number;
-    if (exactBaseMatch) {
-      basePriority = sameAttunement ? 1 : 2;
-    } else if (sameBroadCategory && sameRarity) {
-      basePriority = sameAttunement ? 3 : 4;
-    } else if (sameBroadCategory) {
-      basePriority = sameAttunement ? 5 : 6;
-    } else if (sameRarity) {
-      basePriority = 7;
-    } else {
-      basePriority = 8;
+    // Priority system: lower is better
+    // Each criterion adds to priority if NOT matched
+    // Priority 0-7 = same rarity, Priority 8-15 = 1 rarity apart
+    let priority = 0;
+
+    // Rarity difference is the primary factor (0 or 1 tier difference only)
+    priority += rarityDiff * 8;
+
+    // Same broad category is next most important
+    if (!sameBroadCategory) {
+      priority += 4;
     }
 
-    // Score proximity penalty - large score gaps demote even "perfect" matches
-    // This makes a +1 longbow show +1 Weapon instead of far-off Oathbow
-    let scorePenalty = 0;
-    if (scoreDiff > FAR_THRESHOLD) {
-      scorePenalty = 6;  // Huge gap - demote significantly
-    } else if (scoreDiff > MEDIUM_THRESHOLD) {
-      scorePenalty = 3;  // Moderate gap - demote somewhat
-    } else if (scoreDiff > CLOSE_THRESHOLD) {
-      scorePenalty = 1;  // Small gap - minor penalty
+    // Same attunement is third priority
+    if (!sameAttunement) {
+      priority += 2;
     }
 
-    const priority = basePriority + scorePenalty;
+    // Prefer named items over generic items (slight preference)
+    if (isGeneric) {
+      priority += 1;
+    }
+
+    // SIMPLE IN, SIMPLE OUT: If user made a simple +N item, the matching generic is #1
+    if (simpleCheck.isSimple && sameBroadCategory && isGeneric) {
+      const expectedGenericName = `+${simpleCheck.enhancementLevel} ${
+        simpleCheck.type === 'weapon' ? 'Weapon' :
+        simpleCheck.type === 'shield' ? 'Shield' : 'Armor'
+      }`;
+      if (item.name === expectedGenericName) {
+        priority = 0; // Highest priority - this IS what they're making
+      }
+    }
 
     candidates.push({
       item,
       score,
       scoreDiff,
       priority,
-    });
-  });
-
-  // Process generic items - these fill gaps when named items are too far
-  genericItems.forEach((item) => {
-    const score = getItemScore(item);
-    const scoreDiff = Math.abs(score - userScore);
-    const itemBroadCategory = getBroadCategory(item.baseItem);
-    const sameBroadCategory = itemBroadCategory === userBroadCategory;
-
-    // Generic items start at priority 9-10, but get boosted if very close in score
-    // A +2 Weapon that's 0.1 pts away beats a named item that's 2 pts away
-    let basePriority = sameBroadCategory ? 9 : 10;
-
-    // SIMPLE IN, SIMPLE OUT: If user made a simple +N item, the matching generic is #1
-    // e.g., +3 longsword → show "+3 Weapon" first
-    if (simpleCheck.isSimple && sameBroadCategory) {
-      const expectedGenericName = `+${simpleCheck.enhancementLevel} ${
-        simpleCheck.type === 'weapon' ? 'Weapon' :
-        simpleCheck.type === 'shield' ? 'Shield' : 'Armor'
-      }`;
-      if (item.name === expectedGenericName) {
-        basePriority = 0;  // Highest priority - this IS what they're making
-      }
-    }
-
-    // Generics get a bonus for being close - they're reliable anchors
-    if (basePriority > 0) {  // Don't override the simple match priority
-      if (scoreDiff < 0.2) {
-        basePriority = sameBroadCategory ? 4 : 5;  // Exact score match is valuable
-      } else if (scoreDiff < CLOSE_THRESHOLD) {
-        basePriority = sameBroadCategory ? 6 : 7;  // Close score is good
-      }
-    }
-
-    candidates.push({
-      item,
-      score,
-      scoreDiff,
-      priority: basePriority,
+      rarityDiff,
     });
   });
 
