@@ -7,12 +7,15 @@
 
 /**
  * Numerical edge cases: Items numerically stronger than our logic accounts for
- * These have specific conditions that boost numbers beyond what we track
- * Examples: +3d6 vs sworn enemy, +2d6 on natural 20
+ * These have specific conditions that boost numbers beyond what we track YET
+ * They're rare/conditional enough to compare at your own discretion only
+ * Examples: +3d6 vs sworn enemy, +2d6 on natural 20, instant kill on crit
+ * Note: Not all items here have individual warning explainers
  */
 export const NUMERICAL_EDGE_CASES = new Set([
   'Vicious Weapon',            // +2d6 on nat 20 - we don't track critical-only bonuses
   'Oathbow',                   // +3d6 vs sworn enemy - we mark conditional but undervalues it
+  'Nine Lives Stealer',        // Drains life force on nat 20 - instant kill effect on crit
 ]);
 
 /**

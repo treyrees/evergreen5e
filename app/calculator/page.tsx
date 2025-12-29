@@ -624,7 +624,7 @@ export default function CalculatorPage() {
 
                       <div className="space-y-1.5 bg-white dark:bg-slate-800/50 rounded p-2 border border-blue-100 dark:border-blue-900 text-[11px]">
                         <div className="text-[10px] text-slate-500 dark:text-slate-400 italic mb-1 pb-1 border-b border-slate-200 dark:border-slate-700">
-                          Higher spell levels require higher character levels to access. <strong>Lv6+ effects are rare and powerful</strong>—items granting them should have very limited uses.
+                          Higher spell levels require higher character levels to access. <strong>Lv6+ spells are only available to full casters</strong> and are often much more scarce and adventure-defining—items granting them should have very limited uses.
                         </div>
 
                         <div>
@@ -1154,7 +1154,7 @@ export default function CalculatorPage() {
                       <div className="space-y-1 pt-2 border-t border-slate-700/50">
                         <div className="text-emerald-400 font-semibold">Warning Indicators:</div>
                         <div className="text-blue-400">
-                          <span className="font-bold">🔢</span> Numerical edge case: Conditional bonuses we can't track (e.g., +2d6 on nat 20)
+                          <span className="font-bold">🔢</span> Numerical edge case: Conditional bonuses we haven't weighed YET—rare/conditional enough to compare at your own discretion only. (Some items lack individual explainers)
                         </div>
                         <div className="text-purple-400">
                           <span className="font-bold">⭐</span> Special mechanics: Non-numerical benefits our math can't quantify (e.g., instant kill)
