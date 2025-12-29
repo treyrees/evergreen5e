@@ -8,7 +8,7 @@ import {
   getSuggestedRarity,
   findTopAnchorItems,
 } from '@/lib/calculator';
-import { getWarningIndicator } from '@/lib/item-balance-flags';
+import { getWarningIndicator, getItemEmoji } from '@/lib/item-balance-flags';
 
 const BASE_ITEMS = {
   'Melee Weapons (Simple)': [
@@ -626,16 +626,16 @@ export default function CalculatorPage() {
                   {/* Collapsible Helper Guide */}
                   <details className="mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md select-none">
-                      📖 Spell Level Reference
+                      📖 Guide to custom abilities: Estimating power in terms of spell level
                     </summary>
                     <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2 border-t border-blue-200 dark:border-blue-800">
                       <div className="space-y-1.5 mb-3">
                         <p className="font-semibold text-sm">
-                          Find a spell with similar effects.
+                          Find the spell most similar to your desired custom effect. Use that spell level.
                         </p>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400">
                           Think abstractly: "mass control" → enchantment spells. "Damage over time" → conjuration/evocation.
-                          Reskin freely—a sword shooting lightning bolts is mechanically identical to casting <em>Lightning Bolt</em>.
+                          Reskin freely—a sword shooting columns of thunder is mechanically identical to casting <em>Lightning Bolt</em>.
                         </p>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400">
                           <strong>Damage types:</strong> Fire, cold, lightning, acid, thunder, necrotic are mechanically similar—choose the spell that matches your flavor.
@@ -889,83 +889,55 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Anchor Items - References for Comparison */}
-                {topAnchors.length > 0 && (
+                {/* What's Similar? - Reference Item Comparison */}
+                {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
                   <div className="border-t border-slate-700 pt-4">
-                    <div className="text-emerald-400 font-bold mb-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">⚓</span>
-                        <span>ANCHOR ITEMS</span>
+                    {/* Section Header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-white font-bold text-lg flex items-center gap-2">
+                        <span>🔍</span>
+                        <span>What&apos;s Similar?</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setNumAnchorsToShow(Math.max(1, numAnchorsToShow - 1))}
                           disabled={numAnchorsToShow <= 1}
-                          className="w-6 h-6 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white text-sm"
+                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
                         >
                           −
                         </button>
-                        <span className="text-xs text-slate-400 w-3 text-center">{numAnchorsToShow}</span>
+                        <span className="text-sm text-slate-300 font-mono w-4 text-center">{numAnchorsToShow}</span>
                         <button
                           onClick={() => setNumAnchorsToShow(Math.min(3, numAnchorsToShow + 1))}
                           disabled={numAnchorsToShow >= 3}
-                          className="w-6 h-6 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white text-sm"
+                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
                         >
                           +
                         </button>
                       </div>
                     </div>
 
-                    <div className="space-y-6">
+                    {/* Stacked Anchor Comparisons */}
+                    <div className="space-y-4">
                       {topAnchors.slice(0, numAnchorsToShow).map((anchorData, index) => {
                         const { anchor, anchorScore, comparison } = anchorData;
                         const warnings = getWarningIndicator(anchor.name);
 
-                        // Check if anchor is unbalanced
-                        const isUnbalanced = anchor.rarity && (() => {
-                          const rarityOrder = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
-                          const anchorCalculatedRarity = anchorScore < 1 ? 'Common' :
-                            anchorScore < 2 ? 'Uncommon' :
-                            anchorScore < 3 ? 'Rare' :
-                            anchorScore < 4 ? 'Very Rare' : 'Legendary';
-                          const idx1 = rarityOrder.findIndex(r => r.toLowerCase() === anchorCalculatedRarity.toLowerCase());
-                          const idx2 = rarityOrder.findIndex(r => r.toLowerCase() === anchor.rarity!.toLowerCase());
-                          return Math.abs(idx1 - idx2) >= 2;
-                        })();
-
                         return (
-                          <div key={index} className={`${index > 0 ? 'border-t border-slate-700 pt-6 mt-6' : ''} bg-slate-800/30 rounded-lg p-4`}>
-                            {/* Anchor Header */}
-                            <div className="mb-4 pb-3 border-b border-slate-700/50">
-                              <div className="text-white font-semibold text-base flex items-center gap-1 mb-1">
-                                <span className="text-emerald-400 text-xs font-mono">#{index + 1}</span>
-                                <span>{anchor.name}</span>
-                                {warnings.hasNumerical && <span title="Numerical edge case" className="text-base">{warnings.numericalIcon}</span>}
-                                {warnings.hasSpecial && <span title="Special mechanics" className="text-base">{warnings.specialIcon}</span>}
-                                {warnings.hasCommunity && <span title="Community note" className="text-base">{warnings.communityIcon}</span>}
-                              </div>
-                              <div className="text-xs text-slate-400">
-                                <span className="text-emerald-300">{anchor.rarity?.toUpperCase()}</span>
-                                {' • '}
-                                <span className="font-mono">{anchorScore.toFixed(1)} pts</span>
-                                {anchor.attunement && ' • Attunement'}
-                              </div>
-                            </div>
-
-                            {/* Side-by-Side Comparison */}
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                              {/* Left Column: Your Item */}
-                              <div className="bg-blue-900/10 border border-blue-700/30 rounded p-3">
-                                <div className="text-blue-300 text-xs font-semibold mb-2 flex items-center gap-1">
-                                  <span>⚔️</span>
-                                  <span>YOUR ITEM</span>
+                          <div key={index} className="rounded-lg overflow-hidden border border-slate-600">
+                            {/* Side-by-Side Battle Cards */}
+                            <div className="grid grid-cols-2">
+                              {/* LEFT: Your Item (Deep Blue) */}
+                              <div className="bg-blue-950/50 border-r border-slate-600 p-4">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-blue-800/50">
+                                  <span className="text-blue-400 text-lg">⚔️</span>
+                                  <span className="text-blue-300 font-bold">{itemName || 'YOUR ITEM'}</span>
                                 </div>
-                                <div className="text-[10px] text-slate-400 mb-2">
-                                  <span className="font-mono">{results.combatScore.toFixed(1)} pts</span>
-                                  {' • '}
-                                  <span>{results.suggestedRarity}</span>
+                                <div className="text-sm text-blue-200 font-mono mb-3">
+                                  {results.combatScore.toFixed(1)} pts • <span className="text-blue-400">{results.suggestedRarity}</span>
                                 </div>
-                                <div className="text-xs text-slate-300 space-y-1">
+                                <div className="text-xs text-slate-300 space-y-1.5">
+                                  <div className="text-blue-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
                                   {enhancement > 0 && <div>+{enhancement} enhancement</div>}
                                   {damageBonus && (
                                     <div>
@@ -984,45 +956,39 @@ export default function CalculatorPage() {
                                     <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
                                   )}
                                   {flight && (
-                                    <div>
-                                      Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}
-                                    </div>
+                                    <div>Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}</div>
                                   )}
-                                  {resistances.length > 0 && (
-                                    <div>Resist: {resistances.join(', ')}</div>
-                                  )}
-                                  {abilities.length > 0 && (
-                                    <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>
-                                  )}
-                                  {maxCharges > 0 && (
-                                    <div>{maxCharges} max charges</div>
-                                  )}
+                                  {resistances.length > 0 && <div>Resist: {resistances.join(', ')}</div>}
+                                  {abilities.length > 0 && <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>}
+                                  {maxCharges > 0 && <div>{maxCharges} max charges</div>}
                                   {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !flight && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
-                                    <div className="text-slate-500 italic text-[10px]">No combat features</div>
+                                    <div className="text-slate-500 italic">No combat features</div>
                                   )}
                                 </div>
                               </div>
 
-                              {/* Right Column: Anchor Item */}
-                              <div className="bg-emerald-900/10 border border-emerald-700/30 rounded p-3">
-                                <div className="text-emerald-300 text-xs font-semibold mb-2 flex items-center gap-1">
-                                  <span>⚓</span>
-                                  <span>ANCHOR</span>
+                              {/* RIGHT: Reference Item (Vibrant Emerald) */}
+                              <div className="bg-emerald-950/50 p-4">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-emerald-800/50">
+                                  <span className="text-emerald-400 text-lg">{getItemEmoji(anchor.name)}</span>
+                                  <span className="text-emerald-300 font-bold">#{index + 1} {anchor.name}</span>
+                                  {warnings.hasSpecial && <span title="Special mechanics" className="text-sm">⭐</span>}
+                                  {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}
+                                  {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
                                 </div>
-                                <div className="text-[10px] text-slate-400 mb-2">
-                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span>
-                                  {' • '}
-                                  <span>{anchor.rarity}</span>
+                                <div className="text-sm text-emerald-200 font-mono mb-3">
+                                  {anchorScore.toFixed(1)} pts • <span className="text-emerald-400">{anchor.rarity}</span>
+                                  {anchor.attunement && <span className="text-emerald-600 ml-1">• Attunement</span>}
                                 </div>
-                                <div className="text-xs text-slate-300 space-y-1">
-                                  {anchor.combat.enhancement > 0 && (
-                                    <div>+{anchor.combat.enhancement} enhancement</div>
-                                  )}
+                                <div className="text-xs text-slate-300 space-y-1.5">
+                                  <div className="text-emerald-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
+                                  {anchor.combat.enhancement > 0 && <div>+{anchor.combat.enhancement} enhancement</div>}
                                   {anchor.combat.damageBonus && (
                                     <div>
                                       {anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}
                                       {anchor.combat.damageBonus.frequency === 'per-turn' && <span className="text-yellow-400 text-[10px] ml-1">(per-turn)</span>}
                                       {anchor.combat.damageBonus.conditional && <span className="text-yellow-400 text-[10px] ml-1">(conditional)</span>}
+                                      {anchor.combat.damageBonus.conditionalType && <span className="text-yellow-400 text-[10px] ml-1">({anchor.combat.damageBonus.conditionalType})</span>}
                                       {anchor.combat.damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
                                     </div>
                                   )}
@@ -1035,96 +1001,69 @@ export default function CalculatorPage() {
                                     <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
                                   )}
                                   {anchor.combat.flight && (
-                                    <div>
-                                      Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}
-                                    </div>
+                                    <div>Flight: {anchor.combat.flight.duration === 'unlimited' ? 'Unlimited' : `${anchor.combat.flight.hoursPerDay} hrs/day`}</div>
                                   )}
                                   {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
                                     <div>Resist: {anchor.combat.resistances.join(', ')}</div>
                                   )}
-                                  {anchor.combat.charges && (
-                                    <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
-                                  )}
+                                  {anchor.combat.charges && <div>{anchor.combat.charges.length} spell charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>}
                                   {anchor.combat.advantage && anchor.combat.advantage.length > 0 && (
-                                    <div>Adv: {anchor.combat.advantage.join(', ')}</div>
+                                    <div>Advantage: {anchor.combat.advantage.join(', ')}</div>
                                   )}
-                                  {anchor.combat.reactionAC && (
-                                    <div>+{anchor.combat.reactionAC.bonus} AC (reaction)</div>
-                                  )}
+                                  {anchor.combat.reactionAC && <div>+{anchor.combat.reactionAC.bonus} AC (reaction)</div>}
                                   {anchor.combat.bonusActionDamage && (
                                     <div>Bash: {anchor.combat.bonusActionDamage.dice}{anchor.combat.bonusActionDamage.flatBonus ? `+${anchor.combat.bonusActionDamage.flatBonus}` : ''} {anchor.combat.bonusActionDamage.type}</div>
                                   )}
                                   {anchor.combat.conditionInfliction && (
                                     <div>{anchor.combat.conditionInfliction.condition} (DC {anchor.combat.conditionInfliction.dc})</div>
                                   )}
-                                  {anchor.combat.damageTypeOverride && (
-                                    <div>Type: {anchor.combat.damageTypeOverride}</div>
-                                  )}
-                                  {anchor.combat.handsFreeDef && (
-                                    <div>Hands-free defense</div>
-                                  )}
-                                  {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && !anchor.combat.advantage && !anchor.combat.reactionAC && !anchor.combat.bonusActionDamage && !anchor.combat.conditionInfliction && !anchor.combat.damageTypeOverride && !anchor.combat.handsFreeDef && (
-                                    <div className="text-slate-500 italic text-[10px]">No combat features</div>
+                                  {anchor.combat.damageTypeOverride && <div>Damage type: {anchor.combat.damageTypeOverride}</div>}
+                                  {anchor.combat.handsFreeDef && <div>Hands-free defense</div>}
+                                  {/* Special Mechanics inline badge */}
+                                  {(warnings.hasSpecial || warnings.hasNumerical || warnings.hasCommunity) && (
+                                    <div className="mt-2 pt-2 border-t border-emerald-800/30">
+                                      <div className="text-[10px] text-purple-300 italic">
+                                        {warnings.hasSpecial && '⭐ '}
+                                        {warnings.hasNumerical && '🔢 '}
+                                        {warnings.hasCommunity && '💬 '}
+                                        {anchor.description || warnings.explanation}
+                                      </div>
+                                    </div>
                                   )}
                                 </div>
                               </div>
                             </div>
 
-                            {/* Warning explanation for flagged items */}
-                            {(warnings.hasNumerical || warnings.hasSpecial || warnings.hasCommunity) && (
-                              <div className={`mb-4 rounded p-2 ${
-                                warnings.hasNumerical
-                                  ? 'bg-blue-900/20 border border-blue-700/30'
-                                  : warnings.hasSpecial
-                                  ? 'bg-purple-900/20 border border-purple-700/30'
-                                  : 'bg-slate-900/20 border border-slate-700/30'
-                              }`}>
-                                <div className={`text-xs italic ${
-                                  warnings.hasNumerical ? 'text-blue-300' : warnings.hasSpecial ? 'text-purple-300' : 'text-slate-300'
-                                }`}>
-                                  {warnings.hasNumerical && '🔢 '}
-                                  {warnings.hasSpecial && '⭐ '}
-                                  {warnings.hasCommunity && '💬 '}
-                                  {anchor.description || warnings.explanation}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Diff Section */}
-                            <div className="bg-slate-900/50 rounded p-3 border border-slate-700/50">
-                              <div className="text-xs font-semibold text-slate-300 mb-2">
-                                📊 DIFFERENCES
-                              </div>
-                              <div className="text-xs space-y-1">
-                                {/* Power Comparison */}
+                            {/* DIFFERENCES Bar (Full Width Bottom) */}
+                            <div className="bg-slate-900 border-t border-slate-600 px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <span className="text-slate-400 text-xs font-semibold uppercase tracking-wide">Δ</span>
                                 {comparison.type === 'stronger' && (
-                                  <div className="text-yellow-400 font-medium">
+                                  <span className="text-yellow-400 text-sm font-medium">
                                     ⬆️ Your item is {comparison.scoreDifference.toFixed(1)} pts stronger
-                                  </div>
+                                  </span>
                                 )}
                                 {comparison.type === 'weaker' && (
-                                  <div className="text-blue-400 font-medium">
+                                  <span className="text-blue-400 text-sm font-medium">
                                     ⬇️ Your item is {Math.abs(comparison.scoreDifference).toFixed(1)} pts weaker
-                                  </div>
+                                  </span>
                                 )}
                                 {comparison.type === 'equal' && (
-                                  <div className="text-emerald-400 font-medium">
+                                  <span className="text-emerald-400 text-sm font-medium">
                                     ≈ Equal power level
-                                  </div>
-                                )}
-
-                                {/* Feature Differences */}
-                                {comparison.details.length > 0 && (
-                                  <div className="mt-2 pt-2 border-t border-slate-700/50 text-slate-400 space-y-1">
-                                    {comparison.details.map((detail, idx) => (
-                                      <div key={idx} className="flex items-start gap-1">
-                                        <span className="text-slate-500">•</span>
-                                        <span>{detail}</span>
-                                      </div>
-                                    ))}
-                                  </div>
+                                  </span>
                                 )}
                               </div>
+                              {comparison.details.length > 0 && (
+                                <div className="mt-2 text-xs text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
+                                  {comparison.details.slice(0, 4).map((detail, idx) => (
+                                    <span key={idx}>• {detail}</span>
+                                  ))}
+                                  {comparison.details.length > 4 && (
+                                    <span className="text-slate-600">+{comparison.details.length - 4} more</span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
@@ -1133,166 +1072,126 @@ export default function CalculatorPage() {
                   </div>
                 )}
 
-                {/* Your Item Summary */}
-                <div className="border-t border-slate-700 pt-4">
-                  <div className="text-emerald-400 font-bold mb-2 flex items-center gap-2">
-                    <span>⚔️</span>
-                    <span>YOUR ITEM</span>
-                  </div>
-                  <div className="bg-slate-800/30 rounded-lg p-3">
-                    <div className="text-xs space-y-2">
-                      {/* Features List */}
-                      <div>
-                        <div className="text-slate-400 font-semibold mb-1">Features</div>
-                        <div className="text-slate-300 space-y-0.5 pl-2">
-                          {enhancement > 0 && <div>+{enhancement} enhancement</div>}
-                          {damageBonus && (
-                            <div>
-                              {damageBonus.dice} {damageBonus.type}
-                              {damageBonus.conditional && <span className="text-yellow-400 ml-1">(conditional)</span>}
-                            </div>
-                          )}
-                          {acBonus > 0 && <div>+{acBonus} AC</div>}
-                          {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves</div>}
-                          {abilityScoreSetter && (
-                            <div>{abilityScoreSetter.ability} set to {abilityScoreSetter.setValue}</div>
-                          )}
-                          {abilityScoreBonus && (
-                            <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
-                          )}
-                          {flight && (
-                            <div>
-                              Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}
-                            </div>
-                          )}
-                          {abilities.length > 0 && (
-                            <div>
-                              {maxCharges} charges ({abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'})
-                              {chargesPerShortRest > 0 && <span className="text-slate-400"> • {chargesPerShortRest}/SR</span>}
-                              {chargesPerLongRest > 0 && <span className="text-slate-400"> • {chargesPerLongRest}/LR</span>}
-                            </div>
-                          )}
-                          {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !flight && abilities.length === 0 && (
-                            <div className="text-slate-500 italic">No features added</div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Combat Score */}
-                      <div className="pt-2 border-t border-slate-700/50">
-                        <div className="text-slate-400 font-semibold mb-1">Combat Score</div>
-                        <div className="text-emerald-400 font-mono font-bold">
-                          {results.combatScore.toFixed(1)} pts
-                        </div>
-                      </div>
-
-                      {/* Attunement Notice */}
-                      {attunement && (
-                        <div className="pt-2 border-t border-slate-700/50">
-                          <div className="text-yellow-400 flex items-center gap-1">
-                            <span>⚠️</span>
-                            <span>Requires Attunement</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Advanced: Formula Details */}
-                <div className="border-t border-slate-700 pt-4">
-                  <button
-                    onClick={() => setShowFormulaDetails(!showFormulaDetails)}
-                    className="w-full text-left text-slate-400 hover:text-emerald-400 text-xs font-semibold flex items-center justify-between transition-colors"
-                  >
-                    <span>⚙️ Advanced: Formula Details</span>
-                    <span className="text-xl">{showFormulaDetails ? '−' : '+'}</span>
-                  </button>
-
-                  {showFormulaDetails && (
-                    <div className="mt-3 text-xs text-slate-400 space-y-2 pl-4">
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Base Values:</div>
-                        <div>• Enhancement: 1 point per +1</div>
-                        <div>• AC Bonus: 1 point per +1</div>
-                        <div>• Saving Throw Bonus: 1 point per +1</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Damage Dice:</div>
-                        <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts, 1d12 = 1.75 pts</div>
-                        <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
-                        <div className="text-yellow-400">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
-                        <div className="text-yellow-400">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
-                        <div className="text-yellow-400">• Conditional damage: ×0.25 (only vs specific creatures)</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Damage Type Multipliers:</div>
-                        <div>• Strong (fewer resistances): Force ×1.2, Psychic ×1.15, Radiant ×1.1</div>
-                        <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid ×1.0</div>
-                        <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7, Physical ×0.85</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Ability Scores:</div>
-                        <div>• Setter (19): 2.5 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
-                        <div>• Bonus: ×0.75 per point (e.g., +2 bonus = 1.5 pts)</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Flight:</div>
-                        <div>• Unlimited: 2.0 pts | Limited (4+ hrs/day): 1.5 pts | Limited (&lt;4 hrs): 1.0 pt</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Resistances:</div>
-                        <div>• 1.5 points per damage type resisted</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Spell/Ability Charges:</div>
-                        <div>• Formula: spell_level × uses_per_day × recharge_multiplier</div>
-                        <div>• Dawn/Long Rest: ×0.1-0.25 | Short Rest: ×0.2-0.4</div>
-                        <div className="text-slate-500 italic text-[10px]">
-                          Multipliers vary by total charges and recharge mechanics. Higher spell levels (6-9) represent rare, powerful magic.
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Rarity Thresholds:</div>
-                        <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
-                        <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
-                      </div>
-
-                      <div className="space-y-2 pt-2 border-t border-slate-700/50">
-                        <div className="text-emerald-400 font-semibold">Anchor Discrepancy Categories:</div>
-                        <div className="space-y-2">
-                          <div className="bg-purple-900/20 border border-purple-700/30 rounded p-2">
-                            <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
-                            <div className="text-slate-300 text-[11px]">
-                              These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the anchor!
-                            </div>
-                          </div>
-                          <div className="bg-blue-900/20 border border-blue-700/30 rounded p-2">
-                            <div className="text-blue-400 font-semibold mb-1">🔢 Numerical Edge Case</div>
-                            <div className="text-slate-300 text-[11px]">
-                              These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.
-                            </div>
-                          </div>
-                          <div className="bg-slate-800/50 border border-slate-600/30 rounded p-2">
-                            <div className="text-slate-300 font-semibold mb-1">💬 Community Note</div>
-                            <div className="text-slate-400 text-[11px]">
-                              This item is probably underpowered. Take this reference with a grain of salt.
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Advanced: Formula Details - Standalone Section */}
+        <div className="mt-8">
+          <div className="bg-slate-900 text-slate-100 rounded-lg shadow-xl font-mono text-sm">
+            <button
+              onClick={() => setShowFormulaDetails(!showFormulaDetails)}
+              className="w-full px-6 py-4 text-left text-slate-400 hover:text-emerald-400 text-sm font-semibold flex items-center justify-between transition-colors"
+            >
+              <span>⚙️ Advanced: Formula Details</span>
+              <span className="text-xl">{showFormulaDetails ? '−' : '+'}</span>
+            </button>
+
+            {showFormulaDetails && (
+              <div className="px-6 pb-6 text-xs text-slate-400">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Base Values:</div>
+                      <div>• Enhancement: 1 point per +1</div>
+                      <div>• AC Bonus: 1 point per +1</div>
+                      <div>• Saving Throw Bonus: 1 point per +1</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Damage Dice:</div>
+                      <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts, 1d12 = 1.75 pts</div>
+                      <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
+                      <div className="text-yellow-400">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
+                      <div className="text-yellow-400">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
+                      <div className="text-yellow-400">• Conditional damage by type:</div>
+                      <div className="text-yellow-400 pl-2">- Creature-common (undead, fiends): ×0.6</div>
+                      <div className="text-yellow-400 pl-2">- Creature-rare (giants, dragons): ×0.4</div>
+                      <div className="text-yellow-400 pl-2">- Sworn-enemy (declared target): ×0.6</div>
+                      <div className="text-yellow-400 pl-2">- Environmental (darkness, water): ×0.25</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Damage Type Multipliers:</div>
+                      <div>• Strong (fewer resistances): Force ×1.2, Psychic ×1.15, Radiant ×1.1</div>
+                      <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid ×1.0</div>
+                      <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7, Physical ×0.85</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Ability Scores:</div>
+                      <div>• Setter (19): 2.5 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
+                      <div>• Bonus: ×0.75 per point (e.g., +2 bonus = 1.5 pts)</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Flight:</div>
+                      <div>• Unlimited: 2.0 pts | Limited (4+ hrs/day): 1.5 pts | Limited (&lt;4 hrs): 1.0 pt</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Resistances:</div>
+                      <div>• 2.0 points per damage type resisted</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Spell/Ability Charges:</div>
+                      <div>• Formula: effective_level × uses_per_day × recharge_mult</div>
+                      <div>• Dawn/Long Rest: ×0.1-0.2 | Short Rest: ×0.2-0.4</div>
+                      <div className="text-cyan-400">• High-level spell scaling (effective value):</div>
+                      <div className="text-cyan-400 pl-2">- Levels 1-5: linear (1, 2, 3, 4, 5)</div>
+                      <div className="text-cyan-400 pl-2">- Level 6-7: 7, 10 | Level 8-9: 14, 20</div>
+                      <div className="text-slate-500 italic text-[10px]">
+                        Level 9 spells (Wish) are campaign-defining, hence 20× effective value.
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Rarity Thresholds:</div>
+                      <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
+                      <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Attunement:</div>
+                      <div className="text-slate-300 text-[11px]">
+                        Attunement does <span className="text-yellow-400">not</span> modify scores. Official 5e pricing is inconsistent—Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
+                      </div>
+                      <div className="text-slate-500 italic text-[10px] mt-1">
+                        When comparing, prioritize reference items with matching attunement. The 3-slot limit means attunement is an &quot;opportunity cost&quot; that varies by build.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="text-emerald-400 font-semibold">Reference Item Discrepancy Categories:</div>
+                    <div className="space-y-3">
+                      <div className="bg-purple-900/20 border border-purple-700/30 rounded p-3">
+                        <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
+                        <div className="text-slate-300 text-[11px]">
+                          These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the reference!
+                        </div>
+                      </div>
+                      <div className="bg-blue-900/20 border border-blue-700/30 rounded p-3">
+                        <div className="text-blue-400 font-semibold mb-1">🔢 Numerical Edge Case</div>
+                        <div className="text-slate-300 text-[11px]">
+                          These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.
+                        </div>
+                      </div>
+                      <div className="bg-slate-800/50 border border-slate-600/30 rounded p-3">
+                        <div className="text-slate-300 font-semibold mb-1">💬 Community Note</div>
+                        <div className="text-slate-400 text-[11px]">
+                          This item is probably underpowered. Take this reference with a grain of salt.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

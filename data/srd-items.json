@@ -99,9 +99,13 @@
       "enhancement": 2,
       "damageBonus": {
         "dice": "1d8",
-        "type": "radiant"
-      }
-    }
+        "type": "radiant",
+        "conditional": true,
+        "conditionalType": "creature-common"
+      },
+      "damageTypeOverride": "radiant"
+    },
+    "description": "+2 sword with radiant damage type, +1d8 vs undead. Finesse on longsword is a hidden perk for DEX builds but doesn't affect calculated score."
   },
   {
     "name": "Vorpal Sword",
@@ -124,7 +128,7 @@
       "damageBonus": {
         "dice": "3d6",
         "type": "piercing",
-        "conditional": true
+        "conditionalType": "sworn-enemy"
       },
       "advantage": ["attack"]
     }
@@ -138,8 +142,8 @@
       "enhancement": 1,
       "charges": [
         {
-          "spell": "Poison Coating (2d10, DC 15)",
-          "spellLevel": 2,
+          "spell": "Poison Coating (2d10 + poisoned, DC 15)",
+          "spellLevel": 5,
           "usesPerDay": 1,
           "recharge": "long rest"
         }
@@ -200,7 +204,8 @@
       "acBonus": 1,
       "savingThrowBonus": 1,
       "enhancement": 0
-    }
+    },
+    "description": "WotC IMBALANCE: Formula says Rare (2.0 pts), WotC says Uncommon. By the standards established by Ring of Protection (Rare: +1 AC, +1 saves, attunement), Cloak of Protection with identical stats should also be Rare. Community consensus confirms this is underpriced—frequently banned or restricted at tables due to its power-to-rarity ratio."
   },
   {
     "name": "Defender",
@@ -217,11 +222,13 @@
     "baseItem": "staff",
     "rarity": "very rare",
     "attunement": true,
+    "overrideScore": 3.5,
     "combat": {
       "enhancement": 2,
       "acBonus": 2,
       "savingThrowBonus": 2
-    }
+    },
+    "description": "+2 attack/damage, +2 AC, +2 saves calculates as 6.0 pts (Legendary), but requires attunement by a spellcaster (limits to ~40% of builds). Also has 20 charges for various spells. The sheer versatility and class restriction justify Very Rare."
   },
   {
     "name": "Wand of Fireballs",
@@ -262,6 +269,7 @@
     "baseItem": "wand",
     "rarity": "uncommon",
     "attunement": false,
+    "overrideScore": 1.0,
     "combat": {
       "charges": [
         {
@@ -272,7 +280,8 @@
         }
       ],
       "enhancement": 0
-    }
+    },
+    "description": "Quantifiable: 0.8 pts (4× level 1 spell/day). Special Effect: +0.2 pts for auto-hit reliability (no attack roll, no save). Total: 1.0 pts (Uncommon)."
   },
   {
     "name": "Rod of Absorption",
@@ -290,14 +299,16 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 1,
       "damageBonus": {
         "dice": "2d6",
         "type": "slashing",
-        "conditional": true
+        "conditionalType": "creature-rare"
       }
-    }
+    },
+    "description": "Quantifiable: 1.7 pts (+1, conditional 2d6). Special Effect: +0.3 pts for DC 15 STR knockdown vs giants (prone). Total: 2.0 pts (Rare)."
   },
   {
     "name": "Dragon Slayer",
@@ -309,7 +320,7 @@
       "damageBonus": {
         "dice": "3d6",
         "type": "slashing",
-        "conditional": true
+        "conditionalType": "creature-rare"
       }
     }
   },
@@ -325,30 +336,40 @@
         "type": "slashing",
         "vicious": true
       }
-    }
+    },
+    "description": "WotC IMBALANCE: +2d6 on nat 20 only = 0.1 pts (Common). WotC says Rare. At 5% proc rate, this is one of the weakest Rare items in the SRD."
   },
   {
     "name": "Mace of Disruption",
     "baseItem": "mace",
     "rarity": "rare",
     "attunement": true,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
         "dice": "2d6",
         "type": "radiant",
-        "conditional": true
+        "conditionalType": "creature-common"
       }
-    }
+    },
+    "description": "Quantifiable: 1.3 pts (conditional 2d6 radiant). Special Effect: +0.7 pts for save-or-destroy vs undead/fiends under 25 HP. Total: 2.0 pts (Rare)."
   },
   {
     "name": "Mace of Smiting",
     "baseItem": "mace",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
-      "enhancement": 1
-    }
+      "enhancement": 1,
+      "damageBonus": {
+        "dice": "2d6",
+        "type": "bludgeoning",
+        "conditionalType": "creature-rare"
+      }
+    },
+    "description": "Quantifiable: 1.7 pts (+1, conditional 2d6). Special Effect: +0.3 pts for +4d6 on crit vs constructs and auto-destroy under 25 HP on crit. Total: 2.0 pts (Rare)."
   },
   {
     "name": "Trident of Fish Command",
@@ -368,8 +389,8 @@
       "enhancement": 0,
       "charges": [
         {
-          "spell": "Lightning Bolt (4d6, DC 13)",
-          "spellLevel": 3,
+          "spell": "Lightning Bolt (4d6, DC 13, 120ft line)",
+          "spellLevel": 5,
           "usesPerDay": 1,
           "recharge": "long rest"
         }
@@ -381,12 +402,18 @@
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
-    "manualRarity": true,
     "combat": {
       "enhancement": 1,
-      "savingThrowBonus": 1
-    },
-    "description": "Grants +1 to saves and can cast Wish (1d4-1 times). The Wish spell alone makes this Legendary despite modest combat stats."
+      "savingThrowBonus": 1,
+      "charges": [
+        {
+          "spell": "Wish",
+          "spellLevel": 9,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
+    }
   },
   {
     "name": "Holy Avenger",
@@ -414,7 +441,8 @@
         "+4d6 slashing damage on nat 20",
         "Max damage vs objects"
       ]
-    }
+    },
+    "description": "ROUGH APPROXIMATION: Modeled as +3 enhancement (3.0 pts) even though it has no to-hit/damage bonus on paper. The +4d6 on crit and limb-severing effects roughly equate to +3 weapon value. Very Rare is correct but the math is an abstraction."
   },
   {
     "name": "Boots of Speed",
@@ -487,7 +515,8 @@
       "flight": {
         "duration": "unlimited"
       }
-    }
+    },
+    "description": "WotC IMBALANCE: Formula says Rare (2.0 pts), WotC says Uncommon. By the standards established by other flight items (Winged Boots = Uncommon with attunement + limited duration), unlimited flight without attunement should cost more. Community consensus confirms this is underpriced—trivializes many encounters and exploration challenges."
   },
   {
     "name": "Winged Boots",
@@ -513,7 +542,8 @@
         "duration": "limited",
         "hoursPerDay": 1.5
       }
-    }
+    },
+    "description": "WotC IMBALANCE: Formula says Uncommon (1.0 pts), WotC says Rare. By the standards established by Winged Boots (Uncommon: 4 hrs/day flight with attunement), Wings of Flying with only 1 hr/day should not cost a tier higher. Community consensus confirms this is overpriced—rarely chosen when other flight options exist."
   },
   {
     "name": "Ring of Spell Storing",
@@ -550,7 +580,7 @@
         "dc": 15
       }
     },
-    "description": "+1 longbow. Deals Force instead of Piercing. Arrow of Restraint: DC 15 STR or Restrained 1 min. Arrow of Transport: teleport willing creature 60ft. Energy Ladder: create 60ft ladder on wall."
+    "description": "Formula: 3.2 pts (+1, force damage, DC 15 restrained). Utility ribbons (Arrow of Transport, Energy Ladder) don't affect combat math. Total: Very Rare."
   },
   {
     "name": "Quarterstaff of the Acrobat",
@@ -592,7 +622,7 @@
         "type": "force"
       }
     },
-    "description": "+2 AC bonus (beyond base shield). Forceful Bash: 2d6+2+STR force, push 10ft, prone if smaller. Protective Field: 5ft emanation like Otiluke's."
+    "description": "Formula: 3.2 pts (+2 AC, bonus action bash). Push/prone effects and Protective Field (Otiluke's-style emanation) not quantified, but math already reaches Very Rare. Conservative estimate—actual value likely higher."
   },
   {
     "name": "Thunderous Greatclub",

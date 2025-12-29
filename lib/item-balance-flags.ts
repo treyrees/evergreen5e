@@ -1,47 +1,64 @@
 /**
  * Three types of item balance warnings:
- * 1. Special mechanics - Non-numerical benefits (flight, invisibility, instant kill)
- * 2. Numerical edge cases - Conditional bonuses dependent on setting/campaign
- * 3. Community notes - Override used but value suggests underpowered for tier
+ * 1. Special mechanics - Non-numerical benefits (flight, invisibility, instant kill, action economy)
+ * 2. Numerical edge cases - Conditional bonuses dependent on setting/campaign frequency
+ * 3. Community notes - Items where official rarity doesn't match calculated value (over/underpowered)
  */
 
 /**
  * Special mechanics: Items with non-numerical benefits our math can't quantify
- * Examples: Flight, invisibility, instant kill, spell absorption, action economy
+ * Examples: Flight, invisibility, instant kill, spell absorption, action economy, special restrictions
  */
 export const SPECIAL_MECHANICS = new Set([
-  'Vorpal Sword',              // Instant kill on nat 20
+  // Instant-kill or save-or-die effects
+  'Vorpal Sword',              // Decapitation on nat 20
   'Nine Lives Stealer',        // Save-or-die on nat 20
+
+  // Spell absorption/storage/action economy
   'Rod of Absorption',         // Absorbs spells targeting you
-  'Boots of Speed',            // Doubled movement + advantage
-  'Gloves of Missile Snaring', // Deflect ranged attacks
+  'Ring of Spell Storing',     // Stores 5 spell levels (breaks action economy)
+  // Note: Luck Blade now calculates correctly using level 9 spell scaling for Wish
+
+  // Tactical mobility and positioning
+  'Boots of Speed',            // Doubled movement + disadvantage on opportunity attacks
+  'Broom of Flying',           // Unlimited flight (official Uncommon but calc says Rare)
   'Cloak of Invisibility',     // Tactical invisibility
-  'Ring of Spell Storing',     // Breaks action economy
-  'Broom of Flying',           // Unlimited flight
-  'Staff of Power',            // Complex stacking bonuses
-  'Sun Blade',                 // Finesse longsword + radiant
-  'Cloak of Protection',       // Stacking AC + all saves
+
+  // Defensive special mechanics
+  'Gloves of Missile Snaring', // Deflect ranged attacks (reaction-based)
+  'Shield of the Cavalier',    // Push/prone + Protective Field not quantified
+
+  // Complex stacking or restrictions
+  'Staff of Power',            // +2 to attack/damage/AC/saves (spellcaster-only attunement)
 ]);
 
 /**
  * Numerical edge cases: Conditional bonuses dependent on setting/campaign
- * Examples: +damage vs specific creatures, crit-only effects, 1/day abilities
+ * These items can be quantified, but their value varies wildly based on how often
+ * the condition triggers in your specific campaign
+ *
+ * NOTE: Most items previously here now calculate correctly:
+ * - Oathbow → sworn-enemy (0.6×)
+ * - Giant Slayer, Dragon Slayer, Mace of Smiting → creature-rare (0.4×)
+ * - Mace of Disruption → creature-common (0.6×)
+ * - Dagger of Venom, Javelin of Lightning → spell level adjusted
+ * - Vicious Weapon → vicious checkbox (×0.05 for 5% crit proc)
  */
-export const NUMERICAL_EDGE_CASES = new Set([
-  'Vicious Weapon',            // +2d6 on nat 20 only
-  'Oathbow',                   // +3d6 vs sworn enemy only
-  'Giant Slayer',              // +2d6 vs giants only + prone
-  'Mace of Disruption',        // 2d6 vs undead/fiends only + destroy
-  'Mace of Smiting',           // +3 vs constructs only + crit bonus
-  'Dagger of Venom',           // 1/day poison + condition
+export const NUMERICAL_EDGE_CASES = new Set<string>([
+  // Currently empty - all items now calculate correctly with conditionalType or vicious flag
 ]);
 
 /**
- * Community notes: Items where our value is lower than book rarity
- * Community consensus suggests these items are underpowered for their tier
+ * Community notes: Items where official rarity seems misaligned with power level
+ * These use overrideScore or are known balance oddities in official 5e
  */
 export const COMMUNITY_NOTES = new Set([
-  'Wings of Flying',           // Calc 1.0 (Uncommon) but official Rare - limited flight weak for tier
+  // Official seems too LOW (item is stronger than rarity suggests)
+  'Cloak of Protection',       // Calc 2.0 pts (Rare) but official Uncommon
+
+  // Official seems too HIGH (item is weaker than rarity suggests)
+  'Wings of Flying',           // Calc 1.0 pts (Uncommon) but official Rare - limited 1hr flight is weak
+  'Vicious Weapon',            // Calc 0.1 pts (Common) but official Rare - 5% proc is ~3x weaker than +1
 ]);
 
 /**
@@ -69,67 +86,158 @@ export function hasCommunityNotes(itemName: string): boolean {
  * Get explanation for why an item is flagged
  */
 export function getItemExplanation(itemName: string): string {
-  // Special mechanics
+  // === SPECIAL MECHANICS ===
+
+  // Instant-kill effects
   if (itemName === 'Vorpal Sword') {
-    return 'Decapitation on nat 20 (instant kill). Override score used.';
+    return 'Decapitates on nat 20 (instant kill, no save for most creatures). Power level is campaign-defining.';
   }
   if (itemName === 'Nine Lives Stealer') {
-    return 'Drains life force on nat 20 (save-or-die). Override score used.';
+    return 'Drains life force on nat 20 vs <100 HP (DC 15 CON or die). Save-or-die adds ~1.5 pts beyond +2.';
   }
+
+  // Action economy and spell effects
   if (itemName === 'Rod of Absorption') {
-    return 'Absorbs spells targeting you. Override score used.';
-  }
-  if (itemName === 'Boots of Speed') {
-    return 'Doubles movement + Dex save advantage. Override score used.';
-  }
-  if (itemName === 'Gloves of Missile Snaring') {
-    return 'Catch and deflect ranged attacks. Override score used.';
-  }
-  if (itemName === 'Cloak of Invisibility') {
-    return 'Tactical invisibility with charges. Override score used.';
+    return 'Absorbs spells targeting you, negating effects. Defensive utility is extremely campaign-dependent.';
   }
   if (itemName === 'Ring of Spell Storing') {
-    return 'Stores up to 5 spell levels (breaks action economy). Override score used.';
+    return 'Stores up to 5 spell levels. Breaks action economy by allowing pre-cast buffs or extra spell slots.';
+  }
+  // Luck Blade now calculates correctly using level 9 spell value for Wish
+
+  // Mobility
+  if (itemName === 'Boots of Speed') {
+    return 'Click heels to double speed for 10 min. Opportunity attacks have disadvantage. Mobility is hard to price.';
   }
   if (itemName === 'Broom of Flying') {
-    return 'Unlimited flight calculates as 2.0 pts (Rare) but official is Uncommon. Flight is hard to quantify.';
+    return 'Unlimited flight calculates as 2.0 pts (Rare) but official is Uncommon. No attunement makes it accessible.';
   }
+  if (itemName === 'Cloak of Invisibility') {
+    return 'Tactical invisibility (3 charges, 1hr each). Invisibility advantage on attacks/stealth is campaign-defining.';
+  }
+
+  // Defensive
+  if (itemName === 'Gloves of Missile Snaring') {
+    return 'Reaction to reduce ranged weapon damage by 1d10+DEX. Situational but can completely negate hits.';
+  }
+  if (itemName === 'Shield of the Cavalier') {
+    return 'Math captures +2 AC and bonus action bash (3.2 pts). NOT quantified: push 10ft, prone if smaller, and Protective Field (Otiluke\'s-style emanation). Actual value likely higher than calculated.';
+  }
+
+  // Complex effects
   if (itemName === 'Staff of Power') {
-    return '+2 to attack/damage/AC/saves calculates as 6.0 pts (Legendary), but official is Very Rare. Spellcaster attunement limits value.';
+    return '+2 to attack/damage/AC/saves is 6.0 pts (Legendary calc) but official Very Rare. Spellcaster-only attunement limits audience significantly.';
   }
-  if (itemName === 'Sun Blade') {
-    return '+2 finesse longsword + 1d8 radiant calculates as 3.38 pts (Very Rare) but official is Rare. Finesse + radiant hard to value.';
-  }
+
+  // === COMMUNITY NOTES ===
+
   if (itemName === 'Cloak of Protection') {
-    return '+1 AC and +1 to all saves calculates as 2.0 pts (Rare), but official is Uncommon. Stacking bonuses hard to value.';
+    return '+1 AC and +1 all saves = 2.0 pts (Rare). Official: Uncommon. WotC underpriced this—compare to Ring of Protection (identical, but Rare).';
   }
-
-  // Numerical edge cases
-  if (itemName === 'Vicious Weapon') {
-    return '+2d6 on natural 20 only (5% proc). Calc: 0.09 pts (Uncommon), official: Rare. Value depends on crit-fishing builds.';
-  }
-  if (itemName === 'Oathbow') {
-    return '+3d6 + advantage vs sworn enemy. Calc: 2.77 pts (Rare), official: Very Rare. Value depends on campaign.';
-  }
-  if (itemName === 'Giant Slayer') {
-    return '+1 weapon + 2d6 vs giants + prone. Calc: 1.85 pts (Uncommon), official: Rare. Value depends on giant encounters.';
-  }
-  if (itemName === 'Mace of Disruption') {
-    return '2d6 radiant vs undead/fiends + destroy. Calc: 1.1 pts (Uncommon), official: Rare. Value depends on undead campaign.';
-  }
-  if (itemName === 'Mace of Smiting') {
-    return '+1 mace, +3 vs constructs + crit bonus. Calc: 1.0 pts (Uncommon), official: Rare. Value depends on construct encounters.';
-  }
-  if (itemName === 'Dagger of Venom') {
-    return '+1 dagger + 2d10 poison + poisoned (1/day). Calc: 1.4 pts (Uncommon), official: Rare. Situational use.';
-  }
-
-  // Community notes
   if (itemName === 'Wings of Flying') {
-    return 'Limited flight (1 hr/day). Calc: 1.0 pts (Uncommon), official: Rare. Community considers this weak for Rare tier.';
+    return 'Limited flight (1 hr/day). Calc: 1.0 pts (Uncommon), official: Rare. Community consensus: weak for Rare tier.';
+  }
+  if (itemName === 'Vicious Weapon') {
+    return '+2d6 on nat 20 only = 0.1 pts (Common). Official: Rare. At 5% crit rate, this averages +0.35 damage/hit—roughly 3× weaker than a +1 weapon.';
   }
 
   return '';
+}
+
+/**
+ * Get a thematic emoji for an item based on its name
+ */
+export function getItemEmoji(itemName: string): string {
+  const name = itemName.toLowerCase();
+
+  // Specific items first
+  if (name.includes('vorpal')) return '💀';
+  if (name.includes('sun blade')) return '☀️';
+  if (name.includes('flame tongue')) return '🔥';
+  if (name.includes('frost brand')) return '❄️';
+  if (name.includes('dragon slayer')) return '🐉';
+  if (name.includes('giant slayer')) return '🗻';
+  if (name.includes('nine lives')) return '🐱';
+  if (name.includes('luck blade')) return '🍀';
+  if (name.includes('holy avenger')) return '✝️';
+  if (name.includes('oathbow')) return '🎯';
+  if (name.includes('venom')) return '🐍';
+  if (name.includes('lightning')) return '⚡';
+  if (name.includes('thunder')) return '🌩️';
+  if (name.includes('warning')) return '👁️';
+  if (name.includes('defender')) return '🛡️';
+  if (name.includes('dancing')) return '💃';
+  if (name.includes('sharpness')) return '✂️';
+  if (name.includes('wounding')) return '🩸';
+  if (name.includes('life stealing') || name.includes('life-stealing')) return '💀';
+  if (name.includes('disruption')) return '💥';
+  if (name.includes('smiting')) return '⚡';
+  if (name.includes('terror')) return '😱';
+
+  // Armor and protection
+  if (name.includes('adamantine')) return '⚙️';
+  if (name.includes('mithral')) return '✨';
+  if (name.includes('plate')) return '🛡️';
+  if (name.includes('shield')) return '🛡️';
+  if (name.includes('armor')) return '🛡️';
+
+  // Cloaks and wearables
+  if (name.includes('cloak')) return '🧥';
+  if (name.includes('boots')) return '👢';
+  if (name.includes('gloves') || name.includes('gauntlets')) return '🧤';
+  if (name.includes('helm') || name.includes('helmet')) return '⛑️';
+  if (name.includes('ring')) return '💍';
+  if (name.includes('amulet') || name.includes('necklace') || name.includes('periapt')) return '📿';
+  if (name.includes('belt') || name.includes('girdle')) return '🎗️';
+  if (name.includes('bracers')) return '💪';
+  if (name.includes('wings')) return '🪽';
+  if (name.includes('flying') || name.includes('broom')) return '🧹';
+
+  // Weapons by type
+  if (name.includes('bow') || name.includes('arrow')) return '🏹';
+  if (name.includes('sword') || name.includes('blade') || name.includes('scimitar')) return '⚔️';
+  if (name.includes('axe')) return '🪓';
+  if (name.includes('hammer') || name.includes('maul') || name.includes('mace')) return '🔨';
+  if (name.includes('dagger')) return '🗡️';
+  if (name.includes('staff')) return '🪄';
+  if (name.includes('wand')) return '🪄';
+  if (name.includes('rod')) return '🪄';
+  if (name.includes('spear') || name.includes('javelin') || name.includes('trident')) return '🔱';
+  if (name.includes('crossbow')) return '🎯';
+  if (name.includes('whip')) return '〰️';
+
+  // Magic items
+  if (name.includes('potion')) return '🧪';
+  if (name.includes('scroll')) return '📜';
+  if (name.includes('tome') || name.includes('book') || name.includes('manual')) return '📖';
+  if (name.includes('bag')) return '👝';
+  if (name.includes('carpet')) return '🪔';
+  if (name.includes('rope')) return '🪢';
+  if (name.includes('lantern') || name.includes('lamp')) return '🏮';
+  if (name.includes('mirror')) return '🪞';
+  if (name.includes('horn')) return '📯';
+  if (name.includes('stone')) return '💎';
+  if (name.includes('orb') || name.includes('crystal')) return '🔮';
+  if (name.includes('ioun')) return '🌟';
+
+  // Materials/elements
+  if (name.includes('fire') || name.includes('flame')) return '🔥';
+  if (name.includes('cold') || name.includes('frost') || name.includes('ice')) return '❄️';
+  if (name.includes('poison')) return '☠️';
+  if (name.includes('force')) return '💫';
+  if (name.includes('radiant') || name.includes('light')) return '✨';
+  if (name.includes('necrotic')) return '💀';
+
+  // Creatures
+  if (name.includes('demon') || name.includes('devil')) return '😈';
+  if (name.includes('undead') || name.includes('vampire')) return '🧛';
+  if (name.includes('elemental')) return '🌀';
+
+  // Default based on general weapon category
+  if (name.includes('weapon')) return '⚔️';
+
+  // Fallback
+  return '✨';
 }
 
 /**

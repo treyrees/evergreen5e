@@ -209,9 +209,18 @@ export function calculateCombatScore(combat: CombatFeatures): number {
       }
     }
 
-    // Conditional damage (only works vs specific creatures)
-    // Increased from 0.25 to 0.5 because dragons, giants, undead, fiends are common enemies
-    if (combat.damageBonus.conditional) {
+    // Conditional damage - multiplier based on condition type
+    // More specific types allow better balance tuning
+    if (combat.damageBonus.conditionalType) {
+      const conditionalMultipliers: Record<string, number> = {
+        'creature-common': 0.6,   // Undead, fiends, humanoids - frequent
+        'creature-rare': 0.4,     // Giants, dragons, constructs - less common
+        'sworn-enemy': 0.6,       // Single declared target (Oathbow) - always active in combat
+        'environmental': 0.25,    // "In darkness", "underwater", situational
+      };
+      diceValue *= conditionalMultipliers[combat.damageBonus.conditionalType] || 0.5;
+    } else if (combat.damageBonus.conditional) {
+      // Legacy fallback for items without specific type
       diceValue *= 0.5;
     }
 
@@ -289,14 +298,30 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   }
 
   // Spell charges (legacy format)
+  // High-level spells (6+) scale non-linearly because they're campaign-defining
   if (combat.charges && combat.charges.length > 0) {
+    // Effective spell level values - high level spells are exponentially more valuable
+    // Calibrated so Wish (9th, ~1 use) contributes ~2.5 pts toward Legendary
+    const SPELL_LEVEL_VALUES: Record<number, number> = {
+      0: 0.1,   // Cantrips
+      1: 1,     // Magic Missile, Shield
+      2: 2,     // Scorching Ray, Hold Person
+      3: 3,     // Fireball, Lightning Bolt
+      4: 4,     // Polymorph, Wall of Fire
+      5: 5,     // Cone of Cold, Hold Monster
+      6: 7,     // Chain Lightning, Disintegrate (1.17× level)
+      7: 10,    // Finger of Death, Plane Shift (1.43× level)
+      8: 14,    // Dominate Monster, Power Word Stun (1.75× level)
+      9: 20,    // Wish, Meteor Swarm (2.22× level) - campaign-defining
+    };
+
     for (const charge of combat.charges) {
-      // Normalize "dawn" to "long rest"
       const normalizedRecharge = charge.recharge === 'dawn'
         ? 'long rest'
         : charge.recharge;
       const multiplier = RECHARGE_MULTIPLIERS[normalizedRecharge] || 0.5;
-      score += charge.spellLevel * charge.usesPerDay * multiplier;
+      const effectiveLevel = SPELL_LEVEL_VALUES[charge.spellLevel] ?? charge.spellLevel;
+      score += effectiveLevel * charge.usesPerDay * multiplier;
     }
   }
 
@@ -394,24 +419,32 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   if (combat.chargePool && combat.chargePool.abilities.length > 0) {
     // Calculate sustainable daily charges (what you can expect to use each day on average)
     // Assumes 2 short rests per adventuring day (standard D&D assumption)
-    // Note: maxCharges is just the cap, not additional daily charges
     const dailyRecharge =
       combat.chargePool.chargesPerLongRest +
       (combat.chargePool.chargesPerShortRest * 2);
 
-    // Use the lower of daily recharge or max charges as the sustainable daily budget
-    // (If you regain more than max, you're capped; if less, you use what you regain)
-    const sustainableDailyCharges = Math.min(
-      dailyRecharge > 0 ? dailyRecharge : combat.chargePool.maxCharges,
-      combat.chargePool.maxCharges
-    );
-
     // Calculate score for each ability
     for (const ability of combat.chargePool.abilities) {
       if (ability.chargesPerUse > 0) {
-        const effectiveUses = sustainableDailyCharges / ability.chargesPerUse;
+        // Burst potential: you can nova ALL charges in a single fight
+        const burstUses = combat.chargePool.maxCharges / ability.chargesPerUse;
+
+        // Sustained uses: what you get back per day
+        // If no recharge specified (0/0), assume conservative 1 charge/day
+        // This encourages users to fill in actual recharge rates
+        const sustainedUses = dailyRecharge > 0
+          ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / ability.chargesPerUse
+          : 1 / ability.chargesPerUse;
+
+        // Blend burst and sustained: burst matters more for powerful spells
+        // Level 3 spell: ~45% burst weight (8 Fireballs in a boss fight is huge)
+        // Level 1 spell: ~15% burst weight (less impactful nova)
+        const burstWeight = Math.min(0.5, ability.spellLevel * 0.15);
+        const effectiveUses = sustainedUses * (1 - burstWeight) + burstUses * burstWeight;
+
         // Multiplier tuned to balance charge-based items appropriately
-        const multiplier = 0.15;
+        // Calibrated so Wand of Fireballs (level 3, ~4 uses/day) ≈ 2.4 pts
+        const multiplier = 0.20;
         score += ability.spellLevel * effectiveUses * multiplier;
       }
     }
@@ -557,6 +590,8 @@ export function findTopAnchorItems(
   const genericItems = allItems.filter(item => isGenericItem(item));
 
   // Collect all candidates with their scores and priority level
+  // Priority philosophy: Named items with similar mechanics > generic items
+  // BUT score proximity gates priority - a 2pt difference demotes even perfect matches
   const candidates: Array<{
     item: MagicItem;
     score: number;
@@ -564,33 +599,15 @@ export function findTopAnchorItems(
     priority: number;
   }> = [];
 
-  // Process generic items first - exact score matches get highest priority
-  genericItems.forEach((item) => {
-    const score = getItemScore(item);
-    const scoreDiff = Math.abs(score - userScore);
-    const itemBroadCategory = getBroadCategory(item.baseItem);
-    const sameBroadCategory = itemBroadCategory === userBroadCategory;
+  const userRarity = getSuggestedRarity({ combat: userItem.combat }).suggestedRarity;
 
-    let priority: number;
+  // Score proximity thresholds - items outside these ranges get deprioritized
+  // This prevents showing Oathbow (3.0 pts) to someone making a +1 longbow (1.0 pts)
+  const CLOSE_THRESHOLD = 0.75;   // Very close in power
+  const MEDIUM_THRESHOLD = 1.5;   // Same rarity tier usually
+  const FAR_THRESHOLD = 2.5;      // Different rarity tier
 
-    // Exact score match gets top priority (perfect +1/+2/+3 match)
-    if (scoreDiff < 0.1 && sameBroadCategory) {
-      priority = 1;
-    } else if (sameBroadCategory) {
-      priority = 6;
-    } else {
-      priority = 7;
-    }
-
-    candidates.push({
-      item,
-      score,
-      scoreDiff,
-      priority,
-    });
-  });
-
-  // Process all named items and assign priorities
+  // Process all named items first - these are the interesting comparisons
   namedItems.forEach((item) => {
     const itemBroadCategory = getBroadCategory(item.baseItem);
     const itemAttunement = item.attunement || false;
@@ -603,28 +620,69 @@ export function findTopAnchorItems(
     }
 
     const sameAttunement = itemAttunement === userAttunement;
-    const exactMatch = item.baseItem === userItem.baseItem;
+    const exactBaseMatch = item.baseItem === userItem.baseItem;
+    const sameRarity = (item.rarity || '').toLowerCase() === userRarity.toLowerCase();
+    const score = getItemScore(item);
+    const scoreDiff = Math.abs(score - userScore);
 
-    let priority: number;
-
-    if (sameBroadCategory && sameAttunement && exactMatch) {
-      priority = 2; // Same category, same attunement, exact base item match
-    } else if (sameBroadCategory && sameAttunement) {
-      priority = 3; // Same category, same attunement
+    // Base priority from item relationship (lower = better)
+    let basePriority: number;
+    if (exactBaseMatch) {
+      basePriority = sameAttunement ? 1 : 2;
+    } else if (sameBroadCategory && sameRarity) {
+      basePriority = sameAttunement ? 3 : 4;
     } else if (sameBroadCategory) {
-      priority = 4; // Same category, different attunement
-    } else if (sameAttunement) {
-      priority = 5; // Different category, same attunement
+      basePriority = sameAttunement ? 5 : 6;
+    } else if (sameRarity) {
+      basePriority = 7;
     } else {
-      priority = 8; // Different category, different attunement
+      basePriority = 8;
     }
 
-    const score = getItemScore(item);
+    // Score proximity penalty - large score gaps demote even "perfect" matches
+    // This makes a +1 longbow show +1 Weapon instead of far-off Oathbow
+    let scorePenalty = 0;
+    if (scoreDiff > FAR_THRESHOLD) {
+      scorePenalty = 6;  // Huge gap - demote significantly
+    } else if (scoreDiff > MEDIUM_THRESHOLD) {
+      scorePenalty = 3;  // Moderate gap - demote somewhat
+    } else if (scoreDiff > CLOSE_THRESHOLD) {
+      scorePenalty = 1;  // Small gap - minor penalty
+    }
+
+    const priority = basePriority + scorePenalty;
+
     candidates.push({
       item,
       score,
-      scoreDiff: Math.abs(score - userScore),
+      scoreDiff,
       priority,
+    });
+  });
+
+  // Process generic items - these fill gaps when named items are too far
+  genericItems.forEach((item) => {
+    const score = getItemScore(item);
+    const scoreDiff = Math.abs(score - userScore);
+    const itemBroadCategory = getBroadCategory(item.baseItem);
+    const sameBroadCategory = itemBroadCategory === userBroadCategory;
+
+    // Generic items start at priority 9-10, but get boosted if very close in score
+    // A +2 Weapon that's 0.1 pts away beats a named item that's 2 pts away
+    let basePriority = sameBroadCategory ? 9 : 10;
+
+    // Generics get a bonus for being close - they're reliable anchors
+    if (scoreDiff < 0.2) {
+      basePriority = sameBroadCategory ? 4 : 5;  // Exact score match is valuable
+    } else if (scoreDiff < CLOSE_THRESHOLD) {
+      basePriority = sameBroadCategory ? 6 : 7;  // Close score is good
+    }
+
+    candidates.push({
+      item,
+      score,
+      scoreDiff,
+      priority: basePriority,
     });
   });
 
@@ -707,10 +765,10 @@ function compareToAnchor(
 
   if (userDmg && !anchorDmg) {
     const freqText = userFreq === 'per-turn' ? ' per turn' : '';
-    details.push(`has ${userDmg}${freqText} damage (anchor has none)`);
+    details.push(`has ${userDmg}${freqText} damage (reference has none)`);
   } else if (!userDmg && anchorDmg) {
     const freqText = anchorFreq === 'per-turn' ? ' per turn' : '';
-    details.push(`no damage bonus (anchor has ${anchorDmg}${freqText})`);
+    details.push(`no damage bonus (reference has ${anchorDmg}${freqText})`);
   } else if (userDmg && anchorDmg) {
     const userDmgValue = getDiceValue(userDmg);
     const anchorDmgValue = getDiceValue(anchorDmg);
@@ -718,7 +776,7 @@ function compareToAnchor(
     const anchorFreqText = anchorFreq === 'per-turn' ? ' per turn' : '';
 
     if (userDmg !== anchorDmg || userFreq !== anchorFreq) {
-      details.push(`${userDmg}${userFreqText} vs anchor's ${anchorDmg}${anchorFreqText} damage`);
+      details.push(`${userDmg}${userFreqText} vs reference's ${anchorDmg}${anchorFreqText} damage`);
     }
   }
 
@@ -737,75 +795,44 @@ function compareToAnchor(
   const userResistances = userCombat.resistances?.length || 0;
   const anchorResistances = anchorCombat.resistances?.length || 0;
   if (userResistances !== anchorResistances) {
-    if (userResistances > anchorResistances) {
-      details.push(`${userResistances} resistances (anchor has ${anchorResistances})`);
-    } else {
-      details.push(`${userResistances} resistances (anchor has ${anchorResistances})`);
-    }
+    details.push(`${userResistances} resistances (reference has ${anchorResistances})`);
   }
 
-  // Spell charges comparison (legacy format)
-  const userCharges = userCombat.charges?.length || 0;
-  const anchorCharges = anchorCombat.charges?.length || 0;
-  if (userCharges !== anchorCharges) {
-    if (userCharges > anchorCharges) {
-      details.push(`${userCharges} spell charges (anchor has ${anchorCharges})`);
-    } else {
-      details.push(`${userCharges} spell charges (anchor has ${anchorCharges})`);
-    }
-  }
-
-  // Charge pool comparison (new format)
+  // Charge pool comparison (new format) - takes priority over legacy charges
   const userPool = userCombat.chargePool;
   const anchorPool = anchorCombat.chargePool;
 
   if (userPool && userPool.abilities.length > 0) {
-    // Calculate sustainable daily charges (same logic as scoring)
-    const userDailyRecharge = userPool.chargesPerLongRest + (userPool.chargesPerShortRest * 2);
-    const userDailyCharges = Math.min(
-      userDailyRecharge > 0 ? userDailyRecharge : userPool.maxCharges,
-      userPool.maxCharges
-    );
+    // User has charge pool abilities - show a single clear summary
+    const abilityNames = userPool.abilities.map(a => a.spell).join(', ');
+    const maxLevel = Math.max(...userPool.abilities.map(a => a.spellLevel));
+    const levelText = maxLevel === 0 ? 'cantrip' : `up to level ${maxLevel}`;
 
-    // Describe each ability and its contribution
-    for (const ability of userPool.abilities) {
-      const usesPerDay = Math.floor(userDailyCharges / ability.chargesPerUse);
-      const spellLevelText = ability.spellLevel === 0 ? 'cantrip' : `level ${ability.spellLevel}`;
-
-      if (anchorPool && anchorPool.abilities.length > 0) {
-        // Compare to anchor's abilities
-        details.push(`${ability.spell} (${spellLevelText}, ~${usesPerDay}×/day)`);
-      } else {
-        // Anchor has no charge pool
-        details.push(`has ${ability.spell} (${spellLevelText}, ~${usesPerDay}×/day, anchor has none)`);
-      }
-    }
-
-    // Add charge pool summary
     if (!anchorPool || anchorPool.abilities.length === 0) {
-      if (userDailyRecharge > 0) {
-        details.push(`${userPool.maxCharges} max charges, ${userDailyRecharge}/day sustainable (anchor has no charges)`);
-      } else {
-        details.push(`${userPool.maxCharges} charges total (anchor has no charges)`);
-      }
+      // Reference has no charge pool
+      details.push(`${userPool.maxCharges} charges for ${userPool.abilities.length} spell${userPool.abilities.length > 1 ? 's' : ''} (${levelText})`);
     } else {
-      const anchorDailyRecharge = anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
-      const anchorDailyCharges = Math.min(
-        anchorDailyRecharge > 0 ? anchorDailyRecharge : anchorPool.maxCharges,
-        anchorPool.maxCharges
-      );
-      if (userDailyCharges !== anchorDailyCharges) {
-        details.push(`~${userDailyCharges} sustainable charges/day vs anchor's ~${anchorDailyCharges}`);
+      // Both have charge pools - compare
+      const anchorMaxLevel = Math.max(...anchorPool.abilities.map(a => a.spellLevel));
+      if (maxLevel !== anchorMaxLevel) {
+        details.push(`spells up to level ${maxLevel} vs reference's level ${anchorMaxLevel}`);
+      }
+      if (userPool.maxCharges !== anchorPool.maxCharges) {
+        details.push(`${userPool.maxCharges} max charges vs reference's ${anchorPool.maxCharges}`);
       }
     }
   } else if (anchorPool && anchorPool.abilities.length > 0) {
-    // User has no charge pool but anchor does
-    const anchorDailyRecharge = anchorPool.chargesPerLongRest + (anchorPool.chargesPerShortRest * 2);
-    const anchorDailyCharges = Math.min(
-      anchorDailyRecharge > 0 ? anchorDailyRecharge : anchorPool.maxCharges,
-      anchorPool.maxCharges
-    );
-    details.push(`no spell abilities (anchor has ~${anchorDailyCharges} sustainable charges/day)`);
+    // User has no charge pool but reference does
+    details.push(`no spell abilities (reference has ${anchorPool.abilities.length} spell${anchorPool.abilities.length > 1 ? 's' : ''})`);
+  }
+
+  // Spell charges comparison (legacy format) - only if user doesn't have chargePool
+  if (!userPool || userPool.abilities.length === 0) {
+    const userCharges = userCombat.charges?.length || 0;
+    const anchorCharges = anchorCombat.charges?.length || 0;
+    if (userCharges !== anchorCharges) {
+      details.push(`${userCharges} spell charges (reference has ${anchorCharges})`);
+    }
   }
 
   // Determine type
