@@ -95,6 +95,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": true,
+    "overrideScore": 2.5,
     "combat": {
       "enhancement": 2,
       "damageBonus": {
@@ -102,20 +103,14 @@
         "type": "radiant"
       }
     },
-    "ribbons": {
-      "cosmetic": [
-        "Sheds bright light 15ft, dim light 15ft"
-      ],
-      "utilitySpells": [
-        "Functions as finesse weapon"
-      ]
-    }
+    "description": "+2 longsword + 1d8 radiant. Functions as finesse, sheds light. Despite high calculated score, officially Rare - a strong Rare that's popular in play."
   },
   {
     "name": "Vorpal Sword",
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
+    "overrideScore": 4.0,
     "combat": {
       "enhancement": 3
     },
@@ -126,19 +121,23 @@
     "baseItem": "longbow",
     "rarity": "very rare",
     "attunement": true,
+    "overrideScore": 3.5,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
         "dice": "3d6",
-        "type": "piercing"
+        "type": "piercing",
+        "conditional": true
       }
-    }
+    },
+    "description": "Speak command to declare sworn enemy. +3d6 vs sworn enemy, advantage on attacks, target can't gain invisibility benefits. Powerful single-target hunting weapon."
   },
   {
     "name": "Dagger of Venom",
     "baseItem": "dagger",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 1,
       "charges": [
@@ -149,16 +148,19 @@
           "recharge": "long rest"
         }
       ]
-    }
+    },
+    "description": "+1 dagger. Once/day coat blade with poison: next hit deals 2d10 poison + poisoned condition (DC 15 CON). Poison damage and condition together worth ~1.0 pt beyond +1."
   },
   {
     "name": "Nine Lives Stealer",
     "baseItem": "rapier",
     "rarity": "very rare",
     "attunement": true,
+    "overrideScore": 3.5,
     "combat": {
       "enhancement": 2
-    }
+    },
+    "description": "+2 sword with 9 charges. On natural 20 vs creature with < 100 HP, DC 15 CON save or instant death. Save-or-die mechanic worth ~1.5 pts beyond the +2."
   },
   {
     "name": "Animated Shield",
@@ -166,9 +168,10 @@
     "rarity": "very rare",
     "attunement": true,
     "combat": {
-      "acBonus": 2,
-      "enhancement": 0
-    }
+      "enhancement": 0,
+      "handsFreeDef": true
+    },
+    "description": "Shield that animates and defends you, freeing your hands for two-handed weapons or dual wielding. Provides base shield AC without occupying a hand."
   },
   {
     "name": "Armor of Resistance",
@@ -198,11 +201,13 @@
     "baseItem": "cloak",
     "rarity": "uncommon",
     "attunement": true,
+    "overrideScore": 1.5,
     "combat": {
       "acBonus": 1,
       "savingThrowBonus": 1,
       "enhancement": 0
-    }
+    },
+    "description": "+1 AC and +1 to saves. Officially Uncommon despite similar stats to Ring of Protection (Rare) - a known D&D inconsistency. Treated as high Uncommon."
   },
   {
     "name": "Defender",
@@ -219,11 +224,13 @@
     "baseItem": "staff",
     "rarity": "very rare",
     "attunement": true,
+    "overrideScore": 3.5,
     "combat": {
       "enhancement": 2,
       "acBonus": 2,
       "savingThrowBonus": 2
-    }
+    },
+    "description": "+2 attack/damage, +2 AC, +2 saves (stacking). Also has 20 charges for various spells. Officially Very Rare despite high calculated score - requires attunement by spellcaster."
   },
   {
     "name": "Wand of Fireballs",
@@ -292,6 +299,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 1,
       "damageBonus": {
@@ -299,7 +307,8 @@
         "type": "slashing",
         "conditional": true
       }
-    }
+    },
+    "description": "+1 weapon. +2d6 vs giants + knock prone on failed STR save. Giants are common campaign enemies. Anti-giant specialty worth ~1.0 pt beyond +1."
   },
   {
     "name": "Dragon Slayer",
@@ -320,6 +329,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -328,13 +338,14 @@
         "vicious": true
       }
     },
-    "description": "Deals +2d6 damage on natural 20s (5% of attacks). Expected value: ~0.35 damage/attack."
+    "description": "Deals +2d6 damage on natural 20s. While mathematically ~0.35 dmg/attack, crits are psychologically impactful and synergize with crit-fishing builds. Treated as low Rare."
   },
   {
     "name": "Mace of Disruption",
     "baseItem": "mace",
     "rarity": "rare",
     "attunement": true,
+    "overrideScore": 2.5,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -342,22 +353,19 @@
         "type": "radiant",
         "conditional": true
       }
-    }
+    },
+    "description": "Deals 2d6 radiant to undead/fiends. If target has 25 HP or less, DC 15 WIS save or destroyed. Anti-undead/fiend specialty with destruction effect worth ~2.5 pts."
   },
   {
     "name": "Mace of Smiting",
     "baseItem": "mace",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 1
     },
-    "ribbons": {
-      "utilitySpells": [
-        "+2 enhancement vs constructs",
-        "+2d6 damage on nat 20 vs constructs"
-      ]
-    }
+    "description": "+1 mace (+3 vs constructs). Extra crit damage vs constructs, can destroy constructs outright. Anti-construct specialty worth ~1.0 pt beyond base +1."
   },
   {
     "name": "Trident of Fish Command",
@@ -430,35 +438,37 @@
     "baseItem": "boots",
     "rarity": "rare",
     "attunement": true,
-    "overrideScore": 1.5,
+    "overrideScore": 2.0,
     "combat": {
-      "acBonus": 0,
       "enhancement": 0
     },
-    "description": "Doubles movement speed and grants advantage on Dex saves. Movement/mobility value estimated at 1.5 pts (low Rare tier)."
+    "description": "Click heels to double walking speed for 10 min, bonus action. Opportunity attacks have disadvantage against you. Mobility advantage is powerful. Officially Rare."
   },
   {
     "name": "Gloves of Missile Snaring",
     "baseItem": "gloves",
     "rarity": "uncommon",
     "attunement": true,
+    "overrideScore": 1.0,
     "combat": {
-      "acBonus": 0,
       "enhancement": 0
-    }
+    },
+    "description": "Use reaction to reduce ranged weapon damage by 1d10+DEX, catch if reduced to 0. Situational defensive ability worth ~1.0 pt (Uncommon)."
   },
   {
     "name": "Amulet of Health",
     "baseItem": "amulet",
     "rarity": "rare",
     "attunement": true,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 0,
       "abilityScoreSetter": {
         "ability": "CON",
         "setValue": 19
       }
-    }
+    },
+    "description": "Sets CON to 19. CON affects HP (retroactive), concentration saves, and CON saves. More valuable than STR/INT setters. Officially Rare."
   },
   {
     "name": "Headband of Intellect",
@@ -491,12 +501,14 @@
     "baseItem": "broom",
     "rarity": "uncommon",
     "attunement": false,
+    "overrideScore": 1.5,
     "combat": {
       "enhancement": 0,
       "flight": {
         "duration": "unlimited"
       }
-    }
+    },
+    "description": "Unlimited flight with no attunement. Community consensus is this is underpriced at Uncommon, but officially remains Uncommon. Treated as high Uncommon."
   },
   {
     "name": "Winged Boots",
@@ -516,13 +528,15 @@
     "baseItem": "cloak",
     "rarity": "rare",
     "attunement": true,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 0,
       "flight": {
         "duration": "limited",
         "hoursPerDay": 1.5
       }
-    }
+    },
+    "description": "Speak command to gain flying speed equal to walking speed for 1 hour. Limited uses but flight is extremely powerful. Officially Rare."
   },
   {
     "name": "Ring of Spell Storing",
@@ -552,18 +566,14 @@
     "attunement": true,
     "combat": {
       "enhancement": 1,
-      "damageBonus": {
-        "dice": "0",
-        "type": "force"
+      "damageTypeOverride": "force",
+      "conditionInfliction": {
+        "condition": "restrained",
+        "save": "STR",
+        "dc": 15
       }
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Deals Force damage instead of Piercing",
-        "Arrow of Restraint (DC 15 STR save or Restrained)",
-        "Emits bright light 20ft, dim light 20ft"
-      ]
-    }
+    "description": "+1 longbow. Deals Force instead of Piercing. Arrow of Restraint: DC 15 STR or Restrained 1 min. Arrow of Transport: teleport willing creature 60ft. Energy Ladder: create 60ft ladder on wall."
   },
   {
     "name": "Quarterstaff of the Acrobat",
@@ -571,16 +581,14 @@
     "rarity": "very rare",
     "attunement": false,
     "combat": {
-      "enhancement": 2
+      "enhancement": 2,
+      "advantage": ["acrobatics"],
+      "reactionAC": {
+        "bonus": 5,
+        "usesPerShortRest": 1
+      }
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Can change form (6-inch rod, 10-foot pole, or quarterstaff)",
-        "Advantage on Dexterity (Acrobatics) checks",
-        "Attack Deflection: +5 AC as reaction (1/short rest)",
-        "Thrown property 30/120 feet"
-      ]
-    }
+    "description": "+2 quarterstaff. Shape-changing (rod/pole/staff). Advantage on Acrobatics. Attack Deflection: +5 AC as reaction. Topple mastery. Returns after thrown."
   },
   {
     "name": "Sentinel Shield",
@@ -589,14 +597,9 @@
     "attunement": false,
     "combat": {
       "enhancement": 0,
-      "acBonus": 2
+      "advantage": ["initiative", "perception"]
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Advantage on Initiative rolls",
-        "Advantage on Wisdom (Perception) checks"
-      ]
-    }
+    "description": "Shield with advantage on Initiative and Perception. No magical AC bonus beyond base shield."
   },
   {
     "name": "Shield of the Cavalier",
@@ -605,20 +608,21 @@
     "attunement": false,
     "combat": {
       "enhancement": 0,
-      "acBonus": 4
+      "acBonus": 2,
+      "bonusActionDamage": {
+        "dice": "2d6",
+        "flatBonus": 2,
+        "type": "force"
+      }
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Forceful Bash: 2d6+2 + STR modifier force damage, push 10ft",
-        "Protective Field: 5-foot emanation like Otiluke's Resilient Sphere"
-      ]
-    }
+    "description": "+2 AC bonus (beyond base shield). Forceful Bash: 2d6+2+STR force, push 10ft, prone if smaller. Protective Field: 5ft emanation like Otiluke's."
   },
   {
     "name": "Thunderous Greatclub",
     "baseItem": "greatclub",
     "rarity": "very rare",
     "attunement": true,
+    "overrideScore": 3.5,
     "combat": {
       "enhancement": 0,
       "abilityScoreSetter": {
@@ -630,13 +634,7 @@
         "type": "thunder"
       }
     },
-    "ribbons": {
-      "utilitySpells": [
-        "Clap of Thunder: 30-foot cone, DC 15 STR save or Prone",
-        "Earthquake: 50-foot radius seismic disturbance",
-        "+3d8 thunder damage vs objects"
-      ]
-    }
+    "description": "STR 20 setter + 1d8 thunder per hit. Clap of Thunder: 30ft cone prone. Earthquake: 50ft radius effects. +3d8 vs objects. Multiple powerful abilities."
   },
   {
     "name": "Cloak of Invisibility",

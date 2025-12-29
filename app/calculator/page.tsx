@@ -1045,7 +1045,25 @@ export default function CalculatorPage() {
                                   {anchor.combat.charges && (
                                     <div>{anchor.combat.charges.length} charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>
                                   )}
-                                  {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && (
+                                  {anchor.combat.advantage && anchor.combat.advantage.length > 0 && (
+                                    <div>Adv: {anchor.combat.advantage.join(', ')}</div>
+                                  )}
+                                  {anchor.combat.reactionAC && (
+                                    <div>+{anchor.combat.reactionAC.bonus} AC (reaction)</div>
+                                  )}
+                                  {anchor.combat.bonusActionDamage && (
+                                    <div>Bash: {anchor.combat.bonusActionDamage.dice}{anchor.combat.bonusActionDamage.flatBonus ? `+${anchor.combat.bonusActionDamage.flatBonus}` : ''} {anchor.combat.bonusActionDamage.type}</div>
+                                  )}
+                                  {anchor.combat.conditionInfliction && (
+                                    <div>{anchor.combat.conditionInfliction.condition} (DC {anchor.combat.conditionInfliction.dc})</div>
+                                  )}
+                                  {anchor.combat.damageTypeOverride && (
+                                    <div>Type: {anchor.combat.damageTypeOverride}</div>
+                                  )}
+                                  {anchor.combat.handsFreeDef && (
+                                    <div>Hands-free defense</div>
+                                  )}
+                                  {!anchor.combat.enhancement && !anchor.combat.damageBonus && !anchor.combat.acBonus && !anchor.combat.savingThrowBonus && !anchor.combat.abilityScoreSetter && !anchor.combat.abilityScoreBonus && !anchor.combat.flight && !anchor.combat.resistances && !anchor.combat.charges && !anchor.combat.advantage && !anchor.combat.reactionAC && !anchor.combat.bonusActionDamage && !anchor.combat.conditionInfliction && !anchor.combat.damageTypeOverride && !anchor.combat.handsFreeDef && (
                                     <div className="text-slate-500 italic text-[10px]">No combat features</div>
                                   )}
                                 </div>

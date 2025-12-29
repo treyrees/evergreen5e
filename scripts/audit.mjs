@@ -129,6 +129,80 @@ function calculateCombatScore(combat) {
     }
   }
 
+  // === NEW SRD 5.2.1 MECHANICS ===
+
+  // Advantage on checks/saves
+  const ADVANTAGE_VALUES = {
+    'initiative': 0.75,
+    'attack': 1.5,
+    'saves': 1.5,
+    'dex-saves': 0.5,
+    'str-saves': 0.25,
+    'con-saves': 0.5,
+    'perception': 0.25,
+    'stealth': 0.25,
+    'acrobatics': 0.25,
+  };
+  if (combat.advantage) {
+    for (const adv of combat.advantage) {
+      score += ADVANTAGE_VALUES[adv] || 0.25;
+    }
+  }
+
+  // Reaction AC bonus
+  if (combat.reactionAC) {
+    const { bonus, usesPerShortRest = 0, usesPerLongRest = 0, unlimited = false } = combat.reactionAC;
+    if (unlimited) {
+      score += bonus * 0.5;
+    } else {
+      const dailyUses = usesPerLongRest + (usesPerShortRest * 3);
+      const useRate = Math.min(1, dailyUses / 10);
+      score += bonus * 0.3 * useRate * dailyUses;
+    }
+  }
+
+  // Bonus action damage
+  if (combat.bonusActionDamage) {
+    let bashValue = getDiceValue(combat.bonusActionDamage.dice);
+    const typeMultiplier = DAMAGE_TYPE_MULTIPLIERS[combat.bonusActionDamage.type?.toLowerCase() || 'bludgeoning'] || 1.0;
+    bashValue *= typeMultiplier;
+    if (combat.bonusActionDamage.flatBonus) {
+      bashValue += combat.bonusActionDamage.flatBonus * 0.3;
+    }
+    score += bashValue * 0.4;
+  }
+
+  // Condition infliction
+  const CONDITION_VALUES = {
+    'restrained': 1.5,
+    'prone': 0.5,
+    'frightened': 1.0,
+    'paralyzed': 2.0,
+    'stunned': 1.5,
+    'blinded': 1.0,
+    'poisoned': 0.75,
+  };
+  if (combat.conditionInfliction) {
+    const baseValue = CONDITION_VALUES[combat.conditionInfliction.condition] || 0.5;
+    const dcModifier = (combat.conditionInfliction.dc - 10) * 0.05;
+    score += baseValue * (1 + dcModifier);
+  }
+
+  // Damage type override
+  if (combat.damageTypeOverride) {
+    const typeMultiplier = DAMAGE_TYPE_MULTIPLIERS[combat.damageTypeOverride.toLowerCase()] || 1.0;
+    const baseDamageTypeMultiplier = DAMAGE_TYPE_MULTIPLIERS['piercing'] || 0.85;
+    const typeUpgrade = (typeMultiplier - baseDamageTypeMultiplier) * 1.0;
+    if (typeUpgrade > 0) {
+      score += typeUpgrade;
+    }
+  }
+
+  // Hands-free defense
+  if (combat.handsFreeDef) {
+    score += 3.0;
+  }
+
   return score;
 }
 
@@ -210,3 +284,11 @@ console.log('=== BY DISTANCE ===');
     console.log(`${label}: ${count} items`);
   }
 });
+
+console.log('\n=== OFF BY 1 TIER (detailed) ===');
+results.filter(r => Math.abs(r.distance) === 1)
+  .sort((a, b) => b.distance - a.distance)
+  .forEach(r => {
+    const dir = r.distance > 0 ? 'OVER' : 'UNDER';
+    console.log(`${dir}: ${r.name} - Official: ${r.official}, Calc: ${r.calculated} (${r.score.toFixed(2)} pts)`);
+  });
