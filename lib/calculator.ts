@@ -13,6 +13,7 @@ const DIE_TYPE_VALUES: Record<string, number> = {
 };
 
 // Damage type multipliers based on resistance/immunity prevalence in 5e
+// Note: Physical damage from magic items is magical, bypassing "resistance to non-magical attacks"
 const DAMAGE_TYPE_MULTIPLIERS: Record<string, number> = {
   // Strong types (fewer resistances/immunities)
   'force': 1.2,      // Almost nothing resists force
@@ -25,13 +26,13 @@ const DAMAGE_TYPE_MULTIPLIERS: Record<string, number> = {
   'lightning': 1.0,
   'thunder': 1.0,
   'acid': 1.0,
+  'bludgeoning': 1.0,  // Magic weapon damage bypasses non-magical resistance
+  'piercing': 1.0,
+  'slashing': 1.0,
 
   // Weak types (more resistances/immunities)
   'necrotic': 0.9,   // Some resistances
   'poison': 0.7,     // Very commonly resisted/immune
-  'bludgeoning': 0.85,  // Non-magical physical
-  'piercing': 0.85,
-  'slashing': 0.85,
 };
 
 function getDiceValue(diceString: string): number {

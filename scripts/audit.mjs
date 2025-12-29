@@ -11,8 +11,8 @@ const DIE_TYPE_VALUES = {
 const DAMAGE_TYPE_MULTIPLIERS = {
   'force': 1.2, 'psychic': 1.15, 'radiant': 1.1,
   'fire': 1.0, 'cold': 1.0, 'lightning': 1.0, 'thunder': 1.0, 'acid': 1.0,
+  'bludgeoning': 1.0, 'piercing': 1.0, 'slashing': 1.0,  // Magic weapons bypass non-magical resistance
   'necrotic': 0.9, 'poison': 0.7,
-  'bludgeoning': 0.85, 'piercing': 0.85, 'slashing': 0.85,
 };
 
 function getDiceValue(diceString) {
@@ -32,14 +32,21 @@ function getItemScore(item) {
   if (item.overrideScore !== undefined) {
     return item.overrideScore;
   }
-  return item.combat ? calculateCombatScore(item.combat) : 0;
+  const baseScore = item.combat ? calculateCombatScore(item.combat, item.baseItem) : 0;
+  const bonus = item.overrideBonus ?? 0;
+  return baseScore + bonus;
 }
 
-function calculateCombatScore(combat) {
+function calculateCombatScore(combat, baseItem) {
   let score = 0;
 
-  // Enhancement bonus
-  score += combat.enhancement || 0;
+  // Determine if this is an armor/shield item (AC doesn't stack) or other (AC stacks)
+  const isArmorOrShield = baseItem && ['armor (light)', 'armor (medium)', 'armor (heavy)', 'shield'].includes(baseItem);
+  const acStackingMultiplier = isArmorOrShield ? 1.0 : 1.5;
+
+  // Enhancement bonus (with optional multiplier)
+  const enhancementMultiplier = combat.enhancementMultiplier ?? 1.0;
+  score += (combat.enhancement || 0) * enhancementMultiplier;
 
   // Damage bonus
   if (combat.damageBonus) {
@@ -58,16 +65,33 @@ function calculateCombatScore(combat) {
       if (frequency === 'per-turn') diceValue *= 0.4;
     }
 
-    // Conditional damage - increased from 0.25 to 0.5 for common enemies
-    if (combat.damageBonus.conditional) diceValue *= 0.5;
+    // Conditional damage - uses conditionalType for specific multipliers
+    if (combat.damageBonus.conditionalType) {
+      const conditionalMultipliers = {
+        'creature-common': 0.6,   // Undead, fiends, humanoids - frequent
+        'creature-rare': 0.4,     // Giants, dragons, constructs - less common
+        'sworn-enemy': 0.6,       // Single declared target (Oathbow) - always active in combat
+        'environmental': 0.25,    // "In darkness", "underwater", situational
+      };
+      diceValue *= conditionalMultipliers[combat.damageBonus.conditionalType] || 0.5;
+    } else if (combat.damageBonus.conditional) {
+      // Legacy fallback
+      diceValue *= 0.5;
+    }
     score += diceValue;
   }
 
-  // AC bonus
-  score += combat.acBonus || 0;
+  // AC bonus (with stacking multiplier for non-armor items)
+  if (combat.acBonus) {
+    const acMultiplier = combat.acBonusMultiplier ?? 1.0;
+    score += combat.acBonus * acMultiplier * acStackingMultiplier;
+  }
 
-  // Saving throw bonus
-  score += combat.savingThrowBonus || 0;
+  // Saving throw bonus (with optional multiplier)
+  if (combat.savingThrowBonus) {
+    const saveMultiplier = combat.savingThrowBonusMultiplier ?? 1.0;
+    score += combat.savingThrowBonus * saveMultiplier;
+  }
 
   // Ability score setter - scales with value AND ability type
   if (combat.abilityScoreSetter) {
@@ -110,10 +134,17 @@ function calculateCombatScore(combat) {
     }
   }
 
-  // Resistances - increased from 1.5 to 2.0
-  if (combat.resistances) {
-    score += combat.resistances.length * 2.0;
+  // Resistances (with optional multiplier)
+  if (combat.resistances && combat.resistances.length > 0) {
+    const resistMultiplier = combat.resistancesMultiplier ?? 1.0;
+    score += combat.resistances.length * 2.0 * resistMultiplier;
   }
+
+  // Spell level values - high level spells scale non-linearly
+  const SPELL_LEVEL_VALUES = {
+    0: 0.1, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5,
+    6: 7, 7: 10, 8: 14, 9: 20,  // Campaign-defining spells
+  };
 
   // Legacy charges
   if (combat.charges) {
@@ -123,24 +154,36 @@ function calculateCombatScore(combat) {
         ? 'long rest'
         : charge.recharge;
       const multiplier = RECHARGE_MULTIPLIERS[normalizedRecharge] || 0.5;
-      score += charge.spellLevel * charge.usesPerDay * multiplier;
+      const effectiveLevel = SPELL_LEVEL_VALUES[charge.spellLevel] ?? charge.spellLevel;
+      score += effectiveLevel * charge.usesPerDay * multiplier;
     }
   }
 
-  // Charge pool
+  // Charge pool (blended burst/sustained scoring)
   if (combat.chargePool && combat.chargePool.abilities.length > 0) {
     const dailyRecharge =
       combat.chargePool.chargesPerLongRest +
       (combat.chargePool.chargesPerShortRest * 2);
-    const sustainableDailyCharges = Math.min(
-      dailyRecharge > 0 ? dailyRecharge : combat.chargePool.maxCharges,
-      combat.chargePool.maxCharges
-    );
+
     for (const ability of combat.chargePool.abilities) {
       if (ability.chargesPerUse > 0) {
-        const effectiveUses = sustainableDailyCharges / ability.chargesPerUse;
-        const multiplier = 0.15;
-        score += ability.spellLevel * effectiveUses * multiplier;
+        // Burst potential: you can nova ALL charges in a single fight
+        const burstUses = combat.chargePool.maxCharges / ability.chargesPerUse;
+
+        // Sustained uses: what you get back per day
+        const sustainedUses = dailyRecharge > 0
+          ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / ability.chargesPerUse
+          : 1 / ability.chargesPerUse;
+
+        // Blend burst and sustained: burst matters more for powerful spells
+        const burstWeight = Math.min(0.5, ability.spellLevel * 0.15);
+        const effectiveUses = sustainedUses * (1 - burstWeight) + burstUses * burstWeight;
+
+        // Use effective spell level (high-level spells scale non-linearly)
+        const effectiveLevel = SPELL_LEVEL_VALUES[ability.spellLevel] ?? ability.spellLevel;
+
+        const multiplier = 0.20;
+        score += effectiveLevel * effectiveUses * multiplier;
       }
     }
   }
