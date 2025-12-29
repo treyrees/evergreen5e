@@ -142,6 +142,11 @@ export default function CalculatorPage() {
   // Permanent buffs state
   const [permanentBuffs, setPermanentBuffs] = useState<PermanentBuffs>({});
 
+  // Flight state (separate from permanentBuffs for detailed configuration)
+  const [flightEnabled, setFlightEnabled] = useState(false);
+  const [flySpeed, setFlySpeed] = useState(30);
+  const [flyDuration, setFlyDuration] = useState<number | 'unlimited'>(4);
+
   // Weapon properties state (for adding properties not normally on the base weapon)
   const [weaponProperties, setWeaponProperties] = useState<WeaponProperty[]>([]);
 
@@ -186,10 +191,11 @@ export default function CalculatorPage() {
       abilityScoreSetter !== undefined ||
       abilityScoreBonus !== undefined ||
       hasPermanentBuffs ||
+      flightEnabled ||
       weaponProperties.length > 0 ||
       resistances.length > 0
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, weaponProperties, resistances]);
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, flightEnabled, weaponProperties, resistances]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
@@ -203,6 +209,10 @@ export default function CalculatorPage() {
       abilityScoreSetter,
       abilityScoreBonus,
       permanentBuffs: hasPermanentBuffs ? permanentBuffs : undefined,
+      flight: flightEnabled ? {
+        flySpeed,
+        flyDuration,
+      } : undefined,
       chargePool: (maxCharges > 0 || abilities.length > 0) ? {
         maxCharges,
         chargesPerShortRest,
@@ -212,7 +222,7 @@ export default function CalculatorPage() {
       weaponProperties: weaponProperties.length > 0 ? weaponProperties : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
+  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -667,17 +677,52 @@ export default function CalculatorPage() {
                       Senses & Movement
                     </summary>
                     <div className="px-3 pb-3 pt-2 border-t border-slate-600">
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                      {/* Flight with Speed and Duration */}
+                      <div className="mb-3 p-2.5 rounded border border-slate-600">
+                        <label className="flex items-center gap-2.5 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={permanentBuffs.flight || false}
-                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
+                            checked={flightEnabled}
+                            onChange={(e) => setFlightEnabled(e.target.checked)}
                             className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
                           />
-                          <span className="text-sm text-slate-300">Flight</span>
+                          <span className="text-sm text-slate-300">🦅 Flight</span>
                         </label>
+                        {flightEnabled && (
+                          <div className="mt-2 ml-6 grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs text-slate-400 mb-1">Speed (ft)</label>
+                              <select
+                                value={flySpeed}
+                                onChange={(e) => setFlySpeed(parseInt(e.target.value))}
+                                className="w-full px-2 py-1.5 text-sm border border-slate-600 rounded bg-slate-900 text-slate-100"
+                              >
+                                <option value={30}>30 ft</option>
+                                <option value={40}>40 ft</option>
+                                <option value={50}>50 ft</option>
+                                <option value={60}>60 ft</option>
+                                <option value={80}>80 ft</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs text-slate-400 mb-1">Duration</label>
+                              <select
+                                value={flyDuration === 'unlimited' ? 'unlimited' : flyDuration}
+                                onChange={(e) => setFlyDuration(e.target.value === 'unlimited' ? 'unlimited' : parseInt(e.target.value))}
+                                className="w-full px-2 py-1.5 text-sm border border-slate-600 rounded bg-slate-900 text-slate-100"
+                              >
+                                <option value={1}>1 hr/day</option>
+                                <option value={2}>2 hrs/day</option>
+                                <option value={4}>4 hrs/day</option>
+                                <option value={8}>8 hrs/day</option>
+                                <option value="unlimited">Unlimited</option>
+                              </select>
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
+                      <div className="grid grid-cols-2 gap-2">
                         <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
                           <input
                             type="checkbox"
@@ -1055,7 +1100,7 @@ export default function CalculatorPage() {
                                   {abilityScoreBonus && (
                                     <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
                                   )}
-                                  {permanentBuffs.flight && <div>🦅 Flight</div>}
+                                  {flightEnabled && <div>🦅 Flight ({flySpeed} ft, {flyDuration === 'unlimited' ? 'unlimited' : `${flyDuration} hr/day`})</div>}
                                   {permanentBuffs.darkvision && <div>👁️ Darkvision 60 ft</div>}
                                   {permanentBuffs.blindsight && <div>🔮 Blindsight 30 ft</div>}
                                   {permanentBuffs.speedBonus && <div>💨 +10 ft speed</div>}
@@ -1064,7 +1109,7 @@ export default function CalculatorPage() {
                                   {resistances.length > 0 && <div>Resist: {resistances.join(', ')}</div>}
                                   {abilities.length > 0 && <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>}
                                   {maxCharges > 0 && <div>{maxCharges} max charges</div>}
-                                  {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !hasPermanentBuffs && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
+                                  {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !hasPermanentBuffs && !flightEnabled && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
                                     <div className="text-slate-500 italic">No combat features</div>
                                   )}
                                 </div>
@@ -1104,7 +1149,7 @@ export default function CalculatorPage() {
                                     <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
                                   )}
                                   {anchor.combat.flight && (
-                                    <div>🦅 Flight{anchor.combat.flight.duration === 'limited' ? ` (${anchor.combat.flight.hoursPerDay} hrs/day)` : ''}</div>
+                                    <div>🦅 Flight ({anchor.combat.flight.flySpeed || 30} ft, {anchor.combat.flight.flyDuration === 'unlimited' ? 'unlimited' : `${anchor.combat.flight.flyDuration || anchor.combat.flight.hoursPerDay || '?'} hr/day`})</div>
                                   )}
                                   {anchor.combat.permanentBuffs?.flight && !anchor.combat.flight && <div>🦅 Flight</div>}
                                   {anchor.combat.permanentBuffs?.darkvision && <div>👁️ Darkvision 60 ft</div>}

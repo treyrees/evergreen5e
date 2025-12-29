@@ -21,7 +21,6 @@ export const SPECIAL_MECHANICS = new Set([
 
   // Tactical mobility and positioning
   'Boots of Speed',            // Doubled movement + disadvantage on opportunity attacks
-  'Broom of Flying',           // Unlimited flight (official Uncommon but calc says Rare)
   'Cloak of Invisibility',     // Tactical invisibility
 
   // Defensive special mechanics
@@ -58,7 +57,6 @@ export const COMMUNITY_NOTES = new Set([
   'Sun Blade',                 // Calc 3.0+ pts (Very Rare) but official Rare - community agrees it's powerful
 
   // Official seems too HIGH (item is weaker than rarity suggests)
-  'Wings of Flying',           // Calc 1.0 pts (Uncommon) but official Rare - limited 1hr flight is weak
   'Vicious Weapon',            // Calc 0.1 pts (Common) but official Rare - 5% proc is ~3x weaker than +1
 ]);
 
@@ -111,7 +109,7 @@ export function getItemExplanation(itemName: string): string {
     return 'Click heels to double speed for 10 min. Opportunity attacks have disadvantage. Mobility is hard to price.';
   }
   if (itemName === 'Broom of Flying') {
-    return 'Unlimited flight calculates as 2.0 pts (Rare) but official is Uncommon. No attunement makes it accessible.';
+    return '50 ft fly speed, unlimited duration. With speed+duration model: 0.75 × 2.0 = 1.5 pts (Uncommon).';
   }
   if (itemName === 'Cloak of Invisibility') {
     return 'Tactical invisibility (3 charges, 1hr each). Invisibility advantage on attacks/stealth is campaign-defining.';
@@ -139,7 +137,7 @@ export function getItemExplanation(itemName: string): string {
     return 'Official: Rare. Our math: ~3.0 pts (Very Rare). +2 to hit, 1d8 radiant, +1d8 vs undead, finesse, and creates sunlight. The community widely agrees the Sun Blade punches above its weight class.';
   }
   if (itemName === 'Wings of Flying') {
-    return 'Limited flight (1 hr/day). Calc: 1.0 pts (Uncommon), official: Rare. Community consensus: weak for Rare tier.';
+    return '60 ft fly speed, 1 hour/day. With speed+duration model: 1.0 × 2.0 = 2.0 pts (Rare).';
   }
   if (itemName === 'Vicious Weapon') {
     return '+2d6 on nat 20 only = 0.1 pts (Common). Official: Rare. At 5% crit rate, this averages +0.35 damage/hit—roughly 3× weaker than a +1 weapon.';
