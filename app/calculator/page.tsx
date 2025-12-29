@@ -30,12 +30,12 @@ function capitalizeRarity(rarity: string): string {
 // Get rarity color class based on rarity tier (case-insensitive)
 function getRarityColorClass(rarity: string): string {
   const r = rarity.toLowerCase();
-  if (r === 'common') return 'text-slate-300';
-  if (r === 'uncommon') return 'text-green-400';
-  if (r === 'rare') return 'text-blue-400';
-  if (r === 'very rare') return 'text-purple-400';
-  if (r === 'legendary') return 'text-orange-400';
-  return 'text-slate-300';
+  if (r === 'common') return 'text-slate-400';
+  if (r === 'uncommon') return 'text-emerald-400/80';
+  if (r === 'rare') return 'text-sky-400/80';
+  if (r === 'very rare') return 'text-violet-400/80';
+  if (r === 'legendary') return 'text-amber-400/80';
+  return 'text-slate-400';
 }
 
 const BASE_ITEMS = {
@@ -977,18 +977,18 @@ export default function CalculatorPage() {
 
           {/* Right Column - Results */}
           <div className="lg:sticky lg:top-8 h-fit">
-            <div className="relative bg-purple-950 text-slate-100 rounded-lg shadow-xl p-6 text-sm">
+            <div className="relative bg-slate-800 text-slate-100 rounded-lg shadow-xl p-6 text-sm border border-slate-700">
               {/* Blur overlay when no attributes selected */}
               {!hasSelectedAttributes && (
-                <div className="absolute inset-0 bg-purple-950/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                <div className="absolute inset-0 bg-slate-800/90 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
                   <div className="text-center px-6">
-                    <div className="text-xl font-bold text-slate-300">
+                    <div className="text-xl font-bold text-slate-400">
                       Select a base item type and at least one attribute
                     </div>
                   </div>
                 </div>
               )}
-              <div className="border-b border-purple-800 pb-4 mb-4">
+              <div className="border-b border-slate-600 pb-4 mb-4">
                 <div className="text-center text-lg font-bold">
                   {currentItem.name?.toUpperCase() || 'UNNAMED ITEM'}
                 </div>
@@ -996,10 +996,10 @@ export default function CalculatorPage() {
 
               <div className="space-y-4">
                 {/* Suggested Rarity - THE ANSWER */}
-                <div className="bg-[#00d67e]/20 border border-[#00d67e] rounded-md p-4 card-hover-lift">
-                  <div className="text-[#00ff96] font-bold mb-2 flex items-center justify-between">
+                <div className="bg-slate-700/50 border border-slate-600 rounded-md p-4 card-hover-lift">
+                  <div className="text-slate-300 font-bold mb-2 flex items-center justify-between">
                     <span>📊 SUGGESTED RARITY</span>
-                    <span className="text-sm font-mono text-[#00ff96]">
+                    <span className="text-sm font-mono text-slate-400">
                       <AnimatedNumber value={results.combatScore} /> pts
                     </span>
                   </div>
@@ -1010,10 +1010,10 @@ export default function CalculatorPage() {
 
                 {/* What's Similar? - Reference Item Comparison */}
                 {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
-                  <div className="border-t border-purple-800 pt-4">
+                  <div className="border-t border-slate-600 pt-4">
                     {/* Section Header */}
                     <div className="flex items-center justify-between mb-4">
-                      <div className="text-white font-bold text-lg flex items-center gap-2">
+                      <div className="text-slate-200 font-bold text-lg flex items-center gap-2">
                         <span>🔍</span>
                         <span>What&apos;s Similar?</span>
                       </div>
@@ -1021,15 +1021,15 @@ export default function CalculatorPage() {
                         <button
                           onClick={() => setNumAnchorsToShow(Math.max(1, numAnchorsToShow - 1))}
                           disabled={numAnchorsToShow <= 1}
-                          className="w-7 h-7 flex items-center justify-center bg-purple-800 hover:bg-purple-700 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
+                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
                         >
                           −
                         </button>
-                        <span className="text-sm text-slate-300 font-mono w-4 text-center">{numAnchorsToShow}</span>
+                        <span className="text-sm text-slate-400 font-mono w-4 text-center">{numAnchorsToShow}</span>
                         <button
                           onClick={() => setNumAnchorsToShow(Math.min(3, numAnchorsToShow + 1))}
                           disabled={numAnchorsToShow >= 3}
-                          className="w-7 h-7 flex items-center justify-center bg-purple-800 hover:bg-purple-700 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
+                          className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded text-white font-bold"
                         >
                           +
                         </button>
@@ -1043,21 +1043,21 @@ export default function CalculatorPage() {
                         const warnings = getWarningIndicator(anchor.name);
 
                         return (
-                          <div key={index} className="rounded-lg overflow-hidden border border-purple-700 card-hover-lift">
+                          <div key={index} className="rounded-lg overflow-hidden border border-slate-600 card-hover-lift">
                             {/* Side-by-Side Battle Cards */}
                             <div className="grid grid-cols-2">
-                              {/* LEFT: Your Item (Deep Blue) */}
-                              <div className="bg-blue-950/50 border-r border-slate-600 p-4 relative">
+                              {/* LEFT: Your Item */}
+                              <div className="bg-slate-700/50 border-r border-slate-600 p-4 relative">
                                 {attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
-                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-blue-800/50">
-                                  <span className="text-blue-400 text-lg">⚔️</span>
-                                  <span className="text-blue-300 font-bold">{itemName || 'YOUR ITEM'}</span>
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
+                                  <span className="text-slate-400 text-lg">⚔️</span>
+                                  <span className="text-slate-200 font-bold">{itemName || 'YOUR ITEM'}</span>
                                 </div>
-                                <div className="text-sm text-blue-200 mb-3">
+                                <div className="text-sm text-slate-300 mb-3">
                                   <span className="font-mono"><AnimatedNumber value={results.combatScore} /> pts</span> • <span className={`font-semibold ${getRarityColorClass(results.suggestedRarity)}`}>{results.suggestedRarity}</span>
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
-                                  <div className="text-blue-400/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
+                                  <div className="text-slate-400 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
                                   {enhancement > 0 && <div>+{enhancement} enhancement</div>}
                                   {damageBonus && (
                                     <div>
@@ -1090,21 +1090,21 @@ export default function CalculatorPage() {
                                 </div>
                               </div>
 
-                              {/* RIGHT: Reference Item (Hot Emerald) */}
-                              <div className="bg-[#00d67e]/10 p-4 relative">
+                              {/* RIGHT: Reference Item */}
+                              <div className="bg-slate-700/30 p-4 relative">
                                 {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
-                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#00d67e]/30">
-                                  <span className="text-[#00ff96] text-lg">{getItemEmoji(anchor.name)}</span>
-                                  <span className="text-[#00ff96] font-bold">#{index + 1} {anchor.name}</span>
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
+                                  <span className="text-slate-400 text-lg">{getItemEmoji(anchor.name)}</span>
+                                  <span className="text-slate-200 font-bold">#{index + 1} {anchor.name}</span>
                                   {warnings.hasSpecial && <span title="Special mechanics" className="text-sm">⭐</span>}
                                   {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}
                                   {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
                                 </div>
-                                <div className="text-sm text-[#00ff96]/80 mb-3">
+                                <div className="text-sm text-slate-300 mb-3">
                                   <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${getRarityColorClass(anchor.rarity || 'common')}`}>{capitalizeRarity(anchor.rarity || 'common')}</span>
                                 </div>
                                 <div className="text-xs text-slate-300 space-y-1.5">
-                                  <div className="text-[#00ff96]/80 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
+                                  <div className="text-slate-400 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
                                   {anchor.combat.enhancement > 0 && <div>+{anchor.combat.enhancement} enhancement</div>}
                                   {anchor.combat.damageBonus && (
                                     <div>
@@ -1150,8 +1150,8 @@ export default function CalculatorPage() {
                                   {anchor.combat.handsFreeDef && <div>Hands-free defense</div>}
                                   {/* Special Mechanics inline badge */}
                                   {(warnings.hasSpecial || warnings.hasNumerical || warnings.hasCommunity) && (
-                                    <div className="mt-2 pt-2 border-t border-[#00d67e]/20">
-                                      <div className="text-[10px] text-purple-300 italic">
+                                    <div className="mt-2 pt-2 border-t border-slate-600">
+                                      <div className="text-[10px] text-slate-400 italic">
                                         {warnings.hasSpecial && '⭐ '}
                                         {warnings.hasNumerical && '🔢 '}
                                         {warnings.hasCommunity && '💬 '}
@@ -1164,21 +1164,21 @@ export default function CalculatorPage() {
                             </div>
 
                             {/* DIFFERENCES Bar (Full Width Bottom) */}
-                            <div className="bg-purple-950 border-t border-purple-700 px-4 py-3">
+                            <div className="bg-slate-800 border-t border-slate-600 px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <span className="text-slate-400 text-xs font-semibold uppercase tracking-wide">Δ</span>
+                                <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Δ</span>
                                 {comparison.type === 'stronger' && (
-                                  <span className="text-yellow-400 text-sm font-medium">
+                                  <span className="text-amber-400/80 text-sm font-medium">
                                     ⬆️ Your item is <span className="font-mono">{comparison.scoreDifference.toFixed(1)}</span> pts stronger
                                   </span>
                                 )}
                                 {comparison.type === 'weaker' && (
-                                  <span className="text-blue-400 text-sm font-medium">
+                                  <span className="text-sky-400/80 text-sm font-medium">
                                     ⬇️ Your item is <span className="font-mono">{Math.abs(comparison.scoreDifference).toFixed(1)}</span> pts weaker
                                   </span>
                                 )}
                                 {comparison.type === 'equal' && (
-                                  <span className="text-[#00ff96] text-sm font-medium">
+                                  <span className="text-slate-300 text-sm font-medium">
                                     ≈ Equal power level
                                   </span>
                                 )}
@@ -1208,10 +1208,10 @@ export default function CalculatorPage() {
 
         {/* Advanced: Formula Details - Standalone Section */}
         <div className="mt-8">
-          <div className="bg-purple-950 text-slate-100 rounded-lg shadow-xl font-mono text-sm">
+          <div className="bg-slate-800 text-slate-100 rounded-lg shadow-xl font-mono text-sm border border-slate-700">
             <button
               onClick={() => setShowFormulaDetails(!showFormulaDetails)}
-              className="w-full px-6 py-4 text-left text-slate-400 hover:text-[#00ff96] text-sm font-semibold flex items-center justify-between transition-colors"
+              className="w-full px-6 py-4 text-left text-slate-400 hover:text-slate-200 text-sm font-semibold flex items-center justify-between transition-colors"
             >
               <span>⚙️ Advanced: Formula Details</span>
               <span className="text-xl">{showFormulaDetails ? '−' : '+'}</span>
@@ -1222,27 +1222,27 @@ export default function CalculatorPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Base Values:</div>
+                      <div className="text-slate-200 font-semibold">Base Values:</div>
                       <div>• Enhancement: 1 point per +1</div>
                       <div>• AC Bonus: 1 point per +1</div>
                       <div>• Saving Throw Bonus: 1 point per +1</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Damage Dice:</div>
+                      <div className="text-slate-200 font-semibold">Damage Dice:</div>
                       <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts, 1d12 = 1.75 pts</div>
                       <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
-                      <div className="text-yellow-400">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
-                      <div className="text-yellow-400">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
-                      <div className="text-yellow-400">• Conditional damage by type:</div>
-                      <div className="text-yellow-400 pl-2">- Creature-common (undead, fiends): ×0.6</div>
-                      <div className="text-yellow-400 pl-2">- Creature-rare (giants, dragons): ×0.4</div>
-                      <div className="text-yellow-400 pl-2">- Sworn-enemy (declared target): ×0.6</div>
-                      <div className="text-yellow-400 pl-2">- Environmental (darkness, water): ×0.25</div>
+                      <div className="text-slate-500">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
+                      <div className="text-slate-500">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
+                      <div className="text-slate-500">• Conditional damage by type:</div>
+                      <div className="text-slate-500 pl-2">- Creature-common (undead, fiends): ×0.6</div>
+                      <div className="text-slate-500 pl-2">- Creature-rare (giants, dragons): ×0.4</div>
+                      <div className="text-slate-500 pl-2">- Sworn-enemy (declared target): ×0.6</div>
+                      <div className="text-slate-500 pl-2">- Environmental (darkness, water): ×0.25</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Damage Type Multipliers:</div>
+                      <div className="text-slate-200 font-semibold">Damage Type Multipliers:</div>
                       <div>• Strong (fewer resistances): Force ×1.2, Psychic ×1.15, Radiant ×1.1</div>
                       <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid ×1.0</div>
                       <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7, Physical ×0.85</div>
@@ -1251,13 +1251,13 @@ export default function CalculatorPage() {
 
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Ability Scores:</div>
+                      <div className="text-slate-200 font-semibold">Ability Scores:</div>
                       <div>• Setter (19): 2.5 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
                       <div>• Bonus: ×0.75 per point (e.g., +2 bonus = 1.5 pts)</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Permanent Buffs:</div>
+                      <div className="text-slate-200 font-semibold">Permanent Buffs:</div>
                       <div>• Flight: 2.0 pts (tactical dominance, ranged immunity)</div>
                       <div>• Blindsight: 0.75 pts (see invisible, through illusions)</div>
                       <div>• Speed Bonus: 0.5 pts (+10 ft movement)</div>
@@ -1267,32 +1267,32 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Resistances:</div>
+                      <div className="text-slate-200 font-semibold">Resistances:</div>
                       <div>• 2.0 points per damage type resisted</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Spell/Ability Charges:</div>
+                      <div className="text-slate-200 font-semibold">Spell/Ability Charges:</div>
                       <div>• Formula: effective_level × uses_per_day × recharge_mult</div>
                       <div>• Dawn/Long Rest: ×0.1-0.2 | Short Rest: ×0.2-0.4</div>
-                      <div className="text-cyan-400">• High-level spell scaling (effective value):</div>
-                      <div className="text-cyan-400 pl-2">- Levels 1-5: linear (1, 2, 3, 4, 5)</div>
-                      <div className="text-cyan-400 pl-2">- Level 6-7: 7, 10 | Level 8-9: 14, 20</div>
+                      <div className="text-slate-500">• High-level spell scaling (effective value):</div>
+                      <div className="text-slate-500 pl-2">- Levels 1-5: linear (1, 2, 3, 4, 5)</div>
+                      <div className="text-slate-500 pl-2">- Level 6-7: 7, 10 | Level 8-9: 14, 20</div>
                       <div className="text-slate-500 italic text-[10px]">
                         Level 9 spells (Wish) are campaign-defining, hence 20× effective value.
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Rarity Thresholds:</div>
+                      <div className="text-slate-200 font-semibold">Rarity Thresholds:</div>
                       <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
                       <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-[#00ff96] font-semibold">Attunement:</div>
+                      <div className="text-slate-200 font-semibold">Attunement:</div>
                       <div className="text-slate-300 text-[11px]">
-                        Attunement does <span className="text-yellow-400">not</span> modify scores. Official 5e pricing is inconsistent—Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
+                        Attunement does <span className="text-slate-500">not</span> modify scores. Official 5e pricing is inconsistent—Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
                       </div>
                       <div className="text-slate-500 italic text-[10px] mt-1">
                         When comparing, prioritize reference items with matching attunement. The 3-slot limit means attunement is an &quot;opportunity cost&quot; that varies by build.
@@ -1301,21 +1301,21 @@ export default function CalculatorPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="text-[#00ff96] font-semibold">Reference Item Discrepancy Categories:</div>
+                    <div className="text-slate-200 font-semibold">Reference Item Discrepancy Categories:</div>
                     <div className="space-y-3">
-                      <div className="bg-purple-900/20 border border-purple-700/30 rounded p-3">
-                        <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
-                        <div className="text-slate-300 text-[11px]">
+                      <div className="bg-slate-700/30 border border-slate-600 rounded p-3">
+                        <div className="text-slate-300 font-semibold mb-1">⭐ Special Mechanics</div>
+                        <div className="text-slate-400 text-[11px]">
                           These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the reference!
                         </div>
                       </div>
-                      <div className="bg-blue-900/20 border border-blue-700/30 rounded p-3">
-                        <div className="text-blue-400 font-semibold mb-1">🔢 Numerical Edge Case</div>
-                        <div className="text-slate-300 text-[11px]">
+                      <div className="bg-slate-700/30 border border-slate-600 rounded p-3">
+                        <div className="text-slate-300 font-semibold mb-1">🔢 Numerical Edge Case</div>
+                        <div className="text-slate-400 text-[11px]">
                           These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.
                         </div>
                       </div>
-                      <div className="bg-slate-800/50 border border-slate-600/30 rounded p-3">
+                      <div className="bg-slate-700/30 border border-slate-600 rounded p-3">
                         <div className="text-slate-300 font-semibold mb-1">💬 Community Note</div>
                         <div className="text-slate-400 text-[11px]">
                           This item is probably underpowered. Take this reference with a grain of salt.
