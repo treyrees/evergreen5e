@@ -1199,100 +1199,109 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Advanced: Formula Details */}
-                <div className="border-t border-slate-700 pt-4">
-                  <button
-                    onClick={() => setShowFormulaDetails(!showFormulaDetails)}
-                    className="w-full text-left text-slate-400 hover:text-emerald-400 text-xs font-semibold flex items-center justify-between transition-colors"
-                  >
-                    <span>⚙️ Advanced: Formula Details</span>
-                    <span className="text-xl">{showFormulaDetails ? '−' : '+'}</span>
-                  </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                  {showFormulaDetails && (
-                    <div className="mt-3 text-xs text-slate-400 space-y-2 pl-4">
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Base Values:</div>
-                        <div>• Enhancement: 1 point per +1</div>
-                        <div>• AC Bonus: 1 point per +1</div>
-                        <div>• Saving Throw Bonus: 1 point per +1</div>
+        {/* Advanced: Formula Details - Standalone Section */}
+        <div className="mt-8">
+          <div className="bg-slate-900 text-slate-100 rounded-lg shadow-xl font-mono text-sm">
+            <button
+              onClick={() => setShowFormulaDetails(!showFormulaDetails)}
+              className="w-full px-6 py-4 text-left text-slate-400 hover:text-emerald-400 text-sm font-semibold flex items-center justify-between transition-colors"
+            >
+              <span>⚙️ Advanced: Formula Details</span>
+              <span className="text-xl">{showFormulaDetails ? '−' : '+'}</span>
+            </button>
+
+            {showFormulaDetails && (
+              <div className="px-6 pb-6 text-xs text-slate-400">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Base Values:</div>
+                      <div>• Enhancement: 1 point per +1</div>
+                      <div>• AC Bonus: 1 point per +1</div>
+                      <div>• Saving Throw Bonus: 1 point per +1</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Damage Dice:</div>
+                      <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts, 1d12 = 1.75 pts</div>
+                      <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
+                      <div className="text-yellow-400">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
+                      <div className="text-yellow-400">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
+                      <div className="text-yellow-400">• Conditional damage: ×0.25 (only vs specific creatures)</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Damage Type Multipliers:</div>
+                      <div>• Strong (fewer resistances): Force ×1.2, Psychic ×1.15, Radiant ×1.1</div>
+                      <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid ×1.0</div>
+                      <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7, Physical ×0.85</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Ability Scores:</div>
+                      <div>• Setter (19): 2.5 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
+                      <div>• Bonus: ×0.75 per point (e.g., +2 bonus = 1.5 pts)</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Flight:</div>
+                      <div>• Unlimited: 2.0 pts | Limited (4+ hrs/day): 1.5 pts | Limited (&lt;4 hrs): 1.0 pt</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Resistances:</div>
+                      <div>• 1.5 points per damage type resisted</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Spell/Ability Charges:</div>
+                      <div>• Formula: spell_level × uses_per_day × recharge_multiplier</div>
+                      <div>• Dawn/Long Rest: ×0.1-0.25 | Short Rest: ×0.2-0.4</div>
+                      <div className="text-slate-500 italic text-[10px]">
+                        Multipliers vary by total charges and recharge mechanics. Higher spell levels (6-9) represent rare, powerful magic.
                       </div>
+                    </div>
 
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Damage Dice:</div>
-                        <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts, 1d12 = 1.75 pts</div>
-                        <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
-                        <div className="text-yellow-400">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
-                        <div className="text-yellow-400">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
-                        <div className="text-yellow-400">• Conditional damage: ×0.25 (only vs specific creatures)</div>
-                      </div>
+                    <div className="space-y-1">
+                      <div className="text-emerald-400 font-semibold">Rarity Thresholds:</div>
+                      <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
+                      <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
+                    </div>
+                  </div>
 
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Damage Type Multipliers:</div>
-                        <div>• Strong (fewer resistances): Force ×1.2, Psychic ×1.15, Radiant ×1.1</div>
-                        <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid ×1.0</div>
-                        <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7, Physical ×0.85</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Ability Scores:</div>
-                        <div>• Setter (19): 2.5 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
-                        <div>• Bonus: ×0.75 per point (e.g., +2 bonus = 1.5 pts)</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Flight:</div>
-                        <div>• Unlimited: 2.0 pts | Limited (4+ hrs/day): 1.5 pts | Limited (&lt;4 hrs): 1.0 pt</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Resistances:</div>
-                        <div>• 1.5 points per damage type resisted</div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Spell/Ability Charges:</div>
-                        <div>• Formula: spell_level × uses_per_day × recharge_multiplier</div>
-                        <div>• Dawn/Long Rest: ×0.1-0.25 | Short Rest: ×0.2-0.4</div>
-                        <div className="text-slate-500 italic text-[10px]">
-                          Multipliers vary by total charges and recharge mechanics. Higher spell levels (6-9) represent rare, powerful magic.
+                  <div className="space-y-4">
+                    <div className="text-emerald-400 font-semibold">Anchor Discrepancy Categories:</div>
+                    <div className="space-y-3">
+                      <div className="bg-purple-900/20 border border-purple-700/30 rounded p-3">
+                        <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
+                        <div className="text-slate-300 text-[11px]">
+                          These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the anchor!
                         </div>
                       </div>
-
-                      <div className="space-y-1">
-                        <div className="text-emerald-400 font-semibold">Rarity Thresholds:</div>
-                        <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
-                        <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
+                      <div className="bg-blue-900/20 border border-blue-700/30 rounded p-3">
+                        <div className="text-blue-400 font-semibold mb-1">🔢 Numerical Edge Case</div>
+                        <div className="text-slate-300 text-[11px]">
+                          These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.
+                        </div>
                       </div>
-
-                      <div className="space-y-2 pt-2 border-t border-slate-700/50">
-                        <div className="text-emerald-400 font-semibold">Anchor Discrepancy Categories:</div>
-                        <div className="space-y-2">
-                          <div className="bg-purple-900/20 border border-purple-700/30 rounded p-2">
-                            <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
-                            <div className="text-slate-300 text-[11px]">
-                              These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the anchor!
-                            </div>
-                          </div>
-                          <div className="bg-blue-900/20 border border-blue-700/30 rounded p-2">
-                            <div className="text-blue-400 font-semibold mb-1">🔢 Numerical Edge Case</div>
-                            <div className="text-slate-300 text-[11px]">
-                              These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.
-                            </div>
-                          </div>
-                          <div className="bg-slate-800/50 border border-slate-600/30 rounded p-2">
-                            <div className="text-slate-300 font-semibold mb-1">💬 Community Note</div>
-                            <div className="text-slate-400 text-[11px]">
-                              This item is probably underpowered. Take this reference with a grain of salt.
-                            </div>
-                          </div>
+                      <div className="bg-slate-800/50 border border-slate-600/30 rounded p-3">
+                        <div className="text-slate-300 font-semibold mb-1">💬 Community Note</div>
+                        <div className="text-slate-400 text-[11px]">
+                          This item is probably underpowered. Take this reference with a grain of salt.
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
