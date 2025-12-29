@@ -228,8 +228,9 @@ export function getItemScore(item: Partial<MagicItem>): number {
 export function calculateCombatScore(combat: CombatFeatures): number {
   let score = 0;
 
-  // Enhancement bonus
-  score += combat.enhancement;
+  // Enhancement bonus (with optional "Sometimes" multiplier)
+  const enhancementMultiplier = combat.enhancementMultiplier ?? 1.0;
+  score += combat.enhancement * enhancementMultiplier;
 
   // Damage bonus
   if (combat.damageBonus?.dice) {
@@ -275,14 +276,16 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     score += diceValue;
   }
 
-  // AC bonus
+  // AC bonus (with optional "Sometimes" multiplier)
   if (combat.acBonus) {
-    score += combat.acBonus;
+    const acMultiplier = combat.acBonusMultiplier ?? 1.0;
+    score += combat.acBonus * acMultiplier;
   }
 
-  // Saving throw bonus
+  // Saving throw bonus (with optional "Sometimes" multiplier)
   if (combat.savingThrowBonus) {
-    score += combat.savingThrowBonus;
+    const saveMultiplier = combat.savingThrowBonusMultiplier ?? 1.0;
+    score += combat.savingThrowBonus * saveMultiplier;
   }
 
   // Ability score setter - scales with value AND ability type
@@ -325,17 +328,47 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     score += combat.abilityScoreBonus.bonus * 0.75;
   }
 
-  // Flight - one of the most powerful abilities in D&D (legacy format)
+  // Flight - one of the most powerful abilities in D&D
+  // New model factors in both speed and duration
+  // Base values calibrated to SRD:
+  // - Broom of Flying (50 ft, unlimited, no attune) = Uncommon → 1.0 pts base
+  // - Winged Boots (30 ft, 4 hrs, attune) = Uncommon → 1.0 pts
+  // - Wings of Flying (60 ft, 1 hr, attune) = Rare → 2.0 pts
   if (combat.flight) {
-    if (combat.flight.duration === 'unlimited') {
-      // Unlimited flight is extremely powerful (Broom of Flying should be Rare)
-      score += 2.0;
+    // New format with flySpeed and flyDuration
+    if (combat.flight.flySpeed !== undefined || combat.flight.flyDuration !== undefined) {
+      const flySpeed = combat.flight.flySpeed || 30; // Default to 30 ft
+      const flyDuration = combat.flight.flyDuration; // hours or 'unlimited'
+
+      // Base score from fly speed (30 ft = 0.5, 50 ft = 0.75, 60 ft = 1.0)
+      let speedScore: number;
+      if (flySpeed >= 60) speedScore = 1.0;
+      else if (flySpeed >= 50) speedScore = 0.75;
+      else if (flySpeed >= 40) speedScore = 0.6;
+      else speedScore = 0.5; // 30 ft or less
+
+      // Duration multiplier
+      // Unlimited = 2.0×, 4+ hrs = 1.5×, 1-3 hrs = 2.0× (short duration = tactical, valued higher per hour)
+      let durationMultiplier: number;
+      if (flyDuration === 'unlimited') {
+        durationMultiplier = 2.0;
+      } else if (typeof flyDuration === 'number') {
+        if (flyDuration >= 4) durationMultiplier = 1.5;
+        else if (flyDuration >= 2) durationMultiplier = 1.75;
+        else durationMultiplier = 2.0; // 1 hour or less - premium for tactical use
+      } else {
+        durationMultiplier = 1.5; // Default
+      }
+
+      score += speedScore * durationMultiplier;
+    }
+    // Legacy format support (deprecated)
+    else if (combat.flight.duration === 'unlimited') {
+      score += 1.5; // Reduced from 2.0 to better match Broom of Flying = Uncommon
     } else if (combat.flight.hoursPerDay && combat.flight.hoursPerDay >= 4) {
-      // 4+ hours per day is still very strong (Winged Boots)
-      score += 1.5;
+      score += 1.0; // Winged Boots = Uncommon
     } else {
-      // Limited flight (1-2 hours/day like Wings of Flying)
-      score += 1.0;
+      score += 1.0; // Limited flight baseline
     }
   }
 
@@ -358,11 +391,12 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     }
   }
 
-  // Damage resistances - each resistance is worth 0.5 points
-  // A single resistance is situational (depends on enemy damage types)
-  // Multiple resistances stack in value but one alone is minor utility
+  // Damage resistances - each resistance is worth 2.0 points (with optional "Sometimes" multiplier)
+  // Armor of Resistance (single resistance, attunement) = Rare, confirming ~2.0 pts per resistance
+  // Multiple resistances stack in value
   if (combat.resistances && combat.resistances.length > 0) {
-    score += combat.resistances.length * 0.5;
+    const resistMultiplier = combat.resistancesMultiplier ?? 1.0;
+    score += combat.resistances.length * 2.0 * resistMultiplier;
   }
 
   // Spell charges (legacy format)

@@ -39,6 +39,24 @@ function getRarityColorClass(rarity: string): string {
   return 'text-slate-400';
 }
 
+// Get muted rarity background class for comparison cards
+function getRarityBgClass(rarity: string): string {
+  const r = rarity.toLowerCase();
+  if (r === 'common') return 'bg-slate-700/30';
+  if (r === 'uncommon') return 'bg-emerald-950/20';
+  if (r === 'rare') return 'bg-sky-950/20';
+  if (r === 'very rare') return 'bg-violet-950/20';
+  if (r === 'legendary') return 'bg-amber-950/20';
+  return 'bg-slate-700/30';
+}
+
+// Get medal border class (gold/silver/bronze) for comparison ranking
+function getMedalBorderClass(index: number): string {
+  if (index === 0) return 'border-amber-500/60'; // Gold
+  if (index === 1) return 'border-slate-400/60'; // Silver
+  return 'border-amber-700/50'; // Bronze
+}
+
 const BASE_ITEMS = {
   'Melee Weapons (Simple)': [
     'club',
@@ -125,12 +143,16 @@ export default function CalculatorPage() {
   const [itemName, setItemName] = useState('');
   const [baseItem, setBaseItem] = useState('');
   const [enhancement, setEnhancement] = useState(0);
+  const [enhancementSometimes, setEnhancementSometimes] = useState(false);
   const [damageBonus, setDamageBonus] = useState<DamageBonus | undefined>(
     undefined
   );
   const [acBonus, setAcBonus] = useState(0);
+  const [acBonusSometimes, setAcBonusSometimes] = useState(false);
   const [savingThrowBonus, setSavingThrowBonus] = useState(0);
+  const [saveBonusSometimes, setSaveBonusSometimes] = useState(false);
   const [resistances, setResistances] = useState<string[]>([]);
+  const [resistancesSometimes, setResistancesSometimes] = useState(false);
   const [attunement, setAttunement] = useState(false);
 
   // Ability score setter state
@@ -142,6 +164,11 @@ export default function CalculatorPage() {
   // Permanent buffs state
   const [permanentBuffs, setPermanentBuffs] = useState<PermanentBuffs>({});
 
+  // Flight state (separate from permanentBuffs for detailed configuration)
+  const [flightEnabled, setFlightEnabled] = useState(false);
+  const [flySpeed, setFlySpeed] = useState(30);
+  const [flyDuration, setFlyDuration] = useState<number | 'unlimited'>(4);
+
   // Weapon properties state (for adding properties not normally on the base weapon)
   const [weaponProperties, setWeaponProperties] = useState<WeaponProperty[]>([]);
 
@@ -152,10 +179,10 @@ export default function CalculatorPage() {
   const [abilities, setAbilities] = useState<ChargedAbility[]>([]);
 
   // UI state
-  const [numAnchorsToShow, setNumAnchorsToShow] = useState(1);
   const [showChargeForm, setShowChargeForm] = useState(false);
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
   // Generate random placeholder after mount to avoid hydration mismatch
   const [randomPlaceholder, setRandomPlaceholder] = useState('');
   useEffect(() => {
@@ -186,23 +213,32 @@ export default function CalculatorPage() {
       abilityScoreSetter !== undefined ||
       abilityScoreBonus !== undefined ||
       hasPermanentBuffs ||
+      flightEnabled ||
       weaponProperties.length > 0 ||
       resistances.length > 0
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, weaponProperties, resistances]);
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, flightEnabled, weaponProperties, resistances]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
     baseItem,
     combat: {
       enhancement,
+      enhancementMultiplier: enhancementSometimes ? 0.5 : undefined,
       damageBonus,
       acBonus: acBonus > 0 ? acBonus : undefined,
+      acBonusMultiplier: acBonusSometimes ? 0.5 : undefined,
       savingThrowBonus: savingThrowBonus > 0 ? savingThrowBonus : undefined,
+      savingThrowBonusMultiplier: saveBonusSometimes ? 0.5 : undefined,
       resistances: resistances.length > 0 ? resistances : undefined,
+      resistancesMultiplier: resistancesSometimes ? 0.5 : undefined,
       abilityScoreSetter,
       abilityScoreBonus,
       permanentBuffs: hasPermanentBuffs ? permanentBuffs : undefined,
+      flight: flightEnabled ? {
+        flySpeed,
+        flyDuration,
+      } : undefined,
       chargePool: (maxCharges > 0 || abilities.length > 0) ? {
         maxCharges,
         chargesPerShortRest,
@@ -212,7 +248,7 @@ export default function CalculatorPage() {
       weaponProperties: weaponProperties.length > 0 ? weaponProperties : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, resistances, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -239,7 +275,7 @@ export default function CalculatorPage() {
         {/* Header - Minimal */}
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-slate-100">
-            Magic Item Calculator
+            Evergreen5e Magic Item Balancer
           </h1>
           <div className="flex gap-4 text-sm">
             <Link href="/items" className="text-slate-500 hover:text-slate-300 transition-colors">
@@ -322,20 +358,36 @@ export default function CalculatorPage() {
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       Enhancement (+hit/+dmg)
                     </label>
-                    <div className="flex gap-2">
-                      {[0, 1, 2, 3].map((value) => (
-                        <button
-                          key={value}
-                          onClick={() => setEnhancement(value)}
-                          className={`px-4 py-2 rounded-md font-medium transition-all ${
-                            enhancement === value
-                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
-                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                          }`}
-                        >
-                          +{value}
-                        </button>
-                      ))}
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-2">
+                        {[0, 1, 2, 3].map((value) => (
+                          <button
+                            key={value}
+                            onClick={() => {
+                              setEnhancement(value);
+                              if (value === 0) setEnhancementSometimes(false);
+                            }}
+                            className={`px-4 py-2 rounded-md font-medium transition-all ${
+                              enhancement === value
+                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            }`}
+                          >
+                            +{value}
+                          </button>
+                        ))}
+                      </div>
+                      {enhancement > 0 && (
+                        <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={enhancementSometimes}
+                            onChange={(e) => setEnhancementSometimes(e.target.checked)}
+                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className={enhancementSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                        </label>
+                      )}
                     </div>
                   </div>
 
@@ -473,7 +525,10 @@ export default function CalculatorPage() {
                       {[0, 1, 2, 3].map((value) => (
                         <button
                           key={value}
-                          onClick={() => setAcBonus(value)}
+                          onClick={() => {
+                            setAcBonus(value);
+                            if (value === 0) setAcBonusSometimes(false);
+                          }}
                           className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
                             acBonus === value
                               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
@@ -484,6 +539,17 @@ export default function CalculatorPage() {
                         </button>
                       ))}
                     </div>
+                    {acBonus > 0 && (
+                      <label className="flex items-center gap-1.5 mt-2 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={acBonusSometimes}
+                          onChange={(e) => setAcBonusSometimes(e.target.checked)}
+                          className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className={acBonusSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                      </label>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -493,7 +559,10 @@ export default function CalculatorPage() {
                       {[0, 1, 2, 3].map((value) => (
                         <button
                           key={value}
-                          onClick={() => setSavingThrowBonus(value)}
+                          onClick={() => {
+                            setSavingThrowBonus(value);
+                            if (value === 0) setSaveBonusSometimes(false);
+                          }}
                           className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
                             savingThrowBonus === value
                               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
@@ -504,6 +573,17 @@ export default function CalculatorPage() {
                         </button>
                       ))}
                     </div>
+                    {savingThrowBonus > 0 && (
+                      <label className="flex items-center gap-1.5 mt-2 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={saveBonusSometimes}
+                          onChange={(e) => setSaveBonusSometimes(e.target.checked)}
+                          className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className={saveBonusSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                      </label>
+                    )}
                   </div>
                 </div>
 
@@ -667,17 +747,52 @@ export default function CalculatorPage() {
                       Senses & Movement
                     </summary>
                     <div className="px-3 pb-3 pt-2 border-t border-slate-600">
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                      {/* Flight with Speed and Duration */}
+                      <div className="mb-3 p-2.5 rounded border border-slate-600">
+                        <label className="flex items-center gap-2.5 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={permanentBuffs.flight || false}
-                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, flight: e.target.checked })}
+                            checked={flightEnabled}
+                            onChange={(e) => setFlightEnabled(e.target.checked)}
                             className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
                           />
                           <span className="text-sm text-slate-300">Flight</span>
                         </label>
+                        {flightEnabled && (
+                          <div className="mt-2 ml-6 grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs text-slate-400 mb-1">Speed (ft)</label>
+                              <select
+                                value={flySpeed}
+                                onChange={(e) => setFlySpeed(parseInt(e.target.value))}
+                                className="w-full px-2 py-1.5 text-sm border border-slate-600 rounded bg-slate-900 text-slate-100"
+                              >
+                                <option value={30}>30 ft</option>
+                                <option value={40}>40 ft</option>
+                                <option value={50}>50 ft</option>
+                                <option value={60}>60 ft</option>
+                                <option value={80}>80 ft</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs text-slate-400 mb-1">Duration</label>
+                              <select
+                                value={flyDuration === 'unlimited' ? 'unlimited' : flyDuration}
+                                onChange={(e) => setFlyDuration(e.target.value === 'unlimited' ? 'unlimited' : parseInt(e.target.value))}
+                                className="w-full px-2 py-1.5 text-sm border border-slate-600 rounded bg-slate-900 text-slate-100"
+                              >
+                                <option value={1}>1 hr/day</option>
+                                <option value={2}>2 hrs/day</option>
+                                <option value={4}>4 hrs/day</option>
+                                <option value={8}>8 hrs/day</option>
+                                <option value="unlimited">Unlimited</option>
+                              </select>
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
+                      <div className="grid grid-cols-2 gap-2">
                         <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
                           <input
                             type="checkbox"
@@ -736,7 +851,7 @@ export default function CalculatorPage() {
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
                       Damage Resistances
                       {resistances.length > 0 && (
-                        <span className="ml-2 text-xs text-slate-500">({resistances.length} selected)</span>
+                        <span className="ml-2 text-xs text-slate-500">({resistances.length} selected{resistancesSometimes ? ', sometimes' : ''})</span>
                       )}
                     </summary>
                     <div className="px-3 pb-3 pt-2 border-t border-slate-600">
@@ -754,6 +869,7 @@ export default function CalculatorPage() {
                                   setResistances([...resistances, type]);
                                 } else {
                                   setResistances(resistances.filter(r => r !== type));
+                                  if (resistances.length <= 1) setResistancesSometimes(false);
                                 }
                               }}
                               className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
@@ -764,6 +880,17 @@ export default function CalculatorPage() {
                           </label>
                         ))}
                       </div>
+                      {resistances.length > 0 && (
+                        <label className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-600 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={resistancesSometimes}
+                            onChange={(e) => setResistancesSometimes(e.target.checked)}
+                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className={resistancesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                        </label>
+                      )}
                     </div>
                   </details>
                 </div>
@@ -971,17 +1098,11 @@ export default function CalculatorPage() {
                   </div>
                 </div>
               )}
-              <div className="border-b border-slate-600 pb-4 mb-4">
-                <div className="text-center text-lg font-bold text-slate-200">
-                  {currentItem.name?.toUpperCase() || 'YOUR ITEM'}
-                </div>
-              </div>
-
               <div className="space-y-4">
                 {/* Suggested Rarity - THE ANSWER */}
                 <div className="bg-slate-700/30 border border-slate-600 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Suggested Rarity</span>
+                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Suggested Rarity</span>
                     <span className="text-sm font-mono text-slate-500">
                       <AnimatedNumber value={results.combatScore} /> pts
                     </span>
@@ -991,188 +1112,121 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* What's Similar? - Reference Item Comparison */}
+                {/* What's Similar? - Reference Comparisons */}
                 {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
                   <div className="pt-2">
-                    {/* Section Header */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Similar Items</span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => setNumAnchorsToShow(Math.max(1, numAnchorsToShow - 1))}
-                          disabled={numAnchorsToShow <= 1}
-                          className="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
-                        >
-                          −
-                        </button>
-                        <span className="text-xs text-slate-500 font-mono w-3 text-center">{numAnchorsToShow}</span>
-                        <button
-                          onClick={() => setNumAnchorsToShow(Math.min(3, numAnchorsToShow + 1))}
-                          disabled={numAnchorsToShow >= 3}
-                          className="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
-                        >
-                          +
-                        </button>
-                      </div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">What&apos;s Similar?</span>
+                      <span
+                        className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
+                        title="Compare your item's power level against official SRD items with similar properties."
+                      >
+                        ⓘ
+                      </span>
                     </div>
 
-                    {/* Stacked Anchor Comparisons */}
-                    <div className="space-y-4">
-                      {topAnchors.slice(0, numAnchorsToShow).map((anchorData, index) => {
+                    <div className="space-y-3">
+                      {topAnchors.slice(0, 3).map((anchorData, index) => {
                         const { anchor, anchorScore, comparison } = anchorData;
                         const warnings = getWarningIndicator(anchor.name);
+                        const scoreDiff = results.combatScore - anchorScore;
+                        const hasWarnings = warnings.hasSpecial || warnings.hasCommunity;
+                        const isExpanded = expandedItemInfo === anchor.name;
 
                         return (
-                          <div key={index} className="rounded-lg overflow-hidden border border-slate-600 card-hover-lift">
-                            {/* Side-by-Side Battle Cards */}
+                          <div key={index} className={`rounded-lg overflow-hidden border-2 ${getMedalBorderClass(index)}`}>
+                            {/* Side-by-Side Cards */}
                             <div className="grid grid-cols-2">
                               {/* LEFT: Your Item */}
-                              <div className="bg-slate-700/50 border-r border-slate-600 p-4 relative">
-                                {attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🏆</span>}
-                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
-                                  <span className="text-slate-400 text-lg">⚔️</span>
-                                  <span className="text-slate-200 font-bold">{itemName || 'YOUR ITEM'}</span>
+                              <div className={`${getRarityBgClass(results.suggestedRarity)} p-3 border-r border-slate-700`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-slate-200 font-semibold text-sm truncate">{itemName || 'Your Item'}</span>
+                                  {attunement && <span title="Requires Attunement" className="text-[10px] px-1 py-0.5 bg-violet-900/50 text-violet-300 rounded">A</span>}
                                 </div>
-                                <div className="text-sm text-slate-300 mb-3">
-                                  <span className="font-mono"><AnimatedNumber value={results.combatScore} /> pts</span> • <span className={`font-semibold ${getRarityColorClass(results.suggestedRarity)}`}>{results.suggestedRarity}</span>
+                                <div className="text-xs mb-2">
+                                  <span className="font-mono text-slate-300"><AnimatedNumber value={results.combatScore} /> pts</span>
+                                  <span className="mx-1 text-slate-600">•</span>
+                                  <span className={`font-medium ${getRarityColorClass(results.suggestedRarity)}`}>{results.suggestedRarity}</span>
                                 </div>
-                                <div className="text-xs text-slate-300 space-y-1.5">
-                                  <div className="text-slate-400 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
-                                  {enhancement > 0 && <div>+{enhancement} enhancement</div>}
-                                  {damageBonus && (
-                                    <div>
-                                      {damageBonus.dice} {damageBonus.type}
-                                      {damageBonus.frequency === 'per-turn' && <span className="text-yellow-400 text-[10px] ml-1">(per-turn)</span>}
-                                      {damageBonus.conditional && <span className="text-yellow-400 text-[10px] ml-1">(conditional)</span>}
-                                      {damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
-                                    </div>
-                                  )}
-                                  {acBonus > 0 && <div>+{acBonus} AC</div>}
-                                  {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves</div>}
-                                  {abilityScoreSetter && (
-                                    <div>{abilityScoreSetter.ability} set to {abilityScoreSetter.setValue}</div>
-                                  )}
-                                  {abilityScoreBonus && (
-                                    <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
-                                  )}
-                                  {permanentBuffs.flight && <div>🦅 Flight</div>}
-                                  {permanentBuffs.darkvision && <div>👁️ Darkvision 60 ft</div>}
-                                  {permanentBuffs.blindsight && <div>🔮 Blindsight 30 ft</div>}
-                                  {permanentBuffs.speedBonus && <div>💨 +10 ft speed</div>}
-                                  {permanentBuffs.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
-                                  {permanentBuffs.climbBurrow && <div>🧗 Climb/Burrow speed</div>}
-                                  {resistances.length > 0 && <div>Resist: {resistances.join(', ')}</div>}
-                                  {abilities.length > 0 && <div>{abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'}</div>}
-                                  {maxCharges > 0 && <div>{maxCharges} max charges</div>}
-                                  {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !abilityScoreBonus && !hasPermanentBuffs && resistances.length === 0 && abilities.length === 0 && maxCharges === 0 && (
-                                    <div className="text-slate-500 italic">No combat features</div>
-                                  )}
+                                <div className="text-[11px] text-slate-400 space-y-0.5">
+                                  {enhancement > 0 && <div>+{enhancement} enhancement{enhancementSometimes ? ' ½' : ''}</div>}
+                                  {damageBonus && <div>{damageBonus.dice} {damageBonus.type}{damageBonus.vicious ? ' (crit)' : ''}{damageBonus.frequency === 'per-turn' ? ' /turn' : ''}</div>}
+                                  {acBonus > 0 && <div>+{acBonus} AC{acBonusSometimes ? ' ½' : ''}</div>}
+                                  {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves{saveBonusSometimes ? ' ½' : ''}</div>}
+                                  {abilityScoreSetter && <div>{abilityScoreSetter.ability} → {abilityScoreSetter.setValue}</div>}
+                                  {flightEnabled && <div>Flight {flySpeed}ft {flyDuration === 'unlimited' ? '∞' : `${flyDuration}h`}</div>}
+                                  {resistances.length > 0 && <div>Resist: {resistances.join(', ')}{resistancesSometimes ? ' ½' : ''}</div>}
+                                  {abilities.length > 0 && <div>{abilities.length} spell{abilities.length > 1 ? 's' : ''}</div>}
+                                  {maxCharges > 0 && <div>{maxCharges} charges</div>}
                                 </div>
                               </div>
 
                               {/* RIGHT: Reference Item */}
-                              <div className="bg-slate-700/30 p-4 relative">
-                                {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🏆</span>}
-                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
-                                  <span className="text-slate-400 text-lg">{getItemEmoji(anchor.name)}</span>
-                                  <span className="text-slate-200 font-bold">#{index + 1} {anchor.name}</span>
-                                  {warnings.hasSpecial && <span title="Special mechanics" className="text-sm">⭐</span>}
-                                  {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}
-                                  {warnings.hasCommunity && <span title="Community note" className="text-sm">💬</span>}
+                              <div className={`${getRarityBgClass(anchor.rarity || 'common')} p-3`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>
+                                  <div className="flex items-center gap-1">
+                                    {hasWarnings && (
+                                      <button
+                                        onClick={() => setExpandedItemInfo(isExpanded ? null : anchor.name)}
+                                        title="View notes"
+                                        className="text-[10px] px-1 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded transition-colors"
+                                      >
+                                        ℹ
+                                      </button>
+                                    )}
+                                    {anchor.attunement && <span title="Requires Attunement" className="text-[10px] px-1 py-0.5 bg-violet-900/50 text-violet-300 rounded">A</span>}
+                                  </div>
                                 </div>
-                                <div className="text-sm text-slate-300 mb-3">
-                                  <span className="font-mono">{anchorScore.toFixed(1)} pts</span> • <span className={`font-semibold ${getRarityColorClass(anchor.rarity || 'common')}`}>{capitalizeRarity(anchor.rarity || 'common')}</span>
+                                <div className="text-xs mb-2">
+                                  <span className="font-mono text-slate-300">{anchorScore.toFixed(1)} pts</span>
+                                  <span className="mx-1 text-slate-600">•</span>
+                                  <span className={`font-medium ${getRarityColorClass(anchor.rarity || 'common')}`}>{capitalizeRarity(anchor.rarity || 'common')}</span>
                                 </div>
-                                <div className="text-xs text-slate-300 space-y-1.5">
-                                  <div className="text-slate-400 font-semibold text-[10px] uppercase tracking-wide mb-1">Features</div>
+                                <div className="text-[11px] text-slate-400 space-y-0.5">
                                   {anchor.combat.enhancement > 0 && <div>+{anchor.combat.enhancement} enhancement</div>}
-                                  {anchor.combat.damageBonus && (
-                                    <div>
-                                      {anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}
-                                      {anchor.combat.damageBonus.frequency === 'per-turn' && <span className="text-yellow-400 text-[10px] ml-1">(per-turn)</span>}
-                                      {anchor.combat.damageBonus.conditional && <span className="text-yellow-400 text-[10px] ml-1">(conditional)</span>}
-                                      {anchor.combat.damageBonus.conditionalType && <span className="text-yellow-400 text-[10px] ml-1">({anchor.combat.damageBonus.conditionalType})</span>}
-                                      {anchor.combat.damageBonus.vicious && <span className="text-yellow-400 text-[10px] ml-1">(vicious)</span>}
-                                    </div>
-                                  )}
+                                  {anchor.combat.damageBonus && <div>{anchor.combat.damageBonus.dice} {anchor.combat.damageBonus.type}{anchor.combat.damageBonus.vicious ? ' (crit)' : ''}{anchor.combat.damageBonus.conditionalType ? ` (${anchor.combat.damageBonus.conditionalType})` : ''}</div>}
                                   {anchor.combat.acBonus && <div>+{anchor.combat.acBonus} AC</div>}
                                   {anchor.combat.savingThrowBonus && <div>+{anchor.combat.savingThrowBonus} saves</div>}
-                                  {anchor.combat.abilityScoreSetter && (
-                                    <div>{anchor.combat.abilityScoreSetter.ability} set to {anchor.combat.abilityScoreSetter.setValue}</div>
-                                  )}
-                                  {anchor.combat.abilityScoreBonus && (
-                                    <div>+{anchor.combat.abilityScoreBonus.bonus} {anchor.combat.abilityScoreBonus.ability}</div>
-                                  )}
-                                  {anchor.combat.flight && (
-                                    <div>🦅 Flight{anchor.combat.flight.duration === 'limited' ? ` (${anchor.combat.flight.hoursPerDay} hrs/day)` : ''}</div>
-                                  )}
-                                  {anchor.combat.permanentBuffs?.flight && !anchor.combat.flight && <div>🦅 Flight</div>}
-                                  {anchor.combat.permanentBuffs?.darkvision && <div>👁️ Darkvision 60 ft</div>}
-                                  {anchor.combat.permanentBuffs?.blindsight && <div>🔮 Blindsight 30 ft</div>}
-                                  {anchor.combat.permanentBuffs?.speedBonus && <div>💨 +10 ft speed</div>}
-                                  {anchor.combat.permanentBuffs?.tremorsense && <div>🌍 Tremorsense 30 ft</div>}
-                                  {anchor.combat.permanentBuffs?.climbBurrow && <div>🧗 Climb/Burrow speed</div>}
-                                  {anchor.combat.resistances && anchor.combat.resistances.length > 0 && (
-                                    <div>Resist: {anchor.combat.resistances.join(', ')}</div>
-                                  )}
-                                  {anchor.combat.charges && <div>{anchor.combat.charges.length} spell charge{anchor.combat.charges.length > 1 ? 's' : ''}</div>}
-                                  {anchor.combat.advantage && anchor.combat.advantage.length > 0 && (
-                                    <div>Advantage: {anchor.combat.advantage.join(', ')}</div>
-                                  )}
-                                  {anchor.combat.reactionAC && <div>+{anchor.combat.reactionAC.bonus} AC (reaction)</div>}
-                                  {anchor.combat.bonusActionDamage && (
-                                    <div>Bash: {anchor.combat.bonusActionDamage.dice}{anchor.combat.bonusActionDamage.flatBonus ? `+${anchor.combat.bonusActionDamage.flatBonus}` : ''} {anchor.combat.bonusActionDamage.type}</div>
-                                  )}
-                                  {anchor.combat.conditionInfliction && (
-                                    <div>{anchor.combat.conditionInfliction.condition} (DC {anchor.combat.conditionInfliction.dc})</div>
-                                  )}
-                                  {anchor.combat.damageTypeOverride && <div>Damage type: {anchor.combat.damageTypeOverride}</div>}
+                                  {anchor.combat.abilityScoreSetter && <div>{anchor.combat.abilityScoreSetter.ability} → {anchor.combat.abilityScoreSetter.setValue}</div>}
+                                  {anchor.combat.flight && <div>Flight {anchor.combat.flight.flySpeed || 30}ft {anchor.combat.flight.flyDuration === 'unlimited' ? '∞' : `${anchor.combat.flight.flyDuration || anchor.combat.flight.hoursPerDay}h`}</div>}
+                                  {anchor.combat.resistances && anchor.combat.resistances.length > 0 && <div>Resist: {anchor.combat.resistances.join(', ')}</div>}
+                                  {anchor.combat.charges && <div>{anchor.combat.charges.length} spell{anchor.combat.charges.length > 1 ? 's' : ''}</div>}
+                                  {anchor.combat.advantage && <div>Adv: {anchor.combat.advantage.join(', ')}</div>}
                                   {anchor.combat.handsFreeDef && <div>Hands-free defense</div>}
-                                  {/* Special Mechanics inline badge */}
-                                  {(warnings.hasSpecial || warnings.hasNumerical || warnings.hasCommunity) && (
-                                    <div className="mt-2 pt-2 border-t border-slate-600">
-                                      <div className="text-[10px] text-slate-400 italic">
-                                        {warnings.hasSpecial && '⭐ '}
-                                        {warnings.hasNumerical && '🔢 '}
-                                        {warnings.hasCommunity && '💬 '}
-                                        {anchor.description || warnings.explanation}
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
                               </div>
                             </div>
 
-                            {/* DIFFERENCES Bar (Full Width Bottom) */}
-                            <div className="bg-slate-800 border-t border-slate-600 px-4 py-3">
-                              <div className="flex items-center gap-3">
-                                <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Δ</span>
-                                {comparison.type === 'stronger' && (
-                                  <span className="text-amber-400/80 text-sm font-medium">
-                                    ⬆️ Your item is <span className="font-mono">{comparison.scoreDifference.toFixed(1)}</span> pts stronger
-                                  </span>
-                                )}
-                                {comparison.type === 'weaker' && (
-                                  <span className="text-sky-400/80 text-sm font-medium">
-                                    ⬇️ Your item is <span className="font-mono">{Math.abs(comparison.scoreDifference).toFixed(1)}</span> pts weaker
-                                  </span>
-                                )}
-                                {comparison.type === 'equal' && (
-                                  <span className="text-slate-300 text-sm font-medium">
-                                    ≈ Equal power level
-                                  </span>
-                                )}
+                            {/* Expanded Info Panel */}
+                            {isExpanded && warnings.explanation && (
+                              <div className="bg-slate-800 px-3 py-2 border-t border-slate-700">
+                                <div className="text-[11px] text-slate-400">
+                                  {warnings.hasSpecial && <span className="text-amber-400">⭐ Special: </span>}
+                                  {warnings.hasCommunity && <span className="text-sky-400">💬 Note: </span>}
+                                  {warnings.explanation}
+                                </div>
                               </div>
-                              {comparison.details.length > 0 && (
-                                <div className="mt-2 text-xs text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
-                                  {comparison.details.slice(0, 4).map((detail, idx) => (
-                                    <span key={idx}>• {detail}</span>
-                                  ))}
-                                  {comparison.details.length > 4 && (
-                                    <span className="text-slate-600">+{comparison.details.length - 4} more</span>
+                            )}
+
+                            {/* Difference Summary */}
+                            <div className="bg-slate-900/50 px-3 py-2 border-t border-slate-700">
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs">
+                                  {Math.abs(scoreDiff) < 0.3 ? (
+                                    <span className="text-slate-400">≈ Similar power</span>
+                                  ) : scoreDiff > 0 ? (
+                                    <span className="text-amber-400/90">+{scoreDiff.toFixed(1)} pts stronger</span>
+                                  ) : (
+                                    <span className="text-sky-400/90">{scoreDiff.toFixed(1)} pts weaker</span>
                                   )}
                                 </div>
-                              )}
+                                {Math.abs(scoreDiff) >= 0.3 && comparison.details.length > 0 && (
+                                  <div className="text-[10px] text-slate-500 truncate max-w-[60%] text-right">
+                                    {comparison.details[0]}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         );

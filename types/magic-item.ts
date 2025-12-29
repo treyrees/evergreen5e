@@ -45,8 +45,10 @@ export interface AbilityScoreBonus {
 }
 
 export interface Flight {
-  duration: 'unlimited' | 'limited';
-  hoursPerDay?: number; // if limited
+  duration?: 'unlimited' | 'limited'; // deprecated: use flyDuration instead
+  hoursPerDay?: number; // deprecated: use flyDuration instead
+  flySpeed?: number; // fly speed in feet (30, 50, 60, etc.)
+  flyDuration?: number | 'unlimited'; // hours per day, or 'unlimited' for permanent
   requiresAction?: boolean; // bonus action to activate
 }
 
@@ -106,12 +108,16 @@ export type WeaponProperty =
 
 export interface CombatFeatures {
   enhancement: number; // 0, 1, 2, 3
+  enhancementMultiplier?: number; // 0.5 for "Sometimes" active bonuses
   damageBonus?: DamageBonus;
   acBonus?: number;
+  acBonusMultiplier?: number; // 0.5 for "Sometimes" active bonuses
   savingThrowBonus?: number;
+  savingThrowBonusMultiplier?: number; // 0.5 for "Sometimes" active bonuses
   charges?: SpellCharge[]; // Legacy format for existing SRD items
   chargePool?: ChargePool; // New intuitive format for user items
   resistances?: string[]; // Damage types resisted: "fire", "cold", "all", etc.
+  resistancesMultiplier?: number; // 0.5 for "Sometimes" active resistances
   abilityScoreSetter?: AbilityScoreSetter; // Sets ability score to fixed value (e.g., Gauntlets of Ogre Power set STR to 19)
   abilityScoreBonus?: AbilityScoreBonus; // Adds bonus to ability score (e.g., Headband of Intellect +2)
   flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots) - LEGACY: use permanentBuffs.flight instead

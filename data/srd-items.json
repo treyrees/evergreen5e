@@ -513,10 +513,11 @@
     "combat": {
       "enhancement": 0,
       "flight": {
-        "duration": "unlimited"
+        "flySpeed": 50,
+        "flyDuration": "unlimited"
       }
     },
-    "description": "WotC IMBALANCE: Formula says Rare (2.0 pts), WotC says Uncommon. By the standards established by other flight items (Winged Boots = Uncommon with attunement + limited duration), unlimited flight without attunement should cost more. Community consensus confirms this is underpriced—trivializes many encounters and exploration challenges."
+    "description": "50 ft fly speed, unlimited duration. No attunement required."
   },
   {
     "name": "Winged Boots",
@@ -526,10 +527,11 @@
     "combat": {
       "enhancement": 0,
       "flight": {
-        "duration": "limited",
-        "hoursPerDay": 4
+        "flySpeed": 30,
+        "flyDuration": 4
       }
-    }
+    },
+    "description": "30 ft fly speed (equal to walking speed), 4 hours per day."
   },
   {
     "name": "Wings of Flying",
@@ -539,11 +541,11 @@
     "combat": {
       "enhancement": 0,
       "flight": {
-        "duration": "limited",
-        "hoursPerDay": 1.5
+        "flySpeed": 60,
+        "flyDuration": 1
       }
     },
-    "description": "WotC IMBALANCE: Formula says Uncommon (1.0 pts), WotC says Rare. By the standards established by Winged Boots (Uncommon: 4 hrs/day flight with attunement), Wings of Flying with only 1 hr/day should not cost a tier higher. Community consensus confirms this is overpriced—rarely chosen when other flight options exist."
+    "description": "60 ft fly speed, 1 hour per day. The high fly speed justifies Rare despite limited duration."
   },
   {
     "name": "Ring of Spell Storing",
