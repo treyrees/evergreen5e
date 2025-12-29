@@ -642,7 +642,7 @@ export default function CalculatorPage() {
                 className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
               >
                 <div>
-                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide font-[family-name:var(--font-cinzel)]">Passive Abilities</span>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Passive Abilities</span>
                   <span className="ml-2 text-xs text-slate-500">Senses, Stats, Resistances, & Movement</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showAdvancedOptions ? '−' : '+'}</span>
