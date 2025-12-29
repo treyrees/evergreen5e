@@ -228,14 +228,38 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     score += combat.savingThrowBonus;
   }
 
-  // Ability score setter - scales with the value it sets to
-  // Reduced baseline from 2.5 to 1.5 to match official rarities (Gauntlets, Headband = Uncommon)
+  // Ability score setter - scales with value AND ability type
+  // Different abilities have different combat value:
+  // - CON: HP, concentration saves, common saves → 2.0 pts (Amulet of Health = Rare)
+  // - DEX: AC, initiative, very common saves → 1.75 pts
+  // - STR: Melee damage, athletics, less common saves → 1.5 pts (Gauntlets = Uncommon)
+  // - WIS: Common saves, Perception → 1.5 pts
+  // - INT: Uncommon saves, Investigation → 1.0 pts (Headband = Uncommon)
+  // - CHA: Social, some saves → 1.0 pts
   if (combat.abilityScoreSetter) {
     const setValue = combat.abilityScoreSetter.setValue;
-    if (setValue >= 25) score += 4.0;      // +7 modifier (epic)
-    else if (setValue >= 23) score += 3.5; // +6 modifier (very powerful)
-    else if (setValue >= 21) score += 3.0; // +5 modifier (powerful)
-    else score += 1.5;                      // 19 or lower (+4 modifier, baseline)
+    const ability = combat.abilityScoreSetter.ability?.toUpperCase() || 'STR';
+
+    // Base value depends on the target value
+    let baseValue: number;
+    if (setValue >= 25) baseValue = 4.0;      // +7 modifier (epic)
+    else if (setValue >= 23) baseValue = 3.5; // +6 modifier (very powerful)
+    else if (setValue >= 21) baseValue = 3.0; // +5 modifier (powerful)
+    else if (setValue >= 20) baseValue = 2.0; // +5 modifier (strong)
+    else baseValue = 1.5;                      // 19 or lower (+4 modifier, baseline)
+
+    // Ability type multiplier (applied to base value of 1.5, scales with higher values)
+    const abilityMultipliers: Record<string, number> = {
+      'CON': 1.34,  // 1.5 × 1.34 = 2.01 (Rare tier for Amulet of Health)
+      'DEX': 1.17,  // 1.5 × 1.17 = 1.75
+      'STR': 1.0,   // 1.5 × 1.0 = 1.5 (baseline for Gauntlets)
+      'WIS': 1.0,   // 1.5 × 1.0 = 1.5
+      'INT': 1.0,   // 1.5 × 1.0 = 1.5 (Headband = Uncommon works)
+      'CHA': 1.0,   // 1.5 × 1.0 = 1.5
+    };
+
+    const multiplier = abilityMultipliers[ability] || 1.0;
+    score += baseValue * multiplier;
   }
 
   // Ability score bonus - adds to existing score

@@ -69,13 +69,29 @@ function calculateCombatScore(combat) {
   // Saving throw bonus
   score += combat.savingThrowBonus || 0;
 
-  // Ability score setter - reduced baseline from 2.5 to 1.5
+  // Ability score setter - scales with value AND ability type
   if (combat.abilityScoreSetter) {
     const setValue = combat.abilityScoreSetter.setValue;
-    if (setValue >= 25) score += 4.0;      // +7 modifier (epic)
-    else if (setValue >= 23) score += 3.5; // +6 modifier (very powerful)
-    else if (setValue >= 21) score += 3.0; // +5 modifier (powerful)
-    else score += 1.5;                      // 19 or lower (+4 modifier, baseline)
+    const ability = (combat.abilityScoreSetter.ability || 'STR').toUpperCase();
+
+    let baseValue;
+    if (setValue >= 25) baseValue = 4.0;
+    else if (setValue >= 23) baseValue = 3.5;
+    else if (setValue >= 21) baseValue = 3.0;
+    else if (setValue >= 20) baseValue = 2.0;
+    else baseValue = 1.5;
+
+    const abilityMultipliers = {
+      'CON': 1.34,
+      'DEX': 1.17,
+      'STR': 1.0,
+      'WIS': 1.0,
+      'INT': 1.0,
+      'CHA': 1.0,
+    };
+
+    const multiplier = abilityMultipliers[ability] || 1.0;
+    score += baseValue * multiplier;
   }
 
   // Ability score bonus - adds to existing score

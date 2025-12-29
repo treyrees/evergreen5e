@@ -37,15 +37,16 @@ export const SPECIAL_MECHANICS = new Set([
   'Wand of Lightning Bolts',   // Spell charges not valued in our math
   'Wand of Magic Missiles',    // Spell charges not valued in our math
   'Javelin of Lightning',      // Single-use spell charge not valued
-  'Dagger of Venom',           // Poison charge not valued properly
+  'Dagger of Venom',           // Poison charge + poisoned condition not fully valued
   'Gloves of Missile Snaring', // Defensive utility not quantified
-  'Animated Shield',           // Special activation mechanic
-  'Staff of Power',            // Overvalued - powerful but scored too high
+  'Animated Shield',           // Hands-free defense mechanic
+  'Staff of Power',            // Stacking bonuses overvalued in our math
   'Energy Bow',                // Force damage + restraint arrow - special abilities
-  'Quarterstaff of the Acrobat', // +5 AC reaction (1/rest) not fully valued
-  'Sentinel Shield',           // Advantage on Initiative not quantified
-  'Shield of the Cavalier',    // Force bash damage + protective field not quantified
+  'Quarterstaff of the Acrobat', // +5 AC reaction (1/rest) now quantified
+  'Sentinel Shield',           // Advantage on Initiative now quantified
+  'Shield of the Cavalier',    // Force bash damage + protective field
   'Cloak of Invisibility',     // Invisibility charges - tactical advantage
+  'Thunderous Greatclub',      // Area effects (Clap of Thunder, Earthquake) not quantified
 ]);
 
 /**
@@ -92,10 +93,10 @@ export function hasCommunityNotes(itemName: string): boolean {
 export function getItemExplanation(itemName: string): string {
   // Numerical edge cases
   if (itemName === 'Vicious Weapon') {
-    return '+2d6 damage on natural 20 (5% proc rate = ~0.35 damage/attack, now quantified)';
+    return '+2d6 damage on natural 20 (5% proc rate = ~0.09 pts). Math shows Common but official is Rare. Crit-fishing synergy (Champion, Hexblade) and psychological value not captured.';
   }
   if (itemName === 'Oathbow') {
-    return '+3d6 vs sworn enemy (conditional damage undervalued despite frequency)';
+    return '+3d6 + attack advantage vs sworn enemy calculates as 2.77 pts (Rare) but official is Very Rare. Ignores cover/invisibility benefits not modeled.';
   }
   if (itemName === 'Nine Lives Stealer') {
     return 'Drains life force on nat 20 (instant kill effect on crit not fully weighted)';
@@ -104,13 +105,13 @@ export function getItemExplanation(itemName: string): string {
     return '+3d6 vs dragons (conditional damage heavily discounted at ×0.25, but dragons are common high-CR enemies)';
   }
   if (itemName === 'Giant Slayer') {
-    return '+2d6 vs giants (conditional damage heavily discounted at ×0.25, but giants are common enemies)';
+    return '+1 weapon + 2d6 vs giants calculates as 1.85 pts (Uncommon) but official is Rare. Prone effect on hit and common giant encounters make it stronger.';
   }
   if (itemName === 'Mace of Disruption') {
-    return '+2d6 radiant vs undead/fiends (conditional damage + radiant type undervalued for common enemy types)';
+    return '2d6 radiant vs undead/fiends calculates as 1.1 pts (Uncommon) but official is Rare. Destroy effect on targets with 25 HP or less not modeled.';
   }
   if (itemName === 'Mace of Smiting') {
-    return '+2 enhancement and +2d6 crit damage vs constructs (conditional bonuses not fully valued)';
+    return '+1 mace calculates as 1.0 pts (Uncommon) but official is Rare. Becomes +3 vs constructs, extra crit damage, and construct destruction not modeled.';
   }
   if (itemName === 'Sun Blade') {
     return '+2 enhancement + 1d8 radiant (our radiant ×1.1 multiplier may overvalue this to 3.38 pts, pushing it to Very Rare when official is Rare)';
@@ -142,7 +143,7 @@ export function getItemExplanation(itemName: string): string {
     return 'Single-use Lightning Bolt effect (4d6 damage, DC 13) - spell charge not valued in our math';
   }
   if (itemName === 'Dagger of Venom') {
-    return 'Poison coating (2d10, DC 15, 1/day) - charge-based damage not properly valued';
+    return '+1 dagger with poison coating (2d10 + poisoned condition, DC 15, 1/day) - calculated 1.4 pts (Uncommon) but official is Rare. The poisoned condition value not captured.';
   }
   if (itemName === 'Gloves of Missile Snaring') {
     return 'Catch and deflect ranged attacks (defensive utility not quantified in our math)';
@@ -151,7 +152,10 @@ export function getItemExplanation(itemName: string): string {
     return 'Bonus action to float and protect you (hands-free AC bonus mechanic not fully valued)';
   }
   if (itemName === 'Staff of Power') {
-    return '+2 to attack/damage/AC/saves scores as 6.0 (Legendary tier), but official is Very Rare - our math may overvalue stacking bonuses';
+    return '+2 to attack/damage/AC/saves calculates as 6.0 pts (Legendary), but official is Very Rare. Stacking bonuses + spellcaster attunement requirement + spell charges make the official rating appropriate.';
+  }
+  if (itemName === 'Thunderous Greatclub') {
+    return 'STR 20 setter + 1d8 thunder calculates correctly, but also has Clap of Thunder (30ft cone prone) and Earthquake (50ft radius) abilities not modeled.';
   }
   if (itemName === 'Energy Bow') {
     return '+1 bow that deals Force damage instead of Piercing, with Arrow of Restraint (DC 15 STR save) - force damage type and restraint ability add tactical value beyond +1 enhancement';
@@ -183,7 +187,7 @@ export function getItemExplanation(itemName: string): string {
     return 'Very strong for Rare tier (disadvantage on all attacks against you)';
   }
   if (itemName === 'Wings of Flying') {
-    return 'Weak for Rare tier (time-limited, inferior to Broom of Flying)';
+    return 'Limited flight (1.5 hrs) calculates as 1.0 pts (Uncommon) but official is Rare. Flight value may be underestimated relative to Fly spell (3rd level).';
   }
   if (itemName === 'Trident of Fish Command') {
     return 'Weak for Uncommon (very niche - only controls fish)';
