@@ -60,10 +60,10 @@ const DICE_VALUES: Record<string, number> = {
 
 // Recharge frequency multipliers
 // These represent the value of spell abilities based on how often they recharge
-// A level 3 spell (like Fireball) once per long rest should be worth ~0.75-0.9 points
+// Tuned so Wand of Fireballs (Lv3 × 4 uses) = 2.4 pts (Rare tier)
 const RECHARGE_MULTIPLIERS: Record<string, number> = {
   'dawn': 0.10,  // Lower because wands/staves don't fully recharge (typically 1d6+1)
-  'long rest': 0.25,
+  'long rest': 0.20,  // Reduced from 0.25 to fix wand overvaluation
   'short rest': 0.4,
 };
 
@@ -209,9 +209,10 @@ export function calculateCombatScore(combat: CombatFeatures): number {
       }
     }
 
-    // Conditional damage (only works vs specific creatures) is worth 25% of normal value
+    // Conditional damage (only works vs specific creatures)
+    // Increased from 0.25 to 0.5 because dragons, giants, undead, fiends are common enemies
     if (combat.damageBonus.conditional) {
-      diceValue *= 0.25;
+      diceValue *= 0.5;
     }
 
     score += diceValue;
@@ -228,13 +229,13 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   }
 
   // Ability score setter - scales with the value it sets to
-  // Setting to 19 (+4 mod) is baseline, higher values are more powerful
+  // Reduced baseline from 2.5 to 1.5 to match official rarities (Gauntlets, Headband = Uncommon)
   if (combat.abilityScoreSetter) {
     const setValue = combat.abilityScoreSetter.setValue;
     if (setValue >= 25) score += 4.0;      // +7 modifier (epic)
     else if (setValue >= 23) score += 3.5; // +6 modifier (very powerful)
     else if (setValue >= 21) score += 3.0; // +5 modifier (powerful)
-    else score += 2.5;                      // 19 or lower (+4 modifier, baseline)
+    else score += 1.5;                      // 19 or lower (+4 modifier, baseline)
   }
 
   // Ability score bonus - adds to existing score
@@ -257,10 +258,10 @@ export function calculateCombatScore(combat: CombatFeatures): number {
     }
   }
 
-  // Damage resistances - each resistance is worth 1.5 points
-  // (defensive, situational, but very valuable in the right circumstances)
+  // Damage resistances - each resistance is worth 2.0 points
+  // Increased from 1.5 to 2.0 to better match official rarities (Armor of Resistance, Frost Brand)
   if (combat.resistances && combat.resistances.length > 0) {
-    score += combat.resistances.length * 1.5;
+    score += combat.resistances.length * 2.0;
   }
 
   // Spell charges (legacy format)

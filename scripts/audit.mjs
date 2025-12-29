@@ -24,7 +24,7 @@ function getDiceValue(diceString) {
 }
 
 const RECHARGE_MULTIPLIERS = {
-  'long rest': 0.25,
+  'long rest': 0.20,  // Reduced from 0.25 to fix wand overvaluation
   'short rest': 0.4,
 };
 
@@ -58,7 +58,8 @@ function calculateCombatScore(combat) {
       if (frequency === 'per-turn') diceValue *= 0.4;
     }
 
-    if (combat.damageBonus.conditional) diceValue *= 0.25;
+    // Conditional damage - increased from 0.25 to 0.5 for common enemies
+    if (combat.damageBonus.conditional) diceValue *= 0.5;
     score += diceValue;
   }
 
@@ -68,13 +69,13 @@ function calculateCombatScore(combat) {
   // Saving throw bonus
   score += combat.savingThrowBonus || 0;
 
-  // Ability score setter - scales with the value it sets to
+  // Ability score setter - reduced baseline from 2.5 to 1.5
   if (combat.abilityScoreSetter) {
     const setValue = combat.abilityScoreSetter.setValue;
     if (setValue >= 25) score += 4.0;      // +7 modifier (epic)
     else if (setValue >= 23) score += 3.5; // +6 modifier (very powerful)
     else if (setValue >= 21) score += 3.0; // +5 modifier (powerful)
-    else score += 2.5;                      // 19 or lower (+4 modifier, baseline)
+    else score += 1.5;                      // 19 or lower (+4 modifier, baseline)
   }
 
   // Ability score bonus - adds to existing score
@@ -93,9 +94,9 @@ function calculateCombatScore(combat) {
     }
   }
 
-  // Resistances
+  // Resistances - increased from 1.5 to 2.0
   if (combat.resistances) {
-    score += combat.resistances.length * 1.5;
+    score += combat.resistances.length * 2.0;
   }
 
   // Legacy charges
