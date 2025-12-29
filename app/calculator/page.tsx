@@ -889,14 +889,14 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* HEAD TO HEAD - Battle Card Comparison */}
-                {topAnchors.length > 0 && (
+                {/* What's Similar? - Reference Item Comparison */}
+                {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
                   <div className="border-t border-slate-700 pt-4">
                     {/* Section Header */}
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-white font-bold text-lg flex items-center gap-2">
-                        <span>⚔️</span>
-                        <span>HEAD TO HEAD</span>
+                        <span>🔍</span>
+                        <span>What&apos;s Similar?</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -931,7 +931,7 @@ export default function CalculatorPage() {
                               <div className="bg-blue-950/50 border-r border-slate-600 p-4">
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-blue-800/50">
                                   <span className="text-blue-400 text-lg">⚔️</span>
-                                  <span className="text-blue-300 font-bold">YOUR ITEM</span>
+                                  <span className="text-blue-300 font-bold">{itemName || 'YOUR ITEM'}</span>
                                 </div>
                                 <div className="text-sm text-blue-200 font-mono mb-3">
                                   {results.combatScore.toFixed(1)} pts • <span className="text-blue-400">{results.suggestedRarity}</span>
@@ -967,10 +967,10 @@ export default function CalculatorPage() {
                                 </div>
                               </div>
 
-                              {/* RIGHT: Anchor Item (Vibrant Emerald) */}
+                              {/* RIGHT: Reference Item (Vibrant Emerald) */}
                               <div className="bg-emerald-950/50 p-4">
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-emerald-800/50">
-                                  <span className="text-emerald-400 text-lg">⚓</span>
+                                  <span className="text-emerald-400 text-lg">📖</span>
                                   <span className="text-emerald-300 font-bold">#{index + 1} {anchor.name}</span>
                                   {warnings.hasSpecial && <span title="Special mechanics" className="text-sm">⭐</span>}
                                   {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}
@@ -1072,72 +1072,6 @@ export default function CalculatorPage() {
                   </div>
                 )}
 
-                {/* Your Item Summary */}
-                <div className="border-t border-slate-700 pt-4">
-                  <div className="text-emerald-400 font-bold mb-2 flex items-center gap-2">
-                    <span>⚔️</span>
-                    <span>YOUR ITEM</span>
-                  </div>
-                  <div className="bg-slate-800/30 rounded-lg p-3">
-                    <div className="text-xs space-y-2">
-                      {/* Features List */}
-                      <div>
-                        <div className="text-slate-400 font-semibold mb-1">Features</div>
-                        <div className="text-slate-300 space-y-0.5 pl-2">
-                          {enhancement > 0 && <div>+{enhancement} enhancement</div>}
-                          {damageBonus && (
-                            <div>
-                              {damageBonus.dice} {damageBonus.type}
-                              {damageBonus.conditional && <span className="text-yellow-400 ml-1">(conditional)</span>}
-                            </div>
-                          )}
-                          {acBonus > 0 && <div>+{acBonus} AC</div>}
-                          {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves</div>}
-                          {abilityScoreSetter && (
-                            <div>{abilityScoreSetter.ability} set to {abilityScoreSetter.setValue}</div>
-                          )}
-                          {abilityScoreBonus && (
-                            <div>+{abilityScoreBonus.bonus} {abilityScoreBonus.ability}</div>
-                          )}
-                          {flight && (
-                            <div>
-                              Flight: {flight.duration === 'unlimited' ? 'Unlimited' : `${flight.hoursPerDay} hrs/day`}
-                            </div>
-                          )}
-                          {abilities.length > 0 && (
-                            <div>
-                              {maxCharges} charges ({abilities.length} abilit{abilities.length > 1 ? 'ies' : 'y'})
-                              {chargesPerShortRest > 0 && <span className="text-slate-400"> • {chargesPerShortRest}/SR</span>}
-                              {chargesPerLongRest > 0 && <span className="text-slate-400"> • {chargesPerLongRest}/LR</span>}
-                            </div>
-                          )}
-                          {!enhancement && !damageBonus && !acBonus && !savingThrowBonus && !abilityScoreSetter && !flight && abilities.length === 0 && (
-                            <div className="text-slate-500 italic">No features added</div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Combat Score */}
-                      <div className="pt-2 border-t border-slate-700/50">
-                        <div className="text-slate-400 font-semibold mb-1">Combat Score</div>
-                        <div className="text-emerald-400 font-mono font-bold">
-                          {results.combatScore.toFixed(1)} pts
-                        </div>
-                      </div>
-
-                      {/* Attunement Notice */}
-                      {attunement && (
-                        <div className="pt-2 border-t border-slate-700/50">
-                          <div className="text-yellow-400 flex items-center gap-1">
-                            <span>⚠️</span>
-                            <span>Requires Attunement</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
               </div>
             </div>
           </div>
@@ -1227,18 +1161,18 @@ export default function CalculatorPage() {
                         Attunement does <span className="text-yellow-400">not</span> modify scores. Official 5e pricing is inconsistent—Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
                       </div>
                       <div className="text-slate-500 italic text-[10px] mt-1">
-                        When comparing, prioritize anchors with matching attunement. The 3-slot limit means attunement is an &quot;opportunity cost&quot; that varies by build.
+                        When comparing, prioritize reference items with matching attunement. The 3-slot limit means attunement is an &quot;opportunity cost&quot; that varies by build.
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="text-emerald-400 font-semibold">Anchor Discrepancy Categories:</div>
+                    <div className="text-emerald-400 font-semibold">Reference Item Discrepancy Categories:</div>
                     <div className="space-y-3">
                       <div className="bg-purple-900/20 border border-purple-700/30 rounded p-3">
                         <div className="text-purple-400 font-semibold mb-1">⭐ Special Mechanics</div>
                         <div className="text-slate-300 text-[11px]">
-                          These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the anchor!
+                          These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the reference!
                         </div>
                       </div>
                       <div className="bg-blue-900/20 border border-blue-700/30 rounded p-3">
