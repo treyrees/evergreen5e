@@ -452,13 +452,16 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "5389-holy-avenger",
+    "overrideBonus": 0.5,
     "combat": {
       "enhancement": 3,
       "damageBonus": {
         "dice": "2d10",
-        "type": "radiant"
+        "type": "radiant",
+        "conditionalType": "creature-common"
       }
-    }
+    },
+    "description": "+3 sword with 2d10 radiant vs fiends/undead (~5.0 pts base). Override +0.5 for 10-ft aura granting advantage on saves vs spells to you and allies. Paladin-only attunement limits availability but doesn't reduce power for those who qualify."
   },
   {
     "name": "Sword of Sharpness",
@@ -601,10 +604,11 @@
     "rarity": "rare",
     "attunement": true,
     "dndbeyondSlug": "4605-cloak-of-displacement",
+    "overrideBonus": 2.0,
     "combat": {
-      "enhancement": 0,
-      "acBonus": 2
-    }
+      "enhancement": 0
+    },
+    "description": "Grants disadvantage on attacks against you (turns off when hit until start of your next turn). Similar to Blur spell but permanent. Override +2.0 for defensive effect—hard to quantify precisely but equivalent to roughly +2-3 effective AC with downside."
   },
   {
     "name": "Energy Bow",
