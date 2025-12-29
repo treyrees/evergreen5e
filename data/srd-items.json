@@ -325,7 +325,8 @@
       "utilitySpells": [
         "+2d6 (or +7) damage on natural 20"
       ]
-    }
+    },
+    "description": "Deals +7 damage on natural 20s. Our formula doesn't value critical-only effects, making this appear weaker than its Rare rating suggests."
   },
   {
     "name": "Mace of Disruption",
@@ -428,7 +429,8 @@
     "combat": {
       "acBonus": 0,
       "enhancement": 0
-    }
+    },
+    "description": "Doubles movement speed and grants advantage on Dex saves as a bonus action. Our formula doesn't model movement/utility, making this appear weaker than Rare."
   },
   {
     "name": "Gloves of Missile Snaring",

@@ -805,6 +805,15 @@ export default function CalculatorPage() {
                               </div>
                             </div>
 
+                            {/* Description for unmodeled mechanics */}
+                            {anchor.description && (
+                              <div className="mb-3 bg-cyan-900/20 border border-cyan-700/30 rounded p-2">
+                                <div className="text-xs text-cyan-300 italic">
+                                  ⚠️ {anchor.description}
+                                </div>
+                              </div>
+                            )}
+
                             {/* Comparison */}
                             <div className="bg-slate-900/50 rounded p-2">
                               <div className="text-xs font-semibold text-slate-400 mb-1">

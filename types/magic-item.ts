@@ -65,6 +65,7 @@ export interface MagicItem {
   attunement: boolean;
   rarity?: string; // For SRD items
   manualRarity?: boolean; // If true, use official rarity instead of calculating
+  description?: string; // Explains unmodeled mechanics that affect item power
 }
 
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Very Rare' | 'Legendary';
