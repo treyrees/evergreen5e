@@ -1098,17 +1098,11 @@ export default function CalculatorPage() {
                   </div>
                 </div>
               )}
-              <div className="border-b border-slate-600 pb-4 mb-4">
-                <div className="text-center text-lg font-bold text-slate-200">
-                  {currentItem.name?.toUpperCase() || 'YOUR ITEM'}
-                </div>
-              </div>
-
               <div className="space-y-4">
                 {/* Suggested Rarity - THE ANSWER */}
                 <div className="bg-slate-700/30 border border-slate-600 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Suggested Rarity</span>
+                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Suggested Rarity</span>
                     <span className="text-sm font-mono text-slate-500">
                       <AnimatedNumber value={results.combatScore} /> pts
                     </span>
@@ -1118,10 +1112,18 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Similar Items - Reference Comparisons */}
+                {/* What's Similar? - Reference Comparisons */}
                 {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
                   <div className="pt-2">
-                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide block mb-3">Similar Items</span>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">What&apos;s Similar?</span>
+                      <span
+                        className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
+                        title="Compare your item's power level against official SRD items with similar properties."
+                      >
+                        ⓘ
+                      </span>
+                    </div>
 
                     <div className="space-y-3">
                       {topAnchors.slice(0, 3).map((anchorData, index) => {
