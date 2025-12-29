@@ -8,6 +8,13 @@ const DIE_TYPE_VALUES = {
   'd4': 0.5, 'd6': 1.0, 'd8': 1.25, 'd10': 1.5, 'd12': 1.75, 'd20': 2.5,
 };
 
+const DAMAGE_TYPE_MULTIPLIERS = {
+  'force': 1.2, 'psychic': 1.15, 'radiant': 1.1,
+  'fire': 1.0, 'cold': 1.0, 'lightning': 1.0, 'thunder': 1.0, 'acid': 1.0,
+  'necrotic': 0.9, 'poison': 0.7,
+  'bludgeoning': 0.85, 'piercing': 0.85, 'slashing': 0.85,
+};
+
 function getDiceValue(diceString) {
   const match = diceString.match(/^(\d+)d(\d+)$/);
   if (!match) return 0;
@@ -30,6 +37,9 @@ function calculateCombatScore(combat) {
   // Damage bonus
   if (combat.damageBonus) {
     let diceValue = getDiceValue(combat.damageBonus.dice);
+    const damageType = combat.damageBonus.type.toLowerCase();
+    const typeMultiplier = DAMAGE_TYPE_MULTIPLIERS[damageType] || 1.0;
+    diceValue *= typeMultiplier;
     const frequency = combat.damageBonus.frequency || 'per-hit';
     if (frequency === 'per-turn') diceValue *= 0.4;
     if (combat.damageBonus.conditional) diceValue *= 0.25;

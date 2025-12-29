@@ -611,6 +611,10 @@ export default function CalculatorPage() {
                           Reskin freely—a sword shooting lightning bolts is mechanically identical to casting <em>Lightning Bolt</em>.
                         </p>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                          <strong>Damage types:</strong> Fire, cold, lightning, acid, thunder, necrotic are mechanically similar—choose the spell that matches your flavor.
+                          <strong>Conditions:</strong> Paralyzed, frightened, stunned, restrained are similarly debilitating—find a spell with the closest match.
+                        </p>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400">
                           <strong>Search tip:</strong> Browse by spell school (abjuration, conjuration, divination, enchantment, evocation, illusion, necromancy, transmutation).
                         </p>
                         <p className="text-[10px] text-blue-600 dark:text-blue-400">
@@ -620,7 +624,7 @@ export default function CalculatorPage() {
 
                       <div className="space-y-1.5 bg-white dark:bg-slate-800/50 rounded p-2 border border-blue-100 dark:border-blue-900 text-[11px]">
                         <div className="text-[10px] text-slate-500 dark:text-slate-400 italic mb-1 pb-1 border-b border-slate-200 dark:border-slate-700">
-                          Spell slots: Lv1-5 have multiple slots/day. <strong>Lv6+ only ONE slot each.</strong> Items that bypass this scarcity are very powerful.
+                          Spell slots: Lv1-5 scale to 2-4 slots/day. <strong>Lv6-9 stay at 1 slot forever.</strong> Items that bypass this scarcity are very powerful.
                         </div>
 
                         <div>
@@ -632,13 +636,13 @@ export default function CalculatorPage() {
                         <div>
                           <span className="font-semibold text-slate-700 dark:text-slate-300">Level 1-2</span>
                           <span className="text-slate-500"> • ~0.25-0.5 pts</span>
-                          <span className="text-slate-600 dark:text-slate-400"> — 2d6-4d6, single target. Multiple slots/day. (Magic Missile, Scorching Ray, Invisibility)</span>
+                          <span className="text-slate-600 dark:text-slate-400"> — 2d6-4d6, single target. Scale to 3-4 slots/day. (Magic Missile, Scorching Ray, Invisibility)</span>
                         </div>
 
                         <div className="bg-emerald-50 dark:bg-emerald-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-emerald-500">
                           <div>
                             <span className="font-semibold text-emerald-700 dark:text-emerald-300">⚡ Level 3</span>
-                            <span className="text-emerald-600 dark:text-emerald-400"> • ~0.75 pts • 5th level characters • Multiple slots</span>
+                            <span className="text-emerald-600 dark:text-emerald-400"> • ~0.75 pts • 5th level characters • Scale to 3 slots</span>
                           </div>
                           <div className="text-emerald-700 dark:text-emerald-300 font-medium mt-0.5">
                             AoE unlocks: 8d6 in 20ft sphere (Fireball) or 100ft line (Lightning Bolt). Hits 3-6 enemies = 3x damage.
@@ -648,25 +652,25 @@ export default function CalculatorPage() {
                         <div>
                           <span className="font-semibold text-slate-700 dark:text-slate-300">Level 4-5</span>
                           <span className="text-slate-500"> • ~1.0-1.25 pts</span>
-                          <span className="text-slate-600 dark:text-slate-400"> — 8d8, large AoE. Multiple slots/day. (Wall of Fire, Cone of Cold, Polymorph)</span>
+                          <span className="text-slate-600 dark:text-slate-400"> — 8d8, large AoE. Scale to 3 slots/day. (Wall of Fire, Cone of Cold, Polymorph)</span>
                         </div>
 
                         <div className="bg-amber-50 dark:bg-amber-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-amber-500">
                           <span className="font-semibold text-amber-700 dark:text-amber-300">Level 6</span>
-                          <span className="text-amber-600 dark:text-amber-400"> • ~1.5 pts • 11th level • ONE slot/day</span>
+                          <span className="text-amber-600 dark:text-amber-400"> • ~1.5 pts • 11th level • 1 slot/day forever</span>
                           <span className="text-amber-700 dark:text-amber-300"> — 10d8. Scarcity begins. (Chain Lightning, Disintegrate)</span>
                         </div>
 
                         <div>
                           <span className="font-semibold text-slate-700 dark:text-slate-300">Level 7-8</span>
-                          <span className="text-slate-500"> • ~1.75-2.0 pts • ONE slot each</span>
+                          <span className="text-slate-500"> • ~1.75-2.0 pts • 1 slot each forever</span>
                           <span className="text-slate-600 dark:text-slate-400"> — (Finger of Death, Dominate Monster)</span>
                         </div>
 
                         <div className="bg-red-50 dark:bg-red-900/20 -mx-2 px-2 py-1 rounded border-l-2 border-red-500">
                           <span className="font-semibold text-red-700 dark:text-red-300">Level 9</span>
-                          <span className="text-red-600 dark:text-red-400"> • ~2.5 pts • 17th level • ONE slot forever</span>
-                          <span className="text-red-700 dark:text-red-300"> — 40d6. Never get more slots. (Meteor Swarm, Wish)</span>
+                          <span className="text-red-600 dark:text-red-400"> • ~2.5 pts • 17th level • 1 slot/day forever</span>
+                          <span className="text-red-700 dark:text-red-300"> — 40d6. (Meteor Swarm, Wish)</span>
                         </div>
                       </div>
 
@@ -1103,9 +1107,28 @@ export default function CalculatorPage() {
 
                       <div className="space-y-1">
                         <div className="text-emerald-400 font-semibold">Damage Dice:</div>
-                        <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts</div>
+                        <div>• 1d4 = 0.5 pts, 1d6 = 1 pt, 1d8 = 1.25 pts, 1d10 = 1.5 pts, 1d12 = 1.75 pts</div>
                         <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
+                        <div className="text-yellow-400">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
                         <div className="text-yellow-400">• Conditional damage: ×0.25 (only vs specific creatures)</div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-emerald-400 font-semibold">Damage Type Multipliers:</div>
+                        <div>• Strong (fewer resistances): Force ×1.2, Psychic ×1.15, Radiant ×1.1</div>
+                        <div>• Neutral (baseline): Fire, Cold, Lightning, Thunder, Acid ×1.0</div>
+                        <div>• Weak (more resistances): Necrotic ×0.9, Poison ×0.7, Physical ×0.85</div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-emerald-400 font-semibold">Ability Scores:</div>
+                        <div>• Setter (19): 2.5 pts | Setter (21): 3.0 pts | Setter (23+): 3.5+ pts</div>
+                        <div>• Bonus: ×0.75 per point (e.g., +2 bonus = 1.5 pts)</div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-emerald-400 font-semibold">Flight:</div>
+                        <div>• Unlimited: 2.0 pts | Limited (4+ hrs/day): 1.5 pts | Limited (&lt;4 hrs): 1.0 pt</div>
                       </div>
 
                       <div className="space-y-1">
@@ -1116,29 +1139,28 @@ export default function CalculatorPage() {
                       <div className="space-y-1">
                         <div className="text-emerald-400 font-semibold">Spell/Ability Charges:</div>
                         <div>• Formula: spell_level × uses_per_day × recharge_multiplier</div>
-                        <div>• Dawn/Long Rest: ×0.1</div>
-                        <div>• Short Rest: ×0.2</div>
-                        <div className="text-slate-500 italic">
-                          (Low multipliers account for limited total charges that don't fully recharge)
+                        <div>• Dawn/Long Rest: ×0.1-0.25 | Short Rest: ×0.2-0.4</div>
+                        <div className="text-slate-500 italic text-[10px]">
+                          Multipliers vary by total charges and recharge mechanics. Lv6-9 spells are more valuable (only 1 slot/day for casters).
                         </div>
                       </div>
 
                       <div className="space-y-1">
                         <div className="text-emerald-400 font-semibold">Rarity Thresholds:</div>
-                        <div>• Common: &lt;1.0 pts</div>
-                        <div>• Uncommon: 1.0-1.9 pts</div>
-                        <div>• Rare: 2.0-2.9 pts</div>
-                        <div>• Very Rare: 3.0-3.9 pts</div>
-                        <div>• Legendary: 4.0+ pts</div>
+                        <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
+                        <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
                       </div>
 
                       <div className="space-y-1 pt-2 border-t border-slate-700/50">
-                        <div className="text-emerald-400 font-semibold">Balance Indicators:</div>
-                        <div className="text-cyan-400">
-                          <span className="font-bold">*</span> 3.6% of the SRD items differ by 2+ tiers with our math (2 out of 56 items). Some particular effects are not yet captured by our math, and the more specific the effect, the worse this problem can be. Read the item descriptions and apply discretion.
+                        <div className="text-emerald-400 font-semibold">Warning Indicators:</div>
+                        <div className="text-blue-400">
+                          <span className="font-bold">🔢</span> Numerical edge case: Conditional bonuses we can't track (e.g., +2d6 on nat 20)
                         </div>
-                        <div className="text-amber-400">
-                          <span className="font-bold">**</span> Community consensus - D&D community reports imbalance for rarity
+                        <div className="text-purple-400">
+                          <span className="font-bold">⭐</span> Special mechanics: Non-numerical benefits our math can't quantify (e.g., instant kill)
+                        </div>
+                        <div className="text-slate-300">
+                          <span className="font-bold">💬</span> Community note: Well-established consensus about balance (often stronger than rated)
                         </div>
                       </div>
                     </div>

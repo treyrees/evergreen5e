@@ -12,6 +12,28 @@ const DIE_TYPE_VALUES: Record<string, number> = {
   'd20': 2.5,   // 10.5 avg (rarely used for damage, but supported)
 };
 
+// Damage type multipliers based on resistance/immunity prevalence in 5e
+const DAMAGE_TYPE_MULTIPLIERS: Record<string, number> = {
+  // Strong types (fewer resistances/immunities)
+  'force': 1.2,      // Almost nothing resists force
+  'psychic': 1.15,   // Very few resistances
+  'radiant': 1.1,    // Fewer resistances, strong vs undead
+
+  // Neutral types (baseline - most common damage types)
+  'fire': 1.0,       // Baseline despite common resistance
+  'cold': 1.0,
+  'lightning': 1.0,
+  'thunder': 1.0,
+  'acid': 1.0,
+
+  // Weak types (more resistances/immunities)
+  'necrotic': 0.9,   // Some resistances
+  'poison': 0.7,     // Very commonly resisted/immune
+  'bludgeoning': 0.85,  // Non-magical physical
+  'piercing': 0.85,
+  'slashing': 0.85,
+};
+
 function getDiceValue(diceString: string): number {
   const match = diceString.match(/^(\d+)d(\d+)$/);
   if (!match) return 0;
@@ -154,6 +176,12 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   // Damage bonus
   if (combat.damageBonus?.dice) {
     let diceValue = getDiceValue(combat.damageBonus.dice);
+
+    // Damage type multiplier
+    // Some damage types are more valuable due to fewer resistances/immunities
+    const damageType = combat.damageBonus.type.toLowerCase();
+    const typeMultiplier = DAMAGE_TYPE_MULTIPLIERS[damageType] || 1.0;
+    diceValue *= typeMultiplier;
 
     // Frequency multiplier
     // - per-hit (default): 1.0 - applies to every attack
