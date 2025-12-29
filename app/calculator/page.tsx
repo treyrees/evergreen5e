@@ -599,28 +599,67 @@ export default function CalculatorPage() {
                   {/* Collapsible Helper Guide */}
                   <details className="mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md select-none">
-                      📖 How to Estimate Spell Levels
+                      📖 Spell Level Guide & Power Scaling
                     </summary>
-                    <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2 border-t border-blue-200 dark:border-blue-800">
-                      <p className="font-semibold">
-                        Even if your ability isn't technically a spell, find a similar spell to estimate its power.
+                    <div className="px-3 py-3 text-xs text-slate-700 dark:text-slate-300 space-y-2.5 border-t border-blue-200 dark:border-blue-800">
+                      <p className="font-semibold text-sm">
+                        Even if your ability isn't a spell, find a similar spell to estimate its power.
                       </p>
-                      <div className="space-y-1.5">
-                        <div>
-                          <span className="font-semibold text-blue-700 dark:text-blue-300">Level 0 (Cantrip):</span> Minor effects, unlimited use. Tiny damage (1d6-1d10), simple utility.
+
+                      <div className="space-y-2 bg-white dark:bg-slate-800/50 rounded p-2 border border-blue-100 dark:border-blue-900">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1">
+                            <div className="font-semibold text-slate-700 dark:text-slate-300">Level 0 (Cantrip) • Worth ~0 pts</div>
+                            <div className="text-slate-600 dark:text-slate-400">Minor damage (1d6-1d10), basic utility. Unlimited use but weak.</div>
+                          </div>
                         </div>
-                        <div>
-                          <span className="font-semibold text-emerald-700 dark:text-emerald-300">Level 3 Breakpoint:</span> First major power spike. Heavy damage (8d6 like Fireball), strong conditions, flight.
+
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1">
+                            <div className="font-semibold text-slate-700 dark:text-slate-300">Level 1-2 • Worth ~0.25-0.5 pts</div>
+                            <div className="text-slate-600 dark:text-slate-400">Low damage (2d6-4d6), single target or small cone. Magic Missile, Scorching Ray.</div>
+                          </div>
                         </div>
-                        <div>
-                          <span className="font-semibold text-amber-700 dark:text-amber-300">Level 6 Breakpoint:</span> Devastating effects. Massive damage (10d6-12d6), powerful control, disintegration.
+
+                        <div className="flex justify-between items-start gap-2 bg-emerald-50 dark:bg-emerald-900/20 -mx-2 px-2 py-1.5 rounded border-l-2 border-emerald-500">
+                          <div className="flex-1">
+                            <div className="font-semibold text-emerald-700 dark:text-emerald-300">⚡ Level 3 BREAKPOINT • Worth ~0.75 pts</div>
+                            <div className="text-emerald-800 dark:text-emerald-200 font-medium">CRITICAL: First major AoE damage (Fireball/Lightning Bolt 8d6, 20ft radius/100ft line)</div>
+                            <div className="text-emerald-700 dark:text-emerald-300 text-[11px] mt-0.5">This is where damage explodes. AoE means hitting multiple enemies = massive combat impact.</div>
+                          </div>
                         </div>
-                        <div>
-                          <span className="font-semibold text-red-700 dark:text-red-300">Level 9 Breakpoint:</span> Reality-warping power. Meteor Swarm (40d6), Time Stop, Wish.
+
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1">
+                            <div className="font-semibold text-slate-700 dark:text-slate-300">Level 4-5 • Worth ~1.0-1.25 pts</div>
+                            <div className="text-slate-600 dark:text-slate-400">Heavy effects (Ice Storm, Cone of Cold). Polymorph, Greater Invisibility.</div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-start gap-2 bg-amber-50 dark:bg-amber-900/20 -mx-2 px-2 py-1.5 rounded border-l-2 border-amber-500">
+                          <div className="flex-1">
+                            <div className="font-semibold text-amber-700 dark:text-amber-300">Level 6 Breakpoint • Worth ~1.5 pts</div>
+                            <div className="text-amber-700 dark:text-amber-300">Devastating damage (10d6-14d6). Disintegrate, Chain Lightning, Mass Suggestion.</div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1">
+                            <div className="font-semibold text-slate-700 dark:text-slate-300">Level 7-8 • Worth ~1.75-2.0 pts</div>
+                            <div className="text-slate-600 dark:text-slate-400">Extremely powerful (Finger of Death, Dominate Monster, Earthquake).</div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-start gap-2 bg-red-50 dark:bg-red-900/20 -mx-2 px-2 py-1.5 rounded border-l-2 border-red-500">
+                          <div className="flex-1">
+                            <div className="font-semibold text-red-700 dark:text-red-300">Level 9 Breakpoint • Worth ~2.5 pts</div>
+                            <div className="text-red-700 dark:text-red-300">Reality-warping (Meteor Swarm 40d6, Wish, Time Stop, True Polymorph).</div>
+                          </div>
                         </div>
                       </div>
-                      <p className="pt-2 text-slate-600 dark:text-slate-400 italic border-t border-blue-200 dark:border-blue-700">
-                        Examples: Lightning bolt from sword? Level 3. Flames add 1d6 fire? Level 1. Item polymorphs self? Level 4.
+
+                      <p className="pt-2 text-slate-600 dark:text-slate-400 italic border-t border-blue-200 dark:border-blue-700 text-[11px]">
+                        Quick examples: Sword shoots lightning bolt? Lv3 (AoE). Flames add 1d6 fire? Lv1 (single target). Polymorphs wielder? Lv4.
                       </p>
                     </div>
                   </details>
