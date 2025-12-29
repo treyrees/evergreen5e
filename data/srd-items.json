@@ -118,7 +118,8 @@
     "attunement": true,
     "combat": {
       "enhancement": 3
-    }
+    },
+    "description": "Can decapitate creatures on natural 20 (DC 15 save). This instant-kill ability makes it far more powerful than its +3 enhancement suggests."
   },
   {
     "name": "Oathbow",
@@ -283,7 +284,8 @@
     "manualRarity": true,
     "combat": {
       "enhancement": 0
-    }
+    },
+    "description": "Absorbs spells targeting you, negating their effects and storing their energy. This defensive utility makes it Very Rare despite no direct combat bonus."
   },
   {
     "name": "Giant Slayer",
@@ -391,7 +393,8 @@
     "manualRarity": true,
     "combat": {
       "enhancement": 1
-    }
+    },
+    "description": "Grants +1 to saves and can cast Wish (1d4-1 times). The Wish spell alone makes this Legendary despite modest combat stats."
   },
   {
     "name": "Holy Avenger",

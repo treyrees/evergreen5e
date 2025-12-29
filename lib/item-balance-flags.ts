@@ -35,6 +35,8 @@ export const COMMUNITY_MISMATCHES = new Set([
 
   // Underpowered for rarity (or has special mechanics not captured in math)
   'Vorpal Sword',              // Legendary - decapitation ability not modeled, shows as Very Rare
+  'Luck Blade',                // Legendary - Wish spell not modeled, shows as Uncommon
+  'Rod of Absorption',         // Very Rare - spell absorption not modeled, shows as Common
   'Wings of Flying',           // Rare - time limited, inferior to Broom of Flying
   'Trident of Fish Command',   // Uncommon - very niche, only controls fish
 ]);
