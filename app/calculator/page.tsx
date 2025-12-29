@@ -1028,7 +1028,7 @@ export default function CalculatorPage() {
                             <div className="grid grid-cols-2">
                               {/* LEFT: Your Item */}
                               <div className="bg-slate-700/50 border-r border-slate-600 p-4 relative">
-                                {attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
+                                {attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🏆</span>}
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
                                   <span className="text-slate-400 text-lg">⚔️</span>
                                   <span className="text-slate-200 font-bold">{itemName || 'YOUR ITEM'}</span>
@@ -1072,7 +1072,7 @@ export default function CalculatorPage() {
 
                               {/* RIGHT: Reference Item */}
                               <div className="bg-slate-700/30 p-4 relative">
-                                {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🔗</span>}
+                                {anchor.attunement && <span title="Requires Attunement" className="absolute top-2 right-2 text-sm">🏆</span>}
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-600">
                                   <span className="text-slate-400 text-lg">{getItemEmoji(anchor.name)}</span>
                                   <span className="text-slate-200 font-bold">#{index + 1} {anchor.name}</span>
