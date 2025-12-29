@@ -209,9 +209,18 @@ export function calculateCombatScore(combat: CombatFeatures): number {
       }
     }
 
-    // Conditional damage (only works vs specific creatures)
-    // Increased from 0.25 to 0.5 because dragons, giants, undead, fiends are common enemies
-    if (combat.damageBonus.conditional) {
+    // Conditional damage - multiplier based on condition type
+    // More specific types allow better balance tuning
+    if (combat.damageBonus.conditionalType) {
+      const conditionalMultipliers: Record<string, number> = {
+        'creature-common': 0.6,   // Undead, fiends, humanoids - frequent
+        'creature-rare': 0.4,     // Giants, dragons, constructs - less common
+        'rival': 0.3,             // Sworn enemy / single target (Oathbow)
+        'environmental': 0.25,    // "In darkness", "underwater", situational
+      };
+      diceValue *= conditionalMultipliers[combat.damageBonus.conditionalType] || 0.5;
+    } else if (combat.damageBonus.conditional) {
+      // Legacy fallback for items without specific type
       diceValue *= 0.5;
     }
 
@@ -289,14 +298,30 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   }
 
   // Spell charges (legacy format)
+  // High-level spells (6+) scale non-linearly because they're campaign-defining
   if (combat.charges && combat.charges.length > 0) {
+    // Effective spell level values - high level spells are exponentially more valuable
+    // Calibrated so Wish (9th, ~1 use) contributes ~2.5 pts toward Legendary
+    const SPELL_LEVEL_VALUES: Record<number, number> = {
+      0: 0.1,   // Cantrips
+      1: 1,     // Magic Missile, Shield
+      2: 2,     // Scorching Ray, Hold Person
+      3: 3,     // Fireball, Lightning Bolt
+      4: 4,     // Polymorph, Wall of Fire
+      5: 5,     // Cone of Cold, Hold Monster
+      6: 7,     // Chain Lightning, Disintegrate (1.17× level)
+      7: 10,    // Finger of Death, Plane Shift (1.43× level)
+      8: 14,    // Dominate Monster, Power Word Stun (1.75× level)
+      9: 20,    // Wish, Meteor Swarm (2.22× level) - campaign-defining
+    };
+
     for (const charge of combat.charges) {
-      // Normalize "dawn" to "long rest"
       const normalizedRecharge = charge.recharge === 'dawn'
         ? 'long rest'
         : charge.recharge;
       const multiplier = RECHARGE_MULTIPLIERS[normalizedRecharge] || 0.5;
-      score += charge.spellLevel * charge.usesPerDay * multiplier;
+      const effectiveLevel = SPELL_LEVEL_VALUES[charge.spellLevel] ?? charge.spellLevel;
+      score += effectiveLevel * charge.usesPerDay * multiplier;
     }
   }
 

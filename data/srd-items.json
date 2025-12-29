@@ -124,10 +124,11 @@
       "damageBonus": {
         "dice": "3d6",
         "type": "piercing",
-        "conditional": true
+        "conditionalType": "rival"
       },
       "advantage": ["attack"]
-    }
+    },
+    "description": "Sworn enemy (1 target/dawn) gets +3d6 damage and you have advantage. Rival conditional = 0.3× multiplier since only one target at a time."
   },
   {
     "name": "Dagger of Venom",
@@ -138,13 +139,14 @@
       "enhancement": 1,
       "charges": [
         {
-          "spell": "Poison Coating (2d10, DC 15)",
-          "spellLevel": 2,
+          "spell": "Poison Coating (2d10 + poisoned, DC 15)",
+          "spellLevel": 5,
           "usesPerDay": 1,
           "recharge": "long rest"
         }
       ]
-    }
+    },
+    "description": "1/day coat blade with poison: +2d10 poison damage and DC 15 CON or poisoned 1 min. Modeled as level 5 spell equivalent (damage + condition + DC 15)."
   },
   {
     "name": "Nine Lives Stealer",
@@ -217,11 +219,13 @@
     "baseItem": "staff",
     "rarity": "very rare",
     "attunement": true,
+    "overrideScore": 3.5,
     "combat": {
       "enhancement": 2,
       "acBonus": 2,
       "savingThrowBonus": 2
-    }
+    },
+    "description": "+2 attack/damage, +2 AC, +2 saves calculates as 6.0 pts (Legendary), but requires attunement by a spellcaster (limits to ~40% of builds). Also has 20 charges for various spells. The sheer versatility and class restriction justify Very Rare."
   },
   {
     "name": "Wand of Fireballs",
@@ -295,9 +299,10 @@
       "damageBonus": {
         "dice": "2d6",
         "type": "slashing",
-        "conditional": true
+        "conditionalType": "creature-rare"
       }
-    }
+    },
+    "description": "+1 weapon, +2d6 vs giants + DC 15 STR or prone. Giants are less common than undead/fiends (creature-rare = 0.4×)."
   },
   {
     "name": "Dragon Slayer",
@@ -309,15 +314,17 @@
       "damageBonus": {
         "dice": "3d6",
         "type": "slashing",
-        "conditional": true
+        "conditionalType": "creature-rare"
       }
-    }
+    },
+    "description": "+1 weapon, +3d6 vs dragons. Dragons are iconic but less frequent encounters (creature-rare = 0.4×)."
   },
   {
     "name": "Vicious Weapon",
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -325,7 +332,8 @@
         "type": "slashing",
         "vicious": true
       }
-    }
+    },
+    "description": "+2d6 damage on natural 20 only. Math says 0.1 pts (5% proc), but crit-fishing builds (Champion, Assassin) and psychological 'big moment' value justify Rare."
   },
   {
     "name": "Mace of Disruption",
@@ -337,9 +345,10 @@
       "damageBonus": {
         "dice": "2d6",
         "type": "radiant",
-        "conditional": true
+        "conditionalType": "creature-common"
       }
-    }
+    },
+    "description": "+2d6 radiant vs undead/fiends, creatures with <25 HP destroyed on failed save. Undead/fiends are common campaign threats (creature-common = 0.6×)."
   },
   {
     "name": "Mace of Smiting",
@@ -347,8 +356,14 @@
     "rarity": "rare",
     "attunement": false,
     "combat": {
-      "enhancement": 1
-    }
+      "enhancement": 1,
+      "damageBonus": {
+        "dice": "2d6",
+        "type": "bludgeoning",
+        "conditionalType": "creature-rare"
+      }
+    },
+    "description": "+1 mace, +2d6 vs constructs (+4d6 on crit vs constructs). Constructs are less common (creature-rare = 0.4×). Also has extra crit damage."
   },
   {
     "name": "Trident of Fish Command",
@@ -368,25 +383,33 @@
       "enhancement": 0,
       "charges": [
         {
-          "spell": "Lightning Bolt (4d6, DC 13)",
-          "spellLevel": 3,
+          "spell": "Lightning Bolt (4d6, DC 13, 120ft line)",
+          "spellLevel": 5,
           "usesPerDay": 1,
           "recharge": "long rest"
         }
       ]
-    }
+    },
+    "description": "1/day transform into lightning bolt: 4d6 lightning in 120ft line (DC 13). Modeled as level 5 spell equivalent for reliable daily AoE damage."
   },
   {
     "name": "Luck Blade",
     "baseItem": "longsword",
     "rarity": "legendary",
     "attunement": true,
-    "manualRarity": true,
     "combat": {
       "enhancement": 1,
-      "savingThrowBonus": 1
+      "savingThrowBonus": 1,
+      "charges": [
+        {
+          "spell": "Wish",
+          "spellLevel": 9,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
     },
-    "description": "Grants +1 to saves and can cast Wish (1d4-1 times). The Wish spell alone makes this Legendary despite modest combat stats."
+    "description": "+1 weapon, +1 saves, can reroll 1 attack/check/save per day, and has 1d4-1 Wish charges (non-recharging). Level 9 spell scaling makes this calculate correctly as Legendary."
   },
   {
     "name": "Holy Avenger",

@@ -1232,7 +1232,11 @@ export default function CalculatorPage() {
                       <div>• 2d6 = 2 pts, 2d8 = 2.5 pts, 3d6 = 3 pts, 3d8 = 3.75 pts, 4d6 = 4 pts</div>
                       <div className="text-yellow-400">• Vicious (crit only): ×0.05 (5% proc rate, e.g. 2d6 vicious = ~0.35 pts)</div>
                       <div className="text-yellow-400">• Per-turn frequency: ×0.4 (once per turn vs every hit)</div>
-                      <div className="text-yellow-400">• Conditional damage: ×0.25 (only vs specific creatures)</div>
+                      <div className="text-yellow-400">• Conditional damage by type:</div>
+                      <div className="text-yellow-400 pl-2">- Creature-common (undead, fiends): ×0.6</div>
+                      <div className="text-yellow-400 pl-2">- Creature-rare (giants, dragons): ×0.4</div>
+                      <div className="text-yellow-400 pl-2">- Rival (sworn enemy): ×0.3</div>
+                      <div className="text-yellow-400 pl-2">- Environmental (darkness, water): ×0.25</div>
                     </div>
 
                     <div className="space-y-1">
@@ -1262,10 +1266,13 @@ export default function CalculatorPage() {
 
                     <div className="space-y-1">
                       <div className="text-emerald-400 font-semibold">Spell/Ability Charges:</div>
-                      <div>• Formula: spell_level × uses_per_day × recharge_multiplier</div>
-                      <div>• Dawn/Long Rest: ×0.1-0.25 | Short Rest: ×0.2-0.4</div>
+                      <div>• Formula: effective_level × uses_per_day × recharge_mult</div>
+                      <div>• Dawn/Long Rest: ×0.1-0.2 | Short Rest: ×0.2-0.4</div>
+                      <div className="text-cyan-400">• High-level spell scaling (effective value):</div>
+                      <div className="text-cyan-400 pl-2">- Levels 1-5: linear (1, 2, 3, 4, 5)</div>
+                      <div className="text-cyan-400 pl-2">- Level 6-7: 7, 10 | Level 8-9: 14, 20</div>
                       <div className="text-slate-500 italic text-[10px]">
-                        Multipliers vary by total charges and recharge mechanics. Higher spell levels (6-9) represent rare, powerful magic.
+                        Level 9 spells (Wish) are campaign-defining, hence 20× effective value.
                       </div>
                     </div>
 

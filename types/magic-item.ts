@@ -1,8 +1,16 @@
+// Conditional damage type - determines multiplier based on how often condition triggers
+export type ConditionalType =
+  | 'creature-common'  // Undead, fiends, humanoids - frequent encounters (0.6×)
+  | 'creature-rare'    // Giants, dragons, constructs - less common (0.4×)
+  | 'rival'            // Sworn enemy / single target at a time - Oathbow style (0.3×)
+  | 'environmental';   // "In darkness", "underwater", "against surprised" (0.25×)
+
 export interface DamageBonus {
   dice: string; // "1d6", "2d6", etc.
   type: string; // "fire", "cold", "radiant", etc.
   frequency?: 'per-hit' | 'per-turn'; // per-hit (default) or once per turn
-  conditional?: boolean; // true if only works vs specific creatures (dragons, giants, etc.)
+  conditional?: boolean; // DEPRECATED: use conditionalType instead
+  conditionalType?: ConditionalType; // Specific condition category for accurate multiplier
   vicious?: boolean; // true if damage only applies on natural 20 (critical hits)
 }
 

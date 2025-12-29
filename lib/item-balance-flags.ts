@@ -17,7 +17,7 @@ export const SPECIAL_MECHANICS = new Set([
   // Spell absorption/storage/action economy
   'Rod of Absorption',         // Absorbs spells targeting you
   'Ring of Spell Storing',     // Stores 5 spell levels (breaks action economy)
-  'Luck Blade',                // Can cast Wish (ultimate spell)
+  // Note: Luck Blade now calculates correctly using level 9 spell scaling for Wish
 
   // Tactical mobility and positioning
   'Boots of Speed',            // Doubled movement + disadvantage on opportunity attacks
@@ -37,21 +37,16 @@ export const SPECIAL_MECHANICS = new Set([
  * Numerical edge cases: Conditional bonuses dependent on setting/campaign
  * These items can be quantified, but their value varies wildly based on how often
  * the condition triggers in your specific campaign
+ *
+ * NOTE: Many items previously here now use conditionalType for proper calculation:
+ * - Giant Slayer, Dragon Slayer, Mace of Smiting → creature-rare (0.4×)
+ * - Mace of Disruption → creature-common (0.6×)
+ * - Oathbow → rival (0.3×)
+ * - Dagger of Venom, Javelin of Lightning → spell level adjusted
  */
 export const NUMERICAL_EDGE_CASES = new Set([
-  // Critical-only effects (5% base proc rate, higher with crit-fishing builds)
-  'Vicious Weapon',            // +2d6 on nat 20 only
-
-  // Creature-type conditional damage
-  'Oathbow',                   // +3d6 + advantage vs sworn enemy only
-  'Giant Slayer',              // +2d6 vs giants only + prone
-  'Dragon Slayer',             // +3d6 vs dragons only
-  'Mace of Disruption',        // 2d6 radiant vs undead/fiends + possible destruction
-  'Mace of Smiting',           // +3 vs constructs only + extra crit damage
-
-  // Limited use abilities
-  'Dagger of Venom',           // 2d10 poison + condition, but only 1/day
-  'Javelin of Lightning',      // 4d6 line damage, but only 1/day
+  // Critical-only effects - uses override because value is highly build-dependent
+  'Vicious Weapon',            // +2d6 on nat 20 only (override: 2.0 pts)
 ]);
 
 /**
@@ -108,9 +103,7 @@ export function getItemExplanation(itemName: string): string {
   if (itemName === 'Ring of Spell Storing') {
     return 'Stores up to 5 spell levels. Breaks action economy by allowing pre-cast buffs or extra spell slots.';
   }
-  if (itemName === 'Luck Blade') {
-    return 'Can cast Wish (1d4-1 times). The Wish spell alone makes this Legendary regardless of +1 bonus.';
-  }
+  // Luck Blade now calculates correctly using level 9 spell value for Wish
 
   // Mobility
   if (itemName === 'Boots of Speed') {
@@ -142,29 +135,13 @@ export function getItemExplanation(itemName: string): string {
   // === NUMERICAL EDGE CASES ===
 
   if (itemName === 'Vicious Weapon') {
-    return '+2d6 on natural 20 only (5% proc). Value ranges from ~0.1 pts (normal) to ~1.0+ pts (crit-fishing Champion).';
+    return '+2d6 on natural 20 only (5% proc). Uses override because value ranges from ~0.1 pts (normal builds) to ~1.0+ pts (crit-fishing Champion/Assassin).';
   }
-  if (itemName === 'Oathbow') {
-    return '+3d6 + advantage vs sworn enemy (1 target/dawn). Calc: 2.0 pts (Rare), official: Very Rare. Value depends on campaign pacing.';
-  }
-  if (itemName === 'Giant Slayer') {
-    return '+1 weapon + 2d6 vs giants + prone. Calc: 2.0 pts (Rare), matches official. Value depends on giant frequency.';
-  }
-  if (itemName === 'Dragon Slayer') {
-    return '+1 weapon + 3d6 vs dragons. Calc: 2.5 pts (Rare), matches official. Value depends on dragon frequency.';
-  }
-  if (itemName === 'Mace of Disruption') {
-    return '2d6 radiant vs undead/fiends + possible destruction. Calc: 1.0 pts (Uncommon), official Rare. Undead campaign = much higher.';
-  }
-  if (itemName === 'Mace of Smiting') {
-    return '+1 mace, +3 vs constructs + crit bonus. Calc: 1.0 pts (Uncommon), official Rare. Construct campaign = higher value.';
-  }
-  if (itemName === 'Dagger of Venom') {
-    return '+1 dagger + 2d10 poison + poisoned (1/day). The once-per-day limit makes daily value low despite burst potential.';
-  }
-  if (itemName === 'Javelin of Lightning') {
-    return '4d6 lightning line (1/day recharge at dawn). Calc: 0.6 pts, official Uncommon. Single daily use limits value.';
-  }
+  // Most conditional damage items now calculate correctly using conditionalType:
+  // - Oathbow uses rival (0.3×)
+  // - Giant Slayer, Dragon Slayer, Mace of Smiting use creature-rare (0.4×)
+  // - Mace of Disruption uses creature-common (0.6×)
+  // - Dagger of Venom, Javelin of Lightning use adjusted spell levels
 
   // === COMMUNITY NOTES ===
 
