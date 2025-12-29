@@ -8,7 +8,7 @@ import {
   getSuggestedRarity,
   findTopAnchorItems,
 } from '@/lib/calculator';
-import { getWarningIndicator } from '@/lib/item-balance-flags';
+import { getWarningIndicator, getItemEmoji } from '@/lib/item-balance-flags';
 
 const BASE_ITEMS = {
   'Melee Weapons (Simple)': [
@@ -970,7 +970,7 @@ export default function CalculatorPage() {
                               {/* RIGHT: Reference Item (Vibrant Emerald) */}
                               <div className="bg-emerald-950/50 p-4">
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-emerald-800/50">
-                                  <span className="text-emerald-400 text-lg">📖</span>
+                                  <span className="text-emerald-400 text-lg">{getItemEmoji(anchor.name)}</span>
                                   <span className="text-emerald-300 font-bold">#{index + 1} {anchor.name}</span>
                                   {warnings.hasSpecial && <span title="Special mechanics" className="text-sm">⭐</span>}
                                   {warnings.hasNumerical && <span title="Numerical edge case" className="text-sm">🔢</span>}

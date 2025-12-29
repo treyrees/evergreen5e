@@ -26,7 +26,6 @@ export const SPECIAL_MECHANICS = new Set([
 
   // Defensive special mechanics
   'Gloves of Missile Snaring', // Deflect ranged attacks (reaction-based)
-  'Cloak of Protection',       // +1 AC and +1 all saves stacks with everything
   'Shield of the Cavalier',    // Push/prone + Protective Field not quantified
 
   // Complex stacking or restrictions
@@ -56,7 +55,7 @@ export const NUMERICAL_EDGE_CASES = new Set([
  */
 export const COMMUNITY_NOTES = new Set([
   // Official seems too LOW (item is stronger than rarity suggests)
-  // (none currently - most "underpriced" items have Special Mechanics flags)
+  'Cloak of Protection',       // Calc 2.0 pts (Rare) but official Uncommon
 
   // Official seems too HIGH (item is weaker than rarity suggests)
   'Wings of Flying',           // Calc 1.0 pts (Uncommon) but official Rare - limited 1hr flight is weak
@@ -121,9 +120,6 @@ export function getItemExplanation(itemName: string): string {
   if (itemName === 'Gloves of Missile Snaring') {
     return 'Reaction to reduce ranged weapon damage by 1d10+DEX. Situational but can completely negate hits.';
   }
-  if (itemName === 'Cloak of Protection') {
-    return '+1 AC and +1 all saves is 2.0 pts (Rare calc) but official Uncommon. Stacks with everything unlike most AC.';
-  }
   if (itemName === 'Shield of the Cavalier') {
     return 'Math captures +2 AC and bonus action bash (3.2 pts). NOT quantified: push 10ft, prone if smaller, and Protective Field (Otiluke\'s-style emanation). Actual value likely higher than calculated.';
   }
@@ -149,11 +145,110 @@ export function getItemExplanation(itemName: string): string {
 
   // === COMMUNITY NOTES ===
 
+  if (itemName === 'Cloak of Protection') {
+    return '+1 AC and +1 all saves = 2.0 pts (Rare). Official: Uncommon. WotC underpriced this—compare to Ring of Protection (identical, but Rare).';
+  }
   if (itemName === 'Wings of Flying') {
     return 'Limited flight (1 hr/day). Calc: 1.0 pts (Uncommon), official: Rare. Community consensus: weak for Rare tier.';
   }
 
   return '';
+}
+
+/**
+ * Get a thematic emoji for an item based on its name
+ */
+export function getItemEmoji(itemName: string): string {
+  const name = itemName.toLowerCase();
+
+  // Specific items first
+  if (name.includes('vorpal')) return '💀';
+  if (name.includes('sun blade')) return '☀️';
+  if (name.includes('flame tongue')) return '🔥';
+  if (name.includes('frost brand')) return '❄️';
+  if (name.includes('dragon slayer')) return '🐉';
+  if (name.includes('giant slayer')) return '🗻';
+  if (name.includes('nine lives')) return '🐱';
+  if (name.includes('luck blade')) return '🍀';
+  if (name.includes('holy avenger')) return '✝️';
+  if (name.includes('oathbow')) return '🎯';
+  if (name.includes('venom')) return '🐍';
+  if (name.includes('lightning')) return '⚡';
+  if (name.includes('thunder')) return '🌩️';
+  if (name.includes('warning')) return '👁️';
+  if (name.includes('defender')) return '🛡️';
+  if (name.includes('dancing')) return '💃';
+  if (name.includes('sharpness')) return '✂️';
+  if (name.includes('wounding')) return '🩸';
+  if (name.includes('life stealing') || name.includes('life-stealing')) return '💀';
+  if (name.includes('disruption')) return '💥';
+  if (name.includes('smiting')) return '⚡';
+  if (name.includes('terror')) return '😱';
+
+  // Armor and protection
+  if (name.includes('adamantine')) return '⚙️';
+  if (name.includes('mithral')) return '✨';
+  if (name.includes('plate')) return '🛡️';
+  if (name.includes('shield')) return '🛡️';
+  if (name.includes('armor')) return '🛡️';
+
+  // Cloaks and wearables
+  if (name.includes('cloak')) return '🧥';
+  if (name.includes('boots')) return '👢';
+  if (name.includes('gloves') || name.includes('gauntlets')) return '🧤';
+  if (name.includes('helm') || name.includes('helmet')) return '⛑️';
+  if (name.includes('ring')) return '💍';
+  if (name.includes('amulet') || name.includes('necklace') || name.includes('periapt')) return '📿';
+  if (name.includes('belt') || name.includes('girdle')) return '🎗️';
+  if (name.includes('bracers')) return '💪';
+  if (name.includes('wings')) return '🪽';
+  if (name.includes('flying') || name.includes('broom')) return '🧹';
+
+  // Weapons by type
+  if (name.includes('bow') || name.includes('arrow')) return '🏹';
+  if (name.includes('sword') || name.includes('blade') || name.includes('scimitar')) return '⚔️';
+  if (name.includes('axe')) return '🪓';
+  if (name.includes('hammer') || name.includes('maul') || name.includes('mace')) return '🔨';
+  if (name.includes('dagger')) return '🗡️';
+  if (name.includes('staff')) return '🪄';
+  if (name.includes('wand')) return '🪄';
+  if (name.includes('rod')) return '🪄';
+  if (name.includes('spear') || name.includes('javelin') || name.includes('trident')) return '🔱';
+  if (name.includes('crossbow')) return '🎯';
+  if (name.includes('whip')) return '〰️';
+
+  // Magic items
+  if (name.includes('potion')) return '🧪';
+  if (name.includes('scroll')) return '📜';
+  if (name.includes('tome') || name.includes('book') || name.includes('manual')) return '📖';
+  if (name.includes('bag')) return '👝';
+  if (name.includes('carpet')) return '🪔';
+  if (name.includes('rope')) return '🪢';
+  if (name.includes('lantern') || name.includes('lamp')) return '🏮';
+  if (name.includes('mirror')) return '🪞';
+  if (name.includes('horn')) return '📯';
+  if (name.includes('stone')) return '💎';
+  if (name.includes('orb') || name.includes('crystal')) return '🔮';
+  if (name.includes('ioun')) return '🌟';
+
+  // Materials/elements
+  if (name.includes('fire') || name.includes('flame')) return '🔥';
+  if (name.includes('cold') || name.includes('frost') || name.includes('ice')) return '❄️';
+  if (name.includes('poison')) return '☠️';
+  if (name.includes('force')) return '💫';
+  if (name.includes('radiant') || name.includes('light')) return '✨';
+  if (name.includes('necrotic')) return '💀';
+
+  // Creatures
+  if (name.includes('demon') || name.includes('devil')) return '😈';
+  if (name.includes('undead') || name.includes('vampire')) return '🧛';
+  if (name.includes('elemental')) return '🌀';
+
+  // Default based on general weapon category
+  if (name.includes('weapon')) return '⚔️';
+
+  // Fallback
+  return '✨';
 }
 
 /**
