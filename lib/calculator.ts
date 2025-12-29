@@ -419,24 +419,30 @@ export function calculateCombatScore(combat: CombatFeatures): number {
   if (combat.chargePool && combat.chargePool.abilities.length > 0) {
     // Calculate sustainable daily charges (what you can expect to use each day on average)
     // Assumes 2 short rests per adventuring day (standard D&D assumption)
-    // Note: maxCharges is just the cap, not additional daily charges
     const dailyRecharge =
       combat.chargePool.chargesPerLongRest +
       (combat.chargePool.chargesPerShortRest * 2);
 
-    // Use the lower of daily recharge or max charges as the sustainable daily budget
-    // (If you regain more than max, you're capped; if less, you use what you regain)
-    const sustainableDailyCharges = Math.min(
-      dailyRecharge > 0 ? dailyRecharge : combat.chargePool.maxCharges,
-      combat.chargePool.maxCharges
-    );
-
     // Calculate score for each ability
     for (const ability of combat.chargePool.abilities) {
       if (ability.chargesPerUse > 0) {
-        const effectiveUses = sustainableDailyCharges / ability.chargesPerUse;
+        // Burst potential: you can nova ALL charges in a single fight
+        const burstUses = combat.chargePool.maxCharges / ability.chargesPerUse;
+
+        // Sustained uses: what you get back per day
+        const sustainedUses = dailyRecharge > 0
+          ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / ability.chargesPerUse
+          : burstUses; // If no recharge info, assume full pool available
+
+        // Blend burst and sustained: burst matters more for powerful spells
+        // Level 3 spell: ~45% burst weight (8 Fireballs in a boss fight is huge)
+        // Level 1 spell: ~15% burst weight (less impactful nova)
+        const burstWeight = Math.min(0.5, ability.spellLevel * 0.15);
+        const effectiveUses = sustainedUses * (1 - burstWeight) + burstUses * burstWeight;
+
         // Multiplier tuned to balance charge-based items appropriately
-        const multiplier = 0.15;
+        // Calibrated so Wand of Fireballs (level 3, ~4 uses/day) ≈ 2.4 pts
+        const multiplier = 0.20;
         score += ability.spellLevel * effectiveUses * multiplier;
       }
     }
