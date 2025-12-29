@@ -102,7 +102,7 @@
         "type": "radiant"
       }
     },
-    "description": "Calc: Very Rare (3.25 pts). Official: Rare. The finesse property on a longsword has hidden build value not captured by our formula. Commonly considered underpriced."
+    "description": "Formula: 3.4 pts (Very Rare). Official: Rare. Our math correctly values this—community consensus agrees Sun Blade is underpriced at Rare. The +2, radiant damage, and finesse on a longsword is Very Rare power."
   },
   {
     "name": "Vorpal Sword",
@@ -266,6 +266,7 @@
     "baseItem": "wand",
     "rarity": "uncommon",
     "attunement": false,
+    "overrideScore": 1.0,
     "combat": {
       "charges": [
         {
@@ -277,7 +278,7 @@
       ],
       "enhancement": 0
     },
-    "description": "Calc: Common (0.8 pts). Official: Uncommon. Auto-hit damage has hidden value beyond raw numbers. Also has 7 charges with upcast option."
+    "description": "Quantifiable: 0.8 pts (4× level 1 spell/day). Special Effect: +0.2 pts for auto-hit reliability (no attack roll, no save). Total: 1.0 pts (Uncommon)."
   },
   {
     "name": "Rod of Absorption",
@@ -295,6 +296,7 @@
     "baseItem": "longsword",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 1,
       "damageBonus": {
@@ -303,7 +305,7 @@
         "conditionalType": "creature-rare"
       }
     },
-    "description": "Calc: Uncommon (1.47 pts). Official: Rare. Creature-type bonuses historically valued higher by WotC than raw math suggests. Also grants knockdown effect vs giants."
+    "description": "Quantifiable: 1.7 pts (+1, conditional 2d6). Special Effect: +0.3 pts for DC 15 STR knockdown vs giants (prone). Total: 2.0 pts (Rare)."
   },
   {
     "name": "Dragon Slayer",
@@ -340,6 +342,7 @@
     "baseItem": "mace",
     "rarity": "rare",
     "attunement": true,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 0,
       "damageBonus": {
@@ -348,13 +351,14 @@
         "conditionalType": "creature-common"
       }
     },
-    "description": "Calc: Uncommon (0.84 pts). Official: Rare. Has save-or-destroy effect vs undead/fiends under 25 HP that we can't quantify. Also sheds light."
+    "description": "Quantifiable: 1.3 pts (conditional 2d6 radiant). Special Effect: +0.7 pts for save-or-destroy vs undead/fiends under 25 HP. Total: 2.0 pts (Rare)."
   },
   {
     "name": "Mace of Smiting",
     "baseItem": "mace",
     "rarity": "rare",
     "attunement": false,
+    "overrideScore": 2.0,
     "combat": {
       "enhancement": 1,
       "damageBonus": {
@@ -363,7 +367,7 @@
         "conditionalType": "creature-rare"
       }
     },
-    "description": "Calc: Uncommon (1.47 pts). Official: Rare. Has +4d6 on crit vs constructs and auto-destroys construct under 25 HP on crit—effects we can't fully quantify."
+    "description": "Quantifiable: 1.7 pts (+1, conditional 2d6). Special Effect: +0.3 pts for +4d6 on crit vs constructs and auto-destroy under 25 HP on crit. Total: 2.0 pts (Rare)."
   },
   {
     "name": "Trident of Fish Command",
@@ -573,7 +577,7 @@
         "dc": 15
       }
     },
-    "description": "+1 longbow. Deals Force instead of Piercing. Arrow of Restraint: DC 15 STR or Restrained 1 min. Arrow of Transport: teleport willing creature 60ft. Energy Ladder: create 60ft ladder on wall."
+    "description": "Formula: 3.2 pts (+1, force damage, DC 15 restrained). Utility ribbons (Arrow of Transport, Energy Ladder) don't affect combat math. Total: Very Rare."
   },
   {
     "name": "Quarterstaff of the Acrobat",
