@@ -409,37 +409,63 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     }
   }
 
-  // Damage resistances - each resistance is worth 2.0 points (with optional "Sometimes" multiplier)
-  // Armor of Resistance (single resistance, attunement) = Rare, confirming ~2.0 pts per resistance
-  // Multiple resistances stack in value
+  // Damage resistances - value varies by damage type based on monster damage frequency
+  // Higher values for common damage types (fire, poison), lower for rare (force, radiant)
+  // Physical types (bludgeoning/piercing/slashing) are individually worth less since you need all 3
+  // to be fully protected from physical attacks - combined they'd total 3.75 pts (Very Rare equivalent)
   if (combat.resistances && combat.resistances.length > 0) {
     const resistMultiplier = combat.resistancesMultiplier ?? 1.0;
-    score += combat.resistances.length * 2.0 * resistMultiplier;
+    const DAMAGE_RESISTANCE_VALUES: Record<string, number> = {
+      // Very common damage sources - single category covers all fire/poison/cold
+      'fire': 2.25,         // Dragons, elementals, traps, spells - extremely common
+      'poison': 2.0,        // Many monsters deal poison, often with condition
+      'cold': 2.0,          // Dragons (white/silver), winter creatures, spells
+      // Moderately common damage sources
+      'necrotic': 1.75,     // Undead are common enemies
+      'lightning': 1.75,    // Blue dragons, storm creatures
+      'acid': 1.5,          // Black dragons, oozes - less common
+      // Physical types - worth less individually since you need all 3 for full protection
+      // Combined (all physical) = 3.75 pts ≈ Very Rare
+      'bludgeoning': 1.25,  // Clubs, fists, tails, constrict, falling
+      'piercing': 1.25,     // Bites, claws, arrows, spears
+      'slashing': 1.25,     // Swords, axes, some claws
+      // Rare damage sources - fewer monsters deal these
+      'thunder': 1.25,      // Rarely dealt by monsters
+      'psychic': 1.0,       // Mind flayers, intellect devourers
+      'radiant': 0.75,      // Almost no monsters deal radiant damage
+      'force': 0.5,         // Nothing deals force damage to players
+    };
+
+    for (const resistance of combat.resistances) {
+      const resistanceLower = resistance.toLowerCase();
+      score += (DAMAGE_RESISTANCE_VALUES[resistanceLower] ?? 1.5) * resistMultiplier;
+    }
   }
 
-  // Damage immunities - varies by how common the damage type is (with optional "Sometimes" multiplier)
-  // Immunity to common damage types (fire, poison) is more valuable than rare types (force, psychic)
-  // Values weighted by monster damage frequency in typical campaigns
+  // Damage immunities - roughly 1.5-2× resistance values since you take 0 instead of half
+  // Higher values for common damage types, lower for rare types
+  // Physical types individually worth less (need all 3 for full protection)
   if (combat.damageImmunities && combat.damageImmunities.length > 0) {
     const immunityMultiplier = combat.damageImmunitiesMultiplier ?? 1.0;
     const DAMAGE_IMMUNITY_VALUES: Record<string, number> = {
-      // Very common damage types - immunity is highly valuable
-      'fire': 3.5,        // Dragons, elementals, many spells - extremely common
-      'poison': 3.5,      // Huge number of monsters deal poison damage
-      // Common damage types
-      'cold': 3.0,        // Dragons, winter creatures, cold spells
-      'necrotic': 3.0,    // Undead are common enemies
-      'lightning': 2.5,   // Some dragons, spells
-      'acid': 2.5,        // Black dragons, oozes
-      'bludgeoning': 2.5, // Common but magic weapons bypass
-      'piercing': 2.5,    // Common but magic weapons bypass
-      'slashing': 2.5,    // Common but magic weapons bypass
-      // Less common damage types
-      'thunder': 2.0,     // Relatively rare
-      'radiant': 2.0,     // Few monsters deal radiant
-      'psychic': 2.0,     // Mind flayers, few others
-      // Rare damage types - immunity less valuable
-      'force': 1.5,       // Almost nothing deals force damage
+      // Very common damage sources - immunity is extremely valuable
+      'fire': 4.0,        // Dragons, elementals, spells - never worry about fireballs
+      'poison': 4.0,      // Many monsters + often blocks poisoned condition too
+      'cold': 3.5,        // Dragons, winter environments, ice spells
+      // Moderately common damage sources
+      'necrotic': 3.0,    // Undead deal this frequently
+      'lightning': 3.0,   // Blue dragons, storm creatures
+      'acid': 2.5,        // Black dragons, oozes - less common
+      // Physical types - worth less individually (need all 3 for full protection)
+      // Combined (all physical) = 6.75 pts ≈ Legendary+ equivalent
+      'bludgeoning': 2.25, // Clubs, fists, tails, constrict
+      'piercing': 2.25,    // Bites, claws, arrows
+      'slashing': 2.25,    // Swords, axes, some claws
+      // Rare damage sources - immunity less impactful
+      'thunder': 2.0,      // Rarely needed
+      'psychic': 1.75,     // Mind flayers, few others
+      'radiant': 1.25,     // Few monsters deal radiant
+      'force': 0.75,       // Almost never relevant defensively
     };
 
     for (const immunity of combat.damageImmunities) {
