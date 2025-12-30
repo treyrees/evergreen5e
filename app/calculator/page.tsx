@@ -195,12 +195,20 @@ export default function CalculatorPage() {
     setRandomPlaceholder(generateRandomItemName());
   }, []);
 
-  const [newAbility, setNewAbility] = useState<ChargedAbility>({
+  const [newAbility, setNewAbility] = useState<{
+    spell: string;
+    spellLevel: number | null;
+    chargesPerUse: number | null;
+  }>({
     spell: '',
-    spellLevel: 0,
-    chargesPerUse: 1,
+    spellLevel: null,
+    chargesPerUse: null,
   });
-  const [spellNameError, setSpellNameError] = useState(false);
+  const [spellFormErrors, setSpellFormErrors] = useState<{
+    name: boolean;
+    level: boolean;
+    charges: boolean;
+  }>({ name: false, level: false, charges: false });
 
   // Check if selected base item is a weapon
   const isWeaponSelected = useMemo(() => WEAPON_ITEMS.has(baseItem), [baseItem]);
@@ -291,20 +299,32 @@ export default function CalculatorPage() {
   }, [hasSelectedAttributes, results.suggestedRarity]);
 
   const addAbility = () => {
-    if (newAbility.spell.trim()) {
-      setSpellNameError(false);
-      setAbilities([...abilities, newAbility]);
-      setNewAbility({
-        spell: '',
-        spellLevel: 0,
-        chargesPerUse: 1,
-      });
-      // Keep form open to allow adding multiple abilities
-    } else {
-      setSpellNameError(true);
-      // Clear error after animation
-      setTimeout(() => setSpellNameError(false), 2000);
+    const errors = {
+      name: !newAbility.spell.trim(),
+      level: newAbility.spellLevel === null,
+      charges: newAbility.chargesPerUse === null,
+    };
+
+    if (errors.name || errors.level || errors.charges) {
+      setSpellFormErrors(errors);
+      // Clear errors after 2 seconds
+      setTimeout(() => setSpellFormErrors({ name: false, level: false, charges: false }), 2000);
+      return;
     }
+
+    // All fields valid - add the ability
+    setSpellFormErrors({ name: false, level: false, charges: false });
+    setAbilities([...abilities, {
+      spell: newAbility.spell,
+      spellLevel: newAbility.spellLevel as number,
+      chargesPerUse: newAbility.chargesPerUse as number,
+    }]);
+    setNewAbility({
+      spell: '',
+      spellLevel: null,
+      chargesPerUse: null,
+    });
+    // Keep form open to allow adding multiple abilities
   };
 
   const removeAbility = (index: number) => {
@@ -1381,18 +1401,18 @@ export default function CalculatorPage() {
                           type="text"
                           value={newAbility.spell}
                           onChange={(e) => {
-                            setSpellNameError(false);
+                            setSpellFormErrors(prev => ({ ...prev, name: false }));
                             setNewAbility({ ...newAbility, spell: e.target.value });
                           }}
                           placeholder="Spell/Ability name"
                           className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
-                            spellNameError
+                            spellFormErrors.name
                               ? 'border-red-500 focus:border-red-500'
                               : 'border-slate-600 focus:border-emerald-500'
                           }`}
                         />
-                        {spellNameError && (
-                          <p className="text-xs text-red-400 mt-1">Please enter a spell or ability name</p>
+                        {spellFormErrors.name && (
+                          <p className="text-xs text-red-400 mt-1">Required</p>
                         )}
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -1402,24 +1422,26 @@ export default function CalculatorPage() {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            value={newAbility.spellLevel === 0 ? '' : newAbility.spellLevel}
+                            value={newAbility.spellLevel === null ? '' : newAbility.spellLevel}
                             onChange={(e) => {
                               const val = e.target.value;
-                              if (val === '' || /^[0-9]$/.test(val)) {
-                                setNewAbility({
-                                  ...newAbility,
-                                  spellLevel: val === '' ? 0 : Math.min(9, parseInt(val)),
-                                });
+                              setSpellFormErrors(prev => ({ ...prev, level: false }));
+                              if (val === '') {
+                                setNewAbility({ ...newAbility, spellLevel: null });
+                              } else if (/^[0-9]$/.test(val)) {
+                                setNewAbility({ ...newAbility, spellLevel: Math.min(9, parseInt(val)) });
                               }
                             }}
-                            onBlur={(e) => {
-                              if (e.target.value === '') {
-                                setNewAbility({ ...newAbility, spellLevel: 0 });
-                              }
-                            }}
-                            className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
+                            className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
+                              spellFormErrors.level
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-slate-600 focus:border-emerald-500'
+                            }`}
                             placeholder="0-9"
                           />
+                          {spellFormErrors.level && (
+                            <p className="text-xs text-red-400 mt-1">Required</p>
+                          )}
                         </div>
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Charges/Use</label>
@@ -1427,24 +1449,26 @@ export default function CalculatorPage() {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            value={newAbility.chargesPerUse === 1 ? '' : newAbility.chargesPerUse}
+                            value={newAbility.chargesPerUse === null ? '' : newAbility.chargesPerUse}
                             onChange={(e) => {
                               const val = e.target.value;
-                              if (val === '' || /^[0-9]+$/.test(val)) {
-                                setNewAbility({
-                                  ...newAbility,
-                                  chargesPerUse: val === '' ? 1 : Math.max(1, parseInt(val)),
-                                });
+                              setSpellFormErrors(prev => ({ ...prev, charges: false }));
+                              if (val === '') {
+                                setNewAbility({ ...newAbility, chargesPerUse: null });
+                              } else if (/^[0-9]+$/.test(val)) {
+                                setNewAbility({ ...newAbility, chargesPerUse: Math.max(1, parseInt(val)) });
                               }
                             }}
-                            onBlur={(e) => {
-                              if (e.target.value === '' || parseInt(e.target.value) < 1) {
-                                setNewAbility({ ...newAbility, chargesPerUse: 1 });
-                              }
-                            }}
-                            className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
-                            placeholder="1"
+                            className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
+                              spellFormErrors.charges
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-slate-600 focus:border-emerald-500'
+                            }`}
+                            placeholder="1+"
                           />
+                          {spellFormErrors.charges && (
+                            <p className="text-xs text-red-400 mt-1">Required</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -1457,7 +1481,7 @@ export default function CalculatorPage() {
                         <button
                           onClick={() => {
                             setShowChargeForm(false);
-                            setSpellNameError(false);
+                            setSpellFormErrors({ name: false, level: false, charges: false });
                           }}
                           className="px-4 py-2 bg-slate-600 text-slate-300 rounded hover:bg-slate-500 text-sm transition-colors"
                         >
