@@ -183,6 +183,7 @@ export default function CalculatorPage() {
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
 
   // Item Preview state
+  const [showItemPreview, setShowItemPreview] = useState(false);
   const [itemDescription, setItemDescription] = useState('');
   const [hiddenAttributes, setHiddenAttributes] = useState<Set<string>>(new Set());
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
@@ -441,29 +442,7 @@ export default function CalculatorPage() {
     return attrs;
   }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
 
-  // Get rarity color for canvas (hex values)
-  const getRarityHexColor = (rarity: string): string => {
-    const r = rarity.toLowerCase();
-    if (r === 'common') return '#94a3b8';
-    if (r === 'uncommon') return '#4ade80';
-    if (r === 'rare') return '#38bdf8';
-    if (r === 'very rare') return '#a78bfa';
-    if (r === 'legendary') return '#fbbf24';
-    return '#94a3b8';
-  };
-
-  // Get rarity background gradient colors
-  const getRarityGradientColors = (rarity: string): [string, string] => {
-    const r = rarity.toLowerCase();
-    if (r === 'common') return ['#1e293b', '#0f172a'];
-    if (r === 'uncommon') return ['#052e16', '#0f172a'];
-    if (r === 'rare') return ['#0c4a6e', '#0f172a'];
-    if (r === 'very rare') return ['#2e1065', '#0f172a'];
-    if (r === 'legendary') return ['#451a03', '#0f172a'];
-    return ['#1e293b', '#0f172a'];
-  };
-
-  // Generate print preview image
+  // Generate print preview image - Classic DMG parchment style
   const generatePreviewImage = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -471,166 +450,132 @@ export default function CalculatorPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const width = 500;
-    const padding = 28;
-    const rarityColor = getRarityHexColor(results.suggestedRarity);
-    const [gradientStart, gradientEnd] = getRarityGradientColors(results.suggestedRarity);
+    // DMG-style colors
+    const parchment = '#f4e4bc';
+    const headerRed = '#58180D';
+    const bodyText = '#1a1a1a';
+    const accentGold = '#c9ad6a';
+
+    const width = 400;
+    const padding = 24;
 
     // Filter visible attributes
     const visibleAttrs = previewAttributes.filter(attr => !hiddenAttributes.has(attr.key));
 
     // Calculate dynamic height based on content
     let contentHeight = 0;
-    contentHeight += 50; // Name
-    contentHeight += 24; // Type line
-    contentHeight += 20; // Spacing
-    contentHeight += 60; // Rarity badge
-    contentHeight += 20; // Spacing
-    contentHeight += visibleAttrs.length * 28; // Attributes
+    contentHeight += 36; // Name
+    contentHeight += 20; // Type line
+    contentHeight += 16; // Spacing after header
+    contentHeight += visibleAttrs.length * 22; // Attributes
+    if (visibleAttrs.length > 0) contentHeight += 12; // Spacing after attributes
     if (itemDescription.trim()) {
-      // Estimate description lines (rough calculation)
-      const descLines = Math.ceil(itemDescription.length / 50);
-      contentHeight += 20 + (descLines * 20); // Description
+      // Estimate description lines
+      ctx.font = '13px Georgia, serif';
+      const words = itemDescription.split(' ');
+      let lineCount = 1;
+      let testLine = '';
+      for (const word of words) {
+        const test = testLine + word + ' ';
+        if (testLine && ctx.measureText(test).width > width - padding * 2 - 10) {
+          lineCount++;
+          testLine = word + ' ';
+        } else {
+          testLine = test;
+        }
+      }
+      contentHeight += lineCount * 18 + 8;
     }
-    contentHeight += 40; // Bottom padding
+    contentHeight += 36; // Score badge
 
-    const height = Math.max(300, contentHeight + padding * 2);
+    const height = Math.max(200, contentHeight + padding * 2 + 20);
     canvas.width = width;
     canvas.height = height;
 
-    // Background gradient
-    const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
-    bgGradient.addColorStop(0, gradientStart);
-    bgGradient.addColorStop(1, gradientEnd);
-    ctx.fillStyle = bgGradient;
+    // Parchment background
+    ctx.fillStyle = parchment;
     ctx.fillRect(0, 0, width, height);
 
-    // Decorative border
-    ctx.strokeStyle = rarityColor;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(8, 8, width - 16, height - 16);
+    // Add subtle texture/grain effect
+    ctx.fillStyle = 'rgba(139, 119, 85, 0.03)';
+    for (let i = 0; i < 2000; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      ctx.fillRect(x, y, 1, 1);
+    }
 
-    // Inner subtle border
-    ctx.strokeStyle = `${rarityColor}40`;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(14, 14, width - 28, height - 28);
-
-    // Top accent line
-    const accentGradient = ctx.createLinearGradient(0, 0, width, 0);
-    accentGradient.addColorStop(0, 'transparent');
-    accentGradient.addColorStop(0.3, `${rarityColor}80`);
-    accentGradient.addColorStop(0.5, rarityColor);
-    accentGradient.addColorStop(0.7, `${rarityColor}80`);
-    accentGradient.addColorStop(1, 'transparent');
-    ctx.fillStyle = accentGradient;
-    ctx.fillRect(20, 20, width - 40, 3);
-
-    let y = padding + 30;
-
-    // Item Name
-    ctx.fillStyle = rarityColor;
-    ctx.font = 'bold 28px Georgia, serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(getDisplayName(), width / 2, y);
-    y += 30;
-
-    // Type line
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = 'italic 14px Georgia, serif';
-    ctx.fillText(buildTypeLine(), width / 2, y);
-    y += 35;
-
-    // Rarity Badge with Score
-    const badgeWidth = 180;
-    const badgeHeight = 44;
-    const badgeX = (width - badgeWidth) / 2;
-
-    // Badge background
-    ctx.fillStyle = `${rarityColor}20`;
-    ctx.beginPath();
-    ctx.roundRect(badgeX, y, badgeWidth, badgeHeight, 8);
-    ctx.fill();
-
-    // Badge border
-    ctx.strokeStyle = `${rarityColor}60`;
+    // Simple border
+    ctx.strokeStyle = headerRed;
     ctx.lineWidth = 2;
-    ctx.stroke();
+    ctx.strokeRect(6, 6, width - 12, height - 12);
 
-    // Rarity text
-    ctx.fillStyle = rarityColor;
-    ctx.font = 'bold 18px Georgia, serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(results.suggestedRarity.toUpperCase(), width / 2, y + 20);
+    let y = padding + 8;
 
-    // Score
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = '12px monospace';
-    ctx.fillText(`${results.combatScore.toFixed(1)} pts`, width / 2, y + 36);
+    // Item Name - Large, in header red
+    ctx.fillStyle = headerRed;
+    ctx.font = 'bold 22px Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(getDisplayName(), padding, y);
+    y += 24;
 
-    y += badgeHeight + 25;
-
-    // Divider line
-    ctx.strokeStyle = `${rarityColor}30`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(padding + 20, y);
-    ctx.lineTo(width - padding - 20, y);
-    ctx.stroke();
+    // Type line - Italic
+    ctx.fillStyle = bodyText;
+    ctx.font = 'italic 12px Georgia, serif';
+    ctx.fillText(buildTypeLine(), padding, y);
     y += 20;
+
+    // Red decorative line under header
+    ctx.strokeStyle = headerRed;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    y += 16;
 
     // Attributes
     ctx.textAlign = 'left';
     for (const attr of visibleAttrs) {
       // Bullet
-      ctx.fillStyle = `${rarityColor}80`;
-      ctx.font = '14px Georgia, serif';
-      ctx.fillText('•', padding + 10, y);
-
-      // Label
-      ctx.fillStyle = '#e2e8f0';
-      ctx.font = 'bold 13px Georgia, serif';
-      const labelWidth = ctx.measureText(`${attr.label}. `).width;
-      ctx.fillText(`${attr.label}. `, padding + 26, y);
-
-      // Value (with word wrap if needed)
-      ctx.fillStyle = '#cbd5e1';
+      ctx.fillStyle = bodyText;
       ctx.font = '13px Georgia, serif';
-      const maxValueWidth = width - padding * 2 - 26 - labelWidth - 10;
+      ctx.fillText('•', padding + 4, y);
+
+      // Bold label
+      ctx.font = 'bold 13px Georgia, serif';
+      ctx.fillText(`${attr.label}.`, padding + 18, y);
+      const labelWidth = ctx.measureText(`${attr.label}. `).width;
+
+      // Value
+      ctx.font = '13px Georgia, serif';
+      const maxValueWidth = width - padding * 2 - 18 - labelWidth - 8;
       let valueText = attr.value;
       if (ctx.measureText(valueText).width > maxValueWidth) {
-        // Truncate with ellipsis
         while (ctx.measureText(valueText + '...').width > maxValueWidth && valueText.length > 0) {
           valueText = valueText.slice(0, -1);
         }
         valueText += '...';
       }
-      ctx.fillText(valueText, padding + 26 + labelWidth, y);
-      y += 24;
+      ctx.fillText(valueText, padding + 18 + labelWidth + 4, y);
+      y += 20;
     }
 
     // Description
     if (itemDescription.trim()) {
-      y += 10;
-      ctx.strokeStyle = `${rarityColor}20`;
-      ctx.beginPath();
-      ctx.moveTo(padding + 20, y);
-      ctx.lineTo(width - padding - 20, y);
-      ctx.stroke();
-      y += 18;
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = 'italic 12px Georgia, serif';
+      y += 4;
+      ctx.fillStyle = bodyText;
+      ctx.font = '13px Georgia, serif';
       ctx.textAlign = 'left';
 
       // Word wrap description
       const words = itemDescription.split(' ');
       let line = '';
-      const maxWidth = width - padding * 2 - 20;
+      const maxWidth = width - padding * 2 - 10;
 
       for (const word of words) {
         const testLine = line + word + ' ';
         if (ctx.measureText(testLine).width > maxWidth && line !== '') {
-          ctx.fillText(line.trim(), padding + 10, y);
+          ctx.fillText(line.trim(), padding + 4, y);
           line = word + ' ';
           y += 18;
         } else {
@@ -638,9 +583,33 @@ export default function CalculatorPage() {
         }
       }
       if (line.trim()) {
-        ctx.fillText(line.trim(), padding + 10, y);
+        ctx.fillText(line.trim(), padding + 4, y);
+        y += 18;
       }
     }
+
+    // Bottom section with rarity and score
+    y = height - padding - 24;
+
+    // Gold accent line
+    ctx.strokeStyle = accentGold;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    y += 18;
+
+    // Rarity and Score on same line
+    ctx.fillStyle = headerRed;
+    ctx.font = 'bold 14px Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(results.suggestedRarity.toUpperCase(), padding, y);
+
+    ctx.fillStyle = '#666';
+    ctx.font = '12px Georgia, serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${results.combatScore.toFixed(1)} pts`, width - padding, y);
 
     // Generate image URL
     const dataUrl = canvas.toDataURL('image/png');
@@ -1678,137 +1647,127 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Your Item Preview - Separate Card */}
+            {/* Your Item Preview - Collapsible Card */}
             {hasSelectedAttributes && baseItem && (
-              <div className="mt-4 bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden">
-                {/* Header */}
-                <div className="px-5 py-3 border-b border-slate-700 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Your Item</span>
-                  <span
-                    className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
-                    title="Preview your item as it would appear in a D&D sourcebook. Click attributes to hide them from the preview."
-                  >
-                    ⓘ
-                  </span>
-                </div>
+              <div className="mt-4 bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                {/* Collapsible Header */}
+                <button
+                  onClick={() => setShowItemPreview(!showItemPreview)}
+                  className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
+                >
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Your Item</span>
+                  <span className="text-slate-500 text-lg">{showItemPreview ? '−' : '+'}</span>
+                </button>
 
-                {/* DMG-Style Item Card */}
-                <div className="relative bg-gradient-to-b from-amber-950/10 via-slate-800/50 to-slate-800/50">
-                  {/* Decorative top border accent */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-600/40 to-transparent" />
-
-                  <div className="p-5 space-y-4">
-                    {/* Item Name - Large, ornate */}
-                    <div className="border-b border-amber-900/30 pb-3">
-                      <h3
-                        className={`text-2xl font-bold tracking-wide ${getRarityColorClass(results.suggestedRarity)}`}
-                        style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}
-                      >
-                        {getDisplayName()}
-                      </h3>
-                      {/* Type Line - Italic, smaller */}
-                      <p className="text-sm italic text-slate-400 mt-1">
-                        {buildTypeLine()}
-                      </p>
-                    </div>
-
-                    {/* Attributes Section */}
-                    {previewAttributes.length > 0 && (
-                      <div className="space-y-2.5">
-                        {previewAttributes.map((attr) => (
-                          <div
-                            key={attr.key}
-                            className={`group flex items-start gap-2 text-sm transition-all cursor-pointer ${
-                              hiddenAttributes.has(attr.key)
-                                ? 'opacity-30 line-through'
-                                : 'opacity-100'
-                            }`}
-                            onClick={() => toggleAttributeVisibility(attr.key)}
-                            title={hiddenAttributes.has(attr.key) ? 'Click to show in preview' : 'Click to hide from preview'}
-                          >
-                            <span className="text-amber-600/70 select-none">•</span>
-                            <span className="text-slate-300">
-                              <span className="font-semibold text-slate-200">{attr.label}.</span>{' '}
-                              {attr.value}
-                            </span>
-                            <span className={`ml-auto text-[10px] transition-opacity ${
-                              hiddenAttributes.has(attr.key)
-                                ? 'opacity-100 text-emerald-400'
-                                : 'opacity-0 group-hover:opacity-100 text-slate-500'
-                            }`}>
-                              {hiddenAttributes.has(attr.key) ? 'show' : 'hide'}
-                            </span>
-                          </div>
-                        ))}
+                {showItemPreview && (
+                  <>
+                    {/* DMG-Style Item Card */}
+                    <div className="border-t border-slate-700 p-5 space-y-4">
+                      {/* Item Name - Large, ornate */}
+                      <div className="border-b border-slate-600 pb-3">
+                        <h3
+                          className={`text-2xl font-bold tracking-wide ${getRarityColorClass(results.suggestedRarity)}`}
+                          style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}
+                        >
+                          {getDisplayName()}
+                        </h3>
+                        {/* Type Line - Italic, smaller */}
+                        <p className="text-sm italic text-slate-400 mt-1">
+                          {buildTypeLine()}
+                        </p>
                       </div>
-                    )}
 
-                    {/* User Description Textarea */}
-                    <div className="pt-3 border-t border-amber-900/20">
-                      <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
-                        Description
-                      </label>
-                      <textarea
-                        value={itemDescription}
-                        onChange={(e) => setItemDescription(e.target.value)}
-                        placeholder="Describe your item's special properties, abilities, history or appearance..."
-                        rows={4}
-                        className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-amber-600/50 focus:outline-none focus:ring-1 focus:ring-amber-600/30 resize-none"
-                        style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
-                      />
-                    </div>
+                      {/* Attributes Section */}
+                      {previewAttributes.length > 0 && (
+                        <div className="space-y-2.5">
+                          <p className="text-[10px] text-slate-500 mb-2">Click attributes to hide them from image</p>
+                          {previewAttributes.map((attr) => (
+                            <div
+                              key={attr.key}
+                              className={`group flex items-start gap-2 text-sm transition-all cursor-pointer ${
+                                hiddenAttributes.has(attr.key)
+                                  ? 'opacity-30 line-through'
+                                  : 'opacity-100'
+                              }`}
+                              onClick={() => toggleAttributeVisibility(attr.key)}
+                              title={hiddenAttributes.has(attr.key) ? 'Click to show in preview' : 'Click to hide from preview'}
+                            >
+                              <span className="text-slate-500 select-none">•</span>
+                              <span className="text-slate-300">
+                                <span className="font-semibold text-slate-200">{attr.label}.</span>{' '}
+                                {attr.value}
+                              </span>
+                              <span className={`ml-auto text-[10px] transition-opacity ${
+                                hiddenAttributes.has(attr.key)
+                                  ? 'opacity-100 text-emerald-400'
+                                  : 'opacity-0 group-hover:opacity-100 text-slate-500'
+                              }`}>
+                                {hiddenAttributes.has(attr.key) ? 'show' : 'hide'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-                    {/* Generate Preview Button */}
-                    <div className="pt-4">
+                      {/* User Description Textarea */}
+                      <div className="pt-3 border-t border-slate-700">
+                        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
+                          Description
+                        </label>
+                        <textarea
+                          value={itemDescription}
+                          onChange={(e) => setItemDescription(e.target.value)}
+                          placeholder="Describe your item's special properties, abilities, history or appearance..."
+                          rows={4}
+                          className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
+                        />
+                      </div>
+
+                      {/* Generate Preview Button */}
                       <button
                         onClick={generatePreviewImage}
-                        className="w-full px-4 py-2.5 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-600/40 text-amber-200 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                        className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Generate Print Preview
                       </button>
-                    </div>
-                  </div>
 
-                  {/* Decorative bottom border accent */}
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-600/30 to-transparent" />
-                </div>
-
-                {/* Footer with hidden attributes hint */}
-                {hiddenAttributes.size > 0 && (
-                  <div className="px-5 py-2 border-t border-slate-700 bg-slate-800/50">
-                    <p className="text-[10px] text-slate-500 italic">
-                      {hiddenAttributes.size} attribute{hiddenAttributes.size > 1 ? 's' : ''} hidden from preview
-                    </p>
-                  </div>
-                )}
-
-                {/* Generated Image Preview */}
-                {previewImageUrl && (
-                  <div className="p-5 border-t border-slate-700 bg-slate-900/50">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Print Preview</span>
-                      <button
-                        onClick={() => setPreviewImageUrl(null)}
-                        className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
-                      >
-                        Close
-                      </button>
+                      {/* Hidden attributes hint */}
+                      {hiddenAttributes.size > 0 && (
+                        <p className="text-[10px] text-slate-500 italic">
+                          {hiddenAttributes.size} attribute{hiddenAttributes.size > 1 ? 's' : ''} hidden from image
+                        </p>
+                      )}
                     </div>
-                    <div className="flex justify-center">
-                      <img
-                        src={previewImageUrl}
-                        alt={`${getDisplayName()} - ${results.suggestedRarity}`}
-                        className="max-w-full rounded-lg shadow-xl border border-slate-600 cursor-pointer"
-                        title="Right-click to save image"
-                      />
-                    </div>
-                    <p className="text-center text-[10px] text-slate-500 mt-3">
-                      Right-click the image to copy or save
-                    </p>
-                  </div>
+
+                    {/* Generated Image Preview */}
+                    {previewImageUrl && (
+                      <div className="p-5 border-t border-slate-700 bg-slate-900/50">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Print Preview</span>
+                          <button
+                            onClick={() => setPreviewImageUrl(null)}
+                            className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                          >
+                            Close
+                          </button>
+                        </div>
+                        <div className="flex justify-center">
+                          <img
+                            src={previewImageUrl}
+                            alt={`${getDisplayName()} - ${results.suggestedRarity}`}
+                            className="max-w-full rounded shadow-xl cursor-pointer"
+                            title="Right-click to save image"
+                          />
+                        </div>
+                        <p className="text-center text-[10px] text-slate-500 mt-3">
+                          Right-click the image to copy or save
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Hidden canvas for image generation */}
