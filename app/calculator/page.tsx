@@ -1913,7 +1913,7 @@ export default function CalculatorPage() {
                       Configure Your Item
                     </div>
                     <div className="text-sm text-slate-500">
-                      Select a base item and add bonuses to see the suggested rarity
+                      Add bonuses to see the suggested rarity
                     </div>
                   </div>
                 </div>
