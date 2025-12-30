@@ -39,8 +39,11 @@ export default function RootLayout({
         </div>
         {children}
 
-        {/* Ko-fi support footer */}
-        <footer className="mt-16 pb-6 text-center">
+        {/* Footer */}
+        <footer className="mt-16 pb-6 text-center space-y-3">
+          <p className="text-xs text-gray-500">
+            Your inputs stay here. Evergreen5e doesn&apos;t use AI chatbots to deliver answers.
+          </p>
           <a
             href="https://ko-fi.com/tacardidm"
             target="_blank"
