@@ -193,7 +193,7 @@ export function getItemExplanation(itemName: string): string {
     return 'Flat +2 damage bonus to longbow/shortbow attacks. Bonus +1.0 models this as roughly equivalent to +1 enhancement for damage only (no attack roll bonus).';
   }
   if (itemName === 'Cape of the Mountebank') {
-    return 'Dimension Door (level 4) 1/day = 0.8 pts. Bonus +1.0 for no attunement on a level 4 spell usable by any character—gives martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus.';
+    return 'Dimension Door (level 4) 1/day = 0.8 pts. Bonus +1.2 for no attunement on a level 4 spell usable by any character—gives martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus.';
   }
   if (itemName === 'Dwarven Plate') {
     return '+2 AC plate armor (2.0 pts). Bonus +1.0 for reaction to reduce forced ground movement by up to 10 feet—mitigates positioning control from Thunderwave, Repelling Blast, and similar effects.';

@@ -719,7 +719,7 @@
     "rarity": "rare",
     "attunement": false,
     "dndbeyondSlug": "4598-cape-of-the-mountebank",
-    "overrideBonus": 1.0,
+    "overrideBonus": 1.2,
     "combat": {
       "enhancement": 0,
       "charges": [
@@ -731,7 +731,7 @@
         }
       ]
     },
-    "description": "Dimension Door (level 4) 1/day = 0.8 pts. Override +1.0 for no attunement on a level 4 spell usable by any character—gives martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus."
+    "description": "Dimension Door (level 4) 1/day = 0.8 pts. Override +1.2 for no attunement on a level 4 spell usable by any character—gives martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus."
   },
   {
     "name": "Dwarven Plate",
