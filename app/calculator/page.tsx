@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, useSpring, useTransform, AnimatePresence } from 'framer-motion';
-import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty } from '@/types/magic-item';
+import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType } from '@/types/magic-item';
 import {
   getSuggestedRarity,
   findTopAnchorItems,
@@ -486,7 +486,9 @@ export default function CalculatorPage() {
       if (damageBonus.vicious) dmgText += ' on critical hits';
       else if (damageBonus.frequency === 'per-turn') dmgText += ' (once per turn)';
       else dmgText += ' per hit';
-      if (damageBonus.conditional) dmgText += ' against specific creatures';
+      if (damageBonus.conditionalType === 'creature-common') dmgText += ' vs common creatures';
+      else if (damageBonus.conditionalType === 'creature-rare') dmgText += ' vs rare creatures';
+      else if (damageBonus.conditional) dmgText += ' against specific creatures'; // Legacy fallback
       attrs.push({ key: 'damage', label: 'Bonus Damage', value: dmgText });
     }
 
@@ -679,14 +681,14 @@ export default function CalculatorPage() {
           dice: '2d10',
           type: 'radiant',
           frequency: 'per-hit',
-          conditional: true, // vs fiends and undead
+          conditionalType: 'creature-common', // vs fiends and undead
         });
         // Aura: advantage on saves vs spells for allies within 10ft
-        // Modeled as at-will level 2 Protection effect
+        // Modeled as at-will level 3 Protection effect
         setMaxCharges(1);
         setChargesPerLongRest(1);
         setAbilities([
-          { spell: 'Protective Aura', spellLevel: 2, chargesPerUse: 1 },
+          { spell: 'Protective Aura', spellLevel: 3, chargesPerUse: 1 },
         ]);
         break;
     }
@@ -1032,7 +1034,7 @@ export default function CalculatorPage() {
                             dice: `${e.target.value}d${dieType}`,
                             type: damageBonus?.type || 'fire',
                             frequency: damageBonus?.frequency || 'per-hit',
-                            conditional: damageBonus?.conditional || false,
+                            conditionalType: damageBonus?.conditionalType,
                           });
                         }
                       }}
@@ -1122,19 +1124,25 @@ export default function CalculatorPage() {
                           Vicious (crits only)
                         </span>
                       </label>
-                      <label className="flex items-center cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={damageBonus.conditional || false}
-                          onChange={(e) =>
-                            setDamageBonus({ ...damageBonus, conditional: e.target.checked })
-                          }
-                          className="mr-2.5 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                        />
-                        <span className="text-sm text-slate-400 group-hover:text-slate-300">
-                          Conditional (vs specific creatures)
-                        </span>
-                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-slate-400">Conditional:</span>
+                        <select
+                          value={damageBonus.conditionalType || ''}
+                          onChange={(e) => {
+                            const value = e.target.value as ConditionalType | '';
+                            setDamageBonus({
+                              ...damageBonus,
+                              conditionalType: value || undefined,
+                              conditional: undefined, // Clear deprecated field
+                            });
+                          }}
+                          className="px-2 py-1 text-sm border border-slate-600 rounded bg-slate-900 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                        >
+                          <option value="">None (always applies)</option>
+                          <option value="creature-common">vs Common (undead, fiends)</option>
+                          <option value="creature-rare">vs Rare (giants, dragons)</option>
+                        </select>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -2043,7 +2051,7 @@ export default function CalculatorPage() {
                                 </div>
                                 <div className="text-[11px] text-slate-400 space-y-0.5">
                                   {enhancement > 0 && <div>+{enhancement} enhancement{enhancementSometimes ? ' ½' : ''}</div>}
-                                  {damageBonus && <div>{damageBonus.dice} {damageBonus.type}{damageBonus.vicious ? ' (crit)' : ''}{damageBonus.frequency === 'per-turn' ? ' /turn' : ''}</div>}
+                                  {damageBonus && <div>{damageBonus.dice} {damageBonus.type}{damageBonus.vicious ? ' (crit)' : ''}{damageBonus.frequency === 'per-turn' ? ' /turn' : ''}{damageBonus.conditionalType ? ` (${damageBonus.conditionalType})` : ''}</div>}
                                   {acBonus > 0 && <div>+{acBonus} AC{acBonusSometimes ? ' ½' : ''}</div>}
                                   {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves{saveBonusSometimes ? ' ½' : ''}</div>}
                                   {abilityScoreSetter && <div>{abilityScoreSetter.ability} → {abilityScoreSetter.setValue}</div>}
