@@ -714,26 +714,6 @@
     "description": "Flat +2 damage bonus to longbow/shortbow attacks. Override +1.0 models this as roughly equivalent to +1 enhancement for damage (no attack bonus)."
   },
   {
-    "name": "Cape of the Mountebank",
-    "baseItem": "cape",
-    "rarity": "rare",
-    "attunement": false,
-    "dndbeyondSlug": "4598-cape-of-the-mountebank",
-    "overrideBonus": 0.5,
-    "combat": {
-      "enhancement": 0,
-      "charges": [
-        {
-          "spell": "Dimension Door",
-          "spellLevel": 4,
-          "usesPerDay": 1,
-          "recharge": "long rest"
-        }
-      ]
-    },
-    "description": "Dimension Door (level 4) 1/day (~1.5 pts). Override +0.5 for heavily obscured smoke cloud at origin point—provides tactical concealment when repositioning."
-  },
-  {
     "name": "Plate Armor of Etherealness",
     "baseItem": "armor (heavy)",
     "rarity": "legendary",
@@ -850,19 +830,6 @@
     "description": "Resistance to one damage type (modeled as fire). Attunement required."
   },
   {
-    "name": "Dwarven Plate",
-    "baseItem": "armor (heavy)",
-    "rarity": "very rare",
-    "attunement": false,
-    "dndbeyondSlug": "4618-dwarven-plate",
-    "overrideBonus": 0.5,
-    "combat": {
-      "enhancement": 0,
-      "acBonus": 2
-    },
-    "description": "+2 AC plate armor (2.0 pts). Override +0.5 for immunity to forced movement—negates Thunderwave, Repelling Blast, shoves, and similar battlefield control."
-  },
-  {
     "name": "Dragon Scale Mail",
     "baseItem": "armor (medium)",
     "rarity": "very rare",
@@ -874,5 +841,99 @@
       "resistances": ["fire"]
     },
     "description": "+1 AC (1.0 pts) + fire resistance (2.25 pts) = 3.25 pts → Very Rare. Advantage on saves vs dragon breath/Frightful Presence and 30-mile dragon detection are highly situational ribbons—most campaigns have minimal dragon encounters."
+  },
+  {
+    "name": "Armor of Invulnerability",
+    "baseItem": "armor (heavy)",
+    "rarity": "legendary",
+    "attunement": true,
+    "dndbeyondSlug": "4572-armor-of-invulnerability",
+    "overrideBonus": 0.5,
+    "combat": {
+      "enhancement": 0,
+      "resistances": ["bludgeoning", "piercing", "slashing"]
+    },
+    "description": "Resistance to nonmagical B/P/S (3.75 pts). Override +0.5 for 10-minute immunity to nonmagical damage (1/day)."
+  },
+  {
+    "name": "Bracers of Defense",
+    "baseItem": "bracers",
+    "rarity": "rare",
+    "attunement": true,
+    "dndbeyondSlug": "4590-bracers-of-defense",
+    "overrideBonus": -0.5,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 2
+    },
+    "description": "+2 AC (stacking = 3.0 pts base). Override -0.5 for restriction: only works when wearing no armor and not using a shield."
+  },
+  {
+    "name": "Brooch of Shielding",
+    "baseItem": "brooch",
+    "rarity": "uncommon",
+    "attunement": true,
+    "dndbeyondSlug": "4594-brooch-of-shielding",
+    "overrideBonus": 0.5,
+    "combat": {
+      "enhancement": 0,
+      "resistances": ["force"]
+    },
+    "description": "Force resistance (~0.5 pts). Override +0.5 for complete immunity to Magic Missile—auto-hit protection and concentration safety."
+  },
+  {
+    "name": "Circlet of Blasting",
+    "baseItem": "circlet",
+    "rarity": "uncommon",
+    "attunement": false,
+    "dndbeyondSlug": "4603-circlet-of-blasting",
+    "overrideBonus": 0.6,
+    "combat": {
+      "enhancement": 0,
+      "charges": [
+        {
+          "spell": "Scorching Ray",
+          "spellLevel": 2,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
+    },
+    "description": "Scorching Ray (level 2) 1/day = 0.4 pts. Override +0.6 for reliable multi-target damage (3 rays × 2d6) with no attunement."
+  },
+  {
+    "name": "Cloak of Arachnida",
+    "baseItem": "cloak",
+    "rarity": "very rare",
+    "attunement": true,
+    "dndbeyondSlug": "4604-cloak-of-arachnida",
+    "combat": {
+      "enhancement": 0,
+      "resistances": ["poison"],
+      "permanentBuffs": {
+        "climbBurrow": true
+      },
+      "charges": [
+        {
+          "spell": "Web",
+          "spellLevel": 2,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
+    },
+    "description": "Poison resistance (2.0 pts) + spider climb (0.5 pts) + Web 1/day (0.4 pts) = 2.9 pts → Very Rare. Web immunity is a ribbon."
+  },
+  {
+    "name": "Mace of Terror",
+    "baseItem": "mace",
+    "rarity": "rare",
+    "attunement": true,
+    "dndbeyondSlug": "4672-mace-of-terror",
+    "overrideBonus": 2.0,
+    "combat": {
+      "enhancement": 0
+    },
+    "description": "No enhancement bonus. Override +2.0 for fear aura (3 charges, DC 15 WIS)—frightened condition is powerful crowd control."
   }
 ]
