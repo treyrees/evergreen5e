@@ -9,7 +9,7 @@ export default function Home() {
             Is Your Homebrew Balanced?
           </h1>
           <p className="text-xl text-slate-400">
-            See exactly how your item stacks up against official SRD items, using the devs&apos; own math. Transparent formulas, instant results, no guesswork.
+            Compare your homebrew against official SRD items using reverse-engineered formulas. Transparent math, instant results, no guesswork.
           </p>
         </div>
 
