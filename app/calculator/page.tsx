@@ -2212,9 +2212,12 @@ export default function CalculatorPage() {
                               const val = e.target.value;
                               setSpellFormErrors(prev => ({ ...prev, level: false }));
                               if (val === '') {
-                                setNewAbility({ ...newAbility, spellLevel: null });
+                                setNewAbility({ ...newAbility, spellLevel: null, canUpcast: false });
                               } else if (/^[0-9]$/.test(val)) {
-                                setNewAbility({ ...newAbility, spellLevel: Math.min(9, parseInt(val)) });
+                                const newLevel = Math.min(9, parseInt(val));
+                                // Auto-uncheck upcast if charges < new level
+                                const canStillUpcast = newAbility.chargesPerUse !== null && newAbility.chargesPerUse >= newLevel;
+                                setNewAbility({ ...newAbility, spellLevel: newLevel, canUpcast: canStillUpcast && newAbility.canUpcast });
                               }
                             }}
                             className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
@@ -2239,9 +2242,12 @@ export default function CalculatorPage() {
                               const val = e.target.value;
                               setSpellFormErrors(prev => ({ ...prev, charges: false }));
                               if (val === '') {
-                                setNewAbility({ ...newAbility, chargesPerUse: null });
+                                setNewAbility({ ...newAbility, chargesPerUse: null, canUpcast: false });
                               } else if (/^[0-9]+$/.test(val)) {
-                                setNewAbility({ ...newAbility, chargesPerUse: Math.max(1, parseInt(val)) });
+                                const newCharges = Math.max(1, parseInt(val));
+                                // Auto-uncheck upcast if charges < spell level
+                                const canStillUpcast = newAbility.spellLevel !== null && newCharges >= newAbility.spellLevel;
+                                setNewAbility({ ...newAbility, chargesPerUse: newCharges, canUpcast: canStillUpcast && newAbility.canUpcast });
                               }
                             }}
                             className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
@@ -2272,18 +2278,32 @@ export default function CalculatorPage() {
                             <p className="mb-2">
                               According to the SRD, most charge-based items allow upcasting by spending additional charges. For example, a Wand of Fireballs can cast Fireball at 4th level by spending 4 charges instead of 3.
                             </p>
-                            <p className="mb-3">
+                            <p className="mb-2">
                               This option does not affect balance calculations, but will display a (+) indicator to remind you that upcasting is available.
                             </p>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={newAbility.canUpcast}
-                                onChange={(e) => setNewAbility({ ...newAbility, canUpcast: e.target.checked })}
-                                className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
-                              />
-                              <span className="text-slate-300">Allow upcasting with extra charges</span>
-                            </label>
+                            <p className="mb-3 text-amber-400/80">
+                              Note: Upcastable spells require at least as many charges as their base level. Charges per use must be ≥ spell level.
+                            </p>
+                            {(() => {
+                              const canEnableUpcast = newAbility.chargesPerUse !== null &&
+                                newAbility.spellLevel !== null &&
+                                newAbility.chargesPerUse >= newAbility.spellLevel;
+                              return (
+                                <label className={`flex items-center gap-2 ${canEnableUpcast ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+                                  <input
+                                    type="checkbox"
+                                    checked={newAbility.canUpcast}
+                                    disabled={!canEnableUpcast}
+                                    onChange={(e) => setNewAbility({ ...newAbility, canUpcast: e.target.checked })}
+                                    className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 disabled:opacity-50"
+                                  />
+                                  <span className="text-slate-300">Allow upcasting with extra charges</span>
+                                  {!canEnableUpcast && newAbility.spellLevel !== null && newAbility.chargesPerUse !== null && (
+                                    <span className="text-amber-400/80">(need {newAbility.spellLevel}+ charges)</span>
+                                  )}
+                                </label>
+                              );
+                            })()}
                           </div>
                         )}
                       </div>
