@@ -24,8 +24,14 @@ export interface ShareableItemState {
   acs?: boolean; // acBonusSometimes
   st?: number;  // savingThrowBonus
   sts?: boolean; // saveBonusSometimes
+  sdc?: number; // spellSaveDCBonus
+  sab?: number; // spellAttackBonus
   r?: string[]; // resistances
   rs?: boolean; // resistancesSometimes
+  di?: string[]; // damageImmunities
+  dis?: boolean; // damageImmunitiesSometimes
+  ci?: string[]; // conditionImmunities
+  cis?: boolean; // conditionImmunitiesSometimes
   att?: boolean; // attunement
   // Ability score setter
   ass?: {
@@ -69,8 +75,14 @@ export interface DecodedItemState {
   acBonusSometimes: boolean;
   savingThrowBonus: number;
   saveBonusSometimes: boolean;
+  spellSaveDCBonus: number;
+  spellAttackBonus: number;
   resistances: string[];
   resistancesSometimes: boolean;
+  damageImmunities: string[];
+  damageImmunitiesSometimes: boolean;
+  conditionImmunities: string[];
+  conditionImmunitiesSometimes: boolean;
   attunement: boolean;
   abilityScoreSetter: AbilityScoreSetter | undefined;
   abilityScoreBonus: AbilityScoreBonus | undefined;
@@ -98,8 +110,14 @@ export function encodeItemToUrl(state: {
   acBonusSometimes: boolean;
   savingThrowBonus: number;
   saveBonusSometimes: boolean;
+  spellSaveDCBonus: number;
+  spellAttackBonus: number;
   resistances: string[];
   resistancesSometimes: boolean;
+  damageImmunities: string[];
+  damageImmunitiesSometimes: boolean;
+  conditionImmunities: string[];
+  conditionImmunitiesSometimes: boolean;
   attunement: boolean;
   abilityScoreSetter: AbilityScoreSetter | undefined;
   abilityScoreBonus: AbilityScoreBonus | undefined;
@@ -141,8 +159,14 @@ export function encodeItemToUrl(state: {
   if (state.acBonusSometimes) compact.acs = true;
   if (state.savingThrowBonus > 0) compact.st = state.savingThrowBonus;
   if (state.saveBonusSometimes) compact.sts = true;
+  if (state.spellSaveDCBonus > 0) compact.sdc = state.spellSaveDCBonus;
+  if (state.spellAttackBonus > 0) compact.sab = state.spellAttackBonus;
   if (state.resistances.length > 0) compact.r = state.resistances;
   if (state.resistancesSometimes) compact.rs = true;
+  if (state.damageImmunities.length > 0) compact.di = state.damageImmunities;
+  if (state.damageImmunitiesSometimes) compact.dis = true;
+  if (state.conditionImmunities.length > 0) compact.ci = state.conditionImmunities;
+  if (state.conditionImmunitiesSometimes) compact.cis = true;
   if (state.attunement) compact.att = true;
 
   if (state.abilityScoreSetter) {
@@ -236,8 +260,14 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
       acBonusSometimes: compact.acs || false,
       savingThrowBonus: compact.st || 0,
       saveBonusSometimes: compact.sts || false,
+      spellSaveDCBonus: compact.sdc || 0,
+      spellAttackBonus: compact.sab || 0,
       resistances: compact.r || [],
       resistancesSometimes: compact.rs || false,
+      damageImmunities: compact.di || [],
+      damageImmunitiesSometimes: compact.dis || false,
+      conditionImmunities: compact.ci || [],
+      conditionImmunitiesSometimes: compact.cis || false,
       attunement: compact.att || false,
       abilityScoreSetter: compact.ass ? {
         ability: compact.ass.a as 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA',

@@ -138,6 +138,23 @@ const DAMAGE_TYPES = [
   'bludgeoning',
 ];
 
+// Conditions ordered by combat severity (most impactful first)
+const CONDITIONS = [
+  'paralyzed',
+  'stunned',
+  'petrified',
+  'charmed',
+  'frightened',
+  'restrained',
+  'poisoned',
+  'blinded',
+  'incapacitated',
+  'prone',
+  'grappled',
+  'deafened',
+  'exhaustion',
+];
+
 export default function CalculatorPage() {
   const [itemName, setItemName] = useState('');
   const [baseItem, setBaseItem] = useState('');
@@ -152,6 +169,12 @@ export default function CalculatorPage() {
   const [saveBonusSometimes, setSaveBonusSometimes] = useState(false);
   const [resistances, setResistances] = useState<string[]>([]);
   const [resistancesSometimes, setResistancesSometimes] = useState(false);
+  const [damageImmunities, setDamageImmunities] = useState<string[]>([]);
+  const [damageImmunitiesSometimes, setDamageImmunitiesSometimes] = useState(false);
+  const [conditionImmunities, setConditionImmunities] = useState<string[]>([]);
+  const [conditionImmunitiesSometimes, setConditionImmunitiesSometimes] = useState(false);
+  const [spellSaveDCBonus, setSpellSaveDCBonus] = useState(0);
+  const [spellAttackBonus, setSpellAttackBonus] = useState(0);
   const [attunement, setAttunement] = useState(false);
 
   // Ability score setter state
@@ -218,6 +241,12 @@ export default function CalculatorPage() {
         setSaveBonusSometimes(decoded.saveBonusSometimes);
         setResistances(decoded.resistances);
         setResistancesSometimes(decoded.resistancesSometimes);
+        setDamageImmunities(decoded.damageImmunities || []);
+        setDamageImmunitiesSometimes(decoded.damageImmunitiesSometimes || false);
+        setConditionImmunities(decoded.conditionImmunities || []);
+        setConditionImmunitiesSometimes(decoded.conditionImmunitiesSometimes || false);
+        setSpellSaveDCBonus(decoded.spellSaveDCBonus || 0);
+        setSpellAttackBonus(decoded.spellAttackBonus || 0);
         setAttunement(decoded.attunement);
         setAbilityScoreSetter(decoded.abilityScoreSetter);
         setAbilityScoreBonus(decoded.abilityScoreBonus);
@@ -289,6 +318,12 @@ export default function CalculatorPage() {
       savingThrowBonusMultiplier: saveBonusSometimes ? 0.5 : undefined,
       resistances: resistances.length > 0 ? resistances : undefined,
       resistancesMultiplier: resistancesSometimes ? 0.5 : undefined,
+      damageImmunities: damageImmunities.length > 0 ? damageImmunities : undefined,
+      damageImmunitiesMultiplier: damageImmunitiesSometimes ? 0.5 : undefined,
+      conditionImmunities: conditionImmunities.length > 0 ? conditionImmunities : undefined,
+      conditionImmunitiesMultiplier: conditionImmunitiesSometimes ? 0.5 : undefined,
+      spellSaveDCBonus: spellSaveDCBonus > 0 ? spellSaveDCBonus : undefined,
+      spellAttackBonus: spellAttackBonus > 0 ? spellAttackBonus : undefined,
       abilityScoreSetter,
       abilityScoreBonus,
       permanentBuffs: hasPermanentBuffs ? permanentBuffs : undefined,
@@ -305,7 +340,7 @@ export default function CalculatorPage() {
       weaponProperties: weaponProperties.length > 0 ? weaponProperties : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -448,6 +483,14 @@ export default function CalculatorPage() {
       attrs.push({ key: 'saves', label: 'Saving Throws', value: `+${savingThrowBonus} bonus to saving throws${suffix}` });
     }
 
+    if (spellSaveDCBonus > 0) {
+      attrs.push({ key: 'spell-dc', label: 'Spell Save DC', value: `+${spellSaveDCBonus} bonus to spell save DC` });
+    }
+
+    if (spellAttackBonus > 0) {
+      attrs.push({ key: 'spell-attack', label: 'Spell Attack', value: `+${spellAttackBonus} bonus to spell attack rolls` });
+    }
+
     if (abilityScoreSetter) {
       attrs.push({ key: 'ability-setter', label: 'Ability Score', value: `${abilityScoreSetter.ability} score becomes ${abilityScoreSetter.setValue}` });
     }
@@ -461,6 +504,16 @@ export default function CalculatorPage() {
       attrs.push({ key: 'resistances', label: 'Resistances', value: `Resistance to ${resistances.join(', ')} damage${suffix}` });
     }
 
+    if (damageImmunities.length > 0) {
+      const suffix = damageImmunitiesSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'damage-immunities', label: 'Damage Immunities', value: `Immune to ${damageImmunities.join(', ')} damage${suffix}` });
+    }
+
+    if (conditionImmunities.length > 0) {
+      const suffix = conditionImmunitiesSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'condition-immunities', label: 'Condition Immunities', value: `Immune to ${conditionImmunities.join(', ')}${suffix}` });
+    }
+
     if (flightEnabled) {
       const duration = flyDuration === 'unlimited' ? 'unlimited' : `${flyDuration} hour${flyDuration === 1 ? '' : 's'} per day`;
       attrs.push({ key: 'flight', label: 'Flight', value: `Flying speed of ${flySpeed} feet (${duration})` });
@@ -470,7 +523,10 @@ export default function CalculatorPage() {
     if (permanentBuffs.darkvision) buffs.push('darkvision 60 ft.');
     if (permanentBuffs.blindsight) buffs.push('blindsight 30 ft.');
     if (permanentBuffs.tremorsense) buffs.push('tremorsense 30 ft.');
+    if (permanentBuffs.truesight) buffs.push('truesight 60 ft.');
+    if (permanentBuffs.seeInvisibility) buffs.push('see invisibility');
     if (permanentBuffs.speedBonus) buffs.push('+10 ft. movement speed');
+    if (permanentBuffs.swimming) buffs.push('swimming speed equal to walking speed');
     if (permanentBuffs.climbBurrow) buffs.push('climb and burrow speeds equal to walking speed');
     if (buffs.length > 0) {
       attrs.push({ key: 'buffs', label: 'Senses & Movement', value: buffs.join(', ') });
@@ -502,7 +558,7 @@ export default function CalculatorPage() {
     }
 
     return attrs;
-  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
+  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
 
   // Copy shareable link to clipboard
   const copyShareLink = async () => {
@@ -518,6 +574,12 @@ export default function CalculatorPage() {
       saveBonusSometimes,
       resistances,
       resistancesSometimes,
+      damageImmunities,
+      damageImmunitiesSometimes,
+      conditionImmunities,
+      conditionImmunitiesSometimes,
+      spellSaveDCBonus,
+      spellAttackBonus,
       attunement,
       abilityScoreSetter,
       abilityScoreBonus,
@@ -1118,6 +1180,50 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
+                {/* Spellcaster Bonuses - Combined Row */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Spell Save DC
+                    </label>
+                    <div className="flex gap-1.5">
+                      {[0, 1, 2, 3].map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => setSpellSaveDCBonus(value)}
+                          className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
+                            spellSaveDCBonus === value
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          }`}
+                        >
+                          +{value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Spell Attack
+                    </label>
+                    <div className="flex gap-1.5">
+                      {[0, 1, 2, 3].map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => setSpellAttackBonus(value)}
+                          className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
+                            spellAttackBonus === value
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          }`}
+                        >
+                          +{value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Weapon Properties - Added Properties (only for weapons) */}
                 <AnimatePresence>
                   {isWeaponSelected && (
@@ -1373,6 +1479,36 @@ export default function CalculatorPage() {
                           />
                           <span className="text-sm text-slate-300">Tremorsense</span>
                         </label>
+
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.truesight || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, truesight: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Truesight</span>
+                        </label>
+
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.seeInvisibility || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, seeInvisibility: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">See Invisibility</span>
+                        </label>
+
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.swimming || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, swimming: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Swimming</span>
+                        </label>
                       </div>
                     </div>
                   </details>
@@ -1420,6 +1556,102 @@ export default function CalculatorPage() {
                             className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
                           />
                           <span className={resistancesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                        </label>
+                      )}
+                    </div>
+                  </details>
+
+                  {/* Damage Immunities - Collapsible */}
+                  <details className="bg-slate-700/30 border border-slate-600 rounded-md font-sans">
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
+                      Damage Immunities
+                      {damageImmunities.length > 0 && (
+                        <span className="ml-2 text-xs text-slate-500">({damageImmunities.length} selected)</span>
+                      )}
+                    </summary>
+                    <div className="px-3 pb-3 pt-2 border-t border-slate-600">
+                      <div className="grid grid-cols-2 gap-2">
+                        {DAMAGE_TYPES.map((type) => (
+                          <label
+                            key={type}
+                            className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={damageImmunities.includes(type)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setDamageImmunities([...damageImmunities, type]);
+                                } else {
+                                  setDamageImmunities(damageImmunities.filter(r => r !== type));
+                                  if (damageImmunities.length <= 1) setDamageImmunitiesSometimes(false);
+                                }
+                              }}
+                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                            />
+                            <span className="text-sm text-slate-300">
+                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      {damageImmunities.length > 0 && (
+                        <label className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-600 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={damageImmunitiesSometimes}
+                            onChange={(e) => setDamageImmunitiesSometimes(e.target.checked)}
+                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className={damageImmunitiesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                        </label>
+                      )}
+                    </div>
+                  </details>
+
+                  {/* Condition Immunities - Collapsible */}
+                  <details className="bg-slate-700/30 border border-slate-600 rounded-md font-sans">
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
+                      Condition Immunities
+                      {conditionImmunities.length > 0 && (
+                        <span className="ml-2 text-xs text-slate-500">({conditionImmunities.length} selected)</span>
+                      )}
+                    </summary>
+                    <div className="px-3 pb-3 pt-2 border-t border-slate-600">
+                      <div className="grid grid-cols-2 gap-2">
+                        {CONDITIONS.map((condition) => (
+                          <label
+                            key={condition}
+                            className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={conditionImmunities.includes(condition)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setConditionImmunities([...conditionImmunities, condition]);
+                                } else {
+                                  setConditionImmunities(conditionImmunities.filter(c => c !== condition));
+                                  if (conditionImmunities.length <= 1) setConditionImmunitiesSometimes(false);
+                                }
+                              }}
+                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                            />
+                            <span className="text-sm text-slate-300">
+                              {condition.charAt(0).toUpperCase() + condition.slice(1)}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      {conditionImmunities.length > 0 && (
+                        <label className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-600 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={conditionImmunitiesSometimes}
+                            onChange={(e) => setConditionImmunitiesSometimes(e.target.checked)}
+                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className={conditionImmunitiesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
                         </label>
                       )}
                     </div>
