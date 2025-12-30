@@ -537,7 +537,7 @@ export default function CalculatorPage() {
   };
 
   // Quick start templates for new users
-  const applyTemplate = (template: 'plus1-longsword' | 'flametongue' | 'staff-of-power') => {
+  const applyTemplate = (template: 'plus1-longsword' | 'flametongue' | 'holy-avenger') => {
     // Reset form first
     setDamageBonus(undefined);
     setAcBonus(0);
@@ -576,27 +576,18 @@ export default function CalculatorPage() {
           frequency: 'per-hit',
         });
         break;
-      case 'staff-of-power':
-        setItemName('Staff of Power');
-        setBaseItem('staff');
-        setEnhancement(2);
+      case 'holy-avenger':
+        setItemName('Holy Avenger');
+        setBaseItem('longsword');
+        setEnhancement(3);
         setEnhancementSometimes(false);
         setAttunement(true);
-        setAcBonus(2);
-        setSavingThrowBonus(2);
-        setMaxCharges(20);
-        setChargesPerLongRest(14); // 2d8+4 average
-        setAbilities([
-          { spell: 'Cone of Cold', spellLevel: 5, chargesPerUse: 5 },
-          { spell: 'Fireball', spellLevel: 5, chargesPerUse: 5 },
-          { spell: 'Globe of Invulnerability', spellLevel: 6, chargesPerUse: 6 },
-          { spell: 'Hold Monster', spellLevel: 5, chargesPerUse: 5 },
-          { spell: 'Levitate', spellLevel: 2, chargesPerUse: 2 },
-          { spell: 'Lightning Bolt', spellLevel: 5, chargesPerUse: 5 },
-          { spell: 'Magic Missile', spellLevel: 1, chargesPerUse: 1 },
-          { spell: 'Ray of Enfeeblement', spellLevel: 1, chargesPerUse: 1 },
-          { spell: 'Wall of Force', spellLevel: 5, chargesPerUse: 5 },
-        ]);
+        setDamageBonus({
+          dice: '2d10',
+          type: 'radiant',
+          frequency: 'per-hit',
+          conditional: true, // vs fiends and undead
+        });
         break;
     }
   };
@@ -868,13 +859,13 @@ export default function CalculatorPage() {
                         onClick={() => applyTemplate('flametongue')}
                         className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
                       >
-                        Flametongue
+                        Flame Tongue
                       </button>
                       <button
-                        onClick={() => applyTemplate('staff-of-power')}
+                        onClick={() => applyTemplate('holy-avenger')}
                         className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
                       >
-                        Staff of Power
+                        Holy Avenger
                       </button>
                     </div>
                   </div>
