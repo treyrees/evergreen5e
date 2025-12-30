@@ -229,7 +229,6 @@ export default function CalculatorPage() {
 
   // Item Preview state
   const [showItemPreview, setShowItemPreview] = useState(false);
-  const [itemDescription, setItemDescription] = useState('');
   const [hiddenAttributes, setHiddenAttributes] = useState<Set<string>>(new Set());
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -239,6 +238,14 @@ export default function CalculatorPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time mount initialization
     setRandomPlaceholder(generateRandomItemName());
+  }, []);
+
+  // Check for community mode URL parameter (?community=1)
+  const [communityModeEnabled, setCommunityModeEnabled] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time URL check
+    setCommunityModeEnabled(params.get('community') === '1');
   }, []);
 
   // Parse URL params on mount to restore shared item state
@@ -281,8 +288,11 @@ export default function CalculatorPage() {
         setChargesPerShortRest(decoded.chargesPerShortRest);
         setChargesPerLongRest(decoded.chargesPerLongRest);
         setAbilities(decoded.abilities);
-        // Clean URL after import (no history pollution)
-        window.history.replaceState({}, '', '/calculator');
+        // Clean URL after import (preserve community param if present)
+        const preserveParams = new URLSearchParams();
+        if (params.get('community') === '1') preserveParams.set('community', '1');
+        const newUrl = preserveParams.toString() ? `/calculator?${preserveParams}` : '/calculator';
+        window.history.replaceState({}, '', newUrl);
       }
     }
     setUrlImported(true);
@@ -308,6 +318,17 @@ export default function CalculatorPage() {
 
   // Check if selected base item is armor/shield
   const isArmorSelected = useMemo(() => ARMOR_ITEMS.has(baseItem), [baseItem]);
+
+  // Combine specialMechanics and cosmeticFeatures for preview display
+  const previewDescription = useMemo(() => {
+    const parts: string[] = [];
+    if (specialMechanics.trim()) parts.push(specialMechanics.trim());
+    if (cosmeticFeatures.trim()) {
+      const cosmetics = cosmeticFeatures.split('\n').map(s => s.trim()).filter(Boolean);
+      parts.push(...cosmetics);
+    }
+    return parts.join(' ');
+  }, [specialMechanics, cosmeticFeatures]);
 
   // Check if any combat attributes are selected (for blur effect)
   const hasPermanentBuffs = Object.values(permanentBuffs).some(v => v === true);
@@ -926,10 +947,10 @@ export default function CalculatorPage() {
     contentHeight += 16; // Spacing after header
     contentHeight += visibleAttrs.length * 22; // Attributes
     if (visibleAttrs.length > 0) contentHeight += 12; // Spacing after attributes
-    if (itemDescription.trim()) {
+    if (previewDescription.trim()) {
       // Estimate description lines
       ctx.font = '13px Georgia, serif';
-      const words = itemDescription.split(' ');
+      const words = previewDescription.split(' ');
       let lineCount = 1;
       let testLine = '';
       for (const word of words) {
@@ -1018,14 +1039,14 @@ export default function CalculatorPage() {
     }
 
     // Description
-    if (itemDescription.trim()) {
+    if (previewDescription.trim()) {
       y += 4;
       ctx.fillStyle = bodyText;
       ctx.font = '13px Georgia, serif';
       ctx.textAlign = 'left';
 
       // Word wrap description
-      const words = itemDescription.split(' ');
+      const words = previewDescription.split(' ');
       let line = '';
       const maxWidth = width - padding * 2 - 10;
 
@@ -2395,15 +2416,17 @@ export default function CalculatorPage() {
                           ⓘ
                         </span>
                       </div>
-                      <label className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-400 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={includeCommunityItems}
-                          onChange={toggleCommunityItems}
-                          className="w-3 h-3 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 focus:ring-1 cursor-pointer"
-                        />
-                        <span>Community</span>
-                      </label>
+                      {communityModeEnabled && (
+                        <label className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-400 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={includeCommunityItems}
+                            onChange={toggleCommunityItems}
+                            className="w-3 h-3 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 focus:ring-1 cursor-pointer"
+                          />
+                          <span>Community</span>
+                        </label>
+                      )}
                     </div>
 
                     <div className="space-y-3">
@@ -2601,19 +2624,20 @@ export default function CalculatorPage() {
                         </div>
                       )}
 
-                      {/* User Description Textarea */}
-                      <div className="pt-3 border-t border-slate-700">
-                        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
-                          Description
-                        </label>
-                        <textarea
-                          value={itemDescription}
-                          onChange={(e) => setItemDescription(e.target.value)}
-                          placeholder="Describe your item's special properties, abilities, history or appearance..."
-                          rows={4}
-                          className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
-                        />
-                      </div>
+                      {/* Description Display (from Item Details section) */}
+                      {previewDescription && (
+                        <div className="pt-3 border-t border-slate-700">
+                          <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
+                            Description
+                          </label>
+                          <div className="text-sm text-slate-300 bg-slate-900/50 border border-slate-700 rounded-md px-3 py-2.5">
+                            {previewDescription}
+                          </div>
+                          <p className="mt-1.5 text-[10px] text-slate-600">
+                            Edit in the Item Details section above
+                          </p>
+                        </div>
+                      )}
 
                       {/* Action Buttons */}
                       <div className="flex gap-2">
