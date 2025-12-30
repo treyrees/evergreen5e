@@ -565,7 +565,7 @@ export default function CalculatorPage() {
         setAttunement(false);
         break;
       case 'flametongue':
-        setItemName('Flametongue');
+        setItemName('Flame Tongue');
         setBaseItem('longsword');
         setEnhancement(0);
         setEnhancementSometimes(false);
