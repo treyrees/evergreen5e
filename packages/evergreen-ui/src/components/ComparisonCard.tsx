@@ -2,7 +2,12 @@
 
 import { ReactNode, useState } from 'react';
 import { getMedalBorderClass, getRarityBgClass } from '../utils/rarity';
-import { AttunementBadge, Badge } from './Badge';
+import { AttunementBadge } from './Badge';
+
+/** Default score display when AnimatedNumber is not provided */
+function DefaultScoreDisplay({ value }: { value: number }) {
+  return <span>{value.toFixed(1)}</span>;
+}
 
 export interface ComparisonItemData {
   /** Item name */
@@ -55,9 +60,7 @@ export function ComparisonCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const scoreDiff = yourItem.score - referenceItem.score;
 
-  const ScoreDisplay = AnimatedNumber || (({ value }: { value: number }) => (
-    <span>{value.toFixed(1)}</span>
-  ));
+  const ScoreDisplay = AnimatedNumber || DefaultScoreDisplay;
 
   return (
     <div
