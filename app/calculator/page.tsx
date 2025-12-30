@@ -1135,6 +1135,12 @@ export default function CalculatorPage() {
                   <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
                     Requires Attunement
                   </span>
+                  <span
+                    className="ml-1.5 text-slate-500 hover:text-slate-300 cursor-help text-xs"
+                    title="Attunement has minimal effect on scoring, but heavily influences which reference items appear in 'What's Similar?' since attuned items are compared to other attuned items."
+                  >
+                    ⓘ
+                  </span>
                 </label>
 
                 {/* Quick Start Templates - only show when form is empty */}

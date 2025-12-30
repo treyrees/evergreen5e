@@ -126,6 +126,10 @@ There will be TypeScript errors related to Google Fonts (next/font/google). **Do
 
 **Do not run `npm run build`** - the build will fail due to network issues fetching Google Fonts in this environment. This is expected and does not indicate a problem with the code. Use `npm run lint` to verify code quality instead.
 
+## Style Guide
+
+- **No em dashes**: Never use em dashes (—) in UI copy. Use commas, semicolons, or rephrase instead.
+
 ## Philosophy
 
 The calculator prioritizes:
