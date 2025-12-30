@@ -1137,7 +1137,7 @@ export default function CalculatorPage() {
                   </span>
                   <span
                     className="ml-1.5 text-slate-500 hover:text-slate-300 cursor-help text-xs"
-                    title="Attunement has minimal effect on scoring, but heavily influences which reference items appear in 'What's Similar?' — attuned items are compared to other attuned items."
+                    title="Attunement has minimal effect on scoring, but heavily influences which reference items appear in 'What's Similar?' since attuned items are compared to other attuned items."
                   >
                     ⓘ
                   </span>
