@@ -216,6 +216,7 @@ export default function CalculatorPage() {
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
+  const [showAttunementInfo, setShowAttunementInfo] = useState(false);
 
   // Item Preview state
   const [showItemPreview, setShowItemPreview] = useState(false);
@@ -1125,23 +1126,47 @@ export default function CalculatorPage() {
                     ))}
                   </select>
                 </div>
-                <label className="flex items-center cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={attunement}
-                    onChange={(e) => setAttunement(e.target.checked)}
-                    className="mr-2.5 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 focus:ring-emerald-500"
-                  />
-                  <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
-                    Requires Attunement
-                  </span>
-                  <span
-                    className="ml-1.5 text-slate-500 hover:text-slate-300 cursor-help text-xs"
-                    title="Attunement has minimal effect on scoring, but heavily influences which reference items appear in 'What's Similar?' since attuned items are compared to other attuned items."
-                  >
-                    ⓘ
-                  </span>
-                </label>
+                <div className="flex items-center">
+                  <label className="flex items-center cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={attunement}
+                      onChange={(e) => setAttunement(e.target.checked)}
+                      className="mr-2.5 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 focus:ring-emerald-500"
+                    />
+                    <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                      Requires Attunement
+                    </span>
+                  </label>
+                  <div className="relative ml-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowAttunementInfo(!showAttunementInfo)}
+                      className={`text-xs cursor-help transition-colors ${showAttunementInfo ? 'text-slate-300' : 'text-slate-500 hover:text-slate-300'}`}
+                      aria-label="More info about attunement"
+                    >
+                      ⓘ
+                    </button>
+                    {showAttunementInfo && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowAttunementInfo(false)}
+                        />
+                        <div className="absolute left-0 top-6 z-50 w-64 p-3 bg-slate-800 border border-slate-600 rounded-lg shadow-xl text-xs text-slate-300 leading-relaxed">
+                          Attunement has minimal effect on scoring, but heavily influences which reference items appear in &quot;What&apos;s Similar?&quot; since attuned items are compared to other attuned items.
+                          <button
+                            type="button"
+                            onClick={() => setShowAttunementInfo(false)}
+                            className="block mt-2 text-slate-500 hover:text-slate-300 transition-colors"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
 
                 {/* Quick Start Templates - only show when form is empty */}
                 {!hasSelectedAttributes && !baseItem && (
