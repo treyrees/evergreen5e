@@ -1952,38 +1952,106 @@ export default function CalculatorPage() {
                   {/* Collapsible Helper Guide */}
                   <details className="mb-3 bg-slate-700/30 border border-slate-600 rounded-md">
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
-                      Spell Level Guide
+                      Power Level Guide
                     </summary>
-                    <div className="px-3 py-3 text-xs text-slate-300 space-y-2 border-t border-slate-600">
-                      <p className="text-slate-400 text-[11px] mb-2">
-                        Find the spell most similar to your custom effect. Use that spell level.
+                    <div className="px-3 py-3 text-xs text-slate-300 space-y-3 border-t border-slate-600">
+                      <p className="text-slate-400 text-[11px]">
+                        How impactful is this ability? Match your effect to a power level below.
                       </p>
 
-                      <div className="space-y-1 text-[11px]">
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Level 0 (Cantrip)</span>
-                          <span className="text-slate-500">Light, Mage Hand</span>
+                      {/* Power Level Quick Reference */}
+                      <div className="space-y-1.5 text-[11px]">
+                        <div className="flex items-start gap-2 py-1">
+                          <span className="text-slate-500 w-12 shrink-0 font-medium">Lv 0</span>
+                          <div>
+                            <span className="text-slate-300">Minor convenience</span>
+                            <span className="text-slate-500 ml-1">— glow, clean, minor telekinesis</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Level 1-2</span>
-                          <span className="text-slate-500">Magic Missile, Invisibility</span>
+                        <div className="flex items-start gap-2 py-1">
+                          <span className="text-slate-400 w-12 shrink-0 font-medium">Lv 1-2</span>
+                          <div>
+                            <span className="text-slate-300">Useful but limited</span>
+                            <span className="text-slate-500 ml-1">— 1-3d6 damage, short invisibility, small heals</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-emerald-400">
-                          <span>Level 3 (AoE unlocks)</span>
-                          <span className="text-emerald-500">Fireball, Lightning Bolt</span>
+                        <div className="flex items-start gap-2 py-1 text-emerald-400">
+                          <span className="w-12 shrink-0 font-medium">Lv 3</span>
+                          <div>
+                            <span className="text-emerald-300">Combat-changing</span>
+                            <span className="text-emerald-500/80 ml-1">— AoE damage (8d6), flight, haste</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Level 4-5</span>
-                          <span className="text-slate-500">Wall of Fire, Polymorph</span>
+                        <div className="flex items-start gap-2 py-1">
+                          <span className="text-violet-400 w-12 shrink-0 font-medium">Lv 4-5</span>
+                          <div>
+                            <span className="text-violet-300">Encounter-ending</span>
+                            <span className="text-violet-400/70 ml-1">— polymorph the boss, banish a threat, revive ally</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-amber-400">
-                          <span>Level 6+</span>
-                          <span className="text-amber-500">Disintegrate, Wish</span>
+                        <div className="flex items-start gap-2 py-1 text-amber-400">
+                          <span className="w-12 shrink-0 font-medium">Lv 6-7</span>
+                          <div>
+                            <span className="text-amber-300">Skip the adventure</span>
+                            <span className="text-amber-500/80 ml-1">— teleport anywhere, see through all deception, disintegrate</span>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2 py-1 text-rose-400">
+                          <span className="w-12 shrink-0 font-medium">Lv 8-9</span>
+                          <div>
+                            <span className="text-rose-300">Reality-altering</span>
+                            <span className="text-rose-400/70 ml-1">— mind control, meteor swarm, wish</span>
+                          </div>
                         </div>
                       </div>
 
+                      {/* Common Effect Patterns */}
+                      <details className="pt-2 border-t border-slate-600">
+                        <summary className="cursor-pointer text-[11px] text-slate-400 hover:text-slate-300 select-none">
+                          Common item effects →
+                        </summary>
+                        <div className="mt-2 space-y-2 text-[10px]">
+                          <div>
+                            <div className="text-slate-400 font-medium mb-1">Damage Effects</div>
+                            <div className="text-slate-500 space-y-0.5 pl-2">
+                              <div>+1d6 on hit → <span className="text-slate-300">Lv 1</span></div>
+                              <div>Ranged bolt (3d6, single target) → <span className="text-slate-300">Lv 2</span></div>
+                              <div>AoE blast (8d6, 20ft radius) → <span className="text-emerald-400">Lv 3</span></div>
+                              <div>Massive AoE (40d6 total) → <span className="text-rose-400">Lv 9</span></div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-slate-400 font-medium mb-1">Movement</div>
+                            <div className="text-slate-500 space-y-0.5 pl-2">
+                              <div>+10ft speed → <span className="text-slate-300">Lv 1</span></div>
+                              <div>Fly 60ft for 10min → <span className="text-emerald-400">Lv 3</span></div>
+                              <div>Teleport 500ft → <span className="text-violet-400">Lv 4</span></div>
+                              <div>Teleport anywhere on plane → <span className="text-amber-400">Lv 7</span></div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-slate-400 font-medium mb-1">Control / Debuffs</div>
+                            <div className="text-slate-500 space-y-0.5 pl-2">
+                              <div>Frighten 1 creature → <span className="text-slate-300">Lv 1</span></div>
+                              <div>Hold person (paralyzed) → <span className="text-slate-300">Lv 2</span></div>
+                              <div>Banish creature → <span className="text-violet-400">Lv 4</span></div>
+                              <div>Dominate monster → <span className="text-rose-400">Lv 8</span></div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-slate-400 font-medium mb-1">Utility / Buffs</div>
+                            <div className="text-slate-500 space-y-0.5 pl-2">
+                              <div>Detect magic → <span className="text-slate-300">Lv 1</span></div>
+                              <div>Invisibility (1 creature) → <span className="text-slate-300">Lv 2</span></div>
+                              <div>Haste / extra action → <span className="text-emerald-400">Lv 3</span></div>
+                              <div>True seeing → <span className="text-amber-400">Lv 6</span></div>
+                            </div>
+                          </div>
+                        </div>
+                      </details>
+
                       <p className="text-slate-500 italic text-[10px] pt-2 border-t border-slate-600">
-                        Sword shoots lightning? Lv3. Adds 1d6 fire? Lv1.
+                        Tip: When in doubt, find a similar spell on <a href="https://www.dndbeyond.com/spells" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:text-emerald-400 underline">D&D Beyond</a> and use that level.
                       </p>
                     </div>
                   </details>
@@ -2097,7 +2165,7 @@ export default function CalculatorPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">Spell Level</label>
+                          <label className="block text-[10px] text-slate-500 mb-1">Power Level</label>
                           <input
                             type="text"
                             inputMode="numeric"
