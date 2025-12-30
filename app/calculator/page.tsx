@@ -588,6 +588,13 @@ export default function CalculatorPage() {
           frequency: 'per-hit',
           conditional: true, // vs fiends and undead
         });
+        // Aura: advantage on saves vs spells for allies within 10ft
+        // Modeled as at-will level 2 Protection effect
+        setMaxCharges(1);
+        setChargesPerLongRest(1);
+        setAbilities([
+          { spell: 'Protective Aura', spellLevel: 2, chargesPerUse: 1 },
+        ]);
         break;
     }
   };
