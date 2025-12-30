@@ -979,6 +979,19 @@ function findClosestInCandidates(
  * 1. Filter to only show significant differences (>= 0.3 pts)
  * 2. Show trade-offs even when total score is similar (e.g., "+1 enhancement but no saves")
  * 3. Sort by magnitude to show most impactful differences first
+ *
+ * Compared attributes (with point values):
+ * - Enhancement: 1.0 pts per +1
+ * - Damage bonus: varies by dice/frequency
+ * - Saving throw bonus: 1.0 pts per +1
+ * - AC bonus: 1.0-1.5 pts per +1
+ * - Spell Save DC: 1.0 pts per +1
+ * - Spell Attack: 0.75 pts per +1
+ * - Damage immunities: ~2.5 pts each
+ * - Resistances: ~1.5 pts each
+ * - Condition immunities: ~0.75 pts each
+ * - Flight: ~1.5 pts
+ * - Spell abilities: varies by level
  */
 function compareToAnchor(
   userItem: Partial<MagicItem>,
@@ -1068,6 +1081,48 @@ function compareToAnchor(
       differences.push({ text: `+${diff} higher AC bonus`, magnitude });
     } else {
       differences.push({ text: `+${-diff} lower AC bonus`, magnitude });
+    }
+  }
+
+  // Spell Save DC comparison (1.0 pts per +1 - same as enhancement, very impactful for casters)
+  const userSpellDC = userCombat.spellSaveDCBonus || 0;
+  const anchorSpellDC = anchorCombat.spellSaveDCBonus || 0;
+  if (userSpellDC !== anchorSpellDC) {
+    const diff = userSpellDC - anchorSpellDC;
+    const magnitude = Math.abs(diff) * 1.0;
+    if (diff > 0) {
+      if (anchorSpellDC === 0) {
+        differences.push({ text: `+${userSpellDC} spell save DC (reference has none)`, magnitude });
+      } else {
+        differences.push({ text: `+${diff} higher spell save DC`, magnitude });
+      }
+    } else {
+      if (userSpellDC === 0) {
+        differences.push({ text: `no spell DC bonus (reference has +${anchorSpellDC})`, magnitude });
+      } else {
+        differences.push({ text: `+${-diff} lower spell save DC`, magnitude });
+      }
+    }
+  }
+
+  // Spell Attack comparison (0.75 pts per +1 - valuable for attack-roll spells)
+  const userSpellAtk = userCombat.spellAttackBonus || 0;
+  const anchorSpellAtk = anchorCombat.spellAttackBonus || 0;
+  if (userSpellAtk !== anchorSpellAtk) {
+    const diff = userSpellAtk - anchorSpellAtk;
+    const magnitude = Math.abs(diff) * 0.75;
+    if (diff > 0) {
+      if (anchorSpellAtk === 0) {
+        differences.push({ text: `+${userSpellAtk} spell attack (reference has none)`, magnitude });
+      } else {
+        differences.push({ text: `+${diff} higher spell attack`, magnitude });
+      }
+    } else {
+      if (userSpellAtk === 0) {
+        differences.push({ text: `no spell attack bonus (reference has +${anchorSpellAtk})`, magnitude });
+      } else {
+        differences.push({ text: `+${-diff} lower spell attack`, magnitude });
+      }
     }
   }
 
