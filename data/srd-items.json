@@ -404,6 +404,8 @@
     "rarity": "uncommon",
     "attunement": true,
     "dndbeyondSlug": "4784-trident-of-fish-command",
+    "overrideBonus": 0.25,
+    "description": "3 charges to cast Dominate Beast on swimming beasts only. Too niche to fully model.",
     "combat": {
       "enhancement": 1
     }
