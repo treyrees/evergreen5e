@@ -6,6 +6,8 @@ export interface BadgeProps {
   variant?: 'default' | 'violet' | 'emerald' | 'amber' | 'sky' | 'slate';
   /** Badge size */
   size?: 'xs' | 'sm';
+  /** Tooltip text */
+  title?: string;
   /** Additional CSS classes */
   className?: string;
 }
@@ -17,6 +19,7 @@ export function Badge({
   children,
   variant = 'default',
   size = 'xs',
+  title,
   className = '',
 }: BadgeProps) {
   const sizeClasses = size === 'xs' ? 'text-[10px] px-1 py-0.5' : 'text-xs px-2 py-1';
@@ -31,7 +34,7 @@ export function Badge({
   };
 
   return (
-    <span className={`${sizeClasses} ${variantClasses[variant]} rounded ${className}`}>
+    <span title={title} className={`${sizeClasses} ${variantClasses[variant]} rounded ${className}`}>
       {children}
     </span>
   );
