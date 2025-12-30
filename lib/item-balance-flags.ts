@@ -18,7 +18,7 @@ export const SPECIAL_MECHANICS = new Set([
   // Spell absorption/storage/action economy
   'Rod of Absorption',         // Absorbs spells targeting you
   'Ring of Spell Storing',     // Stores 5 spell levels (breaks action economy)
-  // Note: Luck Blade now calculates correctly using level 9 spell scaling for Wish
+  'Luck Blade',                // Wish spell - campaign-defining, calculates as ~6.0 pts
 
   // Tactical mobility and positioning
   'Boots of Speed',            // Doubled movement + disadvantage on opportunity attacks
@@ -117,6 +117,9 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Ring of Spell Storing') {
     return 'No quantifiable combat stats. Bonus +2.5 for storing up to 5 spell levels—breaks action economy with pre-cast buffs.';
+  }
+  if (itemName === 'Luck Blade') {
+    return '+1 sword with +1 saves (2.0 pts base). Wish 1/day calculates as 4.0 pts using level 9 spell scaling (20 effective value × 0.20 long rest multiplier). Total ~6.0 pts—at the high end of Legendary, campaign-defining.';
   }
 
   // Mobility
