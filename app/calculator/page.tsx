@@ -681,48 +681,82 @@ export default function CalculatorPage() {
     const numAttributes = attrRoll < 0.15 ? 1 : attrRoll < 0.50 ? 2 : attrRoll < 0.85 ? 3 : 4;
 
     // Define possible attributes based on item type
-    type AttributeType = 'enhancement' | 'damage' | 'ac' | 'saves' | 'resistance' | 'conditionImmunity';
-    const possibleAttributes: AttributeType[] = [];
+    // Split into "major" (high point value) and "minor" (low point value) attributes
+    type MajorAttr = 'enhancement' | 'damage' | 'ac' | 'saves';
+    type MinorAttr = 'resistance' | 'conditionImmunity';
+    const possibleMajor: MajorAttr[] = [];
+    const possibleMinor: MinorAttr[] = ['resistance', 'conditionImmunity'];
 
     if (isWeapon) {
-      possibleAttributes.push('enhancement', 'damage');
+      possibleMajor.push('enhancement', 'damage');
     }
     if (isArmor) {
-      possibleAttributes.push('enhancement', 'ac');
+      possibleMajor.push('enhancement');
     }
-    // Universal attributes
-    possibleAttributes.push('ac', 'saves', 'resistance', 'conditionImmunity');
+    // Non-weapon/non-armor items can get AC (stacking bonus) or saves
+    if (!isWeapon) {
+      possibleMajor.push('ac', 'saves');
+    } else {
+      possibleMajor.push('saves');
+    }
 
     // Remove duplicates
-    const uniqueAttributes = [...new Set(possibleAttributes)];
+    const uniqueMajor = [...new Set(possibleMajor)];
 
-    // Shuffle and pick attributes
-    const shuffled = uniqueAttributes.sort(() => Math.random() - 0.5);
-    const selectedAttributes = shuffled.slice(0, Math.min(numAttributes, shuffled.length));
+    // Shuffle both pools
+    const shuffledMajor = uniqueMajor.sort(() => Math.random() - 0.5);
+    const shuffledMinor = possibleMinor.sort(() => Math.random() - 0.5);
+
+    // Limit major attributes to avoid exceeding ~3.9 pts
+    // Uncommon: 1 major max, Rare: 1-2 major, Very Rare: 1-2 major (conservative values)
+    const maxMajor = targetRarity === 'uncommon' ? 1 : 2;
+    const numMajor = Math.min(numAttributes, maxMajor, shuffledMajor.length);
+    const numMinor = Math.min(numAttributes - numMajor, shuffledMinor.length);
+
+    const selectedMajor = shuffledMajor.slice(0, numMajor);
+    const selectedMinor = shuffledMinor.slice(0, numMinor);
 
     // Damage types for random selection (excluding weak ones)
     const goodDamageTypes = ['fire', 'cold', 'lightning', 'radiant', 'necrotic', 'force', 'thunder'];
     const resistanceTypes = ['fire', 'cold', 'lightning', 'acid', 'poison', 'thunder', 'necrotic'];
 
-    // Apply attributes based on target rarity
-    selectedAttributes.forEach((attr) => {
+    // Track if we've added a high-value major attribute (2+ pts)
+    let hasHighValueMajor = false;
+
+    // Apply major attributes with conservative values to stay under 3.9 pts
+    selectedMajor.forEach((attr) => {
       switch (attr) {
         case 'enhancement':
           if (isWeapon || isArmor) {
             if (targetRarity === 'uncommon') {
-              setEnhancement(1);
+              setEnhancement(1); // 1.0 pts
             } else if (targetRarity === 'rare') {
-              setEnhancement(Math.random() < 0.7 ? 1 : 2);
+              setEnhancement(hasHighValueMajor ? 1 : (Math.random() < 0.8 ? 1 : 2));
+              if (!hasHighValueMajor) hasHighValueMajor = true;
             } else {
-              setEnhancement(Math.random() < 0.5 ? 2 : 3);
+              // Very Rare: cap at +2 to leave room for other attributes
+              setEnhancement(hasHighValueMajor ? 1 : 2); // 2.0 pts max
+              hasHighValueMajor = true;
             }
           }
           break;
 
         case 'damage':
           if (isWeapon) {
-            const dieType = targetRarity === 'uncommon' ? '6' : targetRarity === 'rare' ? '6' : '8';
-            const numDice = targetRarity === 'very rare' ? (Math.random() < 0.5 ? '2' : '1') : '1';
+            // Keep damage conservative: 1d6 for uncommon/rare, 1d8 or 2d6 for very rare
+            let dieType = '6';
+            let numDice = '1';
+            if (targetRarity === 'very rare' && !hasHighValueMajor) {
+              // Either 1d8 (~1.1 pts) or 2d6 (~2.0 pts)
+              if (Math.random() < 0.6) {
+                dieType = '8';
+                numDice = '1';
+              } else {
+                dieType = '6';
+                numDice = '2';
+              }
+              hasHighValueMajor = true;
+            }
             const dmgType = goodDamageTypes[Math.floor(Math.random() * goodDamageTypes.length)];
             setDamageBonus({
               dice: `${numDice}d${dieType}`,
@@ -734,30 +768,40 @@ export default function CalculatorPage() {
 
         case 'ac':
           if (!isWeapon) {
+            // AC on non-armor items is 1.5 pts per +1 (stacking)
             if (targetRarity === 'uncommon') {
-              setAcBonus(1);
+              setAcBonus(1); // 1.5 pts on accessories
             } else if (targetRarity === 'rare') {
-              setAcBonus(Math.random() < 0.7 ? 1 : 2);
+              setAcBonus(1); // Keep at 1 to stay conservative
             } else {
-              setAcBonus(2);
+              // Very Rare: +1 AC only if we have another major, otherwise +2
+              setAcBonus(hasHighValueMajor ? 1 : 2);
+              if (!hasHighValueMajor) hasHighValueMajor = true;
             }
           }
           break;
 
         case 'saves':
           if (targetRarity === 'uncommon') {
-            setSavingThrowBonus(1);
+            setSavingThrowBonus(1); // 1.0 pts
           } else if (targetRarity === 'rare') {
-            setSavingThrowBonus(Math.random() < 0.6 ? 1 : 2);
+            setSavingThrowBonus(hasHighValueMajor ? 1 : (Math.random() < 0.7 ? 1 : 2));
           } else {
-            setSavingThrowBonus(Math.random() < 0.5 ? 2 : 3);
+            // Very Rare: cap at +1 saves if we already have high value attr
+            setSavingThrowBonus(hasHighValueMajor ? 1 : 2);
+            if (!hasHighValueMajor) hasHighValueMajor = true;
           }
           break;
+      }
+    });
 
+    // Apply minor attributes (low point value, safe to add)
+    selectedMinor.forEach((attr) => {
+      switch (attr) {
         case 'resistance':
-          const numResistances = targetRarity === 'very rare' ? (Math.random() < 0.5 ? 2 : 1) : 1;
+          // Single resistance only (~0.5 pts)
           const shuffledResistances = [...resistanceTypes].sort(() => Math.random() - 0.5);
-          setResistances(shuffledResistances.slice(0, numResistances));
+          setResistances(shuffledResistances.slice(0, 1));
           break;
 
         case 'conditionImmunity':
