@@ -9,7 +9,7 @@ export default function Home() {
             Is Your Homebrew Balanced?
           </h1>
           <p className="text-xl text-slate-400">
-            Get instant validation. Compare against official D&D 5e items with transparent math. No AI queries—your inputs stay in your browser.
+            Stop waiting for your friend to use ChatGPT at your table. In-browser logic gives you immediate feedback with transparent math.
           </p>
         </div>
 
