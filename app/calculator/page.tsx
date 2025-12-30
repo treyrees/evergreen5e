@@ -2601,7 +2601,8 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Unique Item Details Section (for community submissions) */}
+            {/* Unique Item Details Section (for community submissions) - Hidden unless ?community=1 */}
+            {communityModeEnabled && (
             <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
               <button
                 onClick={() => setShowItemDetails(!showItemDetails)}
@@ -2658,6 +2659,7 @@ export default function CalculatorPage() {
                 </div>
               )}
             </div>
+            )}
           </div>
 
           {/* Right Column - Results */}
