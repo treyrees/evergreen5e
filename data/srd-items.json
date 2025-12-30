@@ -700,5 +700,180 @@
       "enhancement": 0
     },
     "description": "No quantifiable combat stats. Override +4.0 for invisibility (3 charges, 1hr each)—tactical advantage on attacks and stealth is campaign-defining."
+  },
+  {
+    "name": "Bracers of Archery",
+    "baseItem": "bracers",
+    "rarity": "uncommon",
+    "attunement": true,
+    "dndbeyondSlug": "4591-bracers-of-archery",
+    "overrideBonus": 1.0,
+    "combat": {
+      "enhancement": 0
+    },
+    "description": "No quantifiable dice damage. Override +1.0 for flat +2 damage bonus with longbows and shortbows."
+  },
+  {
+    "name": "Cape of the Mountebank",
+    "baseItem": "cape",
+    "rarity": "rare",
+    "attunement": false,
+    "dndbeyondSlug": "4598-cape-of-the-mountebank",
+    "overrideBonus": 0.5,
+    "combat": {
+      "enhancement": 0,
+      "charges": [
+        {
+          "spell": "Dimension Door",
+          "spellLevel": 4,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
+    },
+    "description": "Dimension Door (level 4) 1/day. Override +0.5 for smoke cloud left behind—provides concealment when escaping."
+  },
+  {
+    "name": "Plate Armor of Etherealness",
+    "baseItem": "armor (heavy)",
+    "rarity": "legendary",
+    "attunement": true,
+    "dndbeyondSlug": "5372-plate-armor-of-etherealness",
+    "overrideBonus": 2.0,
+    "combat": {
+      "enhancement": 0,
+      "charges": [
+        {
+          "spell": "Etherealness",
+          "spellLevel": 7,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
+    },
+    "description": "Etherealness (level 7) 1/day as an action. Override +2.0 for plate-wearer access to a powerful spell that normally requires 7th-level slots and caster class."
+  },
+  {
+    "name": "Belt of Hill Giant Strength",
+    "baseItem": "belt",
+    "rarity": "rare",
+    "attunement": true,
+    "dndbeyondSlug": "4579-belt-of-hill-giant-strength",
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "STR",
+        "setValue": 21
+      }
+    }
+  },
+  {
+    "name": "Belt of Frost Giant Strength",
+    "baseItem": "belt",
+    "rarity": "very rare",
+    "attunement": true,
+    "dndbeyondSlug": "4580-belt-of-frost-giant-strength",
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "STR",
+        "setValue": 23
+      }
+    }
+  },
+  {
+    "name": "Belt of Stone Giant Strength",
+    "baseItem": "belt",
+    "rarity": "very rare",
+    "attunement": true,
+    "dndbeyondSlug": "4581-belt-of-stone-giant-strength",
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "STR",
+        "setValue": 23
+      }
+    }
+  },
+  {
+    "name": "Belt of Fire Giant Strength",
+    "baseItem": "belt",
+    "rarity": "very rare",
+    "attunement": true,
+    "dndbeyondSlug": "4582-belt-of-fire-giant-strength",
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "STR",
+        "setValue": 25
+      }
+    }
+  },
+  {
+    "name": "Belt of Cloud Giant Strength",
+    "baseItem": "belt",
+    "rarity": "legendary",
+    "attunement": true,
+    "dndbeyondSlug": "4583-belt-of-cloud-giant-strength",
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "STR",
+        "setValue": 27
+      }
+    }
+  },
+  {
+    "name": "Belt of Storm Giant Strength",
+    "baseItem": "belt",
+    "rarity": "legendary",
+    "attunement": true,
+    "dndbeyondSlug": "4584-belt-of-storm-giant-strength",
+    "combat": {
+      "enhancement": 0,
+      "abilityScoreSetter": {
+        "ability": "STR",
+        "setValue": 29
+      }
+    }
+  },
+  {
+    "name": "Ring of Resistance",
+    "baseItem": "ring",
+    "rarity": "rare",
+    "attunement": true,
+    "dndbeyondSlug": "4728-ring-of-resistance",
+    "combat": {
+      "enhancement": 0,
+      "resistances": ["fire"]
+    },
+    "description": "Resistance to one damage type (modeled as fire). Attunement required."
+  },
+  {
+    "name": "Dwarven Plate",
+    "baseItem": "armor (heavy)",
+    "rarity": "very rare",
+    "attunement": false,
+    "dndbeyondSlug": "4618-dwarven-plate",
+    "overrideBonus": 0.5,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 2
+    },
+    "description": "+2 AC plate armor. Override +0.5 for immunity to forced movement—negates common battlefield control effects."
+  },
+  {
+    "name": "Dragon Scale Mail",
+    "baseItem": "armor (medium)",
+    "rarity": "very rare",
+    "attunement": true,
+    "dndbeyondSlug": "4617-dragon-scale-mail",
+    "overrideBonus": 0.75,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 1,
+      "resistances": ["fire"]
+    },
+    "description": "+1 AC, resistance to one damage type (modeled as fire). Override +0.75 for advantage on saves vs dragon breath/Frightful Presence and 30-mile dragon detection."
   }
 ]

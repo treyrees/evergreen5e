@@ -311,13 +311,18 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     const setValue = combat.abilityScoreSetter.setValue;
     const ability = combat.abilityScoreSetter.ability?.toUpperCase() || 'STR';
 
-    // Base value depends on the target value
+    // Base value depends on the target value (aligned with D&D 5e modifier boundaries)
+    // Belts of Giant Strength calibration:
+    // - Hill Giant (21, +5): Rare → 2.0 pts
+    // - Frost/Stone Giant (23, +6): Very Rare → 3.0 pts
+    // - Fire Giant (25, +7): Very Rare → 3.5 pts
+    // - Cloud/Storm Giant (27-29, +8/+9): Legendary → 4.0 pts
     let baseValue: number;
-    if (setValue >= 25) baseValue = 4.0;      // +7 modifier (epic)
-    else if (setValue >= 23) baseValue = 3.5; // +6 modifier (very powerful)
-    else if (setValue >= 21) baseValue = 3.0; // +5 modifier (powerful)
-    else if (setValue >= 20) baseValue = 2.0; // +5 modifier (strong)
-    else baseValue = 1.5;                      // 19 or lower (+4 modifier, baseline)
+    if (setValue >= 26) baseValue = 4.0;      // +8 modifier or higher (Legendary)
+    else if (setValue >= 24) baseValue = 3.5; // +7 modifier (Very Rare, upper end)
+    else if (setValue >= 22) baseValue = 3.0; // +6 modifier (Very Rare)
+    else if (setValue >= 20) baseValue = 2.0; // +5 modifier (Rare)
+    else baseValue = 1.5;                      // +4 modifier or lower (Uncommon)
 
     // Ability type multiplier (applied to base value of 1.5, scales with higher values)
     const abilityMultipliers: Record<string, number> = {
