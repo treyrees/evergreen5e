@@ -181,6 +181,10 @@ export default function CalculatorPage() {
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
+
+  // Item Preview state
+  const [itemDescription, setItemDescription] = useState('');
+  const [hiddenAttributes, setHiddenAttributes] = useState<Set<string>>(new Set());
   // Generate random placeholder after mount to avoid hydration mismatch
   const [randomPlaceholder, setRandomPlaceholder] = useState('');
   useEffect(() => {
@@ -297,6 +301,137 @@ export default function CalculatorPage() {
   const removeAbility = (index: number) => {
     setAbilities(abilities.filter((_, i) => i !== index));
   };
+
+  // Toggle attribute visibility in preview
+  const toggleAttributeVisibility = (attrKey: string) => {
+    setHiddenAttributes(prev => {
+      const next = new Set(prev);
+      if (next.has(attrKey)) {
+        next.delete(attrKey);
+      } else {
+        next.add(attrKey);
+      }
+      return next;
+    });
+  };
+
+  // Helper to format base item for display (capitalize first letter of each word)
+  const formatBaseItem = (item: string) => {
+    return item.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  // Get item type category for DMG-style formatting
+  const getItemTypeCategory = (item: string): string => {
+    if (WEAPON_ITEMS.has(item)) return 'Weapon';
+    if (item.includes('armor')) return 'Armor';
+    if (item === 'shield') return 'Armor';
+    if (['rod', 'staff', 'wand'].includes(item)) return 'Wondrous item';
+    return 'Wondrous item';
+  };
+
+  // Build the type line like "Weapon (longsword), rare (requires attunement)"
+  const buildTypeLine = (): string => {
+    const category = getItemTypeCategory(baseItem);
+    const itemSpec = baseItem ? `(${formatBaseItem(baseItem).toLowerCase()})` : '';
+    const rarityText = results.suggestedRarity.toLowerCase();
+    const attunementText = attunement ? ' (requires attunement)' : '';
+
+    if (category === 'Weapon' || category === 'Armor') {
+      return `${category} ${itemSpec}, ${rarityText}${attunementText}`;
+    }
+    return `${category}, ${rarityText}${attunementText}`;
+  };
+
+  // Get display name for the item
+  const getDisplayName = (): string => {
+    if (itemName.trim()) return itemName.trim();
+    if (baseItem) return formatBaseItem(baseItem);
+    return 'Magic Item';
+  };
+
+  // Build list of toggleable attributes
+  const previewAttributes = useMemo(() => {
+    const attrs: { key: string; label: string; value: string }[] = [];
+
+    if (enhancement > 0) {
+      const suffix = enhancementSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'enhancement', label: 'Enhancement', value: `+${enhancement} bonus to attack and damage rolls${suffix}` });
+    }
+
+    if (damageBonus) {
+      let dmgText = `${damageBonus.dice} ${damageBonus.type} damage`;
+      if (damageBonus.vicious) dmgText += ' on critical hits';
+      else if (damageBonus.frequency === 'per-turn') dmgText += ' (once per turn)';
+      else dmgText += ' per hit';
+      if (damageBonus.conditional) dmgText += ' against specific creatures';
+      attrs.push({ key: 'damage', label: 'Bonus Damage', value: dmgText });
+    }
+
+    if (acBonus > 0) {
+      const suffix = acBonusSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'ac', label: 'Armor Class', value: `+${acBonus} bonus to AC${suffix}` });
+    }
+
+    if (savingThrowBonus > 0) {
+      const suffix = saveBonusSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'saves', label: 'Saving Throws', value: `+${savingThrowBonus} bonus to saving throws${suffix}` });
+    }
+
+    if (abilityScoreSetter) {
+      attrs.push({ key: 'ability-setter', label: 'Ability Score', value: `${abilityScoreSetter.ability} score becomes ${abilityScoreSetter.setValue}` });
+    }
+
+    if (abilityScoreBonus) {
+      attrs.push({ key: 'ability-bonus', label: 'Ability Score', value: `+${abilityScoreBonus.bonus} to ${abilityScoreBonus.ability}` });
+    }
+
+    if (resistances.length > 0) {
+      const suffix = resistancesSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'resistances', label: 'Resistances', value: `Resistance to ${resistances.join(', ')} damage${suffix}` });
+    }
+
+    if (flightEnabled) {
+      const duration = flyDuration === 'unlimited' ? 'unlimited' : `${flyDuration} hour${flyDuration === 1 ? '' : 's'} per day`;
+      attrs.push({ key: 'flight', label: 'Flight', value: `Flying speed of ${flySpeed} feet (${duration})` });
+    }
+
+    const buffs: string[] = [];
+    if (permanentBuffs.darkvision) buffs.push('darkvision 60 ft.');
+    if (permanentBuffs.blindsight) buffs.push('blindsight 30 ft.');
+    if (permanentBuffs.tremorsense) buffs.push('tremorsense 30 ft.');
+    if (permanentBuffs.speedBonus) buffs.push('+10 ft. movement speed');
+    if (permanentBuffs.climbBurrow) buffs.push('climb and burrow speeds equal to walking speed');
+    if (buffs.length > 0) {
+      attrs.push({ key: 'buffs', label: 'Senses & Movement', value: buffs.join(', ') });
+    }
+
+    if (weaponProperties.length > 0) {
+      const propLabels: Record<string, string> = {
+        'finesse': 'finesse',
+        'light': 'light',
+        'reach': 'reach',
+        'thrown': 'thrown',
+        'versatile': 'versatile',
+        'heavy-two-handed': 'heavy, two-handed',
+      };
+      const propText = weaponProperties.map(p => propLabels[p] || p).join(', ');
+      attrs.push({ key: 'properties', label: 'Properties', value: `Gains the ${propText} ${weaponProperties.length === 1 ? 'property' : 'properties'}` });
+    }
+
+    if (abilities.length > 0) {
+      const spellList = abilities.map(a => `${a.spell} (${a.chargesPerUse} charge${a.chargesPerUse > 1 ? 's' : ''})`).join(', ');
+      attrs.push({ key: 'spells', label: 'Spells', value: spellList });
+    }
+
+    if (maxCharges > 0) {
+      let rechargeText = '';
+      if (chargesPerLongRest > 0) rechargeText = `regains ${chargesPerLongRest} at dawn`;
+      if (chargesPerShortRest > 0) rechargeText = rechargeText ? `${rechargeText}, ${chargesPerShortRest} per short rest` : `regains ${chargesPerShortRest} per short rest`;
+      attrs.push({ key: 'charges', label: 'Charges', value: `${maxCharges} charges${rechargeText ? `, ${rechargeText}` : ''}` });
+    }
+
+    return attrs;
+  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -1278,6 +1413,99 @@ export default function CalculatorPage() {
                         );
                       })}
                     </div>
+                  </div>
+                )}
+
+                {/* Your Item Preview - DMG Style */}
+                {hasSelectedAttributes && baseItem && (
+                  <div className="pt-4 mt-4 border-t border-slate-700">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Your Item</span>
+                      <span
+                        className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
+                        title="Preview your item as it would appear in a D&D sourcebook. Click attributes to hide them from the preview."
+                      >
+                        ⓘ
+                      </span>
+                    </div>
+
+                    {/* DMG-Style Item Card */}
+                    <div className="relative overflow-hidden rounded-lg border-2 border-amber-900/40 bg-gradient-to-b from-amber-950/20 via-slate-800 to-slate-800">
+                      {/* Decorative top border accent */}
+                      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-600/50 to-transparent" />
+
+                      <div className="p-4 space-y-3">
+                        {/* Item Name - Large, ornate */}
+                        <div className="border-b border-amber-900/30 pb-2">
+                          <h3
+                            className={`text-xl font-bold tracking-wide ${getRarityColorClass(results.suggestedRarity)}`}
+                            style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}
+                          >
+                            {getDisplayName()}
+                          </h3>
+                          {/* Type Line - Italic, smaller */}
+                          <p className="text-sm italic text-slate-400 mt-0.5">
+                            {buildTypeLine()}
+                          </p>
+                        </div>
+
+                        {/* Attributes Section */}
+                        {previewAttributes.length > 0 && (
+                          <div className="space-y-2">
+                            {previewAttributes.map((attr) => (
+                              <div
+                                key={attr.key}
+                                className={`group flex items-start gap-2 text-sm transition-all cursor-pointer ${
+                                  hiddenAttributes.has(attr.key)
+                                    ? 'opacity-30 line-through'
+                                    : 'opacity-100'
+                                }`}
+                                onClick={() => toggleAttributeVisibility(attr.key)}
+                                title={hiddenAttributes.has(attr.key) ? 'Click to show in preview' : 'Click to hide from preview'}
+                              >
+                                <span className="text-amber-600/70 select-none">•</span>
+                                <span className="text-slate-300">
+                                  <span className="font-semibold text-slate-200">{attr.label}.</span>{' '}
+                                  {attr.value}
+                                </span>
+                                <span className={`ml-auto text-[10px] transition-opacity ${
+                                  hiddenAttributes.has(attr.key)
+                                    ? 'opacity-100 text-emerald-400'
+                                    : 'opacity-0 group-hover:opacity-100 text-slate-500'
+                                }`}>
+                                  {hiddenAttributes.has(attr.key) ? 'show' : 'hide'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* User Description Textarea */}
+                        <div className="pt-2 border-t border-amber-900/20">
+                          <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">
+                            Description
+                          </label>
+                          <textarea
+                            value={itemDescription}
+                            onChange={(e) => setItemDescription(e.target.value)}
+                            placeholder="Describe your item's appearance, history, or special properties..."
+                            rows={3}
+                            className="w-full px-3 py-2 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded focus:border-amber-600/50 focus:outline-none focus:ring-1 focus:ring-amber-600/30 resize-none"
+                            style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Decorative bottom border accent */}
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-600/30 to-transparent" />
+                    </div>
+
+                    {/* Hidden attributes hint */}
+                    {hiddenAttributes.size > 0 && (
+                      <p className="mt-2 text-[10px] text-slate-500 italic">
+                        {hiddenAttributes.size} attribute{hiddenAttributes.size > 1 ? 's' : ''} hidden from preview
+                      </p>
+                    )}
                   </div>
                 )}
 
