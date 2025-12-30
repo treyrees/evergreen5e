@@ -2051,7 +2051,7 @@ export default function CalculatorPage() {
                                 </div>
                                 <div className="text-[11px] text-slate-400 space-y-0.5">
                                   {enhancement > 0 && <div>+{enhancement} enhancement{enhancementSometimes ? ' ½' : ''}</div>}
-                                  {damageBonus && <div>{damageBonus.dice} {damageBonus.type}{damageBonus.vicious ? ' (crit)' : ''}{damageBonus.frequency === 'per-turn' ? ' /turn' : ''}</div>}
+                                  {damageBonus && <div>{damageBonus.dice} {damageBonus.type}{damageBonus.vicious ? ' (crit)' : ''}{damageBonus.frequency === 'per-turn' ? ' /turn' : ''}{damageBonus.conditionalType ? ` (${damageBonus.conditionalType})` : ''}</div>}
                                   {acBonus > 0 && <div>+{acBonus} AC{acBonusSometimes ? ' ½' : ''}</div>}
                                   {savingThrowBonus > 0 && <div>+{savingThrowBonus} saves{saveBonusSometimes ? ' ½' : ''}</div>}
                                   {abilityScoreSetter && <div>{abilityScoreSetter.ability} → {abilityScoreSetter.setValue}</div>}
