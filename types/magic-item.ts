@@ -117,10 +117,14 @@ export interface CombatFeatures {
   acBonusMultiplier?: number; // 0.5 for "Sometimes" active bonuses
   savingThrowBonus?: number;
   savingThrowBonusMultiplier?: number; // 0.5 for "Sometimes" active bonuses
+  spellSaveDCBonus?: number; // Bonus to spell save DC (e.g., Robe of the Archmagi +2)
+  spellAttackBonus?: number; // Bonus to spell attack rolls (e.g., Wand of the War Mage +1/+2/+3)
   charges?: SpellCharge[]; // Legacy format for existing SRD items
   chargePool?: ChargePool; // New intuitive format for user items
   resistances?: string[]; // Damage types resisted: "fire", "cold", "all", etc.
   resistancesMultiplier?: number; // 0.5 for "Sometimes" active resistances
+  damageImmunities?: string[]; // Damage types immune to: "fire", "poison", etc.
+  conditionImmunities?: string[]; // Conditions immune to: "charmed", "frightened", "poisoned", etc.
   abilityScoreSetter?: AbilityScoreSetter; // Sets ability score to fixed value (e.g., Gauntlets of Ogre Power set STR to 19)
   abilityScoreBonus?: AbilityScoreBonus; // Adds bonus to ability score (e.g., Headband of Intellect +2)
   flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots) - LEGACY: use permanentBuffs.flight instead

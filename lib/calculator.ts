@@ -284,6 +284,22 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     score += combat.savingThrowBonus * saveMultiplier;
   }
 
+  // Spell save DC bonus - very powerful for spellcasters
+  // +2 to DC means ~10% higher success rate on spells, affects all save-based spells
+  // Robe of the Archmagi (+2 DC, +2 spell attack, +5 AC, spell resistance) = Legendary
+  // Estimate DC bonus alone at 1.25 pts per +1 (slightly less than enhancement since caster-only)
+  if (combat.spellSaveDCBonus) {
+    score += combat.spellSaveDCBonus * 1.25;
+  }
+
+  // Spell attack bonus - valuable for attack roll spells
+  // Less impactful than spell save DC since fewer spells use attack rolls
+  // Wand of the War Mage (+1/+2/+3) is Uncommon/Rare/Very Rare - but also ignores cover
+  // Estimate at 0.75 pts per +1 (lower than enhancement since spell-attack only)
+  if (combat.spellAttackBonus) {
+    score += combat.spellAttackBonus * 0.75;
+  }
+
   // Ability score setter - scales with value AND ability type
   // Different abilities have different combat value:
   // - CON: HP, concentration saves, common saves → 2.0 pts (Amulet of Health = Rare)
@@ -376,12 +392,15 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
   // These are permanent effects with no duration tracking
   if (combat.permanentBuffs) {
     const PERMANENT_BUFF_VALUES: Record<keyof PermanentBuffs, number> = {
-      flight: 2.0,        // Permanent flight is extremely powerful - tactical dominance
-      darkvision: 0.25,   // Useful but many races have it; like Goggles of Night (Uncommon)
-      blindsight: 0.75,   // Rare and powerful - see invisible, through illusions
-      speedBonus: 0.5,    // +10 ft movement is always useful; like Boots of Striding
-      tremorsense: 0.5,   // Detect invisible/hidden creatures through ground vibration
-      climbBurrow: 0.5,   // Climb/burrow speed is useful for mobility; like Slippers of Spider Climbing
+      flight: 2.0,          // Permanent flight is extremely powerful - tactical dominance
+      darkvision: 0.25,     // Useful but many races have it; like Goggles of Night (Uncommon)
+      blindsight: 0.75,     // Rare and powerful - see invisible, through illusions
+      speedBonus: 0.5,      // +10 ft movement is always useful; like Boots of Striding
+      tremorsense: 0.5,     // Detect invisible/hidden creatures through ground vibration
+      climbBurrow: 0.5,     // Climb/burrow speed is useful for mobility; like Slippers of Spider Climbing
+      truesight: 1.5,       // Sees through all illusions, invisibility, shapechangers, into ethereal - premium sense
+      seeInvisibility: 0.75, // Detects invisible creatures - valuable but less than truesight
+      swimming: 0.5,        // Swimming speed equal to walking - like Cloak of the Manta Ray
     };
 
     for (const [buff, enabled] of Object.entries(combat.permanentBuffs)) {
@@ -397,6 +416,41 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
   if (combat.resistances && combat.resistances.length > 0) {
     const resistMultiplier = combat.resistancesMultiplier ?? 1.0;
     score += combat.resistances.length * 2.0 * resistMultiplier;
+  }
+
+  // Damage immunities - significantly stronger than resistances
+  // Immunity = no damage vs resistance = half damage
+  // Roughly 1.75× the value of resistance (3.5 pts per immunity)
+  // Ring of Fire Elemental Command (fire immunity + other effects) = Legendary
+  if (combat.damageImmunities && combat.damageImmunities.length > 0) {
+    score += combat.damageImmunities.length * 3.5;
+  }
+
+  // Condition immunities - varies by condition severity
+  // Some conditions are devastating (paralyzed, stunned), others are minor (prone)
+  // Values calibrated to match item rarity for condition-focused items
+  if (combat.conditionImmunities && combat.conditionImmunities.length > 0) {
+    const CONDITION_IMMUNITY_VALUES: Record<string, number> = {
+      'paralyzed': 1.5,    // Devastating - can't act, auto-crit
+      'stunned': 1.25,     // Very bad - can't act, advantage against
+      'petrified': 1.25,   // Very bad - essentially dead
+      'incapacitated': 1.0, // Bad - can't take actions
+      'unconscious': 1.0,  // Bad - but usually from 0 HP anyway
+      'charmed': 0.75,     // Common and dangerous - dominated by enemies
+      'frightened': 0.75,  // Common - disadvantage and can't approach
+      'restrained': 0.75,  // Bad - speed 0, advantage against you
+      'poisoned': 0.5,     // Common condition, disadvantage on attacks/checks
+      'blinded': 0.5,      // Bad but situational
+      'deafened': 0.25,    // Minor - mostly ribbon
+      'grappled': 0.25,    // Minor - speed 0 but can still act
+      'prone': 0.25,       // Minor - half movement to stand
+      'exhaustion': 1.0,   // Cumulative and dangerous
+    };
+
+    for (const condition of combat.conditionImmunities) {
+      const conditionLower = condition.toLowerCase();
+      score += CONDITION_IMMUNITY_VALUES[conditionLower] ?? 0.5;
+    }
   }
 
   // Spell charges (legacy format)
