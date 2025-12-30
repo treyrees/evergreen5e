@@ -641,7 +641,7 @@ export default function CalculatorPage() {
     setTimeout(() => setLinkCopied(false), 2000);
   };
 
-  // Generate a random "Surprise me" item
+  // Generate a random "Surprise me" item with high variety
   const generateSurpriseItem = () => {
     // Reset form first
     setDamageBonus(undefined);
@@ -670,159 +670,388 @@ export default function CalculatorPage() {
     setEnhancement(0);
     setEnhancementSometimes(false);
 
-    // Pick target rarity: Uncommon 60%, Rare 30%, Very Rare 10%
+    // Pick target rarity: Uncommon 50%, Rare 35%, Very Rare 15%
     const rarityRoll = Math.random();
-    const targetRarity = rarityRoll < 0.6 ? 'uncommon' : rarityRoll < 0.9 ? 'rare' : 'very rare';
+    const targetRarity = rarityRoll < 0.5 ? 'uncommon' : rarityRoll < 0.85 ? 'rare' : 'very rare';
 
-    // All base items flattened
-    const allBaseItems = Object.values(BASE_ITEMS).flat();
-    const randomBaseItem = allBaseItems[Math.floor(Math.random() * allBaseItems.length)];
+    // Point budgets to stay under 3.9 (cap at Very Rare, no Legendary)
+    const pointBudget = targetRarity === 'uncommon' ? 1.4 : targetRarity === 'rare' ? 2.4 : 3.8;
+
+    // Decide on item archetype first (affects base item selection)
+    // Archetypes: weapon-focused, armor-focused, spellcaster, utility, hybrid
+    const archetypeRoll = Math.random();
+    type Archetype = 'weapon' | 'armor' | 'spellcaster' | 'utility' | 'hybrid';
+    let archetype: Archetype;
+    if (archetypeRoll < 0.25) archetype = 'weapon';
+    else if (archetypeRoll < 0.40) archetype = 'armor';
+    else if (archetypeRoll < 0.60) archetype = 'spellcaster';
+    else if (archetypeRoll < 0.80) archetype = 'utility';
+    else archetype = 'hybrid';
+
+    // Select base item based on archetype
+    let baseItemPool: string[];
+    switch (archetype) {
+      case 'weapon':
+        baseItemPool = [...BASE_ITEMS['Melee Weapons (Simple)'], ...BASE_ITEMS['Melee Weapons (Martial)'], ...BASE_ITEMS['Ranged Weapons']];
+        break;
+      case 'armor':
+        baseItemPool = [...BASE_ITEMS['Armor']];
+        break;
+      case 'spellcaster':
+        // Implements and accessories are great for spells
+        baseItemPool = [...BASE_ITEMS['Implements'], ...BASE_ITEMS['Accessories'], 'wondrous item'];
+        break;
+      case 'utility':
+        // Accessories and wondrous items for utility effects
+        baseItemPool = [...BASE_ITEMS['Accessories'], ...BASE_ITEMS['Implements'], 'wondrous item'];
+        break;
+      case 'hybrid':
+        // Any item type
+        baseItemPool = Object.values(BASE_ITEMS).flat();
+        break;
+    }
+    const randomBaseItem = baseItemPool[Math.floor(Math.random() * baseItemPool.length)];
     setBaseItem(randomBaseItem);
 
     const isWeapon = WEAPON_ITEMS.has(randomBaseItem);
     const isArmor = ARMOR_ITEMS.has(randomBaseItem);
+    const isImplement = ['rod', 'staff', 'wand'].includes(randomBaseItem);
 
-    // Pick number of attributes: 1-4, weighted toward 2-3
-    // Distribution: 1 attr = 15%, 2 attr = 35%, 3 attr = 35%, 4 attr = 15%
-    const attrRoll = Math.random();
-    const numAttributes = attrRoll < 0.15 ? 1 : attrRoll < 0.50 ? 2 : attrRoll < 0.85 ? 3 : 4;
+    // Spell database for random selection (organized by level for appropriate rarity)
+    const SPELLS_BY_LEVEL: Record<number, { name: string; theme: string }[]> = {
+      1: [
+        { name: 'Magic Missile', theme: 'force' },
+        { name: 'Shield', theme: 'defense' },
+        { name: 'Cure Wounds', theme: 'healing' },
+        { name: 'Faerie Fire', theme: 'utility' },
+        { name: 'Thunderwave', theme: 'thunder' },
+        { name: 'Burning Hands', theme: 'fire' },
+        { name: 'Detect Magic', theme: 'utility' },
+        { name: 'Fog Cloud', theme: 'utility' },
+        { name: 'Charm Person', theme: 'enchantment' },
+        { name: 'Feather Fall', theme: 'utility' },
+      ],
+      2: [
+        { name: 'Scorching Ray', theme: 'fire' },
+        { name: 'Hold Person', theme: 'enchantment' },
+        { name: 'Invisibility', theme: 'illusion' },
+        { name: 'Misty Step', theme: 'teleportation' },
+        { name: 'Shatter', theme: 'thunder' },
+        { name: 'Web', theme: 'control' },
+        { name: 'Darkness', theme: 'shadow' },
+        { name: 'Lesser Restoration', theme: 'healing' },
+        { name: 'Levitate', theme: 'utility' },
+        { name: 'See Invisibility', theme: 'utility' },
+      ],
+      3: [
+        { name: 'Fireball', theme: 'fire' },
+        { name: 'Lightning Bolt', theme: 'lightning' },
+        { name: 'Fly', theme: 'movement' },
+        { name: 'Counterspell', theme: 'defense' },
+        { name: 'Dispel Magic', theme: 'utility' },
+        { name: 'Haste', theme: 'buff' },
+        { name: 'Fear', theme: 'enchantment' },
+        { name: 'Slow', theme: 'debuff' },
+        { name: 'Spirit Guardians', theme: 'radiant' },
+        { name: 'Call Lightning', theme: 'lightning' },
+      ],
+      4: [
+        { name: 'Dimension Door', theme: 'teleportation' },
+        { name: 'Polymorph', theme: 'transmutation' },
+        { name: 'Wall of Fire', theme: 'fire' },
+        { name: 'Greater Invisibility', theme: 'illusion' },
+        { name: 'Ice Storm', theme: 'cold' },
+        { name: 'Banishment', theme: 'abjuration' },
+        { name: 'Confusion', theme: 'enchantment' },
+        { name: 'Freedom of Movement', theme: 'buff' },
+      ],
+      5: [
+        { name: 'Cone of Cold', theme: 'cold' },
+        { name: 'Hold Monster', theme: 'enchantment' },
+        { name: 'Wall of Force', theme: 'force' },
+        { name: 'Cloudkill', theme: 'poison' },
+        { name: 'Flame Strike', theme: 'fire' },
+        { name: 'Greater Restoration', theme: 'healing' },
+        { name: 'Teleportation Circle', theme: 'teleportation' },
+      ],
+    };
 
-    // Define possible attributes based on item type
-    // Split into "major" (high point value) and "minor" (low point value) attributes
-    type MajorAttr = 'enhancement' | 'damage' | 'ac' | 'saves';
-    type MinorAttr = 'resistance' | 'conditionImmunity';
+    // Track points spent
+    let pointsSpent = 0;
+
+    // Define attribute types
+    type MajorAttr = 'enhancement' | 'damage' | 'ac' | 'saves' | 'spells' | 'abilityScore';
+    type MinorAttr = 'resistance' | 'conditionImmunity' | 'permanentBuff' | 'spellBonus' | 'advantage';
+
+    // Build attribute pools based on archetype
     const possibleMajor: MajorAttr[] = [];
-    const possibleMinor: MinorAttr[] = ['resistance', 'conditionImmunity'];
+    const possibleMinor: MinorAttr[] = [];
 
+    // Major attributes
     if (isWeapon) {
       possibleMajor.push('enhancement', 'damage');
     }
     if (isArmor) {
-      possibleMajor.push('enhancement');
+      possibleMajor.push('enhancement', 'ac');
     }
-    // Non-weapon/non-armor items can get AC (stacking bonus) or saves
-    if (!isWeapon) {
+    if (!isWeapon && !isArmor) {
       possibleMajor.push('ac', 'saves');
-    } else {
-      possibleMajor.push('saves');
+    }
+    // Spells can appear on any item, but more likely on implements/accessories
+    if (archetype === 'spellcaster' || archetype === 'hybrid' || isImplement) {
+      possibleMajor.push('spells', 'spells'); // Double weight for spell-focused
+    } else if (Math.random() < 0.3) {
+      possibleMajor.push('spells'); // 30% chance for other archetypes
+    }
+    // Ability score setters for rare+ items
+    if (targetRarity !== 'uncommon' && Math.random() < 0.25) {
+      possibleMajor.push('abilityScore');
     }
 
-    // Remove duplicates
-    const uniqueMajor = [...new Set(possibleMajor)];
+    // Minor attributes (all items can have these)
+    possibleMinor.push('resistance', 'conditionImmunity', 'permanentBuff');
+    if (archetype === 'spellcaster' || isImplement) {
+      possibleMinor.push('spellBonus');
+    }
+    if (isWeapon || archetype === 'utility') {
+      possibleMinor.push('advantage');
+    }
 
-    // Shuffle both pools
-    const shuffledMajor = uniqueMajor.sort(() => Math.random() - 0.5);
-    const shuffledMinor = possibleMinor.sort(() => Math.random() - 0.5);
+    // Shuffle and select attributes
+    const shuffledMajor = [...new Set(possibleMajor)].sort(() => Math.random() - 0.5);
+    const shuffledMinor = [...new Set(possibleMinor)].sort(() => Math.random() - 0.5);
 
-    // Limit major attributes to avoid exceeding ~3.9 pts
-    // Uncommon: 1 major max, Rare: 1-2 major, Very Rare: 1-2 major (conservative values)
-    const maxMajor = targetRarity === 'uncommon' ? 1 : 2;
-    const numMajor = Math.min(numAttributes, maxMajor, shuffledMajor.length);
-    const numMinor = Math.min(numAttributes - numMajor, shuffledMinor.length);
+    // Pick 1-2 major, 0-2 minor depending on rarity
+    const numMajorTarget = targetRarity === 'uncommon' ? 1 : Math.random() < 0.6 ? 1 : 2;
+    const numMinorTarget = Math.random() < 0.4 ? 1 : Math.random() < 0.8 ? 2 : 0;
 
-    const selectedMajor = shuffledMajor.slice(0, numMajor);
-    const selectedMinor = shuffledMinor.slice(0, numMinor);
+    // Damage types
+    const goodDamageTypes = ['fire', 'cold', 'lightning', 'radiant', 'necrotic', 'force', 'thunder', 'psychic'];
+    const resistanceTypes = ['fire', 'cold', 'lightning', 'acid', 'poison', 'thunder', 'necrotic', 'radiant', 'psychic'];
+    const conditions = ['frightened', 'charmed', 'poisoned', 'paralyzed', 'stunned'];
+    const abilities: ('STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA')[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
 
-    // Damage types for random selection (excluding weak ones)
-    const goodDamageTypes = ['fire', 'cold', 'lightning', 'radiant', 'necrotic', 'force', 'thunder'];
-    const resistanceTypes = ['fire', 'cold', 'lightning', 'acid', 'poison', 'thunder', 'necrotic'];
+    // Apply major attributes
+    let majorsApplied = 0;
+    for (const attr of shuffledMajor) {
+      if (majorsApplied >= numMajorTarget) break;
+      if (pointsSpent >= pointBudget - 0.3) break; // Leave room for minors
 
-    // Track if we've added a high-value major attribute (2+ pts)
-    let hasHighValueMajor = false;
-
-    // Apply major attributes with conservative values to stay under 3.9 pts
-    selectedMajor.forEach((attr) => {
       switch (attr) {
         case 'enhancement':
           if (isWeapon || isArmor) {
-            if (targetRarity === 'uncommon') {
-              setEnhancement(1); // 1.0 pts
-            } else if (targetRarity === 'rare') {
-              setEnhancement(hasHighValueMajor ? 1 : (Math.random() < 0.8 ? 1 : 2));
-              if (!hasHighValueMajor) hasHighValueMajor = true;
-            } else {
-              // Very Rare: cap at +2 to leave room for other attributes
-              setEnhancement(hasHighValueMajor ? 1 : 2); // 2.0 pts max
-              hasHighValueMajor = true;
+            const bonus = targetRarity === 'uncommon' ? 1 : targetRarity === 'rare' ? (Math.random() < 0.7 ? 1 : 2) : 2;
+            const cost = bonus * 1.0;
+            if (pointsSpent + cost <= pointBudget) {
+              setEnhancement(bonus);
+              pointsSpent += cost;
+              majorsApplied++;
             }
           }
           break;
 
         case 'damage':
           if (isWeapon) {
-            // Keep damage conservative: 1d6 for uncommon/rare, 1d8 or 2d6 for very rare
-            let dieType = '6';
-            let numDice = '1';
-            if (targetRarity === 'very rare' && !hasHighValueMajor) {
-              // Either 1d8 (~1.1 pts) or 2d6 (~2.0 pts)
-              if (Math.random() < 0.6) {
-                dieType = '8';
-                numDice = '1';
-              } else {
-                dieType = '6';
-                numDice = '2';
-              }
-              hasHighValueMajor = true;
+            // Scale dice by rarity and remaining budget
+            let dice = '1d6';
+            let cost = 1.0;
+            if (targetRarity === 'very rare' && pointBudget - pointsSpent >= 2.0) {
+              dice = Math.random() < 0.5 ? '2d6' : '1d8';
+              cost = dice === '2d6' ? 2.0 : 1.1;
+            } else if (targetRarity === 'rare' && Math.random() < 0.3 && pointBudget - pointsSpent >= 1.5) {
+              dice = '1d8';
+              cost = 1.1;
             }
-            const dmgType = goodDamageTypes[Math.floor(Math.random() * goodDamageTypes.length)];
-            setDamageBonus({
-              dice: `${numDice}d${dieType}`,
-              type: dmgType as DamageBonus['type'],
-              frequency: 'per-hit',
-            });
+            if (pointsSpent + cost <= pointBudget) {
+              const dmgType = goodDamageTypes[Math.floor(Math.random() * goodDamageTypes.length)];
+              setDamageBonus({ dice, type: dmgType as DamageBonus['type'], frequency: 'per-hit' });
+              pointsSpent += cost;
+              majorsApplied++;
+            }
           }
           break;
 
         case 'ac':
           if (!isWeapon) {
-            // AC on non-armor items is 1.5 pts per +1 (stacking)
-            if (targetRarity === 'uncommon') {
-              setAcBonus(1); // 1.5 pts on accessories
-            } else if (targetRarity === 'rare') {
-              setAcBonus(1); // Keep at 1 to stay conservative
-            } else {
-              // Very Rare: +1 AC only if we have another major, otherwise +2
-              setAcBonus(hasHighValueMajor ? 1 : 2);
-              if (!hasHighValueMajor) hasHighValueMajor = true;
+            const bonus = targetRarity === 'uncommon' ? 1 : targetRarity === 'rare' ? 1 : (Math.random() < 0.5 ? 1 : 2);
+            // AC on non-armor is 1.5 pts per +1, on armor is 1.0
+            const costPer = isArmor ? 1.0 : 1.5;
+            const cost = bonus * costPer;
+            if (pointsSpent + cost <= pointBudget) {
+              setAcBonus(bonus);
+              pointsSpent += cost;
+              majorsApplied++;
             }
           }
           break;
 
         case 'saves':
-          if (targetRarity === 'uncommon') {
-            setSavingThrowBonus(1); // 1.0 pts
-          } else if (targetRarity === 'rare') {
-            setSavingThrowBonus(hasHighValueMajor ? 1 : (Math.random() < 0.7 ? 1 : 2));
-          } else {
-            // Very Rare: cap at +1 saves if we already have high value attr
-            setSavingThrowBonus(hasHighValueMajor ? 1 : 2);
-            if (!hasHighValueMajor) hasHighValueMajor = true;
+          {
+            const bonus = targetRarity === 'uncommon' ? 1 : Math.random() < 0.7 ? 1 : 2;
+            const cost = bonus * 1.0;
+            if (pointsSpent + cost <= pointBudget) {
+              setSavingThrowBonus(bonus);
+              pointsSpent += cost;
+              majorsApplied++;
+            }
+          }
+          break;
+
+        case 'spells':
+          {
+            // Pick spell level based on rarity
+            // Uncommon: level 1-2, Rare: level 2-4, Very Rare: level 3-5
+            let maxSpellLevel: number;
+            let minSpellLevel: number;
+            if (targetRarity === 'uncommon') {
+              minSpellLevel = 1; maxSpellLevel = 2;
+            } else if (targetRarity === 'rare') {
+              minSpellLevel = 2; maxSpellLevel = 4;
+            } else {
+              minSpellLevel = 3; maxSpellLevel = 5;
+            }
+            const spellLevel = minSpellLevel + Math.floor(Math.random() * (maxSpellLevel - minSpellLevel + 1));
+            const spellPool = SPELLS_BY_LEVEL[spellLevel] || SPELLS_BY_LEVEL[3];
+            const spell = spellPool[Math.floor(Math.random() * spellPool.length)];
+
+            // Determine charges based on spell level and rarity
+            // Higher level = fewer uses, lower level = more uses
+            let maxChargesVal: number;
+            let chargesPerLongRestVal: number;
+            if (spellLevel <= 2) {
+              maxChargesVal = targetRarity === 'uncommon' ? 3 : targetRarity === 'rare' ? 5 : 7;
+              chargesPerLongRestVal = maxChargesVal;
+            } else if (spellLevel <= 3) {
+              maxChargesVal = targetRarity === 'uncommon' ? 3 : targetRarity === 'rare' ? 5 : 7;
+              chargesPerLongRestVal = Math.ceil(maxChargesVal * 0.7);
+            } else {
+              maxChargesVal = targetRarity === 'rare' ? 3 : 5;
+              chargesPerLongRestVal = Math.ceil(maxChargesVal * 0.6);
+            }
+
+            // Estimate cost (simplified: level * uses_per_day * 0.2)
+            const usesPerDay = chargesPerLongRestVal / spellLevel;
+            const SPELL_VALUES: Record<number, number> = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 };
+            const effectiveLevel = SPELL_VALUES[spellLevel] || spellLevel;
+            const estimatedCost = effectiveLevel * usesPerDay * 0.2;
+
+            if (pointsSpent + estimatedCost <= pointBudget) {
+              setMaxCharges(maxChargesVal);
+              setChargesPerLongRest(chargesPerLongRestVal);
+              // Small chance for short rest recharge too
+              if (Math.random() < 0.2) {
+                setChargesPerShortRest(Math.floor(maxChargesVal / 3));
+              }
+              setAbilities([{
+                spell: spell.name,
+                spellLevel,
+                chargesPerUse: spellLevel,
+                canUpcast: Math.random() < 0.3 && spellLevel >= 1 && maxChargesVal >= spellLevel + 1,
+              }]);
+              pointsSpent += estimatedCost;
+              majorsApplied++;
+            }
+          }
+          break;
+
+        case 'abilityScore':
+          {
+            // Pick an ability and a value based on rarity
+            const ability = abilities[Math.floor(Math.random() * abilities.length)];
+            const setValue = targetRarity === 'rare' ? 19 : 21; // 19 for rare, 21 for very rare
+            const cost = setValue === 19 ? 1.5 : 2.5;
+            if (pointsSpent + cost <= pointBudget) {
+              setAbilityScoreSetter({ ability, setValue });
+              pointsSpent += cost;
+              majorsApplied++;
+            }
           }
           break;
       }
-    });
+    }
 
-    // Apply minor attributes (low point value, safe to add)
-    selectedMinor.forEach((attr) => {
+    // Apply minor attributes
+    let minorsApplied = 0;
+    for (const attr of shuffledMinor) {
+      if (minorsApplied >= numMinorTarget) break;
+      if (pointsSpent >= pointBudget) break;
+
       switch (attr) {
         case 'resistance':
-          // Single resistance only (~0.5 pts)
-          const shuffledResistances = [...resistanceTypes].sort(() => Math.random() - 0.5);
-          setResistances(shuffledResistances.slice(0, 1));
+          {
+            const cost = 0.5;
+            if (pointsSpent + cost <= pointBudget) {
+              const resistance = resistanceTypes[Math.floor(Math.random() * resistanceTypes.length)];
+              setResistances([resistance]);
+              pointsSpent += cost;
+              minorsApplied++;
+            }
+          }
           break;
 
         case 'conditionImmunity':
-          const conditions = ['frightened', 'charmed', 'poisoned'];
-          setConditionImmunities([conditions[Math.floor(Math.random() * conditions.length)]]);
+          {
+            const cost = 0.3;
+            if (pointsSpent + cost <= pointBudget) {
+              const condition = conditions[Math.floor(Math.random() * conditions.length)];
+              setConditionImmunities([condition]);
+              pointsSpent += cost;
+              minorsApplied++;
+            }
+          }
+          break;
+
+        case 'permanentBuff':
+          {
+            // Pick a permanent buff
+            const buffOptions: { key: keyof typeof permanentBuffs; cost: number }[] = [
+              { key: 'darkvision', cost: 0.2 },
+              { key: 'speedBonus', cost: 0.3 },
+              { key: 'swimming', cost: 0.2 },
+              { key: 'climbBurrow', cost: 0.5 },
+            ];
+            // Flight only for rare+ due to high value
+            if (targetRarity !== 'uncommon') {
+              buffOptions.push({ key: 'flight', cost: 1.0 });
+            }
+            const buff = buffOptions[Math.floor(Math.random() * buffOptions.length)];
+            if (pointsSpent + buff.cost <= pointBudget) {
+              setPermanentBuffs({ [buff.key]: true });
+              pointsSpent += buff.cost;
+              minorsApplied++;
+            }
+          }
+          break;
+
+        case 'spellBonus':
+          {
+            // +1 or +2 to spell save DC or spell attack
+            const bonus = targetRarity === 'uncommon' ? 1 : Math.random() < 0.7 ? 1 : 2;
+            const cost = bonus * 0.5;
+            if (pointsSpent + cost <= pointBudget) {
+              if (Math.random() < 0.5) {
+                setSpellSaveDCBonus(bonus);
+              } else {
+                setSpellAttackBonus(bonus);
+              }
+              pointsSpent += cost;
+              minorsApplied++;
+            }
+          }
+          break;
+
+        case 'advantage':
+          // Advantage on specific rolls (not implemented in state, skip for now)
           break;
       }
-    });
+    }
 
-    // Set attunement for rare+ items or items with multiple attributes
-    if (targetRarity !== 'uncommon' || numAttributes >= 3) {
+    // Set attunement: always for rare+ or items with 2+ features, sometimes for uncommon
+    const totalFeatures = majorsApplied + minorsApplied;
+    if (targetRarity !== 'uncommon' || totalFeatures >= 2) {
       setAttunement(true);
     } else {
-      setAttunement(Math.random() < 0.3);
+      setAttunement(Math.random() < 0.4);
     }
 
     // Generate a random item name
