@@ -321,7 +321,21 @@ export default function ItemsPage() {
                       >
                         {/* Name */}
                         <td className="p-3">
-                          <div className="font-medium text-slate-100">{item.name}</div>
+                          {item.dndbeyondSlug ? (
+                            <a
+                              href={`https://www.dndbeyond.com/magic-items/${item.dndbeyondSlug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-medium text-sky-300 hover:text-sky-200 underline decoration-sky-400/40 hover:decoration-sky-300 transition-colors inline-flex items-center gap-1"
+                            >
+                              {item.name}
+                              <svg className="w-3 h-3 opacity-60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          ) : (
+                            <div className="font-medium text-slate-100">{item.name}</div>
+                          )}
                           <div className="text-xs text-slate-500">{item.baseItem}</div>
                           {item.attunement && (
                             <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 bg-violet-900/50 text-violet-300 rounded">Attunement</span>
