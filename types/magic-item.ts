@@ -60,6 +60,9 @@ export interface PermanentBuffs {
   speedBonus?: boolean;       // +10 ft movement speed (e.g., Boots of Striding)
   tremorsense?: boolean;      // Grants tremorsense 30 ft (e.g., rare earth-themed items)
   climbBurrow?: boolean;      // Grants climb or burrow speed (e.g., Slippers of Spider Climbing)
+  truesight?: boolean;        // Grants truesight 60 ft (sees through illusions, invisibility, shapechangers, ethereal)
+  seeInvisibility?: boolean;  // Can see invisible creatures and objects (weaker than truesight)
+  swimming?: boolean;         // Grants swimming speed equal to walking speed (e.g., Cloak of the Manta Ray)
 }
 
 // Reaction-based AC bonus (e.g., Quarterstaff of the Acrobat's Attack Deflection)

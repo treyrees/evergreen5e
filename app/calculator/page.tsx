@@ -470,7 +470,10 @@ export default function CalculatorPage() {
     if (permanentBuffs.darkvision) buffs.push('darkvision 60 ft.');
     if (permanentBuffs.blindsight) buffs.push('blindsight 30 ft.');
     if (permanentBuffs.tremorsense) buffs.push('tremorsense 30 ft.');
+    if (permanentBuffs.truesight) buffs.push('truesight 60 ft.');
+    if (permanentBuffs.seeInvisibility) buffs.push('see invisibility');
     if (permanentBuffs.speedBonus) buffs.push('+10 ft. movement speed');
+    if (permanentBuffs.swimming) buffs.push('swimming speed equal to walking speed');
     if (permanentBuffs.climbBurrow) buffs.push('climb and burrow speeds equal to walking speed');
     if (buffs.length > 0) {
       attrs.push({ key: 'buffs', label: 'Senses & Movement', value: buffs.join(', ') });
@@ -1372,6 +1375,36 @@ export default function CalculatorPage() {
                             className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
                           />
                           <span className="text-sm text-slate-300">Tremorsense</span>
+                        </label>
+
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.truesight || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, truesight: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Truesight</span>
+                        </label>
+
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.seeInvisibility || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, seeInvisibility: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">See Invisibility</span>
+                        </label>
+
+                        <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={permanentBuffs.swimming || false}
+                            onChange={(e) => setPermanentBuffs({ ...permanentBuffs, swimming: e.target.checked })}
+                            className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className="text-sm text-slate-300">Swimming</span>
                         </label>
                       </div>
                     </div>
