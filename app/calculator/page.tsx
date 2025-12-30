@@ -1985,15 +1985,15 @@ export default function CalculatorPage() {
                         <div className="flex items-start gap-2 py-1">
                           <span className="text-violet-400 w-12 shrink-0 font-medium">Lv 4-5</span>
                           <div>
-                            <span className="text-violet-300">Major power</span>
-                            <span className="text-violet-400/70 ml-1">— transform enemy, wall of fire, raise dead</span>
+                            <span className="text-violet-300">Encounter-ending</span>
+                            <span className="text-violet-400/70 ml-1">— polymorph the boss, banish a threat, revive ally</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-amber-400">
                           <span className="w-12 shrink-0 font-medium">Lv 6-7</span>
                           <div>
-                            <span className="text-amber-300">Very powerful</span>
-                            <span className="text-amber-500/80 ml-1">— disintegrate (10d6+), teleport anywhere, true seeing</span>
+                            <span className="text-amber-300">Skip the adventure</span>
+                            <span className="text-amber-500/80 ml-1">— teleport anywhere, see through all deception, disintegrate</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-rose-400">
