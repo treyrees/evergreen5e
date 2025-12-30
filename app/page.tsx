@@ -9,7 +9,7 @@ export default function Home() {
             Is Your Homebrew Balanced?
           </h1>
           <p className="text-xl text-slate-400">
-            Get instant validation. Compare against official D&D 5e items with transparent math. In-browser logic gives you immediate feedback—stop waiting for your friend to use ChatGPT at your table.
+            Compare against official D&D 5e items with transparent math. In-browser logic means immediate feedback—stop waiting for ChatGPT at your table.
           </p>
         </div>
 
