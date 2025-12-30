@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import srdItems from '@/data/srd-items.json';
 import { MagicItem } from '@/types/magic-item';
@@ -315,65 +315,64 @@ export default function ItemsPage() {
                   const isExpanded = expandedRows.has(index);
 
                   return (
-                    <tr
-                      key={index}
-                      className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors"
-                    >
-                      {/* Name */}
-                      <td className="p-3">
-                        <div className="font-medium text-slate-100">{item.name}</div>
-                        <div className="text-xs text-slate-500">{item.baseItem}</div>
-                        {item.attunement && (
-                          <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 bg-violet-900/50 text-violet-300 rounded">Attunement</span>
-                        )}
-                      </td>
+                    <React.Fragment key={index}>
+                      <tr
+                        className={`border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors ${isExpanded ? 'bg-slate-700/20' : ''}`}
+                      >
+                        {/* Name */}
+                        <td className="p-3">
+                          <div className="font-medium text-slate-100">{item.name}</div>
+                          <div className="text-xs text-slate-500">{item.baseItem}</div>
+                          {item.attunement && (
+                            <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 bg-violet-900/50 text-violet-300 rounded">Attunement</span>
+                          )}
+                        </td>
 
-                      {/* Book Rarity */}
-                      <td className="p-3">
-                        <div className={`font-medium ${getRarityColor(item.rarity || '')}`}>
-                          {item.rarity?.toUpperCase()}
-                        </div>
-                      </td>
-
-                      {/* Calculated Rarity + Points */}
-                      <td className="p-3">
-                        <div className={`font-medium ${getRarityColor(item.calculatedRarity)}`}>
-                          {item.calculatedRarity.toUpperCase()}
-                        </div>
-                        <div className="text-xs text-slate-500 font-mono">
-                          {item.score.toFixed(1)} pts
-                        </div>
-                        {!match && (
-                          <div className="text-[10px] text-amber-500/80 mt-0.5">
-                            ≠ Book rarity
+                        {/* Book Rarity */}
+                        <td className="p-3">
+                          <div className={`font-medium ${getRarityColor(item.rarity || '')}`}>
+                            {item.rarity?.toUpperCase()}
                           </div>
-                        )}
-                      </td>
+                        </td>
 
-                      {/* Effects */}
-                      <td className="p-3">
-                        {item.effects.length > 0 ? (
-                          <div className="space-y-0.5">
-                            {item.effects.map((effect, idx) => (
-                              <div key={idx} className="text-slate-300 text-xs">
-                                • {effect}
-                              </div>
-                            ))}
+                        {/* Calculated Rarity + Points */}
+                        <td className="p-3">
+                          <div className={`font-medium ${getRarityColor(item.calculatedRarity)}`}>
+                            {item.calculatedRarity.toUpperCase()}
                           </div>
-                        ) : (
-                          <div className="text-slate-500 italic text-xs">
-                            No quantifiable effects
+                          <div className="text-xs text-slate-500 font-mono">
+                            {item.score.toFixed(1)} pts
                           </div>
-                        )}
-                      </td>
+                          {!match && (
+                            <div className="text-[10px] text-amber-500/80 mt-0.5">
+                              ≠ Book rarity
+                            </div>
+                          )}
+                        </td>
 
-                      {/* Notes (formerly Discrepancy Category) */}
-                      <td className="p-3">
-                        {item.discrepancyCategory ? (
-                          <div className="text-xs">
+                        {/* Effects */}
+                        <td className="p-3">
+                          {item.effects.length > 0 ? (
+                            <div className="space-y-0.5">
+                              {item.effects.map((effect, idx) => (
+                                <div key={idx} className="text-slate-300 text-xs">
+                                  • {effect}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-slate-500 italic text-xs">
+                              No quantifiable effects
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Notes (formerly Discrepancy Category) */}
+                        <td className="p-3">
+                          {item.discrepancyCategory ? (
                             <button
                               onClick={() => toggleRowExpansion(index)}
-                              className="text-left hover:bg-slate-700/30 rounded px-2 py-1 -mx-2 transition-colors"
+                              className="text-left hover:bg-slate-700/30 rounded px-2 py-1 transition-colors text-xs"
                             >
                               <div className="flex items-center gap-2">
                                 <span className="text-slate-500 text-[10px]">
@@ -396,17 +395,25 @@ export default function ItemsPage() {
                                 )}
                               </div>
                             </button>
-                            {isExpanded && warnings.explanation && (
-                              <div className="mt-2 pl-5 pr-2 text-slate-400 text-[11px] border-l-2 border-slate-600">
+                          ) : (
+                            <div className="text-slate-600 text-xs">—</div>
+                          )}
+                        </td>
+                      </tr>
+                      {/* Expanded explanation row */}
+                      {isExpanded && warnings.explanation && (
+                        <tr className="bg-slate-800/80">
+                          <td colSpan={5} className="px-4 py-3 border-b border-slate-700/50">
+                            <div className="flex gap-3">
+                              <div className="w-1 bg-amber-500/60 rounded-full flex-shrink-0" />
+                              <div className="text-slate-300 text-sm leading-relaxed">
                                 {warnings.explanation}
                               </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="text-slate-600 text-xs">—</div>
-                        )}
-                      </td>
-                    </tr>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </tbody>
