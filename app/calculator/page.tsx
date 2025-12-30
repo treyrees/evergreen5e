@@ -287,7 +287,7 @@ export default function CalculatorPage() {
   // Check if any combat attributes are selected (for blur effect)
   const hasPermanentBuffs = Object.values(permanentBuffs).some(v => v === true);
   const hasSelectedAttributes = useMemo(() => {
-    return (
+    return baseItem && (
       enhancement > 0 ||
       damageBonus !== undefined ||
       acBonus > 0 ||
@@ -307,7 +307,7 @@ export default function CalculatorPage() {
       damageImmunities.length > 0 ||
       conditionImmunities.length > 0
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, spellSaveDCBonus, spellAttackBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, flightEnabled, weaponProperties, resistances, damageImmunities, conditionImmunities]);
+  }, [baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, spellSaveDCBonus, spellAttackBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, flightEnabled, weaponProperties, resistances, damageImmunities, conditionImmunities]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
@@ -2251,6 +2251,8 @@ export default function CalculatorPage() {
                       <div>• AC Bonus: 1 pt/+1 on armor/shields, <span className="text-amber-400">1.5 pt/+1 on other items</span></div>
                       <div className="text-slate-500 pl-2 text-[10px]">(Non-armor AC stacks with armor, breaking bounded accuracy)</div>
                       <div>• Saving Throw Bonus: 1 point per +1</div>
+                      <div>• Spell Save DC Bonus: 1.0 pts per +1</div>
+                      <div>• Spell Attack Bonus: 0.75 pts per +1</div>
                     </div>
 
                     <div className="space-y-1">
@@ -2285,16 +2287,32 @@ export default function CalculatorPage() {
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Permanent Buffs:</div>
                       <div>• Flight: 2.0 pts (tactical dominance, ranged immunity)</div>
-                      <div>• Blindsight: 0.75 pts (see invisible, through illusions)</div>
+                      <div>• Truesight: 1.5 pts (see through all illusions, invisibility, shapechangers)</div>
+                      <div>• Blindsight/See Invisibility: 0.75 pts (see invisible creatures)</div>
                       <div>• Speed Bonus: 0.5 pts (+10 ft movement)</div>
                       <div>• Tremorsense: 0.5 pts (detect via vibrations)</div>
-                      <div>• Climb/Burrow: 0.5 pts (vertical/underground mobility)</div>
+                      <div>• Climb/Burrow/Swimming: 0.5 pts (alternative movement modes)</div>
                       <div>• Darkvision: 0.25 pts (many races have this)</div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Resistances:</div>
                       <div>• 2.0 points per damage type resisted</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-slate-200 font-semibold">Damage Immunities:</div>
+                      <div>• Fire/Poison: 3.5 pts (very common damage)</div>
+                      <div>• Cold/Necrotic: 3.0 pts | Lightning/Acid/Physical: 2.5 pts</div>
+                      <div>• Thunder/Radiant/Psychic: 2.0 pts | Force: 1.5 pts (rare)</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-slate-200 font-semibold">Condition Immunities:</div>
+                      <div>• Paralyzed: 1.5 pts | Stunned/Petrified: 1.25 pts</div>
+                      <div>• Incapacitated/Unconscious/Exhaustion: 1.0 pts</div>
+                      <div>• Charmed/Frightened/Restrained: 0.75 pts</div>
+                      <div>• Poisoned/Blinded: 0.5 pts | Deafened/Grappled/Prone: 0.25 pts</div>
                     </div>
 
                     <div className="space-y-1">
@@ -2327,6 +2345,16 @@ export default function CalculatorPage() {
                   </div>
 
                   <div className="space-y-4">
+                    <div className="space-y-1">
+                      <div className="text-slate-200 font-semibold">Weapon Properties:</div>
+                      <div>• Finesse: 0.25 pts (DEX or STR flexibility)</div>
+                      <div>• Reach: 0.25 pts (+5 ft tactical advantage)</div>
+                      <div>• Light: 0.2 pts (enables two-weapon fighting)</div>
+                      <div>• Versatile: 0.15 pts (one or two hands)</div>
+                      <div>• Thrown: 0.1 pts (minor ranged versatility)</div>
+                      <div>• Heavy/Two-Handed: -0.15 pts (combined penalty)</div>
+                    </div>
+
                     <div className="text-slate-200 font-semibold">Reference Item Discrepancy Categories:</div>
                     <div className="space-y-3">
                       <div className="bg-slate-700/30 border border-slate-600 rounded p-3">

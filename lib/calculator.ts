@@ -284,12 +284,11 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     score += combat.savingThrowBonus * saveMultiplier;
   }
 
-  // Spell save DC bonus - very powerful for spellcasters
+  // Spell save DC bonus - powerful for spellcasters
   // +2 to DC means ~10% higher success rate on spells, affects all save-based spells
-  // Robe of the Archmagi (+2 DC, +2 spell attack, +5 AC, spell resistance) = Legendary
-  // Estimate DC bonus alone at 1.25 pts per +1 (slightly less than enhancement since caster-only)
+  // Valued at 1.0 pts per +1 (same as enhancement - both affect "hit rate" equivalently)
   if (combat.spellSaveDCBonus) {
-    score += combat.spellSaveDCBonus * 1.25;
+    score += combat.spellSaveDCBonus * 1.0;
   }
 
   // Spell attack bonus - valuable for attack roll spells
@@ -418,13 +417,35 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     score += combat.resistances.length * 2.0 * resistMultiplier;
   }
 
-  // Damage immunities - significantly stronger than resistances (with optional "Sometimes" multiplier)
-  // Immunity = no damage vs resistance = half damage
-  // Roughly 1.75× the value of resistance (3.5 pts per immunity)
-  // Ring of Fire Elemental Command (fire immunity + other effects) = Legendary
+  // Damage immunities - varies by how common the damage type is (with optional "Sometimes" multiplier)
+  // Immunity to common damage types (fire, poison) is more valuable than rare types (force, psychic)
+  // Values weighted by monster damage frequency in typical campaigns
   if (combat.damageImmunities && combat.damageImmunities.length > 0) {
     const immunityMultiplier = combat.damageImmunitiesMultiplier ?? 1.0;
-    score += combat.damageImmunities.length * 3.5 * immunityMultiplier;
+    const DAMAGE_IMMUNITY_VALUES: Record<string, number> = {
+      // Very common damage types - immunity is highly valuable
+      'fire': 3.5,        // Dragons, elementals, many spells - extremely common
+      'poison': 3.5,      // Huge number of monsters deal poison damage
+      // Common damage types
+      'cold': 3.0,        // Dragons, winter creatures, cold spells
+      'necrotic': 3.0,    // Undead are common enemies
+      'lightning': 2.5,   // Some dragons, spells
+      'acid': 2.5,        // Black dragons, oozes
+      'bludgeoning': 2.5, // Common but magic weapons bypass
+      'piercing': 2.5,    // Common but magic weapons bypass
+      'slashing': 2.5,    // Common but magic weapons bypass
+      // Less common damage types
+      'thunder': 2.0,     // Relatively rare
+      'radiant': 2.0,     // Few monsters deal radiant
+      'psychic': 2.0,     // Mind flayers, few others
+      // Rare damage types - immunity less valuable
+      'force': 1.5,       // Almost nothing deals force damage
+    };
+
+    for (const immunity of combat.damageImmunities) {
+      const immunityLower = immunity.toLowerCase();
+      score += (DAMAGE_IMMUNITY_VALUES[immunityLower] ?? 2.5) * immunityMultiplier;
+    }
   }
 
   // Condition immunities - varies by condition severity (with optional "Sometimes" multiplier)
