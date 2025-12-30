@@ -107,7 +107,8 @@ export async function getSavedItems(): Promise<ActionResult<SavedItem[]>> {
     }
 
     // Transform to camelCase
-    const items: SavedItem[] = data.map((row) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const items: SavedItem[] = data.map((row: any) => ({
       id: row.id,
       name: row.name,
       baseItem: row.base_item,
