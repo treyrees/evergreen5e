@@ -108,6 +108,7 @@ const ITEM_CATEGORIES: Record<string, string> = {
   'ring': 'accessory',
   'amulet': 'accessory',
   'cloak': 'accessory',
+  'cape': 'accessory',
   'boots': 'accessory',
   'gloves': 'accessory',
 
@@ -1002,6 +1003,14 @@ export function findTopAnchorItems(
     if (isGeneric) {
       priority += 2;
     }
+
+    // === SCORE PROXIMITY FACTOR ===
+    // Score difference should influence priority so that a much-closer item
+    // can overcome small priority penalties like attunement mismatch (+3).
+    // Factor of 2: 1.5 pts score difference = +3 priority (equals attunement penalty)
+    // This prevents overrepresentation of "only option" items like Cape of the
+    // Mountebank (only rare trinket without attunement) when closer items exist.
+    priority += scoreDiff * 2;
 
     // === SIMPLE IN, SIMPLE OUT ===
     // If user made a simple +N item, the matching generic gets top priority

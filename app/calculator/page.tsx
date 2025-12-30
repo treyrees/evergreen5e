@@ -1161,6 +1161,7 @@ export default function CalculatorPage() {
                         />
                         <div className="absolute left-0 top-6 z-50 w-64 p-3 bg-slate-800 border border-slate-600 rounded-lg shadow-xl text-xs text-slate-300 leading-relaxed">
                           Attunement has minimal effect on scoring, but heavily influences which reference items appear in &quot;What&apos;s Similar?&quot; since attuned items are compared to other attuned items.
+                          <span className="block mt-2 text-slate-400">Nearly all Very Rare and Legendary items require attunement in official 5e.</span>
                           <button
                             type="button"
                             onClick={() => setShowAttunementInfo(false)}
