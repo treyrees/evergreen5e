@@ -744,7 +744,7 @@
       "enhancement": 0,
       "acBonus": 2
     },
-    "description": "+2 AC plate armor (2.0 pts). Override +1.0 for complete immunity to forced movement—negates Thunderwave, Repelling Blast, shoves, and all push/pull/prone effects."
+    "description": "+2 AC plate armor (2.0 pts). Override +1.0 for reaction to reduce forced ground movement by up to 10 feet—mitigates Thunderwave, Repelling Blast, and similar effects."
   },
   {
     "name": "Plate Armor of Etherealness",

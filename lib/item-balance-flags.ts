@@ -196,7 +196,7 @@ export function getItemExplanation(itemName: string): string {
     return 'Dimension Door (level 4) 1/day = 0.8 pts. Bonus +1.0 for heavily obscured smoke cloud at departure point—provides tactical concealment and breaks line of sight.';
   }
   if (itemName === 'Dwarven Plate') {
-    return '+2 AC plate armor (2.0 pts). Bonus +1.0 for complete immunity to forced movement—negates Thunderwave, Repelling Blast, shoves, and all push/pull/prone effects.';
+    return '+2 AC plate armor (2.0 pts). Bonus +1.0 for reaction to reduce forced ground movement by up to 10 feet—mitigates positioning control from Thunderwave, Repelling Blast, and similar effects.';
   }
   if (itemName === 'Plate Armor of Etherealness') {
     return 'Etherealness (level 7) 1/day (~2.0 pts base). Bonus +2.0 for giving plate-wearers (typically non-casters) access to a powerful 7th-level spell that normally requires caster class and high-level slots.';
