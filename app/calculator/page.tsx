@@ -303,9 +303,14 @@ export default function CalculatorPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header - Minimal */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-100">
-            Evergreen5e Magic Item Balancer
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-slate-100">
+              Evergreen5e Magic Item Balancer
+            </h1>
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-400 bg-slate-800 border border-slate-700 rounded">
+              <span>🔒</span> No AI Queries
+            </span>
+          </div>
           <div className="flex gap-4 text-sm">
             <Link href="/items" className="text-slate-500 hover:text-slate-300 transition-colors">
               Browse Items

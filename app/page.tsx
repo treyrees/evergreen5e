@@ -28,10 +28,20 @@ export default function Home() {
             or browse item database
           </Link>
         </div>
+
+        <div className="mt-8 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg">
+          <div className="flex items-center justify-center gap-2 text-slate-300">
+            <span className="text-lg">🔒</span>
+            <span className="font-semibold">No AI Queries</span>
+          </div>
+          <p className="text-xs text-slate-500 mt-1 text-center">
+            Your inputs stay in your browser. Pure client-side math.
+          </p>
+        </div>
       </div>
 
       <footer className="pb-8 text-sm text-slate-600">
-        Based on D&D 5e SRD &bull; Transparent formulas &bull; No AI
+        Based on D&D 5e SRD &bull; Transparent formulas
       </footer>
     </div>
   );
