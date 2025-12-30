@@ -634,6 +634,194 @@ export default function CalculatorPage() {
     setTimeout(() => setLinkCopied(false), 2000);
   };
 
+  // Generate a random "Surprise me" item
+  const generateSurpriseItem = () => {
+    // Reset form first
+    setDamageBonus(undefined);
+    setAcBonus(0);
+    setAcBonusSometimes(false);
+    setSavingThrowBonus(0);
+    setSaveBonusSometimes(false);
+    setResistances([]);
+    setResistancesSometimes(false);
+    setDamageImmunities([]);
+    setDamageImmunitiesSometimes(false);
+    setConditionImmunities([]);
+    setConditionImmunitiesSometimes(false);
+    setSpellSaveDCBonus(0);
+    setSpellAttackBonus(0);
+    setAbilityScoreSetter(undefined);
+    setAbilityScoreBonus(undefined);
+    setPermanentBuffs({});
+    setFlightEnabled(false);
+    setWeaponProperties([]);
+    setArmorProperties([]);
+    setMaxCharges(0);
+    setChargesPerShortRest(0);
+    setChargesPerLongRest(0);
+    setAbilities([]);
+    setEnhancement(0);
+    setEnhancementSometimes(false);
+
+    // Pick target rarity: Uncommon 60%, Rare 30%, Very Rare 10%
+    const rarityRoll = Math.random();
+    const targetRarity = rarityRoll < 0.6 ? 'uncommon' : rarityRoll < 0.9 ? 'rare' : 'very rare';
+
+    // All base items flattened
+    const allBaseItems = Object.values(BASE_ITEMS).flat();
+    const randomBaseItem = allBaseItems[Math.floor(Math.random() * allBaseItems.length)];
+    setBaseItem(randomBaseItem);
+
+    const isWeapon = WEAPON_ITEMS.has(randomBaseItem);
+    const isArmor = ARMOR_ITEMS.has(randomBaseItem);
+
+    // Pick number of attributes: 1-4, weighted toward 2-3
+    // Distribution: 1 attr = 15%, 2 attr = 35%, 3 attr = 35%, 4 attr = 15%
+    const attrRoll = Math.random();
+    const numAttributes = attrRoll < 0.15 ? 1 : attrRoll < 0.50 ? 2 : attrRoll < 0.85 ? 3 : 4;
+
+    // Define possible attributes based on item type
+    // Split into "major" (high point value) and "minor" (low point value) attributes
+    type MajorAttr = 'enhancement' | 'damage' | 'ac' | 'saves';
+    type MinorAttr = 'resistance' | 'conditionImmunity';
+    const possibleMajor: MajorAttr[] = [];
+    const possibleMinor: MinorAttr[] = ['resistance', 'conditionImmunity'];
+
+    if (isWeapon) {
+      possibleMajor.push('enhancement', 'damage');
+    }
+    if (isArmor) {
+      possibleMajor.push('enhancement');
+    }
+    // Non-weapon/non-armor items can get AC (stacking bonus) or saves
+    if (!isWeapon) {
+      possibleMajor.push('ac', 'saves');
+    } else {
+      possibleMajor.push('saves');
+    }
+
+    // Remove duplicates
+    const uniqueMajor = [...new Set(possibleMajor)];
+
+    // Shuffle both pools
+    const shuffledMajor = uniqueMajor.sort(() => Math.random() - 0.5);
+    const shuffledMinor = possibleMinor.sort(() => Math.random() - 0.5);
+
+    // Limit major attributes to avoid exceeding ~3.9 pts
+    // Uncommon: 1 major max, Rare: 1-2 major, Very Rare: 1-2 major (conservative values)
+    const maxMajor = targetRarity === 'uncommon' ? 1 : 2;
+    const numMajor = Math.min(numAttributes, maxMajor, shuffledMajor.length);
+    const numMinor = Math.min(numAttributes - numMajor, shuffledMinor.length);
+
+    const selectedMajor = shuffledMajor.slice(0, numMajor);
+    const selectedMinor = shuffledMinor.slice(0, numMinor);
+
+    // Damage types for random selection (excluding weak ones)
+    const goodDamageTypes = ['fire', 'cold', 'lightning', 'radiant', 'necrotic', 'force', 'thunder'];
+    const resistanceTypes = ['fire', 'cold', 'lightning', 'acid', 'poison', 'thunder', 'necrotic'];
+
+    // Track if we've added a high-value major attribute (2+ pts)
+    let hasHighValueMajor = false;
+
+    // Apply major attributes with conservative values to stay under 3.9 pts
+    selectedMajor.forEach((attr) => {
+      switch (attr) {
+        case 'enhancement':
+          if (isWeapon || isArmor) {
+            if (targetRarity === 'uncommon') {
+              setEnhancement(1); // 1.0 pts
+            } else if (targetRarity === 'rare') {
+              setEnhancement(hasHighValueMajor ? 1 : (Math.random() < 0.8 ? 1 : 2));
+              if (!hasHighValueMajor) hasHighValueMajor = true;
+            } else {
+              // Very Rare: cap at +2 to leave room for other attributes
+              setEnhancement(hasHighValueMajor ? 1 : 2); // 2.0 pts max
+              hasHighValueMajor = true;
+            }
+          }
+          break;
+
+        case 'damage':
+          if (isWeapon) {
+            // Keep damage conservative: 1d6 for uncommon/rare, 1d8 or 2d6 for very rare
+            let dieType = '6';
+            let numDice = '1';
+            if (targetRarity === 'very rare' && !hasHighValueMajor) {
+              // Either 1d8 (~1.1 pts) or 2d6 (~2.0 pts)
+              if (Math.random() < 0.6) {
+                dieType = '8';
+                numDice = '1';
+              } else {
+                dieType = '6';
+                numDice = '2';
+              }
+              hasHighValueMajor = true;
+            }
+            const dmgType = goodDamageTypes[Math.floor(Math.random() * goodDamageTypes.length)];
+            setDamageBonus({
+              dice: `${numDice}d${dieType}`,
+              type: dmgType as DamageBonus['type'],
+              frequency: 'per-hit',
+            });
+          }
+          break;
+
+        case 'ac':
+          if (!isWeapon) {
+            // AC on non-armor items is 1.5 pts per +1 (stacking)
+            if (targetRarity === 'uncommon') {
+              setAcBonus(1); // 1.5 pts on accessories
+            } else if (targetRarity === 'rare') {
+              setAcBonus(1); // Keep at 1 to stay conservative
+            } else {
+              // Very Rare: +1 AC only if we have another major, otherwise +2
+              setAcBonus(hasHighValueMajor ? 1 : 2);
+              if (!hasHighValueMajor) hasHighValueMajor = true;
+            }
+          }
+          break;
+
+        case 'saves':
+          if (targetRarity === 'uncommon') {
+            setSavingThrowBonus(1); // 1.0 pts
+          } else if (targetRarity === 'rare') {
+            setSavingThrowBonus(hasHighValueMajor ? 1 : (Math.random() < 0.7 ? 1 : 2));
+          } else {
+            // Very Rare: cap at +1 saves if we already have high value attr
+            setSavingThrowBonus(hasHighValueMajor ? 1 : 2);
+            if (!hasHighValueMajor) hasHighValueMajor = true;
+          }
+          break;
+      }
+    });
+
+    // Apply minor attributes (low point value, safe to add)
+    selectedMinor.forEach((attr) => {
+      switch (attr) {
+        case 'resistance':
+          // Single resistance only (~0.5 pts)
+          const shuffledResistances = [...resistanceTypes].sort(() => Math.random() - 0.5);
+          setResistances(shuffledResistances.slice(0, 1));
+          break;
+
+        case 'conditionImmunity':
+          const conditions = ['frightened', 'charmed', 'poisoned'];
+          setConditionImmunities([conditions[Math.floor(Math.random() * conditions.length)]]);
+          break;
+      }
+    });
+
+    // Set attunement for rare+ items or items with multiple attributes
+    if (targetRarity !== 'uncommon' || numAttributes >= 3) {
+      setAttunement(true);
+    } else {
+      setAttunement(Math.random() < 0.3);
+    }
+
+    // Generate a random item name
+    setItemName(generateRandomItemName());
+  };
+
   // Quick start templates for new users
   const applyTemplate = (template: 'plus1-longsword' | 'flametongue' | 'holy-avenger') => {
     // Reset form first
@@ -953,24 +1141,32 @@ export default function CalculatorPage() {
                 {!hasSelectedAttributes && !baseItem && (
                   <div className="pt-3 border-t border-slate-700/50">
                     <p className="text-xs text-slate-500 mb-2">Or start from an example:</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => applyTemplate('plus1-longsword')}
+                          className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                        >
+                          +1 Longsword
+                        </button>
+                        <button
+                          onClick={() => applyTemplate('flametongue')}
+                          className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                        >
+                          Flame Tongue
+                        </button>
+                        <button
+                          onClick={() => applyTemplate('holy-avenger')}
+                          className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                        >
+                          Holy Avenger
+                        </button>
+                      </div>
                       <button
-                        onClick={() => applyTemplate('plus1-longsword')}
-                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                        onClick={generateSurpriseItem}
+                        className="px-2.5 py-1 text-xs bg-violet-900/40 hover:bg-violet-800/50 text-violet-300 rounded border border-violet-600/40 transition-colors"
                       >
-                        +1 Longsword
-                      </button>
-                      <button
-                        onClick={() => applyTemplate('flametongue')}
-                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
-                      >
-                        Flame Tongue
-                      </button>
-                      <button
-                        onClick={() => applyTemplate('holy-avenger')}
-                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
-                      >
-                        Holy Avenger
+                        Surprise me
                       </button>
                     </div>
                   </div>
