@@ -170,7 +170,9 @@ export default function CalculatorPage() {
   const [resistances, setResistances] = useState<string[]>([]);
   const [resistancesSometimes, setResistancesSometimes] = useState(false);
   const [damageImmunities, setDamageImmunities] = useState<string[]>([]);
+  const [damageImmunitiesSometimes, setDamageImmunitiesSometimes] = useState(false);
   const [conditionImmunities, setConditionImmunities] = useState<string[]>([]);
+  const [conditionImmunitiesSometimes, setConditionImmunitiesSometimes] = useState(false);
   const [spellSaveDCBonus, setSpellSaveDCBonus] = useState(0);
   const [spellAttackBonus, setSpellAttackBonus] = useState(0);
   const [attunement, setAttunement] = useState(false);
@@ -240,7 +242,9 @@ export default function CalculatorPage() {
         setResistances(decoded.resistances);
         setResistancesSometimes(decoded.resistancesSometimes);
         setDamageImmunities(decoded.damageImmunities || []);
+        setDamageImmunitiesSometimes(decoded.damageImmunitiesSometimes || false);
         setConditionImmunities(decoded.conditionImmunities || []);
+        setConditionImmunitiesSometimes(decoded.conditionImmunitiesSometimes || false);
         setSpellSaveDCBonus(decoded.spellSaveDCBonus || 0);
         setSpellAttackBonus(decoded.spellAttackBonus || 0);
         setAttunement(decoded.attunement);
@@ -315,7 +319,9 @@ export default function CalculatorPage() {
       resistances: resistances.length > 0 ? resistances : undefined,
       resistancesMultiplier: resistancesSometimes ? 0.5 : undefined,
       damageImmunities: damageImmunities.length > 0 ? damageImmunities : undefined,
+      damageImmunitiesMultiplier: damageImmunitiesSometimes ? 0.5 : undefined,
       conditionImmunities: conditionImmunities.length > 0 ? conditionImmunities : undefined,
+      conditionImmunitiesMultiplier: conditionImmunitiesSometimes ? 0.5 : undefined,
       spellSaveDCBonus: spellSaveDCBonus > 0 ? spellSaveDCBonus : undefined,
       spellAttackBonus: spellAttackBonus > 0 ? spellAttackBonus : undefined,
       abilityScoreSetter,
@@ -334,7 +340,7 @@ export default function CalculatorPage() {
       weaponProperties: weaponProperties.length > 0 ? weaponProperties : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, conditionImmunities, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -499,11 +505,13 @@ export default function CalculatorPage() {
     }
 
     if (damageImmunities.length > 0) {
-      attrs.push({ key: 'damage-immunities', label: 'Damage Immunities', value: `Immune to ${damageImmunities.join(', ')} damage` });
+      const suffix = damageImmunitiesSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'damage-immunities', label: 'Damage Immunities', value: `Immune to ${damageImmunities.join(', ')} damage${suffix}` });
     }
 
     if (conditionImmunities.length > 0) {
-      attrs.push({ key: 'condition-immunities', label: 'Condition Immunities', value: `Immune to ${conditionImmunities.join(', ')}` });
+      const suffix = conditionImmunitiesSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'condition-immunities', label: 'Condition Immunities', value: `Immune to ${conditionImmunities.join(', ')}${suffix}` });
     }
 
     if (flightEnabled) {
@@ -550,7 +558,7 @@ export default function CalculatorPage() {
     }
 
     return attrs;
-  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, damageImmunities, conditionImmunities, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
+  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
 
   // Copy shareable link to clipboard
   const copyShareLink = async () => {
@@ -567,7 +575,9 @@ export default function CalculatorPage() {
       resistances,
       resistancesSometimes,
       damageImmunities,
+      damageImmunitiesSometimes,
       conditionImmunities,
+      conditionImmunitiesSometimes,
       spellSaveDCBonus,
       spellAttackBonus,
       attunement,
@@ -1574,6 +1584,7 @@ export default function CalculatorPage() {
                                   setDamageImmunities([...damageImmunities, type]);
                                 } else {
                                   setDamageImmunities(damageImmunities.filter(r => r !== type));
+                                  if (damageImmunities.length <= 1) setDamageImmunitiesSometimes(false);
                                 }
                               }}
                               className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
@@ -1584,6 +1595,17 @@ export default function CalculatorPage() {
                           </label>
                         ))}
                       </div>
+                      {damageImmunities.length > 0 && (
+                        <label className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-600 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={damageImmunitiesSometimes}
+                            onChange={(e) => setDamageImmunitiesSometimes(e.target.checked)}
+                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className={damageImmunitiesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                        </label>
+                      )}
                     </div>
                   </details>
 
@@ -1610,6 +1632,7 @@ export default function CalculatorPage() {
                                   setConditionImmunities([...conditionImmunities, condition]);
                                 } else {
                                   setConditionImmunities(conditionImmunities.filter(c => c !== condition));
+                                  if (conditionImmunities.length <= 1) setConditionImmunitiesSometimes(false);
                                 }
                               }}
                               className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
@@ -1620,6 +1643,17 @@ export default function CalculatorPage() {
                           </label>
                         ))}
                       </div>
+                      {conditionImmunities.length > 0 && (
+                        <label className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-600 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={conditionImmunitiesSometimes}
+                            onChange={(e) => setConditionImmunitiesSometimes(e.target.checked)}
+                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                          />
+                          <span className={conditionImmunitiesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                        </label>
+                      )}
                     </div>
                   </details>
                 </div>

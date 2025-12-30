@@ -124,7 +124,9 @@ export interface CombatFeatures {
   resistances?: string[]; // Damage types resisted: "fire", "cold", "all", etc.
   resistancesMultiplier?: number; // 0.5 for "Sometimes" active resistances
   damageImmunities?: string[]; // Damage types immune to: "fire", "poison", etc.
+  damageImmunitiesMultiplier?: number; // 0.5 for "Sometimes" active immunities
   conditionImmunities?: string[]; // Conditions immune to: "charmed", "frightened", "poisoned", etc.
+  conditionImmunitiesMultiplier?: number; // 0.5 for "Sometimes" active immunities
   abilityScoreSetter?: AbilityScoreSetter; // Sets ability score to fixed value (e.g., Gauntlets of Ogre Power set STR to 19)
   abilityScoreBonus?: AbilityScoreBonus; // Adds bonus to ability score (e.g., Headband of Intellect +2)
   flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots) - LEGACY: use permanentBuffs.flight instead

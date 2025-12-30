@@ -418,18 +418,20 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     score += combat.resistances.length * 2.0 * resistMultiplier;
   }
 
-  // Damage immunities - significantly stronger than resistances
+  // Damage immunities - significantly stronger than resistances (with optional "Sometimes" multiplier)
   // Immunity = no damage vs resistance = half damage
   // Roughly 1.75× the value of resistance (3.5 pts per immunity)
   // Ring of Fire Elemental Command (fire immunity + other effects) = Legendary
   if (combat.damageImmunities && combat.damageImmunities.length > 0) {
-    score += combat.damageImmunities.length * 3.5;
+    const immunityMultiplier = combat.damageImmunitiesMultiplier ?? 1.0;
+    score += combat.damageImmunities.length * 3.5 * immunityMultiplier;
   }
 
-  // Condition immunities - varies by condition severity
+  // Condition immunities - varies by condition severity (with optional "Sometimes" multiplier)
   // Some conditions are devastating (paralyzed, stunned), others are minor (prone)
   // Values calibrated to match item rarity for condition-focused items
   if (combat.conditionImmunities && combat.conditionImmunities.length > 0) {
+    const conditionMultiplier = combat.conditionImmunitiesMultiplier ?? 1.0;
     const CONDITION_IMMUNITY_VALUES: Record<string, number> = {
       'paralyzed': 1.5,    // Devastating - can't act, auto-crit
       'stunned': 1.25,     // Very bad - can't act, advantage against
@@ -449,7 +451,7 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
 
     for (const condition of combat.conditionImmunities) {
       const conditionLower = condition.toLowerCase();
-      score += CONDITION_IMMUNITY_VALUES[conditionLower] ?? 0.5;
+      score += (CONDITION_IMMUNITY_VALUES[conditionLower] ?? 0.5) * conditionMultiplier;
     }
   }
 

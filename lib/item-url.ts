@@ -29,7 +29,9 @@ export interface ShareableItemState {
   r?: string[]; // resistances
   rs?: boolean; // resistancesSometimes
   di?: string[]; // damageImmunities
+  dis?: boolean; // damageImmunitiesSometimes
   ci?: string[]; // conditionImmunities
+  cis?: boolean; // conditionImmunitiesSometimes
   att?: boolean; // attunement
   // Ability score setter
   ass?: {
@@ -78,7 +80,9 @@ export interface DecodedItemState {
   resistances: string[];
   resistancesSometimes: boolean;
   damageImmunities: string[];
+  damageImmunitiesSometimes: boolean;
   conditionImmunities: string[];
+  conditionImmunitiesSometimes: boolean;
   attunement: boolean;
   abilityScoreSetter: AbilityScoreSetter | undefined;
   abilityScoreBonus: AbilityScoreBonus | undefined;
@@ -111,7 +115,9 @@ export function encodeItemToUrl(state: {
   resistances: string[];
   resistancesSometimes: boolean;
   damageImmunities: string[];
+  damageImmunitiesSometimes: boolean;
   conditionImmunities: string[];
+  conditionImmunitiesSometimes: boolean;
   attunement: boolean;
   abilityScoreSetter: AbilityScoreSetter | undefined;
   abilityScoreBonus: AbilityScoreBonus | undefined;
@@ -158,7 +164,9 @@ export function encodeItemToUrl(state: {
   if (state.resistances.length > 0) compact.r = state.resistances;
   if (state.resistancesSometimes) compact.rs = true;
   if (state.damageImmunities.length > 0) compact.di = state.damageImmunities;
+  if (state.damageImmunitiesSometimes) compact.dis = true;
   if (state.conditionImmunities.length > 0) compact.ci = state.conditionImmunities;
+  if (state.conditionImmunitiesSometimes) compact.cis = true;
   if (state.attunement) compact.att = true;
 
   if (state.abilityScoreSetter) {
@@ -257,7 +265,9 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
       resistances: compact.r || [],
       resistancesSometimes: compact.rs || false,
       damageImmunities: compact.di || [],
+      damageImmunitiesSometimes: compact.dis || false,
       conditionImmunities: compact.ci || [],
+      conditionImmunitiesSometimes: compact.cis || false,
       attunement: compact.att || false,
       abilityScoreSetter: compact.ass ? {
         ability: compact.ass.a as 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA',
