@@ -109,6 +109,16 @@ export type WeaponProperty =
   | 'thrown'          // Can throw for ranged attack
   | 'versatile';      // Can use with one or two hands
 
+// Armor properties that can be added to magic armor
+// Based on SRD 2024 and common 5e conventions
+export type ArmorProperty =
+  | 'fortified'       // Critical hits become normal hits (Adamantine Armor)
+  | 'spiked'          // Deal 1d4 piercing to creatures grappling you
+  | 'buoyant'         // No swimming penalty, can float
+  | 'swift-donning'   // Don or doff as an action (like Mithral)
+  | 'comfortable'     // Can sleep in armor without penalty
+  | 'noisy';          // Disadvantage on Stealth (negative property)
+
 export interface CombatFeatures {
   enhancement: number; // 0, 1, 2, 3
   enhancementMultiplier?: number; // 0.5 for "Sometimes" active bonuses
@@ -142,6 +152,9 @@ export interface CombatFeatures {
 
   // Weapon properties (for adding properties not normally on the base weapon)
   weaponProperties?: WeaponProperty[]; // Added properties like finesse, reach, etc.
+
+  // Armor properties (for adding properties to armor/shields)
+  armorProperties?: ArmorProperty[]; // Added properties like fortified, spiked, etc.
 }
 
 export interface RibbonFeatures {
