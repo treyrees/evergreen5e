@@ -9,7 +9,7 @@ export default function Home() {
             Is Your Homebrew Balanced?
           </h1>
           <p className="text-xl text-slate-400">
-            Get instant validation. Compare against official D&D 5e items with transparent math.
+            Get instant validation. Compare against official D&D 5e items with transparent math. No AI queries—your inputs stay in your browser.
           </p>
         </div>
 
@@ -27,16 +27,6 @@ export default function Home() {
           >
             or browse item database
           </Link>
-        </div>
-
-        <div className="mt-8 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg">
-          <div className="flex items-center justify-center gap-2 text-slate-300">
-            <span className="text-lg">🔒</span>
-            <span className="font-semibold">No AI Queries</span>
-          </div>
-          <p className="text-xs text-slate-500 mt-1 text-center">
-            Your inputs stay in your browser. Pure client-side math.
-          </p>
         </div>
       </div>
 
