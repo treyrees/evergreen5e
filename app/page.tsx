@@ -29,10 +29,6 @@ export default function Home() {
           </Link>
         </div>
       </div>
-
-      <footer className="pb-8 text-sm text-slate-600">
-        Based on D&D 5e SRD &bull; Transparent formulas
-      </footer>
     </div>
   );
 }

@@ -17,7 +17,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "HomebrewQA - D&D 5e Magic Item Balance Calculator",
+  title: "Evergreen5e - D&D 5e Magic Item Balance Calculator",
   description: "Balance custom D&D 5e magic items using deterministic formulas. No AI or LLMs - pure math-based calculations with SRD anchor comparisons.",
 };
 

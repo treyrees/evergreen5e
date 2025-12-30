@@ -181,6 +181,13 @@ export default function CalculatorPage() {
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
+
+  // Item Preview state
+  const [showItemPreview, setShowItemPreview] = useState(false);
+  const [itemDescription, setItemDescription] = useState('');
+  const [hiddenAttributes, setHiddenAttributes] = useState<Set<string>>(new Set());
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   // Generate random placeholder after mount to avoid hydration mismatch
   const [randomPlaceholder, setRandomPlaceholder] = useState('');
   useEffect(() => {
@@ -188,11 +195,20 @@ export default function CalculatorPage() {
     setRandomPlaceholder(generateRandomItemName());
   }, []);
 
-  const [newAbility, setNewAbility] = useState<ChargedAbility>({
+  const [newAbility, setNewAbility] = useState<{
+    spell: string;
+    spellLevel: number | null;
+    chargesPerUse: number | null;
+  }>({
     spell: '',
-    spellLevel: 0,
-    chargesPerUse: 1,
+    spellLevel: null,
+    chargesPerUse: null,
   });
+  const [spellFormErrors, setSpellFormErrors] = useState<{
+    name: boolean;
+    level: boolean;
+    charges: boolean;
+  }>({ name: false, level: false, charges: false });
 
   // Check if selected base item is a weapon
   const isWeaponSelected = useMemo(() => WEAPON_ITEMS.has(baseItem), [baseItem]);
@@ -283,19 +299,341 @@ export default function CalculatorPage() {
   }, [hasSelectedAttributes, results.suggestedRarity]);
 
   const addAbility = () => {
-    if (newAbility.spell.trim()) {
-      setAbilities([...abilities, newAbility]);
-      setNewAbility({
-        spell: '',
-        spellLevel: 0,
-        chargesPerUse: 1,
-      });
-      // Keep form open to allow adding multiple abilities
+    const errors = {
+      name: !newAbility.spell.trim(),
+      level: newAbility.spellLevel === null,
+      charges: newAbility.chargesPerUse === null,
+    };
+
+    if (errors.name || errors.level || errors.charges) {
+      setSpellFormErrors(errors);
+      // Clear errors after 2 seconds
+      setTimeout(() => setSpellFormErrors({ name: false, level: false, charges: false }), 2000);
+      return;
     }
+
+    // All fields valid - add the ability
+    setSpellFormErrors({ name: false, level: false, charges: false });
+    setAbilities([...abilities, {
+      spell: newAbility.spell,
+      spellLevel: newAbility.spellLevel as number,
+      chargesPerUse: newAbility.chargesPerUse as number,
+    }]);
+    setNewAbility({
+      spell: '',
+      spellLevel: null,
+      chargesPerUse: null,
+    });
+    // Keep form open to allow adding multiple abilities
   };
 
   const removeAbility = (index: number) => {
     setAbilities(abilities.filter((_, i) => i !== index));
+  };
+
+  // Toggle attribute visibility in preview
+  const toggleAttributeVisibility = (attrKey: string) => {
+    setHiddenAttributes(prev => {
+      const next = new Set(prev);
+      if (next.has(attrKey)) {
+        next.delete(attrKey);
+      } else {
+        next.add(attrKey);
+      }
+      return next;
+    });
+  };
+
+  // Helper to format base item for display (capitalize first letter of each word)
+  const formatBaseItem = (item: string) => {
+    return item.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  // Get item type category for DMG-style formatting
+  const getItemTypeCategory = (item: string): string => {
+    if (WEAPON_ITEMS.has(item)) return 'Weapon';
+    if (item.includes('armor')) return 'Armor';
+    if (item === 'shield') return 'Armor';
+    if (['rod', 'staff', 'wand'].includes(item)) return 'Wondrous item';
+    return 'Wondrous item';
+  };
+
+  // Build the type line like "Weapon (longsword), rare (requires attunement)"
+  const buildTypeLine = (): string => {
+    const category = getItemTypeCategory(baseItem);
+    const itemSpec = baseItem ? `(${formatBaseItem(baseItem).toLowerCase()})` : '';
+    const rarityText = results.suggestedRarity.toLowerCase();
+    const attunementText = attunement ? ' (requires attunement)' : '';
+
+    if (category === 'Weapon' || category === 'Armor') {
+      return `${category} ${itemSpec}, ${rarityText}${attunementText}`;
+    }
+    return `${category}, ${rarityText}${attunementText}`;
+  };
+
+  // Get display name for the item
+  const getDisplayName = (): string => {
+    if (itemName.trim()) return itemName.trim();
+    if (baseItem) return formatBaseItem(baseItem);
+    return 'Magic Item';
+  };
+
+  // Build list of toggleable attributes
+  const previewAttributes = useMemo(() => {
+    const attrs: { key: string; label: string; value: string }[] = [];
+
+    if (enhancement > 0) {
+      const suffix = enhancementSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'enhancement', label: 'Enhancement', value: `+${enhancement} bonus to attack and damage rolls${suffix}` });
+    }
+
+    if (damageBonus) {
+      let dmgText = `${damageBonus.dice} ${damageBonus.type} damage`;
+      if (damageBonus.vicious) dmgText += ' on critical hits';
+      else if (damageBonus.frequency === 'per-turn') dmgText += ' (once per turn)';
+      else dmgText += ' per hit';
+      if (damageBonus.conditional) dmgText += ' against specific creatures';
+      attrs.push({ key: 'damage', label: 'Bonus Damage', value: dmgText });
+    }
+
+    if (acBonus > 0) {
+      const suffix = acBonusSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'ac', label: 'Armor Class', value: `+${acBonus} bonus to AC${suffix}` });
+    }
+
+    if (savingThrowBonus > 0) {
+      const suffix = saveBonusSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'saves', label: 'Saving Throws', value: `+${savingThrowBonus} bonus to saving throws${suffix}` });
+    }
+
+    if (abilityScoreSetter) {
+      attrs.push({ key: 'ability-setter', label: 'Ability Score', value: `${abilityScoreSetter.ability} score becomes ${abilityScoreSetter.setValue}` });
+    }
+
+    if (abilityScoreBonus) {
+      attrs.push({ key: 'ability-bonus', label: 'Ability Score', value: `+${abilityScoreBonus.bonus} to ${abilityScoreBonus.ability}` });
+    }
+
+    if (resistances.length > 0) {
+      const suffix = resistancesSometimes ? ' (conditional)' : '';
+      attrs.push({ key: 'resistances', label: 'Resistances', value: `Resistance to ${resistances.join(', ')} damage${suffix}` });
+    }
+
+    if (flightEnabled) {
+      const duration = flyDuration === 'unlimited' ? 'unlimited' : `${flyDuration} hour${flyDuration === 1 ? '' : 's'} per day`;
+      attrs.push({ key: 'flight', label: 'Flight', value: `Flying speed of ${flySpeed} feet (${duration})` });
+    }
+
+    const buffs: string[] = [];
+    if (permanentBuffs.darkvision) buffs.push('darkvision 60 ft.');
+    if (permanentBuffs.blindsight) buffs.push('blindsight 30 ft.');
+    if (permanentBuffs.tremorsense) buffs.push('tremorsense 30 ft.');
+    if (permanentBuffs.speedBonus) buffs.push('+10 ft. movement speed');
+    if (permanentBuffs.climbBurrow) buffs.push('climb and burrow speeds equal to walking speed');
+    if (buffs.length > 0) {
+      attrs.push({ key: 'buffs', label: 'Senses & Movement', value: buffs.join(', ') });
+    }
+
+    if (weaponProperties.length > 0) {
+      const propLabels: Record<string, string> = {
+        'finesse': 'finesse',
+        'light': 'light',
+        'reach': 'reach',
+        'thrown': 'thrown',
+        'versatile': 'versatile',
+        'heavy-two-handed': 'heavy, two-handed',
+      };
+      const propText = weaponProperties.map(p => propLabels[p] || p).join(', ');
+      attrs.push({ key: 'properties', label: 'Properties', value: `Gains the ${propText} ${weaponProperties.length === 1 ? 'property' : 'properties'}` });
+    }
+
+    if (abilities.length > 0) {
+      const spellList = abilities.map(a => `${a.spell} (${a.chargesPerUse} charge${a.chargesPerUse > 1 ? 's' : ''})`).join(', ');
+      attrs.push({ key: 'spells', label: 'Spells', value: spellList });
+    }
+
+    if (maxCharges > 0) {
+      let rechargeText = '';
+      if (chargesPerLongRest > 0) rechargeText = `regains ${chargesPerLongRest} at dawn`;
+      if (chargesPerShortRest > 0) rechargeText = rechargeText ? `${rechargeText}, ${chargesPerShortRest} per short rest` : `regains ${chargesPerShortRest} per short rest`;
+      attrs.push({ key: 'charges', label: 'Charges', value: `${maxCharges} charges${rechargeText ? `, ${rechargeText}` : ''}` });
+    }
+
+    return attrs;
+  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
+
+  // Generate print preview image - Classic DMG parchment style
+  const generatePreviewImage = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // DMG-style colors
+    const parchment = '#f4e4bc';
+    const headerRed = '#58180D';
+    const bodyText = '#1a1a1a';
+    const accentGold = '#c9ad6a';
+
+    const width = 400;
+    const padding = 24;
+
+    // Filter visible attributes
+    const visibleAttrs = previewAttributes.filter(attr => !hiddenAttributes.has(attr.key));
+
+    // Calculate dynamic height based on content
+    let contentHeight = 0;
+    contentHeight += 36; // Name
+    contentHeight += 20; // Type line
+    contentHeight += 16; // Spacing after header
+    contentHeight += visibleAttrs.length * 22; // Attributes
+    if (visibleAttrs.length > 0) contentHeight += 12; // Spacing after attributes
+    if (itemDescription.trim()) {
+      // Estimate description lines
+      ctx.font = '13px Georgia, serif';
+      const words = itemDescription.split(' ');
+      let lineCount = 1;
+      let testLine = '';
+      for (const word of words) {
+        const test = testLine + word + ' ';
+        if (testLine && ctx.measureText(test).width > width - padding * 2 - 10) {
+          lineCount++;
+          testLine = word + ' ';
+        } else {
+          testLine = test;
+        }
+      }
+      contentHeight += lineCount * 18 + 8;
+    }
+    contentHeight += 36; // Score badge
+
+    const height = Math.max(200, contentHeight + padding * 2 + 20);
+    canvas.width = width;
+    canvas.height = height;
+
+    // Parchment background
+    ctx.fillStyle = parchment;
+    ctx.fillRect(0, 0, width, height);
+
+    // Add subtle texture/grain effect
+    ctx.fillStyle = 'rgba(139, 119, 85, 0.03)';
+    for (let i = 0; i < 2000; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      ctx.fillRect(x, y, 1, 1);
+    }
+
+    // Simple border
+    ctx.strokeStyle = headerRed;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(6, 6, width - 12, height - 12);
+
+    let y = padding + 8;
+
+    // Item Name - Large, in header red
+    ctx.fillStyle = headerRed;
+    ctx.font = 'bold 22px Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(getDisplayName(), padding, y);
+    y += 24;
+
+    // Type line - Italic
+    ctx.fillStyle = bodyText;
+    ctx.font = 'italic 12px Georgia, serif';
+    ctx.fillText(buildTypeLine(), padding, y);
+    y += 20;
+
+    // Red decorative line under header
+    ctx.strokeStyle = headerRed;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    y += 16;
+
+    // Attributes
+    ctx.textAlign = 'left';
+    for (const attr of visibleAttrs) {
+      // Bullet
+      ctx.fillStyle = bodyText;
+      ctx.font = '13px Georgia, serif';
+      ctx.fillText('•', padding + 4, y);
+
+      // Bold label
+      ctx.font = 'bold 13px Georgia, serif';
+      ctx.fillText(`${attr.label}.`, padding + 18, y);
+      const labelWidth = ctx.measureText(`${attr.label}. `).width;
+
+      // Value
+      ctx.font = '13px Georgia, serif';
+      const maxValueWidth = width - padding * 2 - 18 - labelWidth - 8;
+      let valueText = attr.value;
+      if (ctx.measureText(valueText).width > maxValueWidth) {
+        while (ctx.measureText(valueText + '...').width > maxValueWidth && valueText.length > 0) {
+          valueText = valueText.slice(0, -1);
+        }
+        valueText += '...';
+      }
+      ctx.fillText(valueText, padding + 18 + labelWidth + 4, y);
+      y += 20;
+    }
+
+    // Description
+    if (itemDescription.trim()) {
+      y += 4;
+      ctx.fillStyle = bodyText;
+      ctx.font = '13px Georgia, serif';
+      ctx.textAlign = 'left';
+
+      // Word wrap description
+      const words = itemDescription.split(' ');
+      let line = '';
+      const maxWidth = width - padding * 2 - 10;
+
+      for (const word of words) {
+        const testLine = line + word + ' ';
+        if (ctx.measureText(testLine).width > maxWidth && line !== '') {
+          ctx.fillText(line.trim(), padding + 4, y);
+          line = word + ' ';
+          y += 18;
+        } else {
+          line = testLine;
+        }
+      }
+      if (line.trim()) {
+        ctx.fillText(line.trim(), padding + 4, y);
+        y += 18;
+      }
+    }
+
+    // Bottom section with rarity and score
+    y = height - padding - 24;
+
+    // Gold accent line
+    ctx.strokeStyle = accentGold;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(width - padding, y);
+    ctx.stroke();
+    y += 18;
+
+    // Rarity and Score on same line
+    ctx.fillStyle = headerRed;
+    ctx.font = 'bold 14px Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(results.suggestedRarity.toUpperCase(), padding, y);
+
+    ctx.fillStyle = '#666';
+    ctx.font = '12px Georgia, serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${results.combatScore.toFixed(1)} pts`, width - padding, y);
+
+    // Generate image URL
+    const dataUrl = canvas.toDataURL('image/png');
+    setPreviewImageUrl(dataUrl);
   };
 
   return (
@@ -303,14 +641,9 @@ export default function CalculatorPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header - Minimal */}
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-100">
-              Evergreen5e Magic Item Balancer
-            </h1>
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-400 bg-slate-800 border border-slate-700 rounded">
-              <span>🔒</span> No AI Queries
-            </span>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-100">
+            Evergreen5e Magic Item Balancer
+          </h1>
           <div className="flex gap-4 text-sm">
             <Link href="/items" className="text-slate-500 hover:text-slate-300 transition-colors">
               Browse Items
@@ -985,32 +1318,50 @@ export default function CalculatorPage() {
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Max</label>
                           <input
-                            type="number"
-                            min="0"
-                            value={maxCharges}
-                            onChange={(e) => setMaxCharges(parseInt(e.target.value) || 0)}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={maxCharges === 0 ? '' : maxCharges}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^[0-9]+$/.test(val)) {
+                                setMaxCharges(val === '' ? 0 : parseInt(val));
+                              }
+                            }}
                             className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="7"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">Short Rest</label>
+                          <label className="block text-[10px] text-slate-500 mb-1">+ Short Rest</label>
                           <input
-                            type="number"
-                            min="0"
-                            value={chargesPerShortRest}
-                            onChange={(e) => setChargesPerShortRest(parseInt(e.target.value) || 0)}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={chargesPerShortRest === 0 ? '' : chargesPerShortRest}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^[0-9]+$/.test(val)) {
+                                setChargesPerShortRest(val === '' ? 0 : parseInt(val));
+                              }
+                            }}
                             className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="0"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">Long Rest</label>
+                          <label className="block text-[10px] text-slate-500 mb-1">+ Long Rest</label>
                           <input
-                            type="number"
-                            min="0"
-                            value={chargesPerLongRest}
-                            onChange={(e) => setChargesPerLongRest(parseInt(e.target.value) || 0)}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={chargesPerLongRest === 0 ? '' : chargesPerLongRest}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^[0-9]+$/.test(val)) {
+                                setChargesPerLongRest(val === '' ? 0 : parseInt(val));
+                              }
+                            }}
                             className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="4"
                           />
@@ -1045,47 +1396,79 @@ export default function CalculatorPage() {
                   {/* Add Ability Form */}
                   {showChargeForm ? (
                     <div className="space-y-3 p-4 bg-slate-700/50 rounded border border-slate-600">
-                      <input
-                        type="text"
-                        value={newAbility.spell}
-                        onChange={(e) =>
-                          setNewAbility({ ...newAbility, spell: e.target.value })
-                        }
-                        placeholder="Spell/Ability name"
-                        className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
-                      />
+                      <div>
+                        <input
+                          type="text"
+                          value={newAbility.spell}
+                          onChange={(e) => {
+                            setSpellFormErrors(prev => ({ ...prev, name: false }));
+                            setNewAbility({ ...newAbility, spell: e.target.value });
+                          }}
+                          placeholder="Spell/Ability name"
+                          className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
+                            spellFormErrors.name
+                              ? 'border-red-500 focus:border-red-500'
+                              : 'border-slate-600 focus:border-emerald-500'
+                          }`}
+                        />
+                        {spellFormErrors.name && (
+                          <p className="text-xs text-red-400 mt-1">Required</p>
+                        )}
+                      </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Spell Level</label>
                           <input
-                            type="number"
-                            min="0"
-                            max="9"
-                            value={newAbility.spellLevel}
-                            onChange={(e) =>
-                              setNewAbility({
-                                ...newAbility,
-                                spellLevel: parseInt(e.target.value) || 0,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={newAbility.spellLevel === null ? '' : newAbility.spellLevel}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setSpellFormErrors(prev => ({ ...prev, level: false }));
+                              if (val === '') {
+                                setNewAbility({ ...newAbility, spellLevel: null });
+                              } else if (/^[0-9]$/.test(val)) {
+                                setNewAbility({ ...newAbility, spellLevel: Math.min(9, parseInt(val)) });
+                              }
+                            }}
+                            className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
+                              spellFormErrors.level
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-slate-600 focus:border-emerald-500'
+                            }`}
                             placeholder="0-9"
                           />
+                          {spellFormErrors.level && (
+                            <p className="text-xs text-red-400 mt-1">Required</p>
+                          )}
                         </div>
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Charges/Use</label>
                           <input
-                            type="number"
-                            min="1"
-                            value={newAbility.chargesPerUse}
-                            onChange={(e) =>
-                              setNewAbility({
-                                ...newAbility,
-                                chargesPerUse: parseInt(e.target.value) || 1,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={newAbility.chargesPerUse === null ? '' : newAbility.chargesPerUse}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setSpellFormErrors(prev => ({ ...prev, charges: false }));
+                              if (val === '') {
+                                setNewAbility({ ...newAbility, chargesPerUse: null });
+                              } else if (/^[0-9]+$/.test(val)) {
+                                setNewAbility({ ...newAbility, chargesPerUse: Math.max(1, parseInt(val)) });
+                              }
+                            }}
+                            className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
+                              spellFormErrors.charges
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-slate-600 focus:border-emerald-500'
+                            }`}
+                            placeholder="1+"
                           />
+                          {spellFormErrors.charges && (
+                            <p className="text-xs text-red-400 mt-1">Required</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -1096,7 +1479,10 @@ export default function CalculatorPage() {
                           Add
                         </button>
                         <button
-                          onClick={() => setShowChargeForm(false)}
+                          onClick={() => {
+                            setShowChargeForm(false);
+                            setSpellFormErrors({ name: false, level: false, charges: false });
+                          }}
                           className="px-4 py-2 bg-slate-600 text-slate-300 rounded hover:bg-slate-500 text-sm transition-colors"
                         >
                           Cancel
@@ -1281,8 +1667,137 @@ export default function CalculatorPage() {
                   </div>
                 )}
 
+
               </div>
             </div>
+
+            {/* Your Item Preview - Collapsible Card */}
+            {hasSelectedAttributes && baseItem && (
+              <div className="mt-4 bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                {/* Collapsible Header */}
+                <button
+                  onClick={() => setShowItemPreview(!showItemPreview)}
+                  className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
+                >
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Your Item</span>
+                  <span className="text-slate-500 text-lg">{showItemPreview ? '−' : '+'}</span>
+                </button>
+
+                {showItemPreview && (
+                  <>
+                    {/* DMG-Style Item Card */}
+                    <div className="border-t border-slate-700 p-5 space-y-4">
+                      {/* Item Name - Large, ornate */}
+                      <div className="border-b border-slate-600 pb-3">
+                        <h3
+                          className={`text-2xl font-bold tracking-wide ${getRarityColorClass(results.suggestedRarity)}`}
+                          style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}
+                        >
+                          {getDisplayName()}
+                        </h3>
+                        {/* Type Line - Italic, smaller */}
+                        <p className="text-sm italic text-slate-400 mt-1">
+                          {buildTypeLine()}
+                        </p>
+                      </div>
+
+                      {/* Attributes Section */}
+                      {previewAttributes.length > 0 && (
+                        <div className="space-y-2.5">
+                          <p className="text-[10px] text-slate-500 mb-2">Click attributes to hide them from image</p>
+                          {previewAttributes.map((attr) => (
+                            <div
+                              key={attr.key}
+                              className={`group flex items-start gap-2 text-sm transition-all cursor-pointer ${
+                                hiddenAttributes.has(attr.key)
+                                  ? 'opacity-30 line-through'
+                                  : 'opacity-100'
+                              }`}
+                              onClick={() => toggleAttributeVisibility(attr.key)}
+                              title={hiddenAttributes.has(attr.key) ? 'Click to show in preview' : 'Click to hide from preview'}
+                            >
+                              <span className="text-slate-500 select-none">•</span>
+                              <span className="text-slate-300">
+                                <span className="font-semibold text-slate-200">{attr.label}.</span>{' '}
+                                {attr.value}
+                              </span>
+                              <span className={`ml-auto text-[10px] transition-opacity ${
+                                hiddenAttributes.has(attr.key)
+                                  ? 'opacity-100 text-emerald-400'
+                                  : 'opacity-0 group-hover:opacity-100 text-slate-500'
+                              }`}>
+                                {hiddenAttributes.has(attr.key) ? 'show' : 'hide'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* User Description Textarea */}
+                      <div className="pt-3 border-t border-slate-700">
+                        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
+                          Description
+                        </label>
+                        <textarea
+                          value={itemDescription}
+                          onChange={(e) => setItemDescription(e.target.value)}
+                          placeholder="Describe your item's special properties, abilities, history or appearance..."
+                          rows={4}
+                          className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
+                        />
+                      </div>
+
+                      {/* Generate Preview Button */}
+                      <button
+                        onClick={generatePreviewImage}
+                        className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Generate Print Preview
+                      </button>
+
+                      {/* Hidden attributes hint */}
+                      {hiddenAttributes.size > 0 && (
+                        <p className="text-[10px] text-slate-500 italic">
+                          {hiddenAttributes.size} attribute{hiddenAttributes.size > 1 ? 's' : ''} hidden from image
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Generated Image Preview */}
+                    {previewImageUrl && (
+                      <div className="p-5 border-t border-slate-700 bg-slate-900/50">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Print Preview</span>
+                          <button
+                            onClick={() => setPreviewImageUrl(null)}
+                            className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                          >
+                            Close
+                          </button>
+                        </div>
+                        <div className="flex justify-center">
+                          <img
+                            src={previewImageUrl}
+                            alt={`${getDisplayName()} - ${results.suggestedRarity}`}
+                            className="max-w-full rounded shadow-xl cursor-pointer"
+                            title="Right-click to save image"
+                          />
+                        </div>
+                        <p className="text-center text-[10px] text-slate-500 mt-3">
+                          Right-click the image to copy or save
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Hidden canvas for image generation */}
+                <canvas ref={canvasRef} className="hidden" />
+              </div>
+            )}
           </div>
         </div>
 
