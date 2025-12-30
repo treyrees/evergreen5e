@@ -974,6 +974,15 @@ function findClosestInCandidates(
 
 /**
  * Compare user item to anchor item and generate educational details
+ * Priority order optimized for showing the most meaningful differences:
+ * 1. Enhancement - fundamental weapon/armor differentiator
+ * 2. Damage bonus - highly impactful, easy to understand
+ * 3. Saving throw bonus - often overlooked but worth 1.0 pts per +1
+ * 4. AC bonus - important defensive stat
+ * 5. Resistances & Immunities - defensive capabilities
+ * 6. Condition immunities - common on defensive items
+ * 7. Flight - defining feature when present
+ * 8. Spell abilities - charge pools and legacy charges
  */
 function compareToAnchor(
   userItem: Partial<MagicItem>,
@@ -984,7 +993,7 @@ function compareToAnchor(
   const userCombat = userItem.combat!;
   const anchorCombat = anchor.combat;
 
-  // Enhancement comparison
+  // Priority 1: Enhancement comparison
   const userEnh = userCombat.enhancement || 0;
   const anchorEnh = anchorCombat.enhancement || 0;
   if (userEnh !== anchorEnh) {
@@ -995,7 +1004,7 @@ function compareToAnchor(
     }
   }
 
-  // Damage comparison
+  // Priority 2: Damage comparison
   const userDmg = userCombat.damageBonus?.dice;
   const anchorDmg = anchorCombat.damageBonus?.dice;
   const userFreq = userCombat.damageBonus?.frequency || 'per-hit';
@@ -1016,7 +1025,26 @@ function compareToAnchor(
     }
   }
 
-  // AC bonus comparison
+  // Priority 3: Saving throw bonus comparison (often overlooked, worth 1.0 pts per +1)
+  const userSaves = userCombat.savingThrowBonus || 0;
+  const anchorSaves = anchorCombat.savingThrowBonus || 0;
+  if (userSaves !== anchorSaves) {
+    if (userSaves > anchorSaves) {
+      if (anchorSaves === 0) {
+        details.push(`+${userSaves} to saves (reference has none)`);
+      } else {
+        details.push(`+${userSaves - anchorSaves} higher save bonus`);
+      }
+    } else {
+      if (userSaves === 0) {
+        details.push(`no save bonus (reference has +${anchorSaves})`);
+      } else {
+        details.push(`+${anchorSaves - userSaves} lower save bonus`);
+      }
+    }
+  }
+
+  // Priority 4: AC bonus comparison
   const userAC = userCombat.acBonus || 0;
   const anchorAC = anchorCombat.acBonus || 0;
   if (userAC !== anchorAC) {
@@ -1027,47 +1055,93 @@ function compareToAnchor(
     }
   }
 
-  // Resistances comparison
+  // Priority 5: Resistances & Immunities comparison (expanded)
   const userResistances = userCombat.resistances?.length || 0;
   const anchorResistances = anchorCombat.resistances?.length || 0;
-  if (userResistances !== anchorResistances) {
-    details.push(`${userResistances} resistances (reference has ${anchorResistances})`);
+  const userImmunities = userCombat.damageImmunities?.length || 0;
+  const anchorImmunities = anchorCombat.damageImmunities?.length || 0;
+
+  // Show immunities first (more valuable)
+  if (userImmunities !== anchorImmunities) {
+    if (userImmunities > 0 && anchorImmunities === 0) {
+      details.push(`${userImmunities} damage ${userImmunities === 1 ? 'immunity' : 'immunities'} (reference has none)`);
+    } else if (userImmunities === 0 && anchorImmunities > 0) {
+      details.push(`no immunities (reference has ${anchorImmunities})`);
+    } else {
+      details.push(`${userImmunities} vs ${anchorImmunities} damage immunities`);
+    }
   }
 
-  // Charge pool comparison (new format) - takes priority over legacy charges
+  // Then resistances
+  if (userResistances !== anchorResistances) {
+    if (userResistances > 0 && anchorResistances === 0) {
+      details.push(`${userResistances} ${userResistances === 1 ? 'resistance' : 'resistances'} (reference has none)`);
+    } else if (userResistances === 0 && anchorResistances > 0) {
+      details.push(`no resistances (reference has ${anchorResistances})`);
+    } else {
+      details.push(`${userResistances} vs ${anchorResistances} resistances`);
+    }
+  }
+
+  // Priority 6: Condition immunities comparison
+  const userConditions = userCombat.conditionImmunities?.length || 0;
+  const anchorConditions = anchorCombat.conditionImmunities?.length || 0;
+  if (userConditions !== anchorConditions) {
+    if (userConditions > 0 && anchorConditions === 0) {
+      details.push(`${userConditions} condition ${userConditions === 1 ? 'immunity' : 'immunities'} (reference has none)`);
+    } else if (userConditions === 0 && anchorConditions > 0) {
+      details.push(`no condition immunities (reference has ${anchorConditions})`);
+    } else {
+      details.push(`${userConditions} vs ${anchorConditions} condition immunities`);
+    }
+  }
+
+  // Priority 7: Flight comparison (defining feature when present)
+  const userHasFlight = userCombat.flight || userCombat.permanentBuffs?.flight;
+  const anchorHasFlight = anchorCombat.flight || anchorCombat.permanentBuffs?.flight;
+  if (userHasFlight && !anchorHasFlight) {
+    const speed = userCombat.flight?.flySpeed || 30;
+    details.push(`grants ${speed} ft flight (reference has none)`);
+  } else if (!userHasFlight && anchorHasFlight) {
+    const speed = anchorCombat.flight?.flySpeed || 30;
+    details.push(`no flight (reference has ${speed} ft)`);
+  } else if (userHasFlight && anchorHasFlight) {
+    const userSpeed = userCombat.flight?.flySpeed || 30;
+    const anchorSpeed = anchorCombat.flight?.flySpeed || 30;
+    if (userSpeed !== anchorSpeed) {
+      details.push(`${userSpeed} ft fly speed vs reference's ${anchorSpeed} ft`);
+    }
+  }
+
+  // Priority 8: Spell abilities comparison (consolidated charge pool + legacy)
   const userPool = userCombat.chargePool;
   const anchorPool = anchorCombat.chargePool;
+  const userLegacyCharges = userCombat.charges?.length || 0;
+  const anchorLegacyCharges = anchorCombat.charges?.length || 0;
 
-  if (userPool && userPool.abilities.length > 0) {
-    // User has charge pool abilities - show a single clear summary
-    const maxLevel = Math.max(...userPool.abilities.map(a => a.spellLevel));
-    const levelText = maxLevel === 0 ? 'cantrip' : `up to level ${maxLevel}`;
+  // Determine max spell level for each (from either format)
+  const userMaxLevel = userPool && userPool.abilities.length > 0
+    ? Math.max(...userPool.abilities.map(a => a.spellLevel))
+    : userLegacyCharges > 0
+      ? Math.max(...userCombat.charges!.map(c => c.spellLevel))
+      : 0;
+  const anchorMaxLevel = anchorPool && anchorPool.abilities.length > 0
+    ? Math.max(...anchorPool.abilities.map(a => a.spellLevel))
+    : anchorLegacyCharges > 0
+      ? Math.max(...anchorCombat.charges!.map(c => c.spellLevel))
+      : 0;
 
-    if (!anchorPool || anchorPool.abilities.length === 0) {
-      // Reference has no charge pool
-      details.push(`${userPool.maxCharges} charges for ${userPool.abilities.length} spell${userPool.abilities.length > 1 ? 's' : ''} (${levelText})`);
-    } else {
-      // Both have charge pools - compare
-      const anchorMaxLevel = Math.max(...anchorPool.abilities.map(a => a.spellLevel));
-      if (maxLevel !== anchorMaxLevel) {
-        details.push(`spells up to level ${maxLevel} vs reference's level ${anchorMaxLevel}`);
-      }
-      if (userPool.maxCharges !== anchorPool.maxCharges) {
-        details.push(`${userPool.maxCharges} max charges vs reference's ${anchorPool.maxCharges}`);
-      }
-    }
-  } else if (anchorPool && anchorPool.abilities.length > 0) {
-    // User has no charge pool but reference does
-    details.push(`no spell abilities (reference has ${anchorPool.abilities.length} spell${anchorPool.abilities.length > 1 ? 's' : ''})`);
-  }
+  const userHasSpells = (userPool && userPool.abilities.length > 0) || userLegacyCharges > 0;
+  const anchorHasSpells = (anchorPool && anchorPool.abilities.length > 0) || anchorLegacyCharges > 0;
 
-  // Spell charges comparison (legacy format) - only if user doesn't have chargePool
-  if (!userPool || userPool.abilities.length === 0) {
-    const userCharges = userCombat.charges?.length || 0;
-    const anchorCharges = anchorCombat.charges?.length || 0;
-    if (userCharges !== anchorCharges) {
-      details.push(`${userCharges} spell charges (reference has ${anchorCharges})`);
-    }
+  if (userHasSpells && !anchorHasSpells) {
+    const levelText = userMaxLevel === 0 ? 'cantrip' : `level ${userMaxLevel}`;
+    details.push(`has spell abilities (${levelText})`);
+  } else if (!userHasSpells && anchorHasSpells) {
+    const levelText = anchorMaxLevel === 0 ? 'cantrip' : `level ${anchorMaxLevel}`;
+    details.push(`no spell abilities (reference has ${levelText})`);
+  } else if (userHasSpells && anchorHasSpells && userMaxLevel !== anchorMaxLevel) {
+    details.push(`spells up to level ${userMaxLevel} vs reference's level ${anchorMaxLevel}`);
   }
 
   // Determine type
