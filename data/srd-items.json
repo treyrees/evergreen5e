@@ -711,7 +711,7 @@
     "combat": {
       "enhancement": 0
     },
-    "description": "No quantifiable dice damage. Override +1.0 for flat +2 damage bonus with longbows and shortbows."
+    "description": "Flat +2 damage bonus to longbow/shortbow attacks. Override +1.0 models this as roughly equivalent to +1 enhancement for damage (no attack bonus)."
   },
   {
     "name": "Cape of the Mountebank",
@@ -731,7 +731,7 @@
         }
       ]
     },
-    "description": "Dimension Door (level 4) 1/day. Override +0.5 for smoke cloud left behind—provides concealment when escaping."
+    "description": "Dimension Door (level 4) 1/day (~1.5 pts). Override +0.5 for heavily obscured smoke cloud at origin point—provides tactical concealment when repositioning."
   },
   {
     "name": "Plate Armor of Etherealness",
@@ -860,7 +860,7 @@
       "enhancement": 0,
       "acBonus": 2
     },
-    "description": "+2 AC plate armor. Override +0.5 for immunity to forced movement—negates common battlefield control effects."
+    "description": "+2 AC plate armor (2.0 pts). Override +0.5 for immunity to forced movement—negates Thunderwave, Repelling Blast, shoves, and similar battlefield control."
   },
   {
     "name": "Dragon Scale Mail",
@@ -868,12 +868,11 @@
     "rarity": "very rare",
     "attunement": true,
     "dndbeyondSlug": "4617-dragon-scale-mail",
-    "overrideBonus": 0.75,
     "combat": {
       "enhancement": 0,
       "acBonus": 1,
       "resistances": ["fire"]
     },
-    "description": "+1 AC, resistance to one damage type (modeled as fire). Override +0.75 for advantage on saves vs dragon breath/Frightful Presence and 30-mile dragon detection."
+    "description": "+1 AC (1.0 pts) + fire resistance (2.25 pts) = 3.25 pts → Very Rare. Advantage on saves vs dragon breath/Frightful Presence and 30-mile dragon detection are highly situational ribbons—most campaigns have minimal dragon encounters."
   }
 ]
