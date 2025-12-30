@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, useSpring, useTransform, AnimatePresence } from 'framer-motion';
-import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty } from '@/types/magic-item';
+import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty } from '@/types/magic-item';
 import {
   getSuggestedRarity,
   findTopAnchorItems,
@@ -122,6 +122,11 @@ const WEAPON_ITEMS = new Set([
   ...BASE_ITEMS['Ranged Weapons'],
 ]);
 
+// Helper to check if a base item is armor/shield
+const ARMOR_ITEMS = new Set([
+  ...BASE_ITEMS['Armor'],
+]);
+
 const DAMAGE_TYPES = [
   'fire',
   'cold',
@@ -194,6 +199,9 @@ export default function CalculatorPage() {
   // Weapon properties state (for adding properties not normally on the base weapon)
   const [weaponProperties, setWeaponProperties] = useState<WeaponProperty[]>([]);
 
+  // Armor properties state (for adding properties to armor/shields)
+  const [armorProperties, setArmorProperties] = useState<ArmorProperty[]>([]);
+
   // Charge pool state (new intuitive system)
   const [maxCharges, setMaxCharges] = useState(0);
   const [chargesPerShortRest, setChargesPerShortRest] = useState(0);
@@ -255,6 +263,7 @@ export default function CalculatorPage() {
         setFlySpeed(decoded.flySpeed);
         setFlyDuration(decoded.flyDuration);
         setWeaponProperties(decoded.weaponProperties);
+        setArmorProperties(decoded.armorProperties);
         setMaxCharges(decoded.maxCharges);
         setChargesPerShortRest(decoded.chargesPerShortRest);
         setChargesPerLongRest(decoded.chargesPerLongRest);
@@ -283,6 +292,9 @@ export default function CalculatorPage() {
 
   // Check if selected base item is a weapon
   const isWeaponSelected = useMemo(() => WEAPON_ITEMS.has(baseItem), [baseItem]);
+
+  // Check if selected base item is armor/shield
+  const isArmorSelected = useMemo(() => ARMOR_ITEMS.has(baseItem), [baseItem]);
 
   // Check if any combat attributes are selected (for blur effect)
   const hasPermanentBuffs = Object.values(permanentBuffs).some(v => v === true);
@@ -342,9 +354,10 @@ export default function CalculatorPage() {
         abilities,
       } : undefined,
       weaponProperties: weaponProperties.length > 0 ? weaponProperties : undefined,
+      armorProperties: armorProperties.length > 0 ? armorProperties : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties]);
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -546,7 +559,20 @@ export default function CalculatorPage() {
         'heavy-two-handed': 'heavy, two-handed',
       };
       const propText = weaponProperties.map(p => propLabels[p] || p).join(', ');
-      attrs.push({ key: 'properties', label: 'Properties', value: `Gains the ${propText} ${weaponProperties.length === 1 ? 'property' : 'properties'}` });
+      attrs.push({ key: 'properties', label: 'Weapon Properties', value: `Gains the ${propText} ${weaponProperties.length === 1 ? 'property' : 'properties'}` });
+    }
+
+    if (armorProperties.length > 0) {
+      const propLabels: Record<string, string> = {
+        'fortified': 'fortified',
+        'spiked': 'spiked',
+        'buoyant': 'buoyant',
+        'swift-donning': 'swift donning',
+        'comfortable': 'comfortable',
+        'noisy': 'noisy',
+      };
+      const propText = armorProperties.map(p => propLabels[p] || p).join(', ');
+      attrs.push({ key: 'armorProperties', label: 'Armor Properties', value: `Gains the ${propText} ${armorProperties.length === 1 ? 'property' : 'properties'}` });
     }
 
     if (abilities.length > 0) {
@@ -562,7 +588,7 @@ export default function CalculatorPage() {
     }
 
     return attrs;
-  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
+  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, armorProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
 
   // Copy shareable link to clipboard
   const copyShareLink = async () => {
@@ -592,6 +618,7 @@ export default function CalculatorPage() {
       flySpeed,
       flyDuration,
       weaponProperties,
+      armorProperties,
       maxCharges,
       chargesPerShortRest,
       chargesPerLongRest,
@@ -1262,6 +1289,52 @@ export default function CalculatorPage() {
                                   setWeaponProperties([...weaponProperties, prop.id]);
                                 } else {
                                   setWeaponProperties(weaponProperties.filter(p => p !== prop.id));
+                                }
+                              }}
+                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
+                            />
+                            <span className="text-sm text-slate-300">{prop.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Armor Properties - Added Properties (only for armor/shields) */}
+                <AnimatePresence>
+                  {isArmorSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    >
+                      <label className="block text-sm font-medium text-slate-300 mb-3">
+                        Added Armor Properties
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {([
+                          { id: 'fortified', label: 'Fortified', tooltip: 'Critical hits become normal hits' },
+                          { id: 'spiked', label: 'Spiked', tooltip: 'Deal 1d4 piercing when grappled' },
+                          { id: 'buoyant', label: 'Buoyant', tooltip: 'No swimming penalty, can float' },
+                          { id: 'swift-donning', label: 'Swift Donning', tooltip: 'Don/doff as an action' },
+                          { id: 'comfortable', label: 'Comfortable', tooltip: 'Sleep in armor without penalty' },
+                          { id: 'noisy', label: 'Noisy', tooltip: 'Disadvantage on Stealth checks' },
+                        ] as const).map((prop) => (
+                          <label
+                            key={prop.id}
+                            className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors"
+                            title={prop.tooltip}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={armorProperties.includes(prop.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setArmorProperties([...armorProperties, prop.id]);
+                                } else {
+                                  setArmorProperties(armorProperties.filter(p => p !== prop.id));
                                 }
                               }}
                               className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
@@ -2365,6 +2438,16 @@ export default function CalculatorPage() {
                       <div>• Versatile: 0.15 pts (one or two hands)</div>
                       <div>• Thrown: 0.1 pts (minor ranged versatility)</div>
                       <div>• Heavy/Two-Handed: -0.15 pts (combined penalty)</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="text-slate-200 font-semibold">Armor Properties:</div>
+                      <div>• Fortified: 0.3 pts (crits become normal hits)</div>
+                      <div>• Spiked: 0.2 pts (1d4 piercing to grapplers)</div>
+                      <div>• Buoyant: 0.15 pts (no swimming penalty)</div>
+                      <div>• Swift Donning: 0.1 pts (don/doff as action)</div>
+                      <div>• Comfortable: 0.1 pts (sleep without penalty)</div>
+                      <div>• Noisy: -0.2 pts (disadvantage on Stealth)</div>
                     </div>
 
                   </div>

@@ -5,7 +5,7 @@
  * Excludes UI state and description (too long for URLs).
  */
 
-import { DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty } from '@/types/magic-item';
+import { DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty } from '@/types/magic-item';
 
 // The shareable state - excludes UI state and description
 export interface ShareableItemState {
@@ -52,6 +52,8 @@ export interface ShareableItemState {
   };
   // Weapon properties
   wp?: WeaponProperty[];
+  // Armor properties
+  ap?: ArmorProperty[];
   // Charge pool
   cp?: {
     m: number;  // maxCharges
@@ -91,6 +93,7 @@ export interface DecodedItemState {
   flySpeed: number;
   flyDuration: number | 'unlimited';
   weaponProperties: WeaponProperty[];
+  armorProperties: ArmorProperty[];
   maxCharges: number;
   chargesPerShortRest: number;
   chargesPerLongRest: number;
@@ -126,6 +129,7 @@ export function encodeItemToUrl(state: {
   flySpeed: number;
   flyDuration: number | 'unlimited';
   weaponProperties: WeaponProperty[];
+  armorProperties: ArmorProperty[];
   maxCharges: number;
   chargesPerShortRest: number;
   chargesPerLongRest: number;
@@ -200,6 +204,10 @@ export function encodeItemToUrl(state: {
 
   if (state.weaponProperties.length > 0) {
     compact.wp = state.weaponProperties;
+  }
+
+  if (state.armorProperties.length > 0) {
+    compact.ap = state.armorProperties;
   }
 
   if (state.maxCharges > 0 || state.abilities.length > 0) {
@@ -282,6 +290,7 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
       flySpeed: compact.fl?.s || 30,
       flyDuration: compact.fl?.d || 4,
       weaponProperties: compact.wp || [],
+      armorProperties: compact.ap || [],
       maxCharges: compact.cp?.m || 0,
       chargesPerShortRest: compact.cp?.sr || 0,
       chargesPerLongRest: compact.cp?.lr || 0,

@@ -1,4 +1,4 @@
-import { CombatFeatures, Rarity, MagicItem, PermanentBuffs, WeaponProperty } from '@/types/magic-item';
+import { CombatFeatures, Rarity, MagicItem, PermanentBuffs, WeaponProperty, ArmorProperty } from '@/types/magic-item';
 import srdItems from '@/data/srd-items.json';
 
 // Calculate dice value dynamically based on number and type
@@ -689,6 +689,23 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
 
     for (const prop of combat.weaponProperties) {
       score += WEAPON_PROPERTY_VALUES[prop] || 0;
+    }
+  }
+
+  // Armor properties (added properties for armor/shields)
+  // Based on SRD 2024 and common 5e conventions
+  if (combat.armorProperties && combat.armorProperties.length > 0) {
+    const ARMOR_PROPERTY_VALUES: Record<ArmorProperty, number> = {
+      'fortified': 0.3,       // Critical hits become normal hits (Adamantine Armor's key feature)
+      'spiked': 0.2,          // 1d4 piercing to grapplers - offensive deterrent
+      'buoyant': 0.15,        // No swimming penalty, can float - situational utility
+      'swift-donning': 0.1,   // Don/doff as action (like Mithral) - minor convenience
+      'comfortable': 0.1,     // Sleep in armor without exhaustion - minor utility
+      'noisy': -0.2,          // Disadvantage on Stealth - significant penalty
+    };
+
+    for (const prop of combat.armorProperties) {
+      score += ARMOR_PROPERTY_VALUES[prop] || 0;
     }
   }
 
