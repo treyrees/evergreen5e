@@ -251,7 +251,7 @@ export interface CommunityItem extends MagicItem {
 // Vote record
 export interface Vote {
   id: string;
-  oderId: string; // who voted
+  voterId: string; // who voted
   submissionId: string; // which item
   vote: 'up' | 'pass';
   createdAt: string; // ISO date string
