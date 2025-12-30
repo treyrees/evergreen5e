@@ -38,6 +38,12 @@ export const SPECIAL_MECHANICS = new Set([
   'Giant Slayer',              // Knockdown effect vs giants
   'Mace of Smiting',           // Extra crit damage + auto-destroy constructs
   'Sword of Sharpness',        // Limb-severing on nat 20
+
+  // Flat bonuses or non-quantifiable perks
+  'Bracers of Archery',        // Flat +2 damage to bows (not dice-based)
+  'Cape of the Mountebank',    // Smoke cloud concealment after Dimension Door
+  'Plate Armor of Etherealness', // Plate-wearer access to high-level spell
+  'Dwarven Plate',             // Forced movement immunity
 ]);
 
 /**
@@ -71,9 +77,16 @@ export const COMMUNITY_NOTES = new Set([
   'Headband of Intellect',     // INT 19 - value depends entirely on your starting INT
   'Gauntlets of Ogre Power',   // STR 19 - value depends entirely on your starting STR
   'Amulet of Health',          // CON 19 - value depends entirely on your starting CON
+  'Belt of Hill Giant Strength',   // STR 21 - value depends on your starting STR
+  'Belt of Frost Giant Strength',  // STR 23 - value depends on your starting STR
+  'Belt of Stone Giant Strength',  // STR 23 - value depends on your starting STR
+  'Belt of Fire Giant Strength',   // STR 25 - value depends on your starting STR
+  'Belt of Cloud Giant Strength',  // STR 27 - value depends on your starting STR
+  'Belt of Storm Giant Strength',  // STR 29 - value depends on your starting STR
 
   // Campaign-dependent value (damage type choice)
   'Armor of Resistance',       // Value ranges 0.5-2.25 pts depending on damage type picked
+  'Ring of Resistance',        // Same as Armor of Resistance - value depends on damage type
 ]);
 
 /**
@@ -169,6 +182,20 @@ export function getItemExplanation(itemName: string): string {
     return 'Modeled as +3 equivalent (3.0 pts base) for +4d6 on crit. Bonus +0.25 for limb-severing on nat 20.';
   }
 
+  // Flat bonuses or non-quantifiable perks
+  if (itemName === 'Bracers of Archery') {
+    return 'Flat +2 damage bonus to longbow/shortbow attacks. Bonus +1.0 models this as roughly equivalent to +1 enhancement for damage only (no attack roll bonus).';
+  }
+  if (itemName === 'Cape of the Mountebank') {
+    return 'Dimension Door (level 4) 1/day (~1.5 pts). Bonus +0.5 for heavily obscured smoke cloud at origin point—provides tactical concealment when repositioning.';
+  }
+  if (itemName === 'Plate Armor of Etherealness') {
+    return 'Etherealness (level 7) 1/day (~2.0 pts base). Bonus +2.0 for giving plate-wearers (typically non-casters) access to a powerful 7th-level spell that normally requires caster class and high-level slots.';
+  }
+  if (itemName === 'Dwarven Plate') {
+    return '+2 AC plate armor (2.0 pts). Bonus +0.5 for immunity to forced movement—negates Thunderwave, Repelling Blast, shoves, and similar battlefield control effects.';
+  }
+
   // === COMMUNITY NOTES (no override, just explanation) ===
 
   if (itemName === 'Cloak of Protection') {
@@ -195,9 +222,29 @@ export function getItemExplanation(itemName: string): string {
     return 'Sets CON to 19. Value is entirely character-dependent: amazing if your CON is low, but most adventurers prioritize CON already. Our formula assumes average benefit.';
   }
 
+  // Character-dependent stat setters (Belt variants)
+  if (itemName === 'Belt of Hill Giant Strength') {
+    return 'Sets STR to 21 (+5 mod). Value is character-dependent: amazing for low-STR casters/rogues, less impactful for martial characters who may already have 18+ STR.';
+  }
+  if (itemName === 'Belt of Frost Giant Strength' || itemName === 'Belt of Stone Giant Strength') {
+    return 'Sets STR to 23 (+6 mod). Value is character-dependent: guarantees exceptional strength regardless of starting score, but martial characters with high STR get less relative benefit.';
+  }
+  if (itemName === 'Belt of Fire Giant Strength') {
+    return 'Sets STR to 25 (+7 mod). Value is character-dependent: exceeds normal maximum (20), so universally powerful but still more impactful for low-STR characters.';
+  }
+  if (itemName === 'Belt of Cloud Giant Strength') {
+    return 'Sets STR to 27 (+8 mod). Value is character-dependent: far exceeds normal maximum, but even fighters benefit from the +8 modifier for attacks and damage.';
+  }
+  if (itemName === 'Belt of Storm Giant Strength') {
+    return 'Sets STR to 29 (+9 mod). Value is character-dependent: near-maximum possible strength (+9 mod). At this level, everyone benefits massively regardless of starting STR.';
+  }
+
   // Campaign-dependent damage type choice
   if (itemName === 'Armor of Resistance') {
     return 'Value depends entirely on which damage type you pick and your campaign. Fire resistance = 2.25 pts (Rare), poison/cold = 2.0 pts, acid = 1.5 pts, radiant = 0.75 pts (Uncommon), force = 0.5 pts (Common). Pick fire/poison/cold for max value; force/radiant are poor choices unless your DM loves beholders or angels.';
+  }
+  if (itemName === 'Ring of Resistance') {
+    return 'Same mechanics as Armor of Resistance—value depends entirely on damage type chosen. Fire/poison/cold = max value; force/radiant = minimal value. Attunement required.';
   }
 
   return '';
@@ -241,7 +288,9 @@ export function getItemEmoji(itemName: string): string {
   if (name.includes('armor')) return '🛡️';
 
   // Cloaks and wearables
+  if (name.includes('cape')) return '🧣';
   if (name.includes('cloak')) return '🧥';
+  if (name.includes('dragon scale')) return '🐉';
   if (name.includes('boots')) return '👢';
   if (name.includes('gloves') || name.includes('gauntlets')) return '🧤';
   if (name.includes('helm') || name.includes('helmet')) return '⛑️';
