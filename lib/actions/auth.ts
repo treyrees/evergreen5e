@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { getSiteUrl } from '@/lib/utils/site-url';
 
 // Result types
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
@@ -19,7 +20,7 @@ export async function signInWithEmail(
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: redirectTo || `${process.env.NEXT_PUBLIC_SITE_URL || ''}/auth/callback`,
+        emailRedirectTo: redirectTo || `${getSiteUrl()}/auth/callback`,
       },
     });
 
@@ -44,7 +45,7 @@ export async function signInWithDiscord(redirectTo?: string): Promise<void> {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
     options: {
-      redirectTo: redirectTo || `${process.env.NEXT_PUBLIC_SITE_URL || ''}/auth/callback`,
+      redirectTo: redirectTo || `${getSiteUrl()}/auth/callback`,
     },
   });
 
