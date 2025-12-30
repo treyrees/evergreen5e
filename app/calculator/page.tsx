@@ -113,6 +113,9 @@ const BASE_ITEMS = {
     'gloves',
     'ring',
   ],
+  'Wondrous Items': [
+    'wondrous item',
+  ],
 };
 
 // Helper to check if a base item is a weapon
