@@ -451,7 +451,7 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "5389-holy-avenger",
-    "overrideBonus": 0.5,
+    "overrideBonus": 0.1,
     "combat": {
       "enhancement": 3,
       "damageBonus": {
@@ -460,7 +460,7 @@
         "conditionalType": "creature-common"
       }
     },
-    "description": "+3 sword with 2d10 radiant vs fiends/undead (~5.0 pts base). Override +0.5 for 10-ft aura granting advantage on saves vs spells to you and allies. Paladin-only attunement limits availability but doesn't reduce power for those who qualify."
+    "description": "+3 sword with 2d10 radiant vs fiends/undead. Override +0.1 adjusts for aura (advantage on saves vs spells) which is modeled separately as a charge ability in the calculator template."
   },
   {
     "name": "Sword of Sharpness",

@@ -10,6 +10,7 @@ import {
 } from '@/lib/calculator';
 import { getWarningIndicator } from '@/lib/item-balance-flags';
 import { generateRandomItemName } from '@/lib/item-name-generator';
+import { decodeItemFromUrl, generateShareUrl } from '@/lib/item-url';
 
 // Animated number component for smooth score transitions
 function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: number }) {
@@ -187,6 +188,7 @@ export default function CalculatorPage() {
   const [itemDescription, setItemDescription] = useState('');
   const [hiddenAttributes, setHiddenAttributes] = useState<Set<string>>(new Set());
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // Generate random placeholder after mount to avoid hydration mismatch
   const [randomPlaceholder, setRandomPlaceholder] = useState('');
@@ -194,6 +196,46 @@ export default function CalculatorPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time mount initialization
     setRandomPlaceholder(generateRandomItemName());
   }, []);
+
+  // Parse URL params on mount to restore shared item state
+  const [urlImported, setUrlImported] = useState(false);
+  useEffect(() => {
+    if (urlImported) return;
+    const params = new URLSearchParams(window.location.search);
+    const itemParam = params.get('item');
+    if (itemParam) {
+      const decoded = decodeItemFromUrl(itemParam);
+      if (decoded) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time URL import
+        setItemName(decoded.itemName);
+        setBaseItem(decoded.baseItem);
+        setEnhancement(decoded.enhancement);
+        setEnhancementSometimes(decoded.enhancementSometimes);
+        setDamageBonus(decoded.damageBonus);
+        setAcBonus(decoded.acBonus);
+        setAcBonusSometimes(decoded.acBonusSometimes);
+        setSavingThrowBonus(decoded.savingThrowBonus);
+        setSaveBonusSometimes(decoded.saveBonusSometimes);
+        setResistances(decoded.resistances);
+        setResistancesSometimes(decoded.resistancesSometimes);
+        setAttunement(decoded.attunement);
+        setAbilityScoreSetter(decoded.abilityScoreSetter);
+        setAbilityScoreBonus(decoded.abilityScoreBonus);
+        setPermanentBuffs(decoded.permanentBuffs);
+        setFlightEnabled(decoded.flightEnabled);
+        setFlySpeed(decoded.flySpeed);
+        setFlyDuration(decoded.flyDuration);
+        setWeaponProperties(decoded.weaponProperties);
+        setMaxCharges(decoded.maxCharges);
+        setChargesPerShortRest(decoded.chargesPerShortRest);
+        setChargesPerLongRest(decoded.chargesPerLongRest);
+        setAbilities(decoded.abilities);
+        // Clean URL after import (no history pollution)
+        window.history.replaceState({}, '', '/calculator');
+      }
+    }
+    setUrlImported(true);
+  }, [urlImported]);
 
   const [newAbility, setNewAbility] = useState<{
     spell: string;
@@ -462,6 +504,101 @@ export default function CalculatorPage() {
     return attrs;
   }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, weaponProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
 
+  // Copy shareable link to clipboard
+  const copyShareLink = async () => {
+    const url = generateShareUrl({
+      itemName,
+      baseItem,
+      enhancement,
+      enhancementSometimes,
+      damageBonus,
+      acBonus,
+      acBonusSometimes,
+      savingThrowBonus,
+      saveBonusSometimes,
+      resistances,
+      resistancesSometimes,
+      attunement,
+      abilityScoreSetter,
+      abilityScoreBonus,
+      permanentBuffs,
+      flightEnabled,
+      flySpeed,
+      flyDuration,
+      weaponProperties,
+      maxCharges,
+      chargesPerShortRest,
+      chargesPerLongRest,
+      abilities,
+    });
+    await navigator.clipboard.writeText(url);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  // Quick start templates for new users
+  const applyTemplate = (template: 'plus1-longsword' | 'flametongue' | 'holy-avenger') => {
+    // Reset form first
+    setDamageBonus(undefined);
+    setAcBonus(0);
+    setAcBonusSometimes(false);
+    setSavingThrowBonus(0);
+    setSaveBonusSometimes(false);
+    setResistances([]);
+    setResistancesSometimes(false);
+    setAbilityScoreSetter(undefined);
+    setAbilityScoreBonus(undefined);
+    setPermanentBuffs({});
+    setFlightEnabled(false);
+    setWeaponProperties([]);
+    setMaxCharges(0);
+    setChargesPerShortRest(0);
+    setChargesPerLongRest(0);
+    setAbilities([]);
+
+    switch (template) {
+      case 'plus1-longsword':
+        setItemName('+1 Longsword');
+        setBaseItem('longsword');
+        setEnhancement(1);
+        setEnhancementSometimes(false);
+        setAttunement(false);
+        break;
+      case 'flametongue':
+        setItemName('Flame Tongue');
+        setBaseItem('longsword');
+        setEnhancement(0);
+        setEnhancementSometimes(false);
+        setAttunement(true);
+        setDamageBonus({
+          dice: '2d6',
+          type: 'fire',
+          frequency: 'per-hit',
+        });
+        break;
+      case 'holy-avenger':
+        setItemName('Holy Avenger');
+        setBaseItem('longsword');
+        setEnhancement(3);
+        setEnhancementSometimes(false);
+        setAttunement(true);
+        setDamageBonus({
+          dice: '2d10',
+          type: 'radiant',
+          frequency: 'per-hit',
+          conditional: true, // vs fiends and undead
+        });
+        // Aura: advantage on saves vs spells for allies within 10ft
+        // Modeled as at-will level 2 Protection effect
+        setMaxCharges(1);
+        setChargesPerLongRest(1);
+        setAbilities([
+          { spell: 'Protective Aura', spellLevel: 2, chargesPerUse: 1 },
+        ]);
+        break;
+    }
+  };
+
   // Generate print preview image - Classic DMG parchment style
   const generatePreviewImage = () => {
     const canvas = canvasRef.current;
@@ -713,6 +850,33 @@ export default function CalculatorPage() {
                     Requires Attunement
                   </span>
                 </label>
+
+                {/* Quick Start Templates - only show when form is empty */}
+                {!hasSelectedAttributes && !baseItem && (
+                  <div className="pt-3 border-t border-slate-700/50">
+                    <p className="text-xs text-slate-500 mb-2">Or start from an example:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => applyTemplate('plus1-longsword')}
+                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                      >
+                        +1 Longsword
+                      </button>
+                      <button
+                        onClick={() => applyTemplate('flametongue')}
+                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                      >
+                        Flame Tongue
+                      </button>
+                      <button
+                        onClick={() => applyTemplate('holy-avenger')}
+                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                      >
+                        Holy Avenger
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1589,10 +1753,13 @@ export default function CalculatorPage() {
                                       href={`https://www.dndbeyond.com/magic-items/${anchor.dndbeyondSlug}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-slate-200 font-semibold text-sm truncate hover:underline hover:text-slate-100 transition-colors"
+                                      className="text-sky-300 font-semibold text-sm truncate underline decoration-sky-400/40 hover:decoration-sky-300 hover:text-sky-200 transition-colors inline-flex items-center gap-1"
                                       title="View on D&D Beyond"
                                     >
                                       {anchor.name}
+                                      <svg className="w-3 h-3 opacity-60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                      </svg>
                                     </a>
                                   ) : (
                                     <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>
@@ -1747,16 +1914,42 @@ export default function CalculatorPage() {
                         />
                       </div>
 
-                      {/* Generate Preview Button */}
-                      <button
-                        onClick={generatePreviewImage}
-                        className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Generate Print Preview
-                      </button>
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={copyShareLink}
+                          className={`flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                            linkCopied
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600'
+                          }`}
+                        >
+                          {linkCopied ? (
+                            <>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                              </svg>
+                              Share Link
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={generatePreviewImage}
+                          className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Print Preview
+                        </button>
+                      </div>
 
                       {/* Hidden attributes hint */}
                       {hiddenAttributes.size > 0 && (
