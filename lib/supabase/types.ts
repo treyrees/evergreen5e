@@ -128,6 +128,53 @@ export interface Database {
           created_at?: string;
         };
       };
+      saved_items: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          base_item: string;
+          attunement: boolean;
+          combat: Json;
+          ribbons: Json | null;
+          special_mechanics: string | null;
+          cosmetic_features: string | null;
+          score: number;
+          suggested_rarity: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          base_item: string;
+          attunement?: boolean;
+          combat: Json;
+          ribbons?: Json | null;
+          special_mechanics?: string | null;
+          cosmetic_features?: string | null;
+          score: number;
+          suggested_rarity: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          base_item?: string;
+          attunement?: boolean;
+          combat?: Json;
+          ribbons?: Json | null;
+          special_mechanics?: string | null;
+          cosmetic_features?: string | null;
+          score?: number;
+          suggested_rarity?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Functions: {
       cast_vote: {
@@ -193,6 +240,23 @@ export interface DbProfile {
   accent_color: AccentColor;
   tickets: number;
   total_votes: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Helper type for saved items
+export interface DbSavedItem {
+  id: string;
+  user_id: string;
+  name: string;
+  base_item: string;
+  attunement: boolean;
+  combat: CombatFeatures;
+  ribbons: RibbonFeatures | null;
+  special_mechanics: string | null;
+  cosmetic_features: string | null;
+  score: number;
+  suggested_rarity: Rarity;
   created_at: string;
   updated_at: string;
 }
