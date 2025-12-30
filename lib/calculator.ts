@@ -989,7 +989,7 @@ export function findTopAnchorItems(
     // === RARITY PRIORITY ===
     // Cross-rarity items (1 tier apart) compete on score like same-rarity.
     // Post-processing below ensures #1 is always same-rarity, so we don't
-    // need a priority penalty here — let score proximity drive #2 and #3.
+    // need a priority penalty here; let score proximity drive #2 and #3.
     // (Items 2+ tiers apart are already filtered out above)
 
     // === ATTUNEMENT PRIORITY (secondary) ===
@@ -1437,7 +1437,7 @@ export function getSuggestedRarity(item: Partial<MagicItem>): {
     if (anchorIsUnbalanced) {
       const anchorHasFeatures = anchorScore > 0;
       const anchorCalculatedRarity = scoreToRarity(anchorScore, anchorHasFeatures);
-      explanation += ` ⚠️ Note: ${anchorName} appears unbalanced—its stated rarity (${anchor.rarity}) doesn't match our formula (${anchorCalculatedRarity} for ${anchorScore.toFixed(1)} points). Consider this when balancing.`;
+      explanation += ` ⚠️ Note: ${anchorName} appears unbalanced; its stated rarity (${anchor.rarity}) doesn't match our formula (${anchorCalculatedRarity} for ${anchorScore.toFixed(1)} points). Consider this when balancing.`;
     }
   }
 

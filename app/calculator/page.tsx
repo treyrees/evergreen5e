@@ -216,6 +216,7 @@ export default function CalculatorPage() {
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
+  const [showAttunementInfo, setShowAttunementInfo] = useState(false);
 
   // Item Preview state
   const [showItemPreview, setShowItemPreview] = useState(false);
@@ -1125,23 +1126,47 @@ export default function CalculatorPage() {
                     ))}
                   </select>
                 </div>
-                <label className="flex items-center cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={attunement}
-                    onChange={(e) => setAttunement(e.target.checked)}
-                    className="mr-2.5 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 focus:ring-emerald-500"
-                  />
-                  <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
-                    Requires Attunement
-                  </span>
-                  <span
-                    className="ml-1.5 text-slate-500 hover:text-slate-300 cursor-help text-xs"
-                    title="Attunement has minimal effect on scoring, but heavily influences which reference items appear in 'What's Similar?' since attuned items are compared to other attuned items."
-                  >
-                    ⓘ
-                  </span>
-                </label>
+                <div className="flex items-center">
+                  <label className="flex items-center cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={attunement}
+                      onChange={(e) => setAttunement(e.target.checked)}
+                      className="mr-2.5 h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 focus:ring-emerald-500"
+                    />
+                    <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                      Requires Attunement
+                    </span>
+                  </label>
+                  <div className="relative ml-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowAttunementInfo(!showAttunementInfo)}
+                      className={`text-xs cursor-help transition-colors ${showAttunementInfo ? 'text-slate-300' : 'text-slate-500 hover:text-slate-300'}`}
+                      aria-label="More info about attunement"
+                    >
+                      ⓘ
+                    </button>
+                    {showAttunementInfo && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowAttunementInfo(false)}
+                        />
+                        <div className="absolute left-0 top-6 z-50 w-64 p-3 bg-slate-800 border border-slate-600 rounded-lg shadow-xl text-xs text-slate-300 leading-relaxed">
+                          Attunement has minimal effect on scoring, but heavily influences which reference items appear in &quot;What&apos;s Similar?&quot; since attuned items are compared to other attuned items.
+                          <button
+                            type="button"
+                            onClick={() => setShowAttunementInfo(false)}
+                            className="block mt-2 text-slate-500 hover:text-slate-300 transition-colors"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
 
                 {/* Quick Start Templates - only show when form is empty */}
                 {!hasSelectedAttributes && !baseItem && (
@@ -1971,42 +1996,42 @@ export default function CalculatorPage() {
                           <span className="text-slate-500 w-12 shrink-0 font-medium">Lv 0</span>
                           <div>
                             <span className="text-slate-300">Minor convenience</span>
-                            <span className="text-slate-500 ml-1">— glow, clean, minor telekinesis</span>
+                            <span className="text-slate-500 ml-1">(glow, clean, minor telekinesis)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1">
                           <span className="text-slate-400 w-12 shrink-0 font-medium">Lv 1-2</span>
                           <div>
                             <span className="text-slate-300">Useful but limited</span>
-                            <span className="text-slate-500 ml-1">— 1-3d6 damage, short invisibility, small heals</span>
+                            <span className="text-slate-500 ml-1">(1-3d6 damage, short invisibility, small heals)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-emerald-400">
                           <span className="w-12 shrink-0 font-medium">Lv 3</span>
                           <div>
                             <span className="text-emerald-300">Combat-changing</span>
-                            <span className="text-emerald-500/80 ml-1">— AoE damage (8d6), flight, haste</span>
+                            <span className="text-emerald-500/80 ml-1">(AoE damage 8d6, flight, haste)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1">
                           <span className="text-violet-400 w-12 shrink-0 font-medium">Lv 4-5</span>
                           <div>
                             <span className="text-violet-300">Encounter-ending</span>
-                            <span className="text-violet-400/70 ml-1">— polymorph the boss, banish a threat, revive ally</span>
+                            <span className="text-violet-400/70 ml-1">(polymorph the boss, banish a threat, revive ally)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-amber-400">
                           <span className="w-12 shrink-0 font-medium">Lv 6-7</span>
                           <div>
                             <span className="text-amber-300">Skip the adventure</span>
-                            <span className="text-amber-500/80 ml-1">— teleport anywhere, see through all deception, disintegrate</span>
+                            <span className="text-amber-500/80 ml-1">(teleport anywhere, see through all deception, disintegrate)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-rose-400">
                           <span className="w-12 shrink-0 font-medium">Lv 8-9</span>
                           <div>
                             <span className="text-rose-300">Reality-altering</span>
-                            <span className="text-rose-400/70 ml-1">— mind control, meteor swarm, wish</span>
+                            <span className="text-rose-400/70 ml-1">(mind control, meteor swarm, wish)</span>
                           </div>
                         </div>
                       </div>
@@ -2702,7 +2727,7 @@ export default function CalculatorPage() {
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Attunement:</div>
                       <div className="text-slate-300 text-[11px]">
-                        Attunement does <span className="text-slate-500">not</span> modify scores. Official 5e pricing is inconsistent—Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
+                        Attunement does <span className="text-slate-500">not</span> modify scores. Official 5e pricing is inconsistent; Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
                       </div>
                       <div className="text-slate-500 italic text-[10px] mt-1">
                         When comparing, prioritize reference items with matching attunement. The 3-slot limit means attunement is an &quot;opportunity cost&quot; that varies by build.

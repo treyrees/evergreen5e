@@ -9,7 +9,7 @@ export default function Home() {
             Is Your Homebrew Balanced?
           </h1>
           <p className="text-xl text-slate-400">
-            Compare against official D&D 5e items with transparent math. In-browser logic means immediate feedback—stop waiting for ChatGPT at your table.
+            Compare your homebrew against official SRD items using reverse-engineered formulas. Transparent math, instant results, no guesswork.
           </p>
         </div>
 
@@ -25,7 +25,7 @@ export default function Home() {
             href="/items"
             className="text-sm text-slate-500 hover:text-slate-400 transition-colors"
           >
-            or browse item database
+            Explore 67 official items →
           </Link>
         </div>
       </div>
