@@ -199,6 +199,7 @@ export default function CalculatorPage() {
     spellLevel: 0,
     chargesPerUse: 1,
   });
+  const [spellNameError, setSpellNameError] = useState(false);
 
   // Check if selected base item is a weapon
   const isWeaponSelected = useMemo(() => WEAPON_ITEMS.has(baseItem), [baseItem]);
@@ -290,6 +291,7 @@ export default function CalculatorPage() {
 
   const addAbility = () => {
     if (newAbility.spell.trim()) {
+      setSpellNameError(false);
       setAbilities([...abilities, newAbility]);
       setNewAbility({
         spell: '',
@@ -297,6 +299,10 @@ export default function CalculatorPage() {
         chargesPerUse: 1,
       });
       // Keep form open to allow adding multiple abilities
+    } else {
+      setSpellNameError(true);
+      // Clear error after animation
+      setTimeout(() => setSpellNameError(false), 2000);
     }
   };
 
@@ -646,14 +652,9 @@ export default function CalculatorPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header - Minimal */}
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-100">
-              Evergreen5e Magic Item Balancer
-            </h1>
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-400 bg-slate-800 border border-slate-700 rounded">
-              <span>🔒</span> No AI Queries
-            </span>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-100">
+            Evergreen5e Magic Item Balancer
+          </h1>
           <div className="flex gap-4 text-sm">
             <Link href="/items" className="text-slate-500 hover:text-slate-300 transition-colors">
               Browse Items
@@ -1328,10 +1329,16 @@ export default function CalculatorPage() {
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Max</label>
                           <input
-                            type="number"
-                            min="0"
-                            value={maxCharges}
-                            onChange={(e) => setMaxCharges(parseInt(e.target.value) || 0)}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={maxCharges === 0 ? '' : maxCharges}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^[0-9]+$/.test(val)) {
+                                setMaxCharges(val === '' ? 0 : parseInt(val));
+                              }
+                            }}
                             className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="7"
                           />
@@ -1339,10 +1346,16 @@ export default function CalculatorPage() {
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Short Rest</label>
                           <input
-                            type="number"
-                            min="0"
-                            value={chargesPerShortRest}
-                            onChange={(e) => setChargesPerShortRest(parseInt(e.target.value) || 0)}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={chargesPerShortRest === 0 ? '' : chargesPerShortRest}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^[0-9]+$/.test(val)) {
+                                setChargesPerShortRest(val === '' ? 0 : parseInt(val));
+                              }
+                            }}
                             className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="0"
                           />
@@ -1350,10 +1363,16 @@ export default function CalculatorPage() {
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Long Rest</label>
                           <input
-                            type="number"
-                            min="0"
-                            value={chargesPerLongRest}
-                            onChange={(e) => setChargesPerLongRest(parseInt(e.target.value) || 0)}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={chargesPerLongRest === 0 ? '' : chargesPerLongRest}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^[0-9]+$/.test(val)) {
+                                setChargesPerLongRest(val === '' ? 0 : parseInt(val));
+                              }
+                            }}
                             className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="4"
                           />
@@ -1388,29 +1407,47 @@ export default function CalculatorPage() {
                   {/* Add Ability Form */}
                   {showChargeForm ? (
                     <div className="space-y-3 p-4 bg-slate-700/50 rounded border border-slate-600">
-                      <input
-                        type="text"
-                        value={newAbility.spell}
-                        onChange={(e) =>
-                          setNewAbility({ ...newAbility, spell: e.target.value })
-                        }
-                        placeholder="Spell/Ability name"
-                        className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
-                      />
+                      <div>
+                        <input
+                          type="text"
+                          value={newAbility.spell}
+                          onChange={(e) => {
+                            setSpellNameError(false);
+                            setNewAbility({ ...newAbility, spell: e.target.value });
+                          }}
+                          placeholder="Spell/Ability name"
+                          className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
+                            spellNameError
+                              ? 'border-red-500 focus:border-red-500'
+                              : 'border-slate-600 focus:border-emerald-500'
+                          }`}
+                        />
+                        {spellNameError && (
+                          <p className="text-xs text-red-400 mt-1">Please enter a spell or ability name</p>
+                        )}
+                      </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Spell Level</label>
                           <input
-                            type="number"
-                            min="0"
-                            max="9"
-                            value={newAbility.spellLevel}
-                            onChange={(e) =>
-                              setNewAbility({
-                                ...newAbility,
-                                spellLevel: parseInt(e.target.value) || 0,
-                              })
-                            }
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={newAbility.spellLevel === 0 ? '' : newAbility.spellLevel}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^[0-9]$/.test(val)) {
+                                setNewAbility({
+                                  ...newAbility,
+                                  spellLevel: val === '' ? 0 : Math.min(9, parseInt(val)),
+                                });
+                              }
+                            }}
+                            onBlur={(e) => {
+                              if (e.target.value === '') {
+                                setNewAbility({ ...newAbility, spellLevel: 0 });
+                              }
+                            }}
                             className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
                             placeholder="0-9"
                           />
@@ -1418,16 +1455,26 @@ export default function CalculatorPage() {
                         <div>
                           <label className="block text-[10px] text-slate-500 mb-1">Charges/Use</label>
                           <input
-                            type="number"
-                            min="1"
-                            value={newAbility.chargesPerUse}
-                            onChange={(e) =>
-                              setNewAbility({
-                                ...newAbility,
-                                chargesPerUse: parseInt(e.target.value) || 1,
-                              })
-                            }
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={newAbility.chargesPerUse === 1 ? '' : newAbility.chargesPerUse}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^[0-9]+$/.test(val)) {
+                                setNewAbility({
+                                  ...newAbility,
+                                  chargesPerUse: val === '' ? 1 : Math.max(1, parseInt(val)),
+                                });
+                              }
+                            }}
+                            onBlur={(e) => {
+                              if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                                setNewAbility({ ...newAbility, chargesPerUse: 1 });
+                              }
+                            }}
                             className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
+                            placeholder="1"
                           />
                         </div>
                       </div>
@@ -1439,7 +1486,10 @@ export default function CalculatorPage() {
                           Add
                         </button>
                         <button
-                          onClick={() => setShowChargeForm(false)}
+                          onClick={() => {
+                            setShowChargeForm(false);
+                            setSpellNameError(false);
+                          }}
                           className="px-4 py-2 bg-slate-600 text-slate-300 rounded hover:bg-slate-500 text-sm transition-colors"
                         >
                           Cancel
