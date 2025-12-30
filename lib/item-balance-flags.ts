@@ -41,7 +41,7 @@ export const SPECIAL_MECHANICS = new Set([
 
   // Flat bonuses or non-quantifiable perks
   'Bracers of Archery',        // Flat +2 damage to bows (not dice-based)
-  'Cape of the Mountebank',    // Smoke cloud concealment after Dimension Door
+  'Cape of the Mountebank',    // Level 4 spell for non-casters, no attunement
   'Dwarven Plate',             // Forced movement immunity
   'Plate Armor of Etherealness', // Plate-wearer access to high-level spell
   'Armor of Invulnerability',  // Temporary immunity to nonmagical damage
@@ -193,7 +193,7 @@ export function getItemExplanation(itemName: string): string {
     return 'Flat +2 damage bonus to longbow/shortbow attacks. Bonus +1.0 models this as roughly equivalent to +1 enhancement for damage only (no attack roll bonus).';
   }
   if (itemName === 'Cape of the Mountebank') {
-    return 'Dimension Door (level 4) 1/day = 0.8 pts. Bonus +1.0 for heavily obscured smoke cloud at departure point—provides tactical concealment and breaks line of sight.';
+    return 'Dimension Door (level 4) 1/day = 0.8 pts. Bonus +1.0 for no attunement on a level 4 spell usable by any character—gives martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus.';
   }
   if (itemName === 'Dwarven Plate') {
     return '+2 AC plate armor (2.0 pts). Bonus +1.0 for reaction to reduce forced ground movement by up to 10 feet—mitigates positioning control from Thunderwave, Repelling Blast, and similar effects.';

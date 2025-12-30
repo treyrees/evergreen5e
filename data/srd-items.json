@@ -731,7 +731,7 @@
         }
       ]
     },
-    "description": "Dimension Door (level 4) 1/day = 0.8 pts. Override +1.0 for heavily obscured smoke cloud at departure point—provides tactical concealment and breaks line of sight."
+    "description": "Dimension Door (level 4) 1/day = 0.8 pts. Override +1.0 for no attunement on a level 4 spell usable by any character—gives martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus."
   },
   {
     "name": "Dwarven Plate",
