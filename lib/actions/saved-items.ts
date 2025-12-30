@@ -3,6 +3,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { CombatFeatures, RibbonFeatures, Rarity } from '@/types/magic-item';
+import type { Database } from '@/lib/supabase/types';
+
+type SavedItemInsert = Database['public']['Tables']['saved_items']['Insert'];
 
 // Types for saved item operations
 export interface SaveItemInput {
@@ -49,20 +52,22 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
     }
 
     // Insert the item
+    const insertData: SavedItemInsert = {
+      user_id: user.id,
+      name: input.name,
+      base_item: input.baseItem,
+      attunement: input.attunement,
+      combat: input.combat as unknown as Database['public']['Tables']['saved_items']['Insert']['combat'],
+      ribbons: input.ribbons as unknown as Database['public']['Tables']['saved_items']['Insert']['ribbons'],
+      special_mechanics: input.specialMechanics || null,
+      cosmetic_features: input.cosmeticFeatures || null,
+      score: input.score,
+      suggested_rarity: input.suggestedRarity,
+    };
+
     const { data, error } = await supabase
       .from('saved_items')
-      .insert({
-        user_id: user.id,
-        name: input.name,
-        base_item: input.baseItem,
-        attunement: input.attunement,
-        combat: input.combat as unknown as Record<string, unknown>,
-        ribbons: input.ribbons as unknown as Record<string, unknown> | null,
-        special_mechanics: input.specialMechanics || null,
-        cosmetic_features: input.cosmeticFeatures || null,
-        score: input.score,
-        suggested_rarity: input.suggestedRarity,
-      })
+      .insert(insertData)
       .select('id')
       .single();
 
