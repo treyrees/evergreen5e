@@ -2296,15 +2296,23 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-slate-200 font-semibold">Resistances:</div>
-                      <div>• 2.0 points per damage type resisted</div>
+                      <div className="text-slate-200 font-semibold">Damage Resistances:</div>
+                      <div>• Fire: 2.25 pts (dragons, elementals, spells - very common)</div>
+                      <div>• Poison/Cold: 2.0 pts (common damage sources)</div>
+                      <div>• Necrotic/Lightning: 1.75 pts (moderately common)</div>
+                      <div>• Acid: 1.5 pts | Thunder: 1.25 pts</div>
+                      <div>• Physical (each): 1.25 pts <span className="text-slate-500">(all 3 = 3.75 pts)</span></div>
+                      <div>• Psychic: 1.0 pts | Radiant: 0.75 pts | Force: 0.5 pts</div>
+                      <div className="text-slate-500 text-[10px] pl-2">Physical types worth less individually since you need all 3 for full protection</div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Damage Immunities:</div>
-                      <div>• Fire/Poison: 3.5 pts (very common damage)</div>
-                      <div>• Cold/Necrotic: 3.0 pts | Lightning/Acid/Physical: 2.5 pts</div>
-                      <div>• Thunder/Radiant/Psychic: 2.0 pts | Force: 1.5 pts (rare)</div>
+                      <div>• Fire/Poison: 4.0 pts (very common damage)</div>
+                      <div>• Cold: 3.5 pts | Necrotic/Lightning: 3.0 pts</div>
+                      <div>• Acid: 2.5 pts | Physical (each): 2.25 pts</div>
+                      <div>• Thunder: 2.0 pts | Psychic: 1.75 pts</div>
+                      <div>• Radiant: 1.25 pts | Force: 0.75 pts (very rare)</div>
                     </div>
 
                     <div className="space-y-1">
@@ -2355,27 +2363,6 @@ export default function CalculatorPage() {
                       <div>• Heavy/Two-Handed: -0.15 pts (combined penalty)</div>
                     </div>
 
-                    <div className="text-slate-200 font-semibold">Reference Item Discrepancy Categories:</div>
-                    <div className="space-y-3">
-                      <div className="bg-slate-700/30 border border-slate-600 rounded p-3">
-                        <div className="text-slate-300 font-semibold mb-1">⭐ Special Mechanics</div>
-                        <div className="text-slate-400 text-[11px]">
-                          These items grant bonuses that can&apos;t be expressed in numbers (e.g., flight, invisibility, instant kill). Understand the item&apos;s effect and add something similar of your own to match the reference!
-                        </div>
-                      </div>
-                      <div className="bg-slate-700/30 border border-slate-600 rounded p-3">
-                        <div className="text-slate-300 font-semibold mb-1">🔢 Numerical Edge Case</div>
-                        <div className="text-slate-400 text-[11px]">
-                          These items can be quantified, but only when rare or subjective circumstances occur. For example, a &quot;natural 20 when attacking a humanoid&quot; and &quot;25 extra damage only against dragons in the dark&quot; can only be quantified on an adventure-by-adventure basis. Understand your setting and circumstances and compensate accordingly.
-                        </div>
-                      </div>
-                      <div className="bg-slate-700/30 border border-slate-600 rounded p-3">
-                        <div className="text-slate-300 font-semibold mb-1">💬 Community Note</div>
-                        <div className="text-slate-400 text-[11px]">
-                          This item is probably underpowered. Take this reference with a grain of salt.
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
