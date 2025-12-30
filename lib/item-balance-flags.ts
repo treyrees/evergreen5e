@@ -66,7 +66,6 @@ export const COMMUNITY_NOTES = new Set([
 
   // Official seems too HIGH (item is weaker than rarity suggests)
   'Wand of Magic Missiles',    // Calc 0.8 pts (Common) but official Uncommon - auto-hit may justify bump
-  'Winged Boots',              // Calc 0.8 pts (Common) but official Uncommon - flight value hard to quantify
 
   // Character-dependent value (stat setters)
   'Headband of Intellect',     // INT 19 - value depends entirely on your starting INT
@@ -125,7 +124,7 @@ export function getItemExplanation(itemName: string): string {
     return 'No quantifiable combat stats. Bonus +2.0 for doubled movement speed and disadvantage on opportunity attacks.';
   }
   if (itemName === 'Broom of Flying') {
-    return '50 ft fly speed, unlimited duration. With speed+duration model: 0.75 × 2.0 = 1.5 pts (Uncommon).';
+    return '50 ft fly speed, unlimited duration. Additive model: 1.0 (speed) + 0.1 (duration) = 1.1 pts (Uncommon).';
   }
   if (itemName === 'Cloak of Invisibility') {
     return 'No quantifiable combat stats. Bonus +4.0 for invisibility (3 charges, 1hr each)—tactical advantage is campaign-defining.';
@@ -173,10 +172,10 @@ export function getItemExplanation(itemName: string): string {
     return '4× level 1 spell/day = 0.8 pts (Common). Official: Uncommon. Auto-hit reliability (no attack roll, no save) may justify the bump.';
   }
   if (itemName === 'Wings of Flying') {
-    return '60 ft fly speed, 1 hour/day. With speed+duration model: 1.0 × 2.0 = 2.0 pts (Rare).';
+    return '60 ft fly speed, 1 hour/day. Additive model: 2.0 (speed) + 0.0 (duration) = 2.0 pts (Rare).';
   }
   if (itemName === 'Winged Boots') {
-    return '30 ft fly speed, 4 hrs/day = 0.8 pts (Common). Official: Uncommon. Flight is valuable but hard to quantify—our model may undervalue it.';
+    return '30 ft fly speed, 4 hrs/day. Additive model: 0.75 (speed) + 0.25 (duration) = 1.0 pts (Uncommon).';
   }
 
   // Character-dependent stat setters

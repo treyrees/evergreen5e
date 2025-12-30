@@ -325,38 +325,42 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
   }
 
   // Flight - one of the most powerful abilities in D&D
-  // New model factors in both speed and duration
-  // Base values calibrated to SRD:
-  // - Broom of Flying (50 ft, unlimited, no attune) = Uncommon → 1.0 pts base
-  // - Winged Boots (30 ft, 4 hrs, attune) = Uncommon → 1.0 pts
-  // - Wings of Flying (60 ft, 1 hr, attune) = Rare → 2.0 pts
+  // Additive model: speed is the primary driver, duration adds a small bonus
+  // Speed matters most because 60 ft outpaces most creatures; 30 ft still grants vertical mobility
+  // Duration has diminishing returns: 4+ hours covers a full adventuring day
+  //
+  // Calibrated to SRD:
+  // - Wings of Flying (60 ft, 1 hr): 2.0 + 0.0 = 2.0 pts (Rare) ✓
+  // - Broom of Flying (50 ft, unlimited): 1.0 + 0.1 = 1.1 pts (Uncommon) ✓
+  // - Winged Boots (30 ft, 4 hrs): 0.75 + 0.25 = 1.0 pts (Uncommon) ✓
   if (combat.flight) {
     // New format with flySpeed and flyDuration
     if (combat.flight.flySpeed !== undefined || combat.flight.flyDuration !== undefined) {
       const flySpeed = combat.flight.flySpeed || 30; // Default to 30 ft
       const flyDuration = combat.flight.flyDuration; // hours or 'unlimited'
 
-      // Base score from fly speed (30 ft = 0.5, 50 ft = 0.75, 60 ft = 1.0)
+      // Speed is the primary value driver
+      // 60 ft is exceptional (matches adult dragons), 30 ft is still very useful
       let speedScore: number;
-      if (flySpeed >= 60) speedScore = 1.0;
-      else if (flySpeed >= 50) speedScore = 0.75;
-      else if (flySpeed >= 40) speedScore = 0.6;
-      else speedScore = 0.5; // 30 ft or less
+      if (flySpeed >= 60) speedScore = 2.0;
+      else if (flySpeed >= 50) speedScore = 1.0;
+      else if (flySpeed >= 40) speedScore = 0.85;
+      else speedScore = 0.75; // 30 ft or less
 
-      // Duration multiplier
-      // Unlimited = 2.0×, 4+ hrs = 1.5×, 1-3 hrs = 2.0× (short duration = tactical, valued higher per hour)
-      let durationMultiplier: number;
+      // Duration bonus (additive) - diminishing returns after 4 hours
+      // 1 hour is tactical (enough for combat), unlimited is marginally better
+      let durationBonus: number;
       if (flyDuration === 'unlimited') {
-        durationMultiplier = 2.0;
+        durationBonus = 0.1; // Marginally better than 4+ hours for adventuring convenience
       } else if (typeof flyDuration === 'number') {
-        if (flyDuration >= 4) durationMultiplier = 1.5;
-        else if (flyDuration >= 2) durationMultiplier = 1.75;
-        else durationMultiplier = 2.0; // 1 hour or less - premium for tactical use
+        if (flyDuration >= 4) durationBonus = 0.25; // Full adventuring day coverage
+        else if (flyDuration >= 2) durationBonus = 0.15;
+        else durationBonus = 0.0; // 1 hour - tactical, no bonus
       } else {
-        durationMultiplier = 1.5; // Default
+        durationBonus = 0.0; // Default to tactical (1 hour equivalent)
       }
 
-      score += speedScore * durationMultiplier;
+      score += speedScore + durationBonus;
     }
     // Legacy format support (deprecated)
     else if (combat.flight.duration === 'unlimited') {
