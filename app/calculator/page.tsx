@@ -292,6 +292,8 @@ export default function CalculatorPage() {
       damageBonus !== undefined ||
       acBonus > 0 ||
       savingThrowBonus > 0 ||
+      spellSaveDCBonus > 0 ||
+      spellAttackBonus > 0 ||
       maxCharges > 0 ||
       chargesPerShortRest > 0 ||
       chargesPerLongRest > 0 ||
@@ -301,9 +303,11 @@ export default function CalculatorPage() {
       hasPermanentBuffs ||
       flightEnabled ||
       weaponProperties.length > 0 ||
-      resistances.length > 0
+      resistances.length > 0 ||
+      damageImmunities.length > 0 ||
+      conditionImmunities.length > 0
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, flightEnabled, weaponProperties, resistances]);
+  }, [enhancement, damageBonus, acBonus, savingThrowBonus, spellSaveDCBonus, spellAttackBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, flightEnabled, weaponProperties, resistances, damageImmunities, conditionImmunities]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
