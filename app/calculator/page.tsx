@@ -634,6 +634,150 @@ export default function CalculatorPage() {
     setTimeout(() => setLinkCopied(false), 2000);
   };
 
+  // Generate a random "Surprise me" item
+  const generateSurpriseItem = () => {
+    // Reset form first
+    setDamageBonus(undefined);
+    setAcBonus(0);
+    setAcBonusSometimes(false);
+    setSavingThrowBonus(0);
+    setSaveBonusSometimes(false);
+    setResistances([]);
+    setResistancesSometimes(false);
+    setDamageImmunities([]);
+    setDamageImmunitiesSometimes(false);
+    setConditionImmunities([]);
+    setConditionImmunitiesSometimes(false);
+    setSpellSaveDCBonus(0);
+    setSpellAttackBonus(0);
+    setAbilityScoreSetter(undefined);
+    setAbilityScoreBonus(undefined);
+    setPermanentBuffs({});
+    setFlightEnabled(false);
+    setWeaponProperties([]);
+    setArmorProperties([]);
+    setMaxCharges(0);
+    setChargesPerShortRest(0);
+    setChargesPerLongRest(0);
+    setAbilities([]);
+    setEnhancement(0);
+    setEnhancementSometimes(false);
+
+    // Pick target rarity: Uncommon 60%, Rare 30%, Very Rare 10%
+    const rarityRoll = Math.random();
+    const targetRarity = rarityRoll < 0.6 ? 'uncommon' : rarityRoll < 0.9 ? 'rare' : 'very rare';
+
+    // All base items flattened
+    const allBaseItems = Object.values(BASE_ITEMS).flat();
+    const randomBaseItem = allBaseItems[Math.floor(Math.random() * allBaseItems.length)];
+    setBaseItem(randomBaseItem);
+
+    const isWeapon = WEAPON_ITEMS.has(randomBaseItem);
+    const isArmor = ARMOR_ITEMS.has(randomBaseItem);
+
+    // Pick number of attributes: 1-4, weighted toward 2-3
+    // Distribution: 1 attr = 15%, 2 attr = 35%, 3 attr = 35%, 4 attr = 15%
+    const attrRoll = Math.random();
+    const numAttributes = attrRoll < 0.15 ? 1 : attrRoll < 0.50 ? 2 : attrRoll < 0.85 ? 3 : 4;
+
+    // Define possible attributes based on item type
+    type AttributeType = 'enhancement' | 'damage' | 'ac' | 'saves' | 'resistance' | 'conditionImmunity';
+    const possibleAttributes: AttributeType[] = [];
+
+    if (isWeapon) {
+      possibleAttributes.push('enhancement', 'damage');
+    }
+    if (isArmor) {
+      possibleAttributes.push('enhancement', 'ac');
+    }
+    // Universal attributes
+    possibleAttributes.push('ac', 'saves', 'resistance', 'conditionImmunity');
+
+    // Remove duplicates
+    const uniqueAttributes = [...new Set(possibleAttributes)];
+
+    // Shuffle and pick attributes
+    const shuffled = uniqueAttributes.sort(() => Math.random() - 0.5);
+    const selectedAttributes = shuffled.slice(0, Math.min(numAttributes, shuffled.length));
+
+    // Damage types for random selection (excluding weak ones)
+    const goodDamageTypes = ['fire', 'cold', 'lightning', 'radiant', 'necrotic', 'force', 'thunder'];
+    const resistanceTypes = ['fire', 'cold', 'lightning', 'acid', 'poison', 'thunder', 'necrotic'];
+
+    // Apply attributes based on target rarity
+    selectedAttributes.forEach((attr) => {
+      switch (attr) {
+        case 'enhancement':
+          if (isWeapon || isArmor) {
+            if (targetRarity === 'uncommon') {
+              setEnhancement(1);
+            } else if (targetRarity === 'rare') {
+              setEnhancement(Math.random() < 0.7 ? 1 : 2);
+            } else {
+              setEnhancement(Math.random() < 0.5 ? 2 : 3);
+            }
+          }
+          break;
+
+        case 'damage':
+          if (isWeapon) {
+            const dieType = targetRarity === 'uncommon' ? '6' : targetRarity === 'rare' ? '6' : '8';
+            const numDice = targetRarity === 'very rare' ? (Math.random() < 0.5 ? '2' : '1') : '1';
+            const dmgType = goodDamageTypes[Math.floor(Math.random() * goodDamageTypes.length)];
+            setDamageBonus({
+              dice: `${numDice}d${dieType}`,
+              type: dmgType as DamageBonus['type'],
+              frequency: 'per-hit',
+            });
+          }
+          break;
+
+        case 'ac':
+          if (!isWeapon) {
+            if (targetRarity === 'uncommon') {
+              setAcBonus(1);
+            } else if (targetRarity === 'rare') {
+              setAcBonus(Math.random() < 0.7 ? 1 : 2);
+            } else {
+              setAcBonus(2);
+            }
+          }
+          break;
+
+        case 'saves':
+          if (targetRarity === 'uncommon') {
+            setSavingThrowBonus(1);
+          } else if (targetRarity === 'rare') {
+            setSavingThrowBonus(Math.random() < 0.6 ? 1 : 2);
+          } else {
+            setSavingThrowBonus(Math.random() < 0.5 ? 2 : 3);
+          }
+          break;
+
+        case 'resistance':
+          const numResistances = targetRarity === 'very rare' ? (Math.random() < 0.5 ? 2 : 1) : 1;
+          const shuffledResistances = [...resistanceTypes].sort(() => Math.random() - 0.5);
+          setResistances(shuffledResistances.slice(0, numResistances));
+          break;
+
+        case 'conditionImmunity':
+          const conditions = ['frightened', 'charmed', 'poisoned'];
+          setConditionImmunities([conditions[Math.floor(Math.random() * conditions.length)]]);
+          break;
+      }
+    });
+
+    // Set attunement for rare+ items or items with multiple attributes
+    if (targetRarity !== 'uncommon' || numAttributes >= 3) {
+      setAttunement(true);
+    } else {
+      setAttunement(Math.random() < 0.3);
+    }
+
+    // Generate a random item name
+    setItemName(generateRandomItemName());
+  };
+
   // Quick start templates for new users
   const applyTemplate = (template: 'plus1-longsword' | 'flametongue' | 'holy-avenger') => {
     // Reset form first
@@ -971,6 +1115,12 @@ export default function CalculatorPage() {
                         className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
                       >
                         Holy Avenger
+                      </button>
+                      <button
+                        onClick={generateSurpriseItem}
+                        className="px-2.5 py-1 text-xs bg-violet-900/40 hover:bg-violet-800/50 text-violet-300 rounded border border-violet-600/40 transition-colors"
+                      >
+                        Surprise me
                       </button>
                     </div>
                   </div>
