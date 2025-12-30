@@ -2056,10 +2056,11 @@ export default function CalculatorPage() {
                                     <span className="text-sky-400/90">{scoreDiff.toFixed(1)} pts weaker</span>
                                   )}
                                 </div>
-                                {Math.abs(scoreDiff) >= 0.3 && comparison.details.length > 0 && (
+                                {/* Show significant differences even for similar-power items (trade-offs) */}
+                                {comparison.details.length > 0 && comparison.details[0] !== 'Similar combat power' && (
                                   <div className="text-[10px] text-slate-500 text-right flex flex-col gap-0.5">
                                     <span className="truncate">{comparison.details[0]}</span>
-                                    {comparison.details.length > 1 && comparison.details[1] !== 'Similar combat power' && (
+                                    {comparison.details.length > 1 && (
                                       <span className="truncate text-slate-600">{comparison.details[1]}</span>
                                     )}
                                   </div>

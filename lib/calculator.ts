@@ -974,37 +974,41 @@ function findClosestInCandidates(
 
 /**
  * Compare user item to anchor item and generate educational details
- * Priority order optimized for showing the most meaningful differences:
- * 1. Enhancement - fundamental weapon/armor differentiator
- * 2. Damage bonus - highly impactful, easy to understand
- * 3. Saving throw bonus - often overlooked but worth 1.0 pts per +1
- * 4. AC bonus - important defensive stat
- * 5. Resistances & Immunities - defensive capabilities
- * 6. Condition immunities - common on defensive items
- * 7. Flight - defining feature when present
- * 8. Spell abilities - charge pools and legacy charges
+ *
+ * Each difference is tracked with its approximate point magnitude so we can:
+ * 1. Filter to only show significant differences (>= 0.3 pts)
+ * 2. Show trade-offs even when total score is similar (e.g., "+1 enhancement but no saves")
+ * 3. Sort by magnitude to show most impactful differences first
  */
 function compareToAnchor(
   userItem: Partial<MagicItem>,
   anchor: MagicItem,
   scoreDiff: number
 ): AnchorComparison {
-  const details: string[] = [];
+  // Track differences with their approximate point magnitude
+  const differences: { text: string; magnitude: number }[] = [];
   const userCombat = userItem.combat!;
   const anchorCombat = anchor.combat;
 
-  // Priority 1: Enhancement comparison
+  // Determine if user item is armor/shield (affects AC scoring)
+  const userIsArmor = userItem.baseItem &&
+    ['armor (light)', 'armor (medium)', 'armor (heavy)', 'shield'].includes(userItem.baseItem);
+  const acMultiplier = userIsArmor ? 1.0 : 1.5;
+
+  // Enhancement comparison (1.0 pts per +1)
   const userEnh = userCombat.enhancement || 0;
   const anchorEnh = anchorCombat.enhancement || 0;
   if (userEnh !== anchorEnh) {
-    if (userEnh > anchorEnh) {
-      details.push(`+${userEnh - anchorEnh} higher enhancement`);
+    const diff = userEnh - anchorEnh;
+    const magnitude = Math.abs(diff) * 1.0;
+    if (diff > 0) {
+      differences.push({ text: `+${diff} higher enhancement`, magnitude });
     } else {
-      details.push(`+${anchorEnh - userEnh} lower enhancement`);
+      differences.push({ text: `+${-diff} lower enhancement`, magnitude });
     }
   }
 
-  // Priority 2: Damage comparison
+  // Damage comparison (estimate ~1.0 pts for presence, varies by dice)
   const userDmg = userCombat.damageBonus?.dice;
   const anchorDmg = anchorCombat.damageBonus?.dice;
   const userFreq = userCombat.damageBonus?.frequency || 'per-hit';
@@ -1012,114 +1016,139 @@ function compareToAnchor(
 
   if (userDmg && !anchorDmg) {
     const freqText = userFreq === 'per-turn' ? ' per turn' : '';
-    details.push(`has ${userDmg}${freqText} damage (reference has none)`);
+    const magnitude = getDiceValue(userDmg) * (userFreq === 'per-turn' ? 0.4 : 1.0);
+    differences.push({ text: `has ${userDmg}${freqText} damage (reference has none)`, magnitude });
   } else if (!userDmg && anchorDmg) {
     const freqText = anchorFreq === 'per-turn' ? ' per turn' : '';
-    details.push(`no damage bonus (reference has ${anchorDmg}${freqText})`);
+    const magnitude = getDiceValue(anchorDmg) * (anchorFreq === 'per-turn' ? 0.4 : 1.0);
+    differences.push({ text: `no damage bonus (reference has ${anchorDmg}${freqText})`, magnitude });
   } else if (userDmg && anchorDmg) {
     const userFreqText = userFreq === 'per-turn' ? ' per turn' : '';
     const anchorFreqText = anchorFreq === 'per-turn' ? ' per turn' : '';
 
     if (userDmg !== anchorDmg || userFreq !== anchorFreq) {
-      details.push(`${userDmg}${userFreqText} vs reference's ${anchorDmg}${anchorFreqText} damage`);
+      const userVal = getDiceValue(userDmg) * (userFreq === 'per-turn' ? 0.4 : 1.0);
+      const anchorVal = getDiceValue(anchorDmg) * (anchorFreq === 'per-turn' ? 0.4 : 1.0);
+      const magnitude = Math.abs(userVal - anchorVal);
+      differences.push({
+        text: `${userDmg}${userFreqText} vs reference's ${anchorDmg}${anchorFreqText} damage`,
+        magnitude: Math.max(magnitude, 0.3) // Damage differences are always notable
+      });
     }
   }
 
-  // Priority 3: Saving throw bonus comparison (often overlooked, worth 1.0 pts per +1)
+  // Saving throw bonus comparison (1.0 pts per +1)
   const userSaves = userCombat.savingThrowBonus || 0;
   const anchorSaves = anchorCombat.savingThrowBonus || 0;
   if (userSaves !== anchorSaves) {
-    if (userSaves > anchorSaves) {
+    const diff = userSaves - anchorSaves;
+    const magnitude = Math.abs(diff) * 1.0;
+    if (diff > 0) {
       if (anchorSaves === 0) {
-        details.push(`+${userSaves} to saves (reference has none)`);
+        differences.push({ text: `+${userSaves} to saves (reference has none)`, magnitude });
       } else {
-        details.push(`+${userSaves - anchorSaves} higher save bonus`);
+        differences.push({ text: `+${diff} higher save bonus`, magnitude });
       }
     } else {
       if (userSaves === 0) {
-        details.push(`no save bonus (reference has +${anchorSaves})`);
+        differences.push({ text: `no save bonus (reference has +${anchorSaves})`, magnitude });
       } else {
-        details.push(`+${anchorSaves - userSaves} lower save bonus`);
+        differences.push({ text: `+${-diff} lower save bonus`, magnitude });
       }
     }
   }
 
-  // Priority 4: AC bonus comparison
+  // AC bonus comparison (1.0-1.5 pts per +1 depending on item type)
   const userAC = userCombat.acBonus || 0;
   const anchorAC = anchorCombat.acBonus || 0;
   if (userAC !== anchorAC) {
-    if (userAC > anchorAC) {
-      details.push(`+${userAC - anchorAC} higher AC bonus`);
+    const diff = userAC - anchorAC;
+    const magnitude = Math.abs(diff) * acMultiplier;
+    if (diff > 0) {
+      differences.push({ text: `+${diff} higher AC bonus`, magnitude });
     } else {
-      details.push(`+${anchorAC - userAC} lower AC bonus`);
+      differences.push({ text: `+${-diff} lower AC bonus`, magnitude });
     }
   }
 
-  // Priority 5: Resistances & Immunities comparison (expanded)
-  const userResistances = userCombat.resistances?.length || 0;
-  const anchorResistances = anchorCombat.resistances?.length || 0;
+  // Damage immunities comparison (~2.5 pts average per immunity)
   const userImmunities = userCombat.damageImmunities?.length || 0;
   const anchorImmunities = anchorCombat.damageImmunities?.length || 0;
-
-  // Show immunities first (more valuable)
   if (userImmunities !== anchorImmunities) {
+    const diff = userImmunities - anchorImmunities;
+    const magnitude = Math.abs(diff) * 2.5;
     if (userImmunities > 0 && anchorImmunities === 0) {
-      details.push(`${userImmunities} damage ${userImmunities === 1 ? 'immunity' : 'immunities'} (reference has none)`);
+      differences.push({
+        text: `${userImmunities} damage ${userImmunities === 1 ? 'immunity' : 'immunities'} (reference has none)`,
+        magnitude
+      });
     } else if (userImmunities === 0 && anchorImmunities > 0) {
-      details.push(`no immunities (reference has ${anchorImmunities})`);
+      differences.push({ text: `no immunities (reference has ${anchorImmunities})`, magnitude });
     } else {
-      details.push(`${userImmunities} vs ${anchorImmunities} damage immunities`);
+      differences.push({ text: `${userImmunities} vs ${anchorImmunities} damage immunities`, magnitude });
     }
   }
 
-  // Then resistances
+  // Resistances comparison (~1.5 pts average per resistance)
+  const userResistances = userCombat.resistances?.length || 0;
+  const anchorResistances = anchorCombat.resistances?.length || 0;
   if (userResistances !== anchorResistances) {
+    const diff = userResistances - anchorResistances;
+    const magnitude = Math.abs(diff) * 1.5;
     if (userResistances > 0 && anchorResistances === 0) {
-      details.push(`${userResistances} ${userResistances === 1 ? 'resistance' : 'resistances'} (reference has none)`);
+      differences.push({
+        text: `${userResistances} ${userResistances === 1 ? 'resistance' : 'resistances'} (reference has none)`,
+        magnitude
+      });
     } else if (userResistances === 0 && anchorResistances > 0) {
-      details.push(`no resistances (reference has ${anchorResistances})`);
+      differences.push({ text: `no resistances (reference has ${anchorResistances})`, magnitude });
     } else {
-      details.push(`${userResistances} vs ${anchorResistances} resistances`);
+      differences.push({ text: `${userResistances} vs ${anchorResistances} resistances`, magnitude });
     }
   }
 
-  // Priority 6: Condition immunities comparison
+  // Condition immunities comparison (~0.75 pts average per condition)
   const userConditions = userCombat.conditionImmunities?.length || 0;
   const anchorConditions = anchorCombat.conditionImmunities?.length || 0;
   if (userConditions !== anchorConditions) {
+    const diff = userConditions - anchorConditions;
+    const magnitude = Math.abs(diff) * 0.75;
     if (userConditions > 0 && anchorConditions === 0) {
-      details.push(`${userConditions} condition ${userConditions === 1 ? 'immunity' : 'immunities'} (reference has none)`);
+      differences.push({
+        text: `${userConditions} condition ${userConditions === 1 ? 'immunity' : 'immunities'} (reference has none)`,
+        magnitude
+      });
     } else if (userConditions === 0 && anchorConditions > 0) {
-      details.push(`no condition immunities (reference has ${anchorConditions})`);
+      differences.push({ text: `no condition immunities (reference has ${anchorConditions})`, magnitude });
     } else {
-      details.push(`${userConditions} vs ${anchorConditions} condition immunities`);
+      differences.push({ text: `${userConditions} vs ${anchorConditions} condition immunities`, magnitude });
     }
   }
 
-  // Priority 7: Flight comparison (defining feature when present)
+  // Flight comparison (~1.5 pts average)
   const userHasFlight = userCombat.flight || userCombat.permanentBuffs?.flight;
   const anchorHasFlight = anchorCombat.flight || anchorCombat.permanentBuffs?.flight;
   if (userHasFlight && !anchorHasFlight) {
     const speed = userCombat.flight?.flySpeed || 30;
-    details.push(`grants ${speed} ft flight (reference has none)`);
+    differences.push({ text: `grants ${speed} ft flight (reference has none)`, magnitude: 1.5 });
   } else if (!userHasFlight && anchorHasFlight) {
     const speed = anchorCombat.flight?.flySpeed || 30;
-    details.push(`no flight (reference has ${speed} ft)`);
+    differences.push({ text: `no flight (reference has ${speed} ft)`, magnitude: 1.5 });
   } else if (userHasFlight && anchorHasFlight) {
     const userSpeed = userCombat.flight?.flySpeed || 30;
     const anchorSpeed = anchorCombat.flight?.flySpeed || 30;
     if (userSpeed !== anchorSpeed) {
-      details.push(`${userSpeed} ft fly speed vs reference's ${anchorSpeed} ft`);
+      const magnitude = Math.abs(userSpeed - anchorSpeed) >= 20 ? 0.5 : 0.25;
+      differences.push({ text: `${userSpeed} ft fly speed vs reference's ${anchorSpeed} ft`, magnitude });
     }
   }
 
-  // Priority 8: Spell abilities comparison (consolidated charge pool + legacy)
+  // Spell abilities comparison (varies widely by level)
   const userPool = userCombat.chargePool;
   const anchorPool = anchorCombat.chargePool;
   const userLegacyCharges = userCombat.charges?.length || 0;
   const anchorLegacyCharges = anchorCombat.charges?.length || 0;
 
-  // Determine max spell level for each (from either format)
   const userMaxLevel = userPool && userPool.abilities.length > 0
     ? Math.max(...userPool.abilities.map(a => a.spellLevel))
     : userLegacyCharges > 0
@@ -1136,13 +1165,22 @@ function compareToAnchor(
 
   if (userHasSpells && !anchorHasSpells) {
     const levelText = userMaxLevel === 0 ? 'cantrip' : `level ${userMaxLevel}`;
-    details.push(`has spell abilities (${levelText})`);
+    const magnitude = Math.max(userMaxLevel * 0.5, 0.5);
+    differences.push({ text: `has spell abilities (${levelText})`, magnitude });
   } else if (!userHasSpells && anchorHasSpells) {
     const levelText = anchorMaxLevel === 0 ? 'cantrip' : `level ${anchorMaxLevel}`;
-    details.push(`no spell abilities (reference has ${levelText})`);
+    const magnitude = Math.max(anchorMaxLevel * 0.5, 0.5);
+    differences.push({ text: `no spell abilities (reference has ${levelText})`, magnitude });
   } else if (userHasSpells && anchorHasSpells && userMaxLevel !== anchorMaxLevel) {
-    details.push(`spells up to level ${userMaxLevel} vs reference's level ${anchorMaxLevel}`);
+    const magnitude = Math.abs(userMaxLevel - anchorMaxLevel) * 0.5;
+    differences.push({ text: `spells up to level ${userMaxLevel} vs reference's level ${anchorMaxLevel}`, magnitude });
   }
+
+  // Filter to significant differences (>= 0.3 pts) and sort by magnitude
+  const significantDiffs = differences
+    .filter(d => d.magnitude >= 0.3)
+    .sort((a, b) => b.magnitude - a.magnitude)
+    .map(d => d.text);
 
   // Determine type
   let type: 'stronger' | 'weaker' | 'equal' = 'equal';
@@ -1155,7 +1193,7 @@ function compareToAnchor(
   return {
     type,
     scoreDifference: scoreDiff,
-    details: details.length > 0 ? details : ['Similar combat power'],
+    details: significantDiffs.length > 0 ? significantDiffs : ['Similar combat power'],
   };
 }
 
