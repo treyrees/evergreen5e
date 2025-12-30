@@ -71,6 +71,9 @@ export const COMMUNITY_NOTES = new Set([
   'Headband of Intellect',     // INT 19 - value depends entirely on your starting INT
   'Gauntlets of Ogre Power',   // STR 19 - value depends entirely on your starting STR
   'Amulet of Health',          // CON 19 - value depends entirely on your starting CON
+
+  // Campaign-dependent value (damage type choice)
+  'Armor of Resistance',       // Value ranges 0.5-2.25 pts depending on damage type picked
 ]);
 
 /**
@@ -190,6 +193,11 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Amulet of Health') {
     return 'Sets CON to 19. Value is entirely character-dependent: amazing if your CON is low, but most adventurers prioritize CON already. Our formula assumes average benefit.';
+  }
+
+  // Campaign-dependent damage type choice
+  if (itemName === 'Armor of Resistance') {
+    return 'Value depends entirely on which damage type you pick and your campaign. Fire resistance = 2.25 pts (Rare), poison/cold = 2.0 pts, acid = 1.5 pts, radiant = 0.75 pts (Uncommon), force = 0.5 pts (Common). Pick fire/poison/cold for max value; force/radiant are poor choices unless your DM loves beholders or angels.';
   }
 
   return '';
