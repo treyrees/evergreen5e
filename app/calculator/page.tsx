@@ -222,7 +222,7 @@ export default function CalculatorPage() {
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
   const [showAttunementInfo, setShowAttunementInfo] = useState(false);
 
-  // Item Details state (for community submissions)
+  // Unique Item Details state (for community submissions)
   const [specialMechanics, setSpecialMechanics] = useState('');
   const [cosmeticFeatures, setCosmeticFeatures] = useState('');
   const [showItemDetails, setShowItemDetails] = useState(false);
@@ -2313,15 +2313,15 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Item Details Section (for community submissions) */}
+            {/* Unique Item Details Section (for community submissions) */}
             <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
               <button
                 onClick={() => setShowItemDetails(!showItemDetails)}
                 className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
               >
                 <div>
-                  <span className="font-medium text-slate-200">Item Details</span>
-                  <span className="ml-2 text-xs text-slate-500">Special mechanics & flavor text</span>
+                  <span className="font-medium text-slate-200">Unique Item Details</span>
+                  <span className="ml-2 text-xs text-slate-500">What makes this item special?</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showItemDetails ? '−' : '+'}</span>
               </button>
@@ -2333,18 +2333,18 @@ export default function CalculatorPage() {
                     <label className="block text-xs font-medium text-slate-400 mb-2">
                       Special Mechanics
                       <span className="ml-2 text-slate-500 font-normal">
-                        (charge regain, activation triggers, unique rules)
+                        (tradeoffs, conditionals, spell modifications)
                       </span>
                     </label>
                     <textarea
                       value={specialMechanics}
                       onChange={(e) => setSpecialMechanics(e.target.value)}
-                      placeholder="e.g., Regains 1d4+1 charges at moonrise. While attuned, you can use a bonus action to..."
-                      rows={3}
+                      placeholder="e.g., Fireball cast through this staff deals cold damage instead and leaves frozen terrain. Regains charges only under moonlight..."
+                      rows={4}
                       className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
                     />
                     <p className="mt-1.5 text-[10px] text-slate-500">
-                      Describe mechanics that affect power but aren&apos;t captured by the calculator
+                      Focus on what makes your item <span className="text-slate-400">interesting</span>, not just powerful. Describe tradeoffs, conditional triggers, and how spells behave differently when cast through this item.
                     </p>
                   </div>
 
@@ -2634,7 +2634,7 @@ export default function CalculatorPage() {
                             {previewDescription}
                           </div>
                           <p className="mt-1.5 text-[10px] text-slate-600">
-                            Edit in the Item Details section above
+                            Edit in Unique Item Details above
                           </p>
                         </div>
                       )}
