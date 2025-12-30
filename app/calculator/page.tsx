@@ -287,7 +287,7 @@ export default function CalculatorPage() {
   // Check if any combat attributes are selected (for blur effect)
   const hasPermanentBuffs = Object.values(permanentBuffs).some(v => v === true);
   const hasSelectedAttributes = useMemo(() => {
-    return (
+    return baseItem && (
       enhancement > 0 ||
       damageBonus !== undefined ||
       acBonus > 0 ||
@@ -307,7 +307,7 @@ export default function CalculatorPage() {
       damageImmunities.length > 0 ||
       conditionImmunities.length > 0
     );
-  }, [enhancement, damageBonus, acBonus, savingThrowBonus, spellSaveDCBonus, spellAttackBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, flightEnabled, weaponProperties, resistances, damageImmunities, conditionImmunities]);
+  }, [baseItem, enhancement, damageBonus, acBonus, savingThrowBonus, spellSaveDCBonus, spellAttackBonus, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, abilityScoreSetter, abilityScoreBonus, hasPermanentBuffs, flightEnabled, weaponProperties, resistances, damageImmunities, conditionImmunities]);
 
   const currentItem: Partial<MagicItem> = useMemo(() => ({
     name: itemName || 'Unnamed Item',
@@ -1913,7 +1913,7 @@ export default function CalculatorPage() {
                       Configure Your Item
                     </div>
                     <div className="text-sm text-slate-500">
-                      Add bonuses to see the suggested rarity
+                      Select a base item and add bonuses to see the suggested rarity
                     </div>
                   </div>
                 </div>
