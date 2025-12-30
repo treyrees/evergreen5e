@@ -2251,7 +2251,7 @@ export default function CalculatorPage() {
                       <div>• AC Bonus: 1 pt/+1 on armor/shields, <span className="text-amber-400">1.5 pt/+1 on other items</span></div>
                       <div className="text-slate-500 pl-2 text-[10px]">(Non-armor AC stacks with armor, breaking bounded accuracy)</div>
                       <div>• Saving Throw Bonus: 1 point per +1</div>
-                      <div>• Spell Save DC Bonus: 1.25 pts per +1</div>
+                      <div>• Spell Save DC Bonus: 1.0 pts per +1</div>
                       <div>• Spell Attack Bonus: 0.75 pts per +1</div>
                     </div>
 
@@ -2302,7 +2302,9 @@ export default function CalculatorPage() {
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Damage Immunities:</div>
-                      <div>• 3.5 points per damage type (1.75× resistance value)</div>
+                      <div>• Fire/Poison: 3.5 pts (very common damage)</div>
+                      <div>• Cold/Necrotic: 3.0 pts | Lightning/Acid/Physical: 2.5 pts</div>
+                      <div>• Thunder/Radiant/Psychic: 2.0 pts | Force: 1.5 pts (rare)</div>
                     </div>
 
                     <div className="space-y-1">
