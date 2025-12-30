@@ -1,12 +1,17 @@
 {
-  "name": "homebrewqa",
+  "name": "evergreen-5e",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ui:build": "npm run build -w @evergreen/ui",
+    "ui:dev": "npm run dev -w @evergreen/ui"
   },
   "dependencies": {
     "framer-motion": "^12.23.26",

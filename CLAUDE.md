@@ -2,6 +2,39 @@
 
 A Next.js application for calculating and validating D&D 5e magic item balance. All calculations are performed client-side using deterministic formulas - no AI/LLM queries or external API calls.
 
+## Multi-System Architecture
+
+This project is designed to support multiple TTRPG systems (D&D 5e, Draw Steel) with a shared UI layer. See `ARCHITECTURE.md` for full details.
+
+### Where to Put Changes
+
+**Shared UI (`packages/evergreen-ui/`)** - Changes that should look/behave the same across all systems:
+- Visual components (buttons, cards, inputs, badges)
+- Animations and effects (shimmer, glow, ambient motes)
+- Layout patterns (collapsible sections, comparison cards)
+- Color utilities (rarity colors, medal borders)
+- Design tokens and Tailwind preset
+
+**5e-Specific (root app files)** - Changes specific to D&D 5e balance:
+- `lib/calculator.ts` - Scoring formulas, rarity thresholds, damage multipliers
+- `lib/item-balance-flags.ts` - SRD item warnings, emoji mappings
+- `data/srd-items.json` - Reference item database
+- `types/magic-item.ts` - 5e item type definitions (damage types, conditions, etc.)
+- `app/calculator/page.tsx` - 5e-specific form fields (BASE_ITEMS, DAMAGE_TYPES)
+
+### Quick Reference
+
+| Change Type | Location |
+|-------------|----------|
+| New button style | `packages/evergreen-ui/src/components/Button.tsx` |
+| New animation | `packages/evergreen-ui/src/styles/globals.css` |
+| New 5e damage type | `lib/calculator.ts` + `app/calculator/page.tsx` |
+| New scoring formula | `lib/calculator.ts` |
+| New SRD reference item | `data/srd-items.json` |
+| New rarity color | `packages/evergreen-ui/src/utils/rarity.ts` |
+
+**Note:** The shared UI package is not yet consumed by the main app - it's prepared for future extraction. Currently, UI code lives in both places during the transition period.
+
 ## Project Overview
 
 This tool helps D&D 5e players and DMs create balanced homebrew magic items by:
