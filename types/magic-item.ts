@@ -181,3 +181,86 @@ export interface MagicItem {
 }
 
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Very Rare' | 'Legendary';
+
+// ============================================
+// Community Item Types (for user submissions)
+// ============================================
+
+// Curated emoji set for creator profiles (fantasy-themed)
+export const CREATOR_EMOJIS = [
+  // Weapons
+  '⚔️', '🗡️', '🏹', '🔱', '🪓', '🛡️',
+  // Magic
+  '✨', '🔮', '💫', '⚡', '🔥', '❄️', '💀', '👁️',
+  // Creatures
+  '🐉', '🦅', '🐺', '🦇', '🕷️', '🐍', '🦎', '🐙',
+  // Nature
+  '🌙', '☀️', '🌊', '🍃', '🌲', '💎', '🌸', '🍄',
+  // Misc
+  '👑', '🎭', '📜', '🗝️', '⚰️', '🏰', '🎲', '🧙',
+] as const;
+
+export type CreatorEmoji = typeof CREATOR_EMOJIS[number];
+
+// Curated accent color palette (fantasy-themed)
+export const ACCENT_COLORS = {
+  crimson: '#DC2626',
+  amber: '#D97706',
+  gold: '#CA8A04',
+  emerald: '#059669',
+  sapphire: '#2563EB',
+  amethyst: '#7C3AED',
+  silver: '#94A3B8',
+  obsidian: '#334155',
+} as const;
+
+export type AccentColor = keyof typeof ACCENT_COLORS;
+
+// Creator profile for community submissions
+export interface CreatorProfile {
+  id: string;
+  displayName: string;
+  emoji: CreatorEmoji;
+  accentColor: AccentColor;
+}
+
+// Status of a community submission
+export type SubmissionStatus = 'pending' | 'graduated';
+
+// Community item extends MagicItem with submission metadata
+export interface CommunityItem extends MagicItem {
+  id: string;
+  score: number; // Pre-calculated combat score
+  suggestedRarity: Rarity;
+
+  // Creator info (denormalized for display)
+  creatorId: string;
+  creatorDisplayName: string;
+  creatorEmoji: CreatorEmoji;
+  creatorAccentColor: AccentColor;
+
+  // Voting & status
+  upvotes: number;
+  status: SubmissionStatus;
+
+  // Timestamps
+  createdAt: string; // ISO date string
+  graduatedAt?: string; // ISO date string, set when status changes to 'graduated'
+}
+
+// Vote record
+export interface Vote {
+  id: string;
+  oderId: string; // who voted
+  submissionId: string; // which item
+  vote: 'up' | 'pass';
+  createdAt: string; // ISO date string
+}
+
+// User profile with ticket tracking
+export interface UserProfile extends CreatorProfile {
+  email: string;
+  tickets: number;
+  totalVotes: number; // Track votes to award free tickets (15 votes = 1 ticket)
+  createdAt: string; // ISO date string
+}

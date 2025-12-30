@@ -11,6 +11,7 @@ import {
 import { getWarningIndicator } from '@/lib/item-balance-flags';
 import { generateRandomItemName } from '@/lib/item-name-generator';
 import { decodeItemFromUrl, generateShareUrl } from '@/lib/item-url';
+import { useCommunityItemsPreference } from '@/lib/feature-flags';
 
 // Animated number component for smooth score transitions
 function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: number }) {
@@ -164,6 +165,9 @@ const CONDITIONS = [
 ];
 
 export default function CalculatorPage() {
+  // Community items preference
+  const { includeCommunityItems, toggle: toggleCommunityItems } = useCommunityItemsPreference();
+
   const [itemName, setItemName] = useState('');
   const [baseItem, setBaseItem] = useState('');
   const [enhancement, setEnhancement] = useState(0);
@@ -218,9 +222,13 @@ export default function CalculatorPage() {
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
   const [showAttunementInfo, setShowAttunementInfo] = useState(false);
 
+  // Unique Item Details state (for community submissions)
+  const [specialMechanics, setSpecialMechanics] = useState('');
+  const [cosmeticFeatures, setCosmeticFeatures] = useState('');
+  const [showItemDetails, setShowItemDetails] = useState(false);
+
   // Item Preview state
   const [showItemPreview, setShowItemPreview] = useState(false);
-  const [itemDescription, setItemDescription] = useState('');
   const [hiddenAttributes, setHiddenAttributes] = useState<Set<string>>(new Set());
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -230,6 +238,14 @@ export default function CalculatorPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time mount initialization
     setRandomPlaceholder(generateRandomItemName());
+  }, []);
+
+  // Check for community mode URL parameter (?community=1)
+  const [communityModeEnabled, setCommunityModeEnabled] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time URL check
+    setCommunityModeEnabled(params.get('community') === '1');
   }, []);
 
   // Parse URL params on mount to restore shared item state
@@ -272,8 +288,11 @@ export default function CalculatorPage() {
         setChargesPerShortRest(decoded.chargesPerShortRest);
         setChargesPerLongRest(decoded.chargesPerLongRest);
         setAbilities(decoded.abilities);
-        // Clean URL after import (no history pollution)
-        window.history.replaceState({}, '', '/calculator');
+        // Clean URL after import (preserve community param if present)
+        const preserveParams = new URLSearchParams();
+        if (params.get('community') === '1') preserveParams.set('community', '1');
+        const newUrl = preserveParams.toString() ? `/calculator?${preserveParams}` : '/calculator';
+        window.history.replaceState({}, '', newUrl);
       }
     }
     setUrlImported(true);
@@ -302,6 +321,17 @@ export default function CalculatorPage() {
 
   // Check if selected base item is armor/shield
   const isArmorSelected = useMemo(() => ARMOR_ITEMS.has(baseItem), [baseItem]);
+
+  // Combine specialMechanics and cosmeticFeatures for preview display
+  const previewDescription = useMemo(() => {
+    const parts: string[] = [];
+    if (specialMechanics.trim()) parts.push(specialMechanics.trim());
+    if (cosmeticFeatures.trim()) {
+      const cosmetics = cosmeticFeatures.split('\n').map(s => s.trim()).filter(Boolean);
+      parts.push(...cosmetics);
+    }
+    return parts.join(' ');
+  }, [specialMechanics, cosmeticFeatures]);
 
   // Check if any combat attributes are selected (for blur effect)
   const hasPermanentBuffs = Object.values(permanentBuffs).some(v => v === true);
@@ -364,7 +394,11 @@ export default function CalculatorPage() {
       armorProperties: armorProperties.length > 0 ? armorProperties : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties]);
+    description: specialMechanics.trim() || undefined,
+    ribbons: cosmeticFeatures.trim() ? {
+      cosmetic: cosmeticFeatures.split('\n').map(s => s.trim()).filter(Boolean),
+    } : undefined,
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties, specialMechanics, cosmeticFeatures]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -1148,10 +1182,10 @@ export default function CalculatorPage() {
     contentHeight += 16; // Spacing after header
     contentHeight += visibleAttrs.length * 22; // Attributes
     if (visibleAttrs.length > 0) contentHeight += 12; // Spacing after attributes
-    if (itemDescription.trim()) {
+    if (previewDescription.trim()) {
       // Estimate description lines
       ctx.font = '13px Georgia, serif';
-      const words = itemDescription.split(' ');
+      const words = previewDescription.split(' ');
       let lineCount = 1;
       let testLine = '';
       for (const word of words) {
@@ -1240,14 +1274,14 @@ export default function CalculatorPage() {
     }
 
     // Description
-    if (itemDescription.trim()) {
+    if (previewDescription.trim()) {
       y += 4;
       ctx.fillStyle = bodyText;
       ctx.font = '13px Georgia, serif';
       ctx.textAlign = 'left';
 
       // Word wrap description
-      const words = itemDescription.split(' ');
+      const words = previewDescription.split(' ');
       let line = '';
       const maxWidth = width - padding * 2 - 10;
 
@@ -2566,6 +2600,64 @@ export default function CalculatorPage() {
                   )}
               </div>
             </div>
+
+            {/* Unique Item Details Section (for community submissions) */}
+            <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+              <button
+                onClick={() => setShowItemDetails(!showItemDetails)}
+                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
+              >
+                <div>
+                  <span className="font-medium text-slate-200">Unique Item Details</span>
+                  <span className="ml-2 text-xs text-slate-500">What makes this item special?</span>
+                </div>
+                <span className="text-slate-500 text-lg">{showItemDetails ? '−' : '+'}</span>
+              </button>
+
+              {showItemDetails && (
+                <div className="px-5 pb-5 space-y-4 border-t border-slate-700">
+                  {/* Special Mechanics */}
+                  <div className="pt-4">
+                    <label className="block text-xs font-medium text-slate-400 mb-2">
+                      Special Mechanics
+                      <span className="ml-2 text-slate-500 font-normal">
+                        (tradeoffs, conditionals, spell modifications)
+                      </span>
+                    </label>
+                    <textarea
+                      value={specialMechanics}
+                      onChange={(e) => setSpecialMechanics(e.target.value)}
+                      placeholder="e.g., Fireball cast through this staff deals cold damage instead and leaves frozen terrain. Regains charges only under moonlight..."
+                      rows={4}
+                      className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
+                    />
+                    <p className="mt-1.5 text-[10px] text-slate-500">
+                      Focus on what makes your item <span className="text-slate-400">interesting</span>, not just powerful. Describe tradeoffs, conditional triggers, and how spells behave differently when cast through this item.
+                    </p>
+                  </div>
+
+                  {/* Flavor & Lore */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-2">
+                      Flavor & Lore
+                      <span className="ml-2 text-slate-500 font-normal">
+                        (cosmetic effects, history, appearance)
+                      </span>
+                    </label>
+                    <textarea
+                      value={cosmeticFeatures}
+                      onChange={(e) => setCosmeticFeatures(e.target.value)}
+                      placeholder="e.g., The blade glows faintly blue in the presence of orcs.&#10;Forged in the fires of Mount Veloth by the smith Keldara."
+                      rows={3}
+                      className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
+                    />
+                    <p className="mt-1.5 text-[10px] text-slate-500">
+                      One feature per line. These don&apos;t affect balance, just add character.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Column - Results */}
@@ -2602,14 +2694,27 @@ export default function CalculatorPage() {
                 {/* What's Similar? - Reference Comparisons */}
                 {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
                   <div className="pt-2">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">What&apos;s Similar?</span>
-                      <span
-                        className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
-                        title="Compare your item's power level against official SRD items with similar properties."
-                      >
-                        ⓘ
-                      </span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">What&apos;s Similar?</span>
+                        <span
+                          className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
+                          title="Compare your item's power level against official SRD items with similar properties."
+                        >
+                          ⓘ
+                        </span>
+                      </div>
+                      {communityModeEnabled && (
+                        <label className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-400 cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={includeCommunityItems}
+                            onChange={toggleCommunityItems}
+                            className="w-3 h-3 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 focus:ring-1 cursor-pointer"
+                          />
+                          <span>Community</span>
+                        </label>
+                      )}
                     </div>
 
                     <div className="space-y-3">
@@ -2807,19 +2912,20 @@ export default function CalculatorPage() {
                         </div>
                       )}
 
-                      {/* User Description Textarea */}
-                      <div className="pt-3 border-t border-slate-700">
-                        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
-                          Description
-                        </label>
-                        <textarea
-                          value={itemDescription}
-                          onChange={(e) => setItemDescription(e.target.value)}
-                          placeholder="Describe your item's special properties, abilities, history or appearance..."
-                          rows={4}
-                          className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
-                        />
-                      </div>
+                      {/* Description Display (from Item Details section) */}
+                      {previewDescription && (
+                        <div className="pt-3 border-t border-slate-700">
+                          <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
+                            Description
+                          </label>
+                          <div className="text-sm text-slate-300 bg-slate-900/50 border border-slate-700 rounded-md px-3 py-2.5">
+                            {previewDescription}
+                          </div>
+                          <p className="mt-1.5 text-[10px] text-slate-600">
+                            Edit in Unique Item Details above
+                          </p>
+                        </div>
+                      )}
 
                       {/* Action Buttons */}
                       <div className="flex gap-2">
