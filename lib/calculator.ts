@@ -99,24 +99,27 @@ const ITEM_CATEGORIES: Record<string, string> = {
   'armor (medium)': 'defensive',
   'armor (heavy)': 'defensive',
 
-  // Magic implements
+  // Magic implements (trinket with weapon affinity)
   'staff': 'implement',
   'wand': 'implement',
   'rod': 'implement',
 
-  // Accessories
+  // Accessories (trinket with armor affinity)
   'ring': 'accessory',
   'amulet': 'accessory',
   'cloak': 'accessory',
   'boots': 'accessory',
   'gloves': 'accessory',
+
+  // Wondrous items - catch-all for items without specific type
+  'wondrous item': 'wondrous',
 };
 
 /**
  * Get item category for matching purposes
  */
 function getItemCategory(baseItem: string): string {
-  return ITEM_CATEGORIES[baseItem] || 'other';
+  return ITEM_CATEGORIES[baseItem] || 'wondrous';
 }
 
 /**
@@ -134,8 +137,34 @@ function getBroadCategory(baseItem: string): 'weapon' | 'armor' | 'trinket' {
     return 'armor';
   }
 
-  // Everything else (implements, accessories, other) is a trinket
+  // Everything else (implements, accessories, wondrous) is a trinket
   return 'trinket';
+}
+
+/**
+ * Get trinket subtype for affinity matching
+ * - 'implement': staves, wands, rods (affinity with weapons)
+ * - 'accessory': rings, amulets, cloaks, boots, gloves (affinity with armor)
+ * - 'wondrous': everything else (neutral affinity)
+ */
+type TrinketSubtype = 'implement' | 'accessory' | 'wondrous';
+function getTrinketSubtype(baseItem: string): TrinketSubtype {
+  const category = getItemCategory(baseItem);
+  if (category === 'implement') return 'implement';
+  if (category === 'accessory') return 'accessory';
+  return 'wondrous';
+}
+
+/**
+ * Get the affinity category for a trinket subtype
+ * - implements have affinity with weapons
+ * - accessories have affinity with armor
+ * - wondrous items are neutral
+ */
+function getTrinketAffinity(subtype: TrinketSubtype): 'weapon' | 'armor' | null {
+  if (subtype === 'implement') return 'weapon';
+  if (subtype === 'accessory') return 'armor';
+  return null;
 }
 
 /**
@@ -839,12 +868,23 @@ function getRarityTierIndex(rarity: string): number {
 /**
  * Find top N anchor items for comparison
  *
- * Priority order (most important first):
- * 1. Same rarity (HARD RULE: never show items 2+ rarities apart)
- * 2. Same general class (weapon/armor/trinket)
- * 3. Same attunement requirement
+ * Category filtering rules:
+ * - WEAPONS: 90-100% weapons, trinkets only if no weapon within 1.0 pts
+ * - ARMOR: 90-100% armor, trinkets only if no armor within 1.0 pts
+ * - TRINKETS: ~70% trinkets, mix in affinity category more readily
+ *   - Implements (staff/wand/rod) have affinity with weapons
+ *   - Accessories (ring/amulet/cloak/etc) have affinity with armor
+ *   - Wondrous items are neutral
  *
- * Within same priority, prefer items with closer scores.
+ * Rarity rules:
+ * - Same rarity strongly preferred
+ * - Items within 0.2 pts can cross 1 rarity tier, but never as #1
+ * - Never show items 2+ tiers apart
+ *
+ * Other factors:
+ * - Same attunement preferred (secondary)
+ * - Score proximity as tiebreaker
+ * - Simple In/Simple Out for plain +N items
  */
 export function findTopAnchorItems(
   userItem: Partial<MagicItem>,
@@ -865,6 +905,12 @@ export function findTopAnchorItems(
   const userRarity = getSuggestedRarity({ combat: userItem.combat, baseItem: userItem.baseItem }).suggestedRarity;
   const userRarityTier = getRarityTierIndex(userRarity);
 
+  // For trinkets, get subtype and affinity
+  const userTrinketSubtype = userBroadCategory === 'trinket'
+    ? getTrinketSubtype(userItem.baseItem || '')
+    : null;
+  const userAffinity = userTrinketSubtype ? getTrinketAffinity(userTrinketSubtype) : null;
+
   // Check if this is a "simple" item (only +N enhancement/AC, no attunement)
   const simpleCheck = isSimpleItem(userItem);
 
@@ -875,6 +921,7 @@ export function findTopAnchorItems(
     scoreDiff: number;
     priority: number;
     rarityDiff: number;
+    categoryMatch: 'exact' | 'affinity' | 'cross';
   }> = [];
 
   // Process all items
@@ -892,42 +939,80 @@ export function findTopAnchorItems(
     const itemAttunement = item.attunement || false;
     const isGeneric = isGenericItem(item);
 
-    let sameBroadCategory = itemBroadCategory === userBroadCategory;
-    // Special case: implements can also match weapons
-    const userCategory = getItemCategory(userItem.baseItem || '');
-    if (userCategory === 'implement' && itemBroadCategory === 'weapon') {
-      sameBroadCategory = true;
-    }
-
-    const sameAttunement = itemAttunement === userAttunement;
     const score = getItemScore(item);
     const scoreDiff = Math.abs(score - userScore);
+    const sameAttunement = itemAttunement === userAttunement;
 
-    // Priority system: lower is better
-    // Each criterion adds to priority if NOT matched
-    // Priority 0-7 = same rarity, Priority 8-15 = 1 rarity apart
-    let priority = 0;
-
-    // Rarity difference is the primary factor (0 or 1 tier difference only)
-    priority += rarityDiff * 8;
-
-    // Same broad category is next most important
-    if (!sameBroadCategory) {
-      priority += 4;
+    // Determine category match type
+    let categoryMatch: 'exact' | 'affinity' | 'cross';
+    if (itemBroadCategory === userBroadCategory) {
+      categoryMatch = 'exact';
+    } else if (userAffinity && itemBroadCategory === userAffinity) {
+      // Trinket with affinity matching its affinity category
+      categoryMatch = 'affinity';
+    } else if (userBroadCategory === 'trinket') {
+      // Trinket matching non-affinity category
+      categoryMatch = 'cross';
+    } else {
+      // Weapon/Armor matching different category
+      categoryMatch = 'cross';
     }
 
-    // Same attunement is third priority
+    // Priority system: lower is better
+    // Base priority determined by category match rules
+    let priority = 0;
+
+    // === CATEGORY PRIORITY (most important for weapons/armor) ===
+    if (userBroadCategory === 'weapon' || userBroadCategory === 'armor') {
+      // Weapons/Armor: Strong preference for same category (90-100%)
+      // Only allow cross-category if no good match within 1.0 pts
+      if (categoryMatch === 'cross') {
+        if (scoreDiff < 1.0) {
+          // Cross-category with close score: still heavily penalized
+          priority += 50;
+        } else {
+          // Cross-category with distant score: barely considered
+          priority += 100;
+        }
+      }
+    } else {
+      // Trinkets: More flexible (~70% trinkets)
+      if (categoryMatch === 'exact') {
+        priority += 0; // Same trinket type: best
+      } else if (categoryMatch === 'affinity') {
+        priority += 8; // Affinity match (implement→weapon, accessory→armor): good
+      } else {
+        priority += 20; // Non-affinity cross-category: acceptable but lower priority
+      }
+    }
+
+    // === RARITY PRIORITY ===
+    // Same rarity is strongly preferred
+    // 1 tier difference allowed but penalized, and never as #1 choice
+    if (rarityDiff === 1) {
+      // Cross-rarity: only acceptable if very close in score (within 0.2 pts)
+      if (scoreDiff <= 0.2) {
+        priority += 15; // Acceptable but not #1
+      } else {
+        priority += 30; // Significant penalty for cross-rarity + score gap
+      }
+    }
+    // rarityDiff === 0: no penalty
+
+    // === ATTUNEMENT PRIORITY (secondary) ===
     if (!sameAttunement) {
+      priority += 3;
+    }
+
+    // === GENERIC ITEM PENALTY ===
+    // Prefer named items over generic items (slight preference)
+    if (isGeneric) {
       priority += 2;
     }
 
-    // Prefer named items over generic items (slight preference)
-    if (isGeneric) {
-      priority += 1;
-    }
-
-    // SIMPLE IN, SIMPLE OUT: If user made a simple +N item, the matching generic is #1
-    if (simpleCheck.isSimple && sameBroadCategory && isGeneric) {
+    // === SIMPLE IN, SIMPLE OUT ===
+    // If user made a simple +N item, the matching generic gets top priority
+    if (simpleCheck.isSimple && categoryMatch === 'exact' && isGeneric) {
       const expectedGenericName = `+${simpleCheck.enhancementLevel} ${
         simpleCheck.type === 'weapon' ? 'Weapon' :
         simpleCheck.type === 'shield' ? 'Shield' : 'Armor'
@@ -943,6 +1028,7 @@ export function findTopAnchorItems(
       scoreDiff,
       priority,
       rarityDiff,
+      categoryMatch,
     });
   });
 
@@ -953,6 +1039,18 @@ export function findTopAnchorItems(
     }
     return a.scoreDiff - b.scoreDiff;
   });
+
+  // Post-processing: Ensure #1 slot is same rarity
+  // If the best candidate is cross-rarity, swap with the first same-rarity candidate
+  if (candidates.length > 1 && candidates[0].rarityDiff > 0) {
+    const firstSameRarityIdx = candidates.findIndex(c => c.rarityDiff === 0);
+    if (firstSameRarityIdx > 0) {
+      // Swap: same-rarity item becomes #1
+      const sameRarityItem = candidates[firstSameRarityIdx];
+      candidates.splice(firstSameRarityIdx, 1);
+      candidates.unshift(sameRarityItem);
+    }
+  }
 
   // Take top items
   const topCandidates = candidates.slice(0, count);
