@@ -679,14 +679,14 @@ export default function CalculatorPage() {
           dice: '2d10',
           type: 'radiant',
           frequency: 'per-hit',
-          conditional: true, // vs fiends and undead
+          conditionalType: 'creature-common', // vs fiends and undead
         });
         // Aura: advantage on saves vs spells for allies within 10ft
-        // Modeled as at-will level 2 Protection effect
+        // Modeled as at-will level 3 Protection effect
         setMaxCharges(1);
         setChargesPerLongRest(1);
         setAbilities([
-          { spell: 'Protective Aura', spellLevel: 2, chargesPerUse: 1 },
+          { spell: 'Protective Aura', spellLevel: 3, chargesPerUse: 1 },
         ]);
         break;
     }
