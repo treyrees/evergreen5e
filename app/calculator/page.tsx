@@ -1096,7 +1096,15 @@ export default function CalculatorPage() {
                 {/* Quick Start Templates - only show when form is empty */}
                 {!hasSelectedAttributes && !baseItem && (
                   <div className="pt-3 border-t border-slate-700/50">
-                    <p className="text-xs text-slate-500 mb-2">Or start from an example:</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs text-slate-500">Or start from an example:</p>
+                      <button
+                        onClick={generateSurpriseItem}
+                        className="px-2.5 py-1 text-xs bg-violet-900/40 hover:bg-violet-800/50 text-violet-300 rounded border border-violet-600/40 transition-colors"
+                      >
+                        Surprise me
+                      </button>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => applyTemplate('plus1-longsword')}
@@ -1115,12 +1123,6 @@ export default function CalculatorPage() {
                         className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
                       >
                         Holy Avenger
-                      </button>
-                      <button
-                        onClick={generateSurpriseItem}
-                        className="px-2.5 py-1 text-xs bg-violet-900/40 hover:bg-violet-800/50 text-violet-300 rounded border border-violet-600/40 transition-colors"
-                      >
-                        Surprise me
                       </button>
                     </div>
                   </div>
