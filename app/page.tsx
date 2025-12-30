@@ -9,7 +9,7 @@ export default function Home() {
             Is Your Homebrew Balanced?
           </h1>
           <p className="text-xl text-slate-400">
-            Get instant validation. Compare against official D&D 5e items with transparent math.
+            Get instant validation. Compare against official D&D 5e items with transparent math. No AI queries—your inputs stay in your browser.
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export default function Home() {
       </div>
 
       <footer className="pb-8 text-sm text-slate-600">
-        Based on D&D 5e SRD &bull; Transparent formulas &bull; No AI
+        Based on D&D 5e SRD &bull; Transparent formulas
       </footer>
     </div>
   );
