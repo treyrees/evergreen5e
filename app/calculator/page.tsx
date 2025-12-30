@@ -2046,8 +2046,8 @@ export default function CalculatorPage() {
 
                             {/* Difference Summary */}
                             <div className="bg-slate-900/50 px-3 py-2 border-t border-slate-700">
-                              <div className="flex items-center justify-between">
-                                <div className="text-xs">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="text-xs shrink-0">
                                   {Math.abs(scoreDiff) < 0.3 ? (
                                     <span className="text-slate-400">≈ Similar power</span>
                                   ) : scoreDiff > 0 ? (
@@ -2056,9 +2056,13 @@ export default function CalculatorPage() {
                                     <span className="text-sky-400/90">{scoreDiff.toFixed(1)} pts weaker</span>
                                   )}
                                 </div>
-                                {Math.abs(scoreDiff) >= 0.3 && comparison.details.length > 0 && (
-                                  <div className="text-[10px] text-slate-500 truncate max-w-[60%] text-right">
-                                    {comparison.details[0]}
+                                {/* Show significant differences even for similar-power items (trade-offs) */}
+                                {comparison.details.length > 0 && comparison.details[0] !== 'Similar combat power' && (
+                                  <div className="text-[10px] text-slate-500 text-right flex flex-col gap-0.5">
+                                    <span className="truncate">{comparison.details[0]}</span>
+                                    {comparison.details.length > 1 && (
+                                      <span className="truncate text-slate-600">{comparison.details[1]}</span>
+                                    )}
                                   </div>
                                 )}
                               </div>

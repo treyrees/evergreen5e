@@ -974,28 +974,54 @@ function findClosestInCandidates(
 
 /**
  * Compare user item to anchor item and generate educational details
+ *
+ * Each difference is tracked with its approximate point magnitude so we can:
+ * 1. Filter to only show significant differences (>= 0.3 pts)
+ * 2. Show trade-offs even when total score is similar (e.g., "+1 enhancement but no saves")
+ * 3. Sort by magnitude to show most impactful differences first
+ *
+ * Compared attributes (with point values):
+ * - Enhancement: 1.0 pts per +1
+ * - Damage bonus: varies by dice/frequency
+ * - Saving throw bonus: 1.0 pts per +1
+ * - AC bonus: 1.0-1.5 pts per +1
+ * - Spell Save DC: 1.0 pts per +1
+ * - Spell Attack: 0.75 pts per +1
+ * - Damage immunities: ~2.5 pts each
+ * - Resistances: ~1.5 pts each
+ * - Condition immunities: ~0.75 pts each
+ * - Flight: ~1.5 pts
+ * - Spell abilities: varies by level
  */
 function compareToAnchor(
   userItem: Partial<MagicItem>,
   anchor: MagicItem,
   scoreDiff: number
 ): AnchorComparison {
-  const details: string[] = [];
+  // Track differences with their approximate point magnitude
+  const differences: { text: string; magnitude: number }[] = [];
   const userCombat = userItem.combat!;
   const anchorCombat = anchor.combat;
 
-  // Enhancement comparison
+  // Determine if user item is armor/shield (affects AC scoring)
+  const userIsArmor = userItem.baseItem &&
+    ['armor (light)', 'armor (medium)', 'armor (heavy)', 'shield'].includes(userItem.baseItem);
+  const acMultiplier = userIsArmor ? 1.0 : 1.5;
+
+  // Enhancement comparison (1.0 pts per +1)
   const userEnh = userCombat.enhancement || 0;
   const anchorEnh = anchorCombat.enhancement || 0;
   if (userEnh !== anchorEnh) {
-    if (userEnh > anchorEnh) {
-      details.push(`+${userEnh - anchorEnh} higher enhancement`);
+    const diff = userEnh - anchorEnh;
+    const magnitude = Math.abs(diff) * 1.0;
+    if (diff > 0) {
+      differences.push({ text: `+${diff} higher enhancement`, magnitude });
     } else {
-      details.push(`+${anchorEnh - userEnh} lower enhancement`);
+      differences.push({ text: `+${-diff} lower enhancement`, magnitude });
     }
   }
 
-  // Damage comparison
+  // Damage comparison (estimate ~1.0 pts for presence, varies by dice)
   const userDmg = userCombat.damageBonus?.dice;
   const anchorDmg = anchorCombat.damageBonus?.dice;
   const userFreq = userCombat.damageBonus?.frequency || 'per-hit';
@@ -1003,72 +1029,213 @@ function compareToAnchor(
 
   if (userDmg && !anchorDmg) {
     const freqText = userFreq === 'per-turn' ? ' per turn' : '';
-    details.push(`has ${userDmg}${freqText} damage (reference has none)`);
+    const magnitude = getDiceValue(userDmg) * (userFreq === 'per-turn' ? 0.4 : 1.0);
+    differences.push({ text: `has ${userDmg}${freqText} damage (reference has none)`, magnitude });
   } else if (!userDmg && anchorDmg) {
     const freqText = anchorFreq === 'per-turn' ? ' per turn' : '';
-    details.push(`no damage bonus (reference has ${anchorDmg}${freqText})`);
+    const magnitude = getDiceValue(anchorDmg) * (anchorFreq === 'per-turn' ? 0.4 : 1.0);
+    differences.push({ text: `no damage bonus (reference has ${anchorDmg}${freqText})`, magnitude });
   } else if (userDmg && anchorDmg) {
     const userFreqText = userFreq === 'per-turn' ? ' per turn' : '';
     const anchorFreqText = anchorFreq === 'per-turn' ? ' per turn' : '';
 
     if (userDmg !== anchorDmg || userFreq !== anchorFreq) {
-      details.push(`${userDmg}${userFreqText} vs reference's ${anchorDmg}${anchorFreqText} damage`);
+      const userVal = getDiceValue(userDmg) * (userFreq === 'per-turn' ? 0.4 : 1.0);
+      const anchorVal = getDiceValue(anchorDmg) * (anchorFreq === 'per-turn' ? 0.4 : 1.0);
+      const magnitude = Math.abs(userVal - anchorVal);
+      differences.push({
+        text: `${userDmg}${userFreqText} vs reference's ${anchorDmg}${anchorFreqText} damage`,
+        magnitude: Math.max(magnitude, 0.3) // Damage differences are always notable
+      });
     }
   }
 
-  // AC bonus comparison
+  // Saving throw bonus comparison (1.0 pts per +1)
+  const userSaves = userCombat.savingThrowBonus || 0;
+  const anchorSaves = anchorCombat.savingThrowBonus || 0;
+  if (userSaves !== anchorSaves) {
+    const diff = userSaves - anchorSaves;
+    const magnitude = Math.abs(diff) * 1.0;
+    if (diff > 0) {
+      if (anchorSaves === 0) {
+        differences.push({ text: `+${userSaves} to saves (reference has none)`, magnitude });
+      } else {
+        differences.push({ text: `+${diff} higher save bonus`, magnitude });
+      }
+    } else {
+      if (userSaves === 0) {
+        differences.push({ text: `no save bonus (reference has +${anchorSaves})`, magnitude });
+      } else {
+        differences.push({ text: `+${-diff} lower save bonus`, magnitude });
+      }
+    }
+  }
+
+  // AC bonus comparison (1.0-1.5 pts per +1 depending on item type)
   const userAC = userCombat.acBonus || 0;
   const anchorAC = anchorCombat.acBonus || 0;
   if (userAC !== anchorAC) {
-    if (userAC > anchorAC) {
-      details.push(`+${userAC - anchorAC} higher AC bonus`);
+    const diff = userAC - anchorAC;
+    const magnitude = Math.abs(diff) * acMultiplier;
+    if (diff > 0) {
+      differences.push({ text: `+${diff} higher AC bonus`, magnitude });
     } else {
-      details.push(`+${anchorAC - userAC} lower AC bonus`);
+      differences.push({ text: `+${-diff} lower AC bonus`, magnitude });
     }
   }
 
-  // Resistances comparison
+  // Spell Save DC comparison (1.0 pts per +1 - same as enhancement, very impactful for casters)
+  const userSpellDC = userCombat.spellSaveDCBonus || 0;
+  const anchorSpellDC = anchorCombat.spellSaveDCBonus || 0;
+  if (userSpellDC !== anchorSpellDC) {
+    const diff = userSpellDC - anchorSpellDC;
+    const magnitude = Math.abs(diff) * 1.0;
+    if (diff > 0) {
+      if (anchorSpellDC === 0) {
+        differences.push({ text: `+${userSpellDC} spell save DC (reference has none)`, magnitude });
+      } else {
+        differences.push({ text: `+${diff} higher spell save DC`, magnitude });
+      }
+    } else {
+      if (userSpellDC === 0) {
+        differences.push({ text: `no spell DC bonus (reference has +${anchorSpellDC})`, magnitude });
+      } else {
+        differences.push({ text: `+${-diff} lower spell save DC`, magnitude });
+      }
+    }
+  }
+
+  // Spell Attack comparison (0.75 pts per +1 - valuable for attack-roll spells)
+  const userSpellAtk = userCombat.spellAttackBonus || 0;
+  const anchorSpellAtk = anchorCombat.spellAttackBonus || 0;
+  if (userSpellAtk !== anchorSpellAtk) {
+    const diff = userSpellAtk - anchorSpellAtk;
+    const magnitude = Math.abs(diff) * 0.75;
+    if (diff > 0) {
+      if (anchorSpellAtk === 0) {
+        differences.push({ text: `+${userSpellAtk} spell attack (reference has none)`, magnitude });
+      } else {
+        differences.push({ text: `+${diff} higher spell attack`, magnitude });
+      }
+    } else {
+      if (userSpellAtk === 0) {
+        differences.push({ text: `no spell attack bonus (reference has +${anchorSpellAtk})`, magnitude });
+      } else {
+        differences.push({ text: `+${-diff} lower spell attack`, magnitude });
+      }
+    }
+  }
+
+  // Damage immunities comparison (~2.5 pts average per immunity)
+  const userImmunities = userCombat.damageImmunities?.length || 0;
+  const anchorImmunities = anchorCombat.damageImmunities?.length || 0;
+  if (userImmunities !== anchorImmunities) {
+    const diff = userImmunities - anchorImmunities;
+    const magnitude = Math.abs(diff) * 2.5;
+    if (userImmunities > 0 && anchorImmunities === 0) {
+      differences.push({
+        text: `${userImmunities} damage ${userImmunities === 1 ? 'immunity' : 'immunities'} (reference has none)`,
+        magnitude
+      });
+    } else if (userImmunities === 0 && anchorImmunities > 0) {
+      differences.push({ text: `no immunities (reference has ${anchorImmunities})`, magnitude });
+    } else {
+      differences.push({ text: `${userImmunities} vs ${anchorImmunities} damage immunities`, magnitude });
+    }
+  }
+
+  // Resistances comparison (~1.5 pts average per resistance)
   const userResistances = userCombat.resistances?.length || 0;
   const anchorResistances = anchorCombat.resistances?.length || 0;
   if (userResistances !== anchorResistances) {
-    details.push(`${userResistances} resistances (reference has ${anchorResistances})`);
+    const diff = userResistances - anchorResistances;
+    const magnitude = Math.abs(diff) * 1.5;
+    if (userResistances > 0 && anchorResistances === 0) {
+      differences.push({
+        text: `${userResistances} ${userResistances === 1 ? 'resistance' : 'resistances'} (reference has none)`,
+        magnitude
+      });
+    } else if (userResistances === 0 && anchorResistances > 0) {
+      differences.push({ text: `no resistances (reference has ${anchorResistances})`, magnitude });
+    } else {
+      differences.push({ text: `${userResistances} vs ${anchorResistances} resistances`, magnitude });
+    }
   }
 
-  // Charge pool comparison (new format) - takes priority over legacy charges
+  // Condition immunities comparison (~0.75 pts average per condition)
+  const userConditions = userCombat.conditionImmunities?.length || 0;
+  const anchorConditions = anchorCombat.conditionImmunities?.length || 0;
+  if (userConditions !== anchorConditions) {
+    const diff = userConditions - anchorConditions;
+    const magnitude = Math.abs(diff) * 0.75;
+    if (userConditions > 0 && anchorConditions === 0) {
+      differences.push({
+        text: `${userConditions} condition ${userConditions === 1 ? 'immunity' : 'immunities'} (reference has none)`,
+        magnitude
+      });
+    } else if (userConditions === 0 && anchorConditions > 0) {
+      differences.push({ text: `no condition immunities (reference has ${anchorConditions})`, magnitude });
+    } else {
+      differences.push({ text: `${userConditions} vs ${anchorConditions} condition immunities`, magnitude });
+    }
+  }
+
+  // Flight comparison (~1.5 pts average)
+  const userHasFlight = userCombat.flight || userCombat.permanentBuffs?.flight;
+  const anchorHasFlight = anchorCombat.flight || anchorCombat.permanentBuffs?.flight;
+  if (userHasFlight && !anchorHasFlight) {
+    const speed = userCombat.flight?.flySpeed || 30;
+    differences.push({ text: `grants ${speed} ft flight (reference has none)`, magnitude: 1.5 });
+  } else if (!userHasFlight && anchorHasFlight) {
+    const speed = anchorCombat.flight?.flySpeed || 30;
+    differences.push({ text: `no flight (reference has ${speed} ft)`, magnitude: 1.5 });
+  } else if (userHasFlight && anchorHasFlight) {
+    const userSpeed = userCombat.flight?.flySpeed || 30;
+    const anchorSpeed = anchorCombat.flight?.flySpeed || 30;
+    if (userSpeed !== anchorSpeed) {
+      const magnitude = Math.abs(userSpeed - anchorSpeed) >= 20 ? 0.5 : 0.25;
+      differences.push({ text: `${userSpeed} ft fly speed vs reference's ${anchorSpeed} ft`, magnitude });
+    }
+  }
+
+  // Spell abilities comparison (varies widely by level)
   const userPool = userCombat.chargePool;
   const anchorPool = anchorCombat.chargePool;
+  const userLegacyCharges = userCombat.charges?.length || 0;
+  const anchorLegacyCharges = anchorCombat.charges?.length || 0;
 
-  if (userPool && userPool.abilities.length > 0) {
-    // User has charge pool abilities - show a single clear summary
-    const maxLevel = Math.max(...userPool.abilities.map(a => a.spellLevel));
-    const levelText = maxLevel === 0 ? 'cantrip' : `up to level ${maxLevel}`;
+  const userMaxLevel = userPool && userPool.abilities.length > 0
+    ? Math.max(...userPool.abilities.map(a => a.spellLevel))
+    : userLegacyCharges > 0
+      ? Math.max(...userCombat.charges!.map(c => c.spellLevel))
+      : 0;
+  const anchorMaxLevel = anchorPool && anchorPool.abilities.length > 0
+    ? Math.max(...anchorPool.abilities.map(a => a.spellLevel))
+    : anchorLegacyCharges > 0
+      ? Math.max(...anchorCombat.charges!.map(c => c.spellLevel))
+      : 0;
 
-    if (!anchorPool || anchorPool.abilities.length === 0) {
-      // Reference has no charge pool
-      details.push(`${userPool.maxCharges} charges for ${userPool.abilities.length} spell${userPool.abilities.length > 1 ? 's' : ''} (${levelText})`);
-    } else {
-      // Both have charge pools - compare
-      const anchorMaxLevel = Math.max(...anchorPool.abilities.map(a => a.spellLevel));
-      if (maxLevel !== anchorMaxLevel) {
-        details.push(`spells up to level ${maxLevel} vs reference's level ${anchorMaxLevel}`);
-      }
-      if (userPool.maxCharges !== anchorPool.maxCharges) {
-        details.push(`${userPool.maxCharges} max charges vs reference's ${anchorPool.maxCharges}`);
-      }
-    }
-  } else if (anchorPool && anchorPool.abilities.length > 0) {
-    // User has no charge pool but reference does
-    details.push(`no spell abilities (reference has ${anchorPool.abilities.length} spell${anchorPool.abilities.length > 1 ? 's' : ''})`);
+  const userHasSpells = (userPool && userPool.abilities.length > 0) || userLegacyCharges > 0;
+  const anchorHasSpells = (anchorPool && anchorPool.abilities.length > 0) || anchorLegacyCharges > 0;
+
+  if (userHasSpells && !anchorHasSpells) {
+    const levelText = userMaxLevel === 0 ? 'cantrip' : `level ${userMaxLevel}`;
+    const magnitude = Math.max(userMaxLevel * 0.5, 0.5);
+    differences.push({ text: `has spell abilities (${levelText})`, magnitude });
+  } else if (!userHasSpells && anchorHasSpells) {
+    const levelText = anchorMaxLevel === 0 ? 'cantrip' : `level ${anchorMaxLevel}`;
+    const magnitude = Math.max(anchorMaxLevel * 0.5, 0.5);
+    differences.push({ text: `no spell abilities (reference has ${levelText})`, magnitude });
+  } else if (userHasSpells && anchorHasSpells && userMaxLevel !== anchorMaxLevel) {
+    const magnitude = Math.abs(userMaxLevel - anchorMaxLevel) * 0.5;
+    differences.push({ text: `spells up to level ${userMaxLevel} vs reference's level ${anchorMaxLevel}`, magnitude });
   }
 
-  // Spell charges comparison (legacy format) - only if user doesn't have chargePool
-  if (!userPool || userPool.abilities.length === 0) {
-    const userCharges = userCombat.charges?.length || 0;
-    const anchorCharges = anchorCombat.charges?.length || 0;
-    if (userCharges !== anchorCharges) {
-      details.push(`${userCharges} spell charges (reference has ${anchorCharges})`);
-    }
-  }
+  // Filter to significant differences (>= 0.3 pts) and sort by magnitude
+  const significantDiffs = differences
+    .filter(d => d.magnitude >= 0.3)
+    .sort((a, b) => b.magnitude - a.magnitude)
+    .map(d => d.text);
 
   // Determine type
   let type: 'stronger' | 'weaker' | 'equal' = 'equal';
@@ -1081,7 +1248,7 @@ function compareToAnchor(
   return {
     type,
     scoreDifference: scoreDiff,
-    details: details.length > 0 ? details : ['Similar combat power'],
+    details: significantDiffs.length > 0 ? significantDiffs : ['Similar combat power'],
   };
 }
 
