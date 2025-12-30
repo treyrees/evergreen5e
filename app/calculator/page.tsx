@@ -536,6 +536,71 @@ export default function CalculatorPage() {
     setTimeout(() => setLinkCopied(false), 2000);
   };
 
+  // Quick start templates for new users
+  const applyTemplate = (template: 'plus1-longsword' | 'flametongue' | 'staff-of-power') => {
+    // Reset form first
+    setDamageBonus(undefined);
+    setAcBonus(0);
+    setAcBonusSometimes(false);
+    setSavingThrowBonus(0);
+    setSaveBonusSometimes(false);
+    setResistances([]);
+    setResistancesSometimes(false);
+    setAbilityScoreSetter(undefined);
+    setAbilityScoreBonus(undefined);
+    setPermanentBuffs({});
+    setFlightEnabled(false);
+    setWeaponProperties([]);
+    setMaxCharges(0);
+    setChargesPerShortRest(0);
+    setChargesPerLongRest(0);
+    setAbilities([]);
+
+    switch (template) {
+      case 'plus1-longsword':
+        setItemName('+1 Longsword');
+        setBaseItem('longsword');
+        setEnhancement(1);
+        setEnhancementSometimes(false);
+        setAttunement(false);
+        break;
+      case 'flametongue':
+        setItemName('Flametongue');
+        setBaseItem('longsword');
+        setEnhancement(0);
+        setEnhancementSometimes(false);
+        setAttunement(true);
+        setDamageBonus({
+          dice: '2d6',
+          type: 'fire',
+          frequency: 'per-hit',
+        });
+        break;
+      case 'staff-of-power':
+        setItemName('Staff of Power');
+        setBaseItem('staff');
+        setEnhancement(2);
+        setEnhancementSometimes(false);
+        setAttunement(true);
+        setAcBonus(2);
+        setSavingThrowBonus(2);
+        setMaxCharges(20);
+        setChargesPerLongRest(14); // 2d8+4 average
+        setAbilities([
+          { spell: 'Cone of Cold', spellLevel: 5, chargesPerUse: 5 },
+          { spell: 'Fireball', spellLevel: 5, chargesPerUse: 5 },
+          { spell: 'Globe of Invulnerability', spellLevel: 6, chargesPerUse: 6 },
+          { spell: 'Hold Monster', spellLevel: 5, chargesPerUse: 5 },
+          { spell: 'Levitate', spellLevel: 2, chargesPerUse: 2 },
+          { spell: 'Lightning Bolt', spellLevel: 5, chargesPerUse: 5 },
+          { spell: 'Magic Missile', spellLevel: 1, chargesPerUse: 1 },
+          { spell: 'Ray of Enfeeblement', spellLevel: 1, chargesPerUse: 1 },
+          { spell: 'Wall of Force', spellLevel: 5, chargesPerUse: 5 },
+        ]);
+        break;
+    }
+  };
+
   // Generate print preview image - Classic DMG parchment style
   const generatePreviewImage = () => {
     const canvas = canvasRef.current;
@@ -787,6 +852,33 @@ export default function CalculatorPage() {
                     Requires Attunement
                   </span>
                 </label>
+
+                {/* Quick Start Templates - only show when form is empty */}
+                {!hasSelectedAttributes && !baseItem && (
+                  <div className="pt-3 border-t border-slate-700/50">
+                    <p className="text-xs text-slate-500 mb-2">Or start from an example:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => applyTemplate('plus1-longsword')}
+                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                      >
+                        +1 Longsword
+                      </button>
+                      <button
+                        onClick={() => applyTemplate('flametongue')}
+                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                      >
+                        Flametongue
+                      </button>
+                      <button
+                        onClick={() => applyTemplate('staff-of-power')}
+                        className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
+                      >
+                        Staff of Power
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1663,10 +1755,13 @@ export default function CalculatorPage() {
                                       href={`https://www.dndbeyond.com/magic-items/${anchor.dndbeyondSlug}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-slate-200 font-semibold text-sm truncate hover:underline hover:text-slate-100 transition-colors"
+                                      className="text-sky-300 font-semibold text-sm truncate underline decoration-sky-400/40 hover:decoration-sky-300 hover:text-sky-200 transition-colors inline-flex items-center gap-1"
                                       title="View on D&D Beyond"
                                     >
                                       {anchor.name}
+                                      <svg className="w-3 h-3 opacity-60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                      </svg>
                                     </a>
                                   ) : (
                                     <span className="text-slate-200 font-semibold text-sm truncate">{anchor.name}</span>

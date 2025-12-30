@@ -14,10 +14,11 @@ export interface ShareableItemState {
   e?: number;  // enhancement
   es?: boolean; // enhancementSometimes
   d?: {        // damageBonus
-    c: number;   // diceCount
-    t: string;   // diceType
-    dt: string;  // damageType
-    cd?: string; // conditional
+    di: string;  // dice (e.g. "1d6")
+    t: string;   // type (damage type)
+    f?: 'per-hit' | 'per-turn'; // frequency
+    c?: boolean; // conditional
+    v?: boolean; // vicious
   };
   ac?: number;  // acBonus
   acs?: boolean; // acBonusSometimes
@@ -122,12 +123,17 @@ export function encodeItemToUrl(state: {
 
   if (state.damageBonus) {
     compact.d = {
-      c: state.damageBonus.diceCount,
-      t: state.damageBonus.diceType,
-      dt: state.damageBonus.damageType,
+      di: state.damageBonus.dice,
+      t: state.damageBonus.type,
     };
+    if (state.damageBonus.frequency && state.damageBonus.frequency !== 'per-hit') {
+      compact.d.f = state.damageBonus.frequency;
+    }
     if (state.damageBonus.conditional) {
-      compact.d.cd = state.damageBonus.conditional;
+      compact.d.c = true;
+    }
+    if (state.damageBonus.vicious) {
+      compact.d.v = true;
     }
   }
 
@@ -178,8 +184,8 @@ export function encodeItemToUrl(state: {
       sr: state.chargesPerShortRest,
       lr: state.chargesPerLongRest,
       ab: state.abilities.map(a => ({
-        n: a.name,
-        l: a.level,
+        n: a.spell,
+        l: a.spellLevel,
         c: a.chargesPerUse,
       })),
     };
@@ -220,10 +226,11 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
       enhancement: compact.e || 0,
       enhancementSometimes: compact.es || false,
       damageBonus: compact.d ? {
-        diceCount: compact.d.c,
-        diceType: compact.d.t,
-        damageType: compact.d.dt,
-        conditional: compact.d.cd,
+        dice: compact.d.di,
+        type: compact.d.t,
+        frequency: compact.d.f || 'per-hit',
+        conditional: compact.d.c || false,
+        vicious: compact.d.v || false,
       } : undefined,
       acBonus: compact.ac || 0,
       acBonusSometimes: compact.acs || false,
@@ -249,8 +256,8 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
       chargesPerShortRest: compact.cp?.sr || 0,
       chargesPerLongRest: compact.cp?.lr || 0,
       abilities: (compact.cp?.ab || []).map(a => ({
-        name: a.n,
-        level: a.l,
+        spell: a.n,
+        spellLevel: a.l,
         chargesPerUse: a.c,
       })),
     };
