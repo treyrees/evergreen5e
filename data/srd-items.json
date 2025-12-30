@@ -126,7 +126,7 @@
     "combat": {
       "enhancement": 3
     },
-    "description": "+3 sword (3.0 pts base). Override +1.0 for decapitation on nat 20—instant kill with no save for most creatures."
+    "description": "+3 sword (3.0 pts base). Override +1.0 for decapitation on nat 20, which instant-kills most creatures with no save."
   },
   {
     "name": "Oathbow",
@@ -172,7 +172,7 @@
     "combat": {
       "enhancement": 2
     },
-    "description": "+2 sword (2.0 pts base). Override +1.5 for save-or-die on nat 20 vs creatures under 100 HP (DC 15 CON or instant death)."
+    "description": "+2 sword (2.0 pts base). Override +1.5 for save-or-die on nat 20 vs creatures under 100 HP. DC 15 CON or they die instantly."
   },
   {
     "name": "Animated Shield",
@@ -195,7 +195,7 @@
     "combat": {
       "enhancement": 0,
       "resistances": [
-        "acid"
+        "fire"
       ]
     }
   },
@@ -222,7 +222,7 @@
       "savingThrowBonus": 1,
       "enhancement": 0
     },
-    "description": "WotC IMBALANCE: Formula says Rare (2.5 pts), WotC says Uncommon. By the standards established by Ring of Protection (Rare: +1 AC, +1 saves, attunement), Cloak of Protection with identical stats should also be Rare. Community consensus confirms this is underpriced—frequently banned or restricted at tables due to its power-to-rarity ratio."
+    "description": "WotC IMBALANCE: Formula says Rare (2.5 pts), WotC says Uncommon. Ring of Protection has identical stats (+1 AC, +1 saves, attunement) and is Rare, so this should be too. Community agrees it's underpriced and many tables ban or restrict it."
   },
   {
     "name": "Defender",
@@ -231,7 +231,7 @@
     "attunement": true,
     "dndbeyondSlug": "5384-defender",
     "overrideBonus": -2.25,
-    "description": "+3 enhancement and +3 AC calculates as 7.5 pts, but you must split the bonus each turn—can't have both simultaneously. Override -2.25 (0.7× penalty) for transfer limitation.",
+    "description": "+3 enhancement and +3 AC calculates as 7.5 pts, but you must split the bonus each turn (can't have both at once). Override -2.25 (0.7x penalty) for this limitation.",
     "combat": {
       "enhancement": 3,
       "acBonus": 3
@@ -315,7 +315,7 @@
     "combat": {
       "enhancement": 0
     },
-    "description": "No quantifiable combat stats. Override +3.0 for spell absorption—negates spells targeting you and stores energy for later use."
+    "description": "No quantifiable combat stats. Override +3.0 for spell absorption. Negates spells targeting you and stores the energy for later."
   },
   {
     "name": "Giant Slayer",
@@ -460,7 +460,7 @@
         "conditionalType": "creature-common"
       }
     },
-    "description": "+3 sword with 2d10 radiant vs fiends/undead (~4.0 pts base). Override +0.6 for 10ft aura granting advantage on saves vs spells—affects entire party positioning and provides consistent defensive value."
+    "description": "+3 sword with 2d10 radiant vs fiends/undead (~4.0 pts base). Override +0.6 for 10ft aura granting advantage on saves vs spells. Helps the whole party and rewards good positioning."
   },
   {
     "name": "Sword of Sharpness",
@@ -472,7 +472,7 @@
     "combat": {
       "enhancement": 3
     },
-    "description": "Modeled as +3 equivalent (3.0 pts base) for +4d6 on crit. Override +0.25 for limb-severing on nat 20—non-quantifiable instant disable."
+    "description": "Modeled as +3 equivalent (3.0 pts base) for +4d6 on crit. Override +0.25 for limb-severing on nat 20, which can instantly disable enemies."
   },
   {
     "name": "Boots of Speed",
@@ -595,7 +595,7 @@
     "combat": {
       "enhancement": 0
     },
-    "description": "No quantifiable combat stats. Override +2.5 for storing up to 5 spell levels—breaks action economy with pre-cast buffs."
+    "description": "No quantifiable combat stats. Override +2.5 for storing up to 5 spell levels. Breaks action economy by letting you pre-cast buffs."
   },
   {
     "name": "Cloak of Displacement",
@@ -607,7 +607,7 @@
     "combat": {
       "enhancement": 0
     },
-    "description": "Grants disadvantage on attacks against you (turns off when hit until start of your next turn). Similar to Blur spell but permanent. Override +2.0 for defensive effect—hard to quantify precisely but equivalent to roughly +2-3 effective AC with downside."
+    "description": "Grants disadvantage on attacks against you (turns off when hit until your next turn). Like a permanent Blur spell. Override +2.0 for this effect, which is roughly +2-3 effective AC with a downside."
   },
   {
     "name": "Energy Bow",
@@ -669,7 +669,7 @@
         "type": "force"
       }
     },
-    "description": "Formula: 3.2 pts (+2 AC, bonus action bash). Push/prone effects and Protective Field (Otiluke's-style emanation) not quantified, but math already reaches Very Rare. Conservative estimate—actual value likely higher."
+    "description": "Formula: 3.2 pts (+2 AC, bonus action bash). Push/prone effects and Protective Field aren't quantified, but the math already reaches Very Rare. Actual value is probably higher."
   },
   {
     "name": "Thunderous Greatclub",
@@ -699,7 +699,7 @@
     "combat": {
       "enhancement": 0
     },
-    "description": "No quantifiable combat stats. Override +4.0 for invisibility (3 charges, 1hr each)—tactical advantage on attacks and stealth is campaign-defining."
+    "description": "No quantifiable combat stats. Override +4.0 for invisibility (3 charges, 1hr each). The tactical advantage on attacks and stealth is campaign-defining."
   },
   {
     "name": "Bracers of Archery",
@@ -731,7 +731,7 @@
         }
       ]
     },
-    "description": "Dimension Door (level 4) 1/day = 0.8 pts. Override +1.2 for no attunement on a level 4 spell usable by any character—gives martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus."
+    "description": "Dimension Door (level 4) 1/day = 0.8 pts. Override +1.2 because it needs no attunement, so any character (including martials) gets 500ft teleportation without burning an attunement slot. Smoke cloud is a nice bonus."
   },
   {
     "name": "Dwarven Plate",
@@ -744,7 +744,7 @@
       "enhancement": 0,
       "acBonus": 2
     },
-    "description": "+2 AC plate armor (2.0 pts). Override +1.0 for reaction to reduce forced ground movement by up to 10 feet—mitigates Thunderwave, Repelling Blast, and similar effects."
+    "description": "+2 AC plate armor (2.0 pts). Override +1.0 for reaction to reduce forced movement by up to 10 feet. Helps against Thunderwave, Repelling Blast, and similar effects."
   },
   {
     "name": "Plate Armor of Etherealness",
@@ -873,7 +873,7 @@
       "acBonus": 1,
       "resistances": ["fire"]
     },
-    "description": "+1 AC (1.0 pts) + fire resistance (2.25 pts) = 3.25 pts → Very Rare. Advantage on saves vs dragon breath/Frightful Presence and 30-mile dragon detection are highly situational ribbons—most campaigns have minimal dragon encounters."
+    "description": "+1 AC (1.0 pts) + fire resistance (2.25 pts) = 3.25 pts, so Very Rare. The dragon-specific perks (save advantage, detection) are situational since most campaigns don't feature many dragons."
   },
   {
     "name": "Armor of Invulnerability",
@@ -912,7 +912,7 @@
       "enhancement": 0,
       "resistances": ["force"]
     },
-    "description": "Force resistance (~0.5 pts). Override +0.5 for complete immunity to Magic Missile—auto-hit protection and concentration safety."
+    "description": "Force resistance (~0.5 pts). Override +0.5 for complete immunity to Magic Missile, which protects against auto-hits and keeps your concentration safe."
   },
   {
     "name": "Circlet of Blasting",
@@ -968,6 +968,6 @@
     "combat": {
       "enhancement": 0
     },
-    "description": "No enhancement bonus. Override +2.0 for fear aura (3 charges, DC 15 WIS)—frightened condition is powerful crowd control."
+    "description": "No enhancement bonus. Override +2.0 for fear aura (3 charges, DC 15 WIS). Frightened is powerful crowd control."
   }
 ]

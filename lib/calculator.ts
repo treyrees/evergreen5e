@@ -877,13 +877,13 @@ function getRarityTierIndex(rarity: string): number {
  *   - Wondrous items are neutral
  *
  * Rarity rules:
- * - Same rarity strongly preferred
- * - Items within 0.2 pts can cross 1 rarity tier, but never as #1
+ * - #1 slot is always same-rarity (post-processing ensures this)
+ * - #2 and #3 can be cross-rarity if they're closer by score
  * - Never show items 2+ tiers apart
  *
  * Other factors:
- * - Same attunement preferred (secondary)
- * - Score proximity as tiebreaker
+ * - Score proximity is primary (after category match)
+ * - Same attunement preferred (secondary tiebreaker)
  * - Simple In/Simple Out for plain +N items
  */
 export function findTopAnchorItems(
@@ -987,17 +987,10 @@ export function findTopAnchorItems(
     }
 
     // === RARITY PRIORITY ===
-    // Same rarity is strongly preferred
-    // 1 tier difference allowed but penalized, and never as #1 choice
-    if (rarityDiff === 1) {
-      // Cross-rarity: only acceptable if very close in score (within 0.2 pts)
-      if (scoreDiff <= 0.2) {
-        priority += 15; // Acceptable but not #1
-      } else {
-        priority += 30; // Significant penalty for cross-rarity + score gap
-      }
-    }
-    // rarityDiff === 0: no penalty
+    // Cross-rarity items (1 tier apart) compete on score like same-rarity.
+    // Post-processing below ensures #1 is always same-rarity, so we don't
+    // need a priority penalty here — let score proximity drive #2 and #3.
+    // (Items 2+ tiers apart are already filtered out above)
 
     // === ATTUNEMENT PRIORITY (secondary) ===
     if (!sameAttunement) {
