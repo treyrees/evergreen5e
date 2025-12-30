@@ -63,6 +63,7 @@ export interface ShareableItemState {
       n: string;   // name
       l: number;   // level
       c: number;   // chargesPerUse
+      u?: boolean; // canUpcast
     }>;
   };
 }
@@ -219,6 +220,7 @@ export function encodeItemToUrl(state: {
         n: a.spell,
         l: a.spellLevel,
         c: a.chargesPerUse,
+        ...(a.canUpcast ? { u: true } : {}),
       })),
     };
   }
@@ -298,6 +300,7 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
         spell: a.n,
         spellLevel: a.l,
         chargesPerUse: a.c,
+        canUpcast: a.u || false,
       })),
     };
 

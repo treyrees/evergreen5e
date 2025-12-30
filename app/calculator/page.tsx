@@ -283,11 +283,14 @@ export default function CalculatorPage() {
     spell: string;
     spellLevel: number | null;
     chargesPerUse: number | null;
+    canUpcast: boolean;
   }>({
     spell: '',
     spellLevel: null,
     chargesPerUse: null,
+    canUpcast: false,
   });
+  const [showUpcastInfo, setShowUpcastInfo] = useState(false);
   const [spellFormErrors, setSpellFormErrors] = useState<{
     name: boolean;
     level: boolean;
@@ -416,12 +419,15 @@ export default function CalculatorPage() {
       spell: newAbility.spell,
       spellLevel: newAbility.spellLevel as number,
       chargesPerUse: newAbility.chargesPerUse as number,
+      canUpcast: newAbility.canUpcast,
     }]);
     setNewAbility({
       spell: '',
       spellLevel: null,
       chargesPerUse: null,
+      canUpcast: false,
     });
+    setShowUpcastInfo(false);
     // Keep form open to allow adding multiple abilities
   };
 
@@ -582,7 +588,7 @@ export default function CalculatorPage() {
     }
 
     if (abilities.length > 0) {
-      const spellList = abilities.map(a => `${a.spell} (${a.chargesPerUse} charge${a.chargesPerUse > 1 ? 's' : ''})`).join(', ');
+      const spellList = abilities.map(a => `${a.spell} (${a.chargesPerUse} charge${a.chargesPerUse > 1 ? 's' : ''}${a.canUpcast ? '+' : ''})`).join(', ');
       attrs.push({ key: 'spells', label: 'Spells', value: spellList });
     }
 
@@ -2159,7 +2165,7 @@ export default function CalculatorPage() {
                         >
                           <div className="text-sm text-slate-300">
                             <span className="font-medium">{ability.spell}</span>
-                            <span className="text-slate-500"> Lv{ability.spellLevel}, {ability.chargesPerUse}ch</span>
+                            <span className="text-slate-500"> Lv{ability.spellLevel}, {ability.chargesPerUse}ch{ability.canUpcast && <span className="text-emerald-400" title="Can upcast with extra charges">(+)</span>}</span>
                           </div>
                           <button
                             onClick={() => removeAbility(index)}
@@ -2250,6 +2256,38 @@ export default function CalculatorPage() {
                           )}
                         </div>
                       </div>
+
+                      {/* Upcast Info Panel */}
+                      <div className="mt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowUpcastInfo(!showUpcastInfo)}
+                          className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                        >
+                          <span className={`transition-transform ${showUpcastInfo ? 'rotate-90' : ''}`}>▶</span>
+                          <span>Upcast with extra charges?</span>
+                        </button>
+                        {showUpcastInfo && (
+                          <div className="mt-2 p-3 bg-slate-700/50 rounded border border-slate-600 text-xs text-slate-400">
+                            <p className="mb-2">
+                              According to the SRD, most charge-based items allow upcasting by spending additional charges. For example, a Wand of Fireballs can cast Fireball at 4th level by spending 4 charges instead of 3.
+                            </p>
+                            <p className="mb-3">
+                              This option does not affect balance calculations, but will display a (+) indicator to remind you that upcasting is available.
+                            </p>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={newAbility.canUpcast}
+                                onChange={(e) => setNewAbility({ ...newAbility, canUpcast: e.target.checked })}
+                                className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
+                              />
+                              <span className="text-slate-300">Allow upcasting with extra charges</span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex gap-2">
                         <button
                           onClick={addAbility}

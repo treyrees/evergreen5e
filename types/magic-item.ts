@@ -25,6 +25,7 @@ export interface ChargedAbility {
   spell: string;
   spellLevel: number;
   chargesPerUse: number; // How many charges this ability consumes (default 1)
+  canUpcast?: boolean; // If true, can spend additional charges to upcast (+1 level per charge)
 }
 
 export interface ChargePool {
