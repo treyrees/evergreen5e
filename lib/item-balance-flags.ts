@@ -124,7 +124,7 @@ export function getItemExplanation(itemName: string): string {
 
   // Instant-kill effects
   if (itemName === 'Vorpal Sword') {
-    return '+3 sword (3.0 pts base). Bonus +1.0 for decapitation on nat 20—instant kill with no save for most creatures.';
+    return '+3 sword (3.0 pts base). Bonus +1.0 for decapitation on nat 20; instant kill with no save for most creatures.';
   }
   if (itemName === 'Nine Lives Stealer') {
     return '+2 sword (2.0 pts base). Bonus +1.5 for save-or-die on nat 20 vs creatures under 100 HP.';
@@ -135,13 +135,13 @@ export function getItemExplanation(itemName: string): string {
 
   // Action economy and spell effects
   if (itemName === 'Rod of Absorption') {
-    return 'No quantifiable combat stats. Bonus +3.0 for spell absorption—negates spells targeting you and stores energy.';
+    return 'No quantifiable combat stats. Bonus +3.0 for spell absorption, which negates spells targeting you and stores energy.';
   }
   if (itemName === 'Ring of Spell Storing') {
-    return 'No quantifiable combat stats. Bonus +2.5 for storing up to 5 spell levels—breaks action economy with pre-cast buffs.';
+    return 'No quantifiable combat stats. Bonus +2.5 for storing up to 5 spell levels, breaking action economy with pre-cast buffs.';
   }
   if (itemName === 'Luck Blade') {
-    return '+1 sword with +1 saves (2.0 pts base). Wish 1/day calculates as 4.0 pts using level 9 spell scaling (20 effective value × 0.20 long rest multiplier). Total ~6.0 pts—at the high end of Legendary, campaign-defining.';
+    return '+1 sword with +1 saves (2.0 pts base). Wish 1/day calculates as 4.0 pts using level 9 spell scaling (20 effective value × 0.20 long rest multiplier). Total ~6.0 pts, at the high end of Legendary, campaign-defining.';
   }
 
   // Mobility
@@ -152,7 +152,7 @@ export function getItemExplanation(itemName: string): string {
     return '50 ft fly speed, unlimited duration. Additive model: 1.0 (speed) + 0.1 (duration) = 1.1 pts (Uncommon).';
   }
   if (itemName === 'Cloak of Invisibility') {
-    return 'No quantifiable combat stats. Bonus +4.0 for invisibility (3 charges, 1hr each)—tactical advantage is campaign-defining.';
+    return 'No quantifiable combat stats. Bonus +4.0 for invisibility (3 charges, 1hr each); tactical advantage is campaign-defining.';
   }
 
   // Defensive
@@ -163,15 +163,15 @@ export function getItemExplanation(itemName: string): string {
     return 'Math captures +2 AC and bonus action bash (3.2 pts). NOT quantified: push 10ft, prone if smaller, and Protective Field. Actual value likely higher.';
   }
   if (itemName === 'Cloak of Displacement') {
-    return 'Grants disadvantage on attacks against you—turns off when hit, resets at start of your next turn. Similar to Blur spell but permanent/self-resetting. Override +2.0 targets Rare; effect is hard to quantify but roughly equivalent to +2-3 effective AC with a conditional downside.';
+    return 'Grants disadvantage on attacks against you; turns off when hit, resets at start of your next turn. Similar to Blur spell but permanent/self-resetting. Override +2.0 targets Rare; effect is hard to quantify but roughly equivalent to +2-3 effective AC with a conditional downside.';
   }
 
   // Complex effects (negative bonuses for limitations)
   if (itemName === 'Staff of Power') {
-    return '+2 enhancement, +2 AC, +2 saves (7.0 pts base). Bonus -3.5 for spellcaster-only attunement. Community consensus: appropriately balanced at Very Rare—class restriction and hand-occupation are key constraints.';
+    return '+2 enhancement, +2 AC, +2 saves (7.0 pts base). Bonus -3.5 for spellcaster-only attunement. Community consensus: appropriately balanced at Very Rare; class restriction and hand-occupation are key constraints.';
   }
   if (itemName === 'Defender') {
-    return '+3 enhancement and +3 AC (7.5 pts base). Bonus -2.25 for transfer limitation—must split the bonus each turn, can\'t have both.';
+    return '+3 enhancement and +3 AC (7.5 pts base). Bonus -2.25 for transfer limitation: must split the bonus each turn, can\'t have both.';
   }
   if (itemName === 'Holy Avenger') {
     return '+3 sword with 2d10 radiant vs fiends/undead (~5.0 pts base). Bonus +0.5 for 10-ft aura granting advantage on saves vs spells to you and all allies. Paladin-only attunement limits availability but doesn\'t reduce power for paladins. Community consensus: quintessential paladin weapon, appropriately Legendary.';
@@ -193,22 +193,22 @@ export function getItemExplanation(itemName: string): string {
     return 'Flat +2 damage bonus to longbow/shortbow attacks. Bonus +1.0 models this as roughly equivalent to +1 enhancement for damage only (no attack roll bonus).';
   }
   if (itemName === 'Cape of the Mountebank') {
-    return 'Dimension Door (level 4) 1/day = 0.8 pts. Bonus +1.2 for no attunement on a level 4 spell usable by any character—gives martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus.';
+    return 'Dimension Door (level 4) 1/day = 0.8 pts. Bonus +1.2 for no attunement on a level 4 spell usable by any character, giving martial classes 500ft teleportation without burning an attunement slot. Smoke cloud at departure point is a bonus.';
   }
   if (itemName === 'Dwarven Plate') {
-    return '+2 AC plate armor (2.0 pts). Bonus +1.0 for reaction to reduce forced ground movement by up to 10 feet—mitigates positioning control from Thunderwave, Repelling Blast, and similar effects.';
+    return '+2 AC plate armor (2.0 pts). Bonus +1.0 for reaction to reduce forced ground movement by up to 10 feet, mitigating positioning control from Thunderwave, Repelling Blast, and similar effects.';
   }
   if (itemName === 'Plate Armor of Etherealness') {
     return 'Etherealness (level 7) 1/day (~2.0 pts base). Bonus +2.0 for giving plate-wearers (typically non-casters) access to a powerful 7th-level spell that normally requires caster class and high-level slots.';
   }
   if (itemName === 'Armor of Invulnerability') {
-    return 'Resistance to nonmagical B/P/S (3.75 pts). Bonus +0.5 for 10-minute immunity to nonmagical damage (1/day)—complete invulnerability to most physical attacks.';
+    return 'Resistance to nonmagical B/P/S (3.75 pts). Bonus +0.5 for 10-minute immunity to nonmagical damage (1/day), providing complete invulnerability to most physical attacks.';
   }
   if (itemName === 'Bracers of Defense') {
     return '+2 AC (stacking, so 3.0 pts base). Bonus -0.5 for restriction: only works when wearing no armor and not using a shield. Limits to unarmored builds (monks, bladesinger, barbarian).';
   }
   if (itemName === 'Brooch of Shielding') {
-    return 'Force resistance (~0.5 pts). Bonus +0.5 for complete immunity to Magic Missile—guarantees safety from an auto-hit spell that can break concentration.';
+    return 'Force resistance (~0.5 pts). Bonus +0.5 for complete immunity to Magic Missile, guaranteeing safety from an auto-hit spell that can break concentration.';
   }
   if (itemName === 'Circlet of Blasting') {
     return 'Scorching Ray (level 2) 1/day calculates as 0.4 pts. Bonus +0.6 for reliable multi-target damage (3 rays × 2d6) with no attunement required.';
@@ -217,13 +217,13 @@ export function getItemExplanation(itemName: string): string {
     return 'Poison resistance (2.0 pts) + climb speed (0.5 pts) + Web 1/day (0.4 pts) = 2.9 pts. Bonus +0.2 for ceiling walking (like Spider Climb spell) and web immunity.';
   }
   if (itemName === 'Mace of Terror') {
-    return 'No base enhancement. Bonus +2.0 for fear aura (3 charges, DC 15 WIS)—frightened condition is powerful crowd control that denies enemy actions and forces disadvantage.';
+    return 'No base enhancement. Bonus +2.0 for fear aura (3 charges, DC 15 WIS); frightened condition is powerful crowd control that denies enemy actions and forces disadvantage.';
   }
 
   // === COMMUNITY NOTES (no override, just explanation) ===
 
   if (itemName === 'Cloak of Protection') {
-    return '+1 AC and +1 all saves = 2.5 pts (Rare). Official: Uncommon. WotC underpriced this—compare to Ring of Protection (identical, but Rare).';
+    return '+1 AC and +1 all saves = 2.5 pts (Rare). Official: Uncommon. WotC underpriced this; compare to Ring of Protection (identical, but Rare).';
   }
   if (itemName === 'Wand of Magic Missiles') {
     return '4× level 1 spell/day = 0.8 pts (Common). Official: Uncommon. Auto-hit reliability (no attack roll, no save) may justify the bump.';
@@ -268,7 +268,7 @@ export function getItemExplanation(itemName: string): string {
     return 'Value depends entirely on which damage type you pick and your campaign. Fire resistance = 2.25 pts (Rare), poison/cold = 2.0 pts, acid = 1.5 pts, radiant = 0.75 pts (Uncommon), force = 0.5 pts (Common). Pick fire/poison/cold for max value; force/radiant are poor choices unless your DM loves beholders or angels.';
   }
   if (itemName === 'Ring of Resistance') {
-    return 'Same mechanics as Armor of Resistance—value depends entirely on damage type chosen. Fire/poison/cold = max value; force/radiant = minimal value. Attunement required.';
+    return 'Same mechanics as Armor of Resistance; value depends entirely on damage type chosen. Fire/poison/cold = max value; force/radiant = minimal value. Attunement required.';
   }
 
   return '';

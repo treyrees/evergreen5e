@@ -410,7 +410,7 @@ export default function ItemsPage() {
                               </div>
                             </button>
                           ) : (
-                            <div className="text-slate-600 text-xs">—</div>
+                            <div className="text-slate-600 text-xs">-</div>
                           )}
                         </td>
                       </tr>

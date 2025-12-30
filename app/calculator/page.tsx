@@ -1996,42 +1996,42 @@ export default function CalculatorPage() {
                           <span className="text-slate-500 w-12 shrink-0 font-medium">Lv 0</span>
                           <div>
                             <span className="text-slate-300">Minor convenience</span>
-                            <span className="text-slate-500 ml-1">— glow, clean, minor telekinesis</span>
+                            <span className="text-slate-500 ml-1">(glow, clean, minor telekinesis)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1">
                           <span className="text-slate-400 w-12 shrink-0 font-medium">Lv 1-2</span>
                           <div>
                             <span className="text-slate-300">Useful but limited</span>
-                            <span className="text-slate-500 ml-1">— 1-3d6 damage, short invisibility, small heals</span>
+                            <span className="text-slate-500 ml-1">(1-3d6 damage, short invisibility, small heals)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-emerald-400">
                           <span className="w-12 shrink-0 font-medium">Lv 3</span>
                           <div>
                             <span className="text-emerald-300">Combat-changing</span>
-                            <span className="text-emerald-500/80 ml-1">— AoE damage (8d6), flight, haste</span>
+                            <span className="text-emerald-500/80 ml-1">(AoE damage 8d6, flight, haste)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1">
                           <span className="text-violet-400 w-12 shrink-0 font-medium">Lv 4-5</span>
                           <div>
                             <span className="text-violet-300">Encounter-ending</span>
-                            <span className="text-violet-400/70 ml-1">— polymorph the boss, banish a threat, revive ally</span>
+                            <span className="text-violet-400/70 ml-1">(polymorph the boss, banish a threat, revive ally)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-amber-400">
                           <span className="w-12 shrink-0 font-medium">Lv 6-7</span>
                           <div>
                             <span className="text-amber-300">Skip the adventure</span>
-                            <span className="text-amber-500/80 ml-1">— teleport anywhere, see through all deception, disintegrate</span>
+                            <span className="text-amber-500/80 ml-1">(teleport anywhere, see through all deception, disintegrate)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-rose-400">
                           <span className="w-12 shrink-0 font-medium">Lv 8-9</span>
                           <div>
                             <span className="text-rose-300">Reality-altering</span>
-                            <span className="text-rose-400/70 ml-1">— mind control, meteor swarm, wish</span>
+                            <span className="text-rose-400/70 ml-1">(mind control, meteor swarm, wish)</span>
                           </div>
                         </div>
                       </div>
@@ -2727,7 +2727,7 @@ export default function CalculatorPage() {
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Attunement:</div>
                       <div className="text-slate-300 text-[11px]">
-                        Attunement does <span className="text-slate-500">not</span> modify scores. Official 5e pricing is inconsistent—Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
+                        Attunement does <span className="text-slate-500">not</span> modify scores. Official 5e pricing is inconsistent; Cloak of Protection (+1 AC/saves, Uncommon) vs Ring of Protection (identical stats, Rare).
                       </div>
                       <div className="text-slate-500 italic text-[10px] mt-1">
                         When comparing, prioritize reference items with matching attunement. The 3-slot limit means attunement is an &quot;opportunity cost&quot; that varies by build.
