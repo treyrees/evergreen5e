@@ -41,11 +41,14 @@ export const SPECIAL_MECHANICS = new Set([
 
   // Flat bonuses or non-quantifiable perks
   'Bracers of Archery',        // Flat +2 damage to bows (not dice-based)
+  'Cape of the Mountebank',    // Smoke cloud concealment after Dimension Door
+  'Dwarven Plate',             // Forced movement immunity
   'Plate Armor of Etherealness', // Plate-wearer access to high-level spell
   'Armor of Invulnerability',  // Temporary immunity to nonmagical damage
   'Bracers of Defense',        // AC stacking restriction (no armor)
   'Brooch of Shielding',       // Magic Missile immunity
   'Circlet of Blasting',       // Scorching Ray value bump
+  'Cloak of Arachnida',        // Ceiling walking and web immunity
   'Mace of Terror',            // Fear effect (crowd control)
 ]);
 
@@ -189,6 +192,12 @@ export function getItemExplanation(itemName: string): string {
   if (itemName === 'Bracers of Archery') {
     return 'Flat +2 damage bonus to longbow/shortbow attacks. Bonus +1.0 models this as roughly equivalent to +1 enhancement for damage only (no attack roll bonus).';
   }
+  if (itemName === 'Cape of the Mountebank') {
+    return 'Dimension Door (level 4) 1/day = 0.8 pts. Bonus +1.0 for heavily obscured smoke cloud at departure point—provides tactical concealment and breaks line of sight.';
+  }
+  if (itemName === 'Dwarven Plate') {
+    return '+2 AC plate armor (2.0 pts). Bonus +1.0 for complete immunity to forced movement—negates Thunderwave, Repelling Blast, shoves, and all push/pull/prone effects.';
+  }
   if (itemName === 'Plate Armor of Etherealness') {
     return 'Etherealness (level 7) 1/day (~2.0 pts base). Bonus +2.0 for giving plate-wearers (typically non-casters) access to a powerful 7th-level spell that normally requires caster class and high-level slots.';
   }
@@ -203,6 +212,9 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Circlet of Blasting') {
     return 'Scorching Ray (level 2) 1/day calculates as 0.4 pts. Bonus +0.6 for reliable multi-target damage (3 rays × 2d6) with no attunement required.';
+  }
+  if (itemName === 'Cloak of Arachnida') {
+    return 'Poison resistance (2.0 pts) + climb speed (0.5 pts) + Web 1/day (0.4 pts) = 2.9 pts. Bonus +0.2 for ceiling walking (like Spider Climb spell) and web immunity.';
   }
   if (itemName === 'Mace of Terror') {
     return 'No base enhancement. Bonus +2.0 for fear aura (3 charges, DC 15 WIS)—frightened condition is powerful crowd control that denies enemy actions and forces disadvantage.';

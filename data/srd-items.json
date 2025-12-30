@@ -714,6 +714,39 @@
     "description": "Flat +2 damage bonus to longbow/shortbow attacks. Override +1.0 models this as roughly equivalent to +1 enhancement for damage (no attack bonus)."
   },
   {
+    "name": "Cape of the Mountebank",
+    "baseItem": "cape",
+    "rarity": "rare",
+    "attunement": false,
+    "dndbeyondSlug": "4598-cape-of-the-mountebank",
+    "overrideBonus": 1.0,
+    "combat": {
+      "enhancement": 0,
+      "charges": [
+        {
+          "spell": "Dimension Door",
+          "spellLevel": 4,
+          "usesPerDay": 1,
+          "recharge": "long rest"
+        }
+      ]
+    },
+    "description": "Dimension Door (level 4) 1/day = 0.8 pts. Override +1.0 for heavily obscured smoke cloud at departure point—provides tactical concealment and breaks line of sight."
+  },
+  {
+    "name": "Dwarven Plate",
+    "baseItem": "armor (heavy)",
+    "rarity": "very rare",
+    "attunement": false,
+    "dndbeyondSlug": "4618-dwarven-plate",
+    "overrideBonus": 1.0,
+    "combat": {
+      "enhancement": 0,
+      "acBonus": 2
+    },
+    "description": "+2 AC plate armor (2.0 pts). Override +1.0 for complete immunity to forced movement—negates Thunderwave, Repelling Blast, shoves, and all push/pull/prone effects."
+  },
+  {
     "name": "Plate Armor of Etherealness",
     "baseItem": "armor (heavy)",
     "rarity": "legendary",
@@ -907,6 +940,7 @@
     "rarity": "very rare",
     "attunement": true,
     "dndbeyondSlug": "4604-cloak-of-arachnida",
+    "overrideBonus": 0.2,
     "combat": {
       "enhancement": 0,
       "resistances": ["poison"],
@@ -922,7 +956,7 @@
         }
       ]
     },
-    "description": "Poison resistance (2.0 pts) + spider climb (0.5 pts) + Web 1/day (0.4 pts) = 2.9 pts → Very Rare. Web immunity is a ribbon."
+    "description": "Poison resistance (2.0 pts) + climb speed (0.5 pts) + Web 1/day (0.4 pts) = 2.9 pts. Override +0.2 for ceiling walking and web immunity."
   },
   {
     "name": "Mace of Terror",
