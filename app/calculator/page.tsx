@@ -1416,101 +1416,108 @@ export default function CalculatorPage() {
                   </div>
                 )}
 
-                {/* Your Item Preview - DMG Style */}
-                {hasSelectedAttributes && baseItem && (
-                  <div className="pt-4 mt-4 border-t border-slate-700">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Your Item</span>
-                      <span
-                        className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
-                        title="Preview your item as it would appear in a D&D sourcebook. Click attributes to hide them from the preview."
-                      >
-                        ⓘ
-                      </span>
-                    </div>
-
-                    {/* DMG-Style Item Card */}
-                    <div className="relative overflow-hidden rounded-lg border-2 border-amber-900/40 bg-gradient-to-b from-amber-950/20 via-slate-800 to-slate-800">
-                      {/* Decorative top border accent */}
-                      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-600/50 to-transparent" />
-
-                      <div className="p-4 space-y-3">
-                        {/* Item Name - Large, ornate */}
-                        <div className="border-b border-amber-900/30 pb-2">
-                          <h3
-                            className={`text-xl font-bold tracking-wide ${getRarityColorClass(results.suggestedRarity)}`}
-                            style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}
-                          >
-                            {getDisplayName()}
-                          </h3>
-                          {/* Type Line - Italic, smaller */}
-                          <p className="text-sm italic text-slate-400 mt-0.5">
-                            {buildTypeLine()}
-                          </p>
-                        </div>
-
-                        {/* Attributes Section */}
-                        {previewAttributes.length > 0 && (
-                          <div className="space-y-2">
-                            {previewAttributes.map((attr) => (
-                              <div
-                                key={attr.key}
-                                className={`group flex items-start gap-2 text-sm transition-all cursor-pointer ${
-                                  hiddenAttributes.has(attr.key)
-                                    ? 'opacity-30 line-through'
-                                    : 'opacity-100'
-                                }`}
-                                onClick={() => toggleAttributeVisibility(attr.key)}
-                                title={hiddenAttributes.has(attr.key) ? 'Click to show in preview' : 'Click to hide from preview'}
-                              >
-                                <span className="text-amber-600/70 select-none">•</span>
-                                <span className="text-slate-300">
-                                  <span className="font-semibold text-slate-200">{attr.label}.</span>{' '}
-                                  {attr.value}
-                                </span>
-                                <span className={`ml-auto text-[10px] transition-opacity ${
-                                  hiddenAttributes.has(attr.key)
-                                    ? 'opacity-100 text-emerald-400'
-                                    : 'opacity-0 group-hover:opacity-100 text-slate-500'
-                                }`}>
-                                  {hiddenAttributes.has(attr.key) ? 'show' : 'hide'}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* User Description Textarea */}
-                        <div className="pt-2 border-t border-amber-900/20">
-                          <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">
-                            Description
-                          </label>
-                          <textarea
-                            value={itemDescription}
-                            onChange={(e) => setItemDescription(e.target.value)}
-                            placeholder="Describe your item's appearance, history, or special properties..."
-                            rows={3}
-                            className="w-full px-3 py-2 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded focus:border-amber-600/50 focus:outline-none focus:ring-1 focus:ring-amber-600/30 resize-none"
-                            style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Decorative bottom border accent */}
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-600/30 to-transparent" />
-                    </div>
-
-                    {/* Hidden attributes hint */}
-                    {hiddenAttributes.size > 0 && (
-                      <p className="mt-2 text-[10px] text-slate-500 italic">
-                        {hiddenAttributes.size} attribute{hiddenAttributes.size > 1 ? 's' : ''} hidden from preview
-                      </p>
-                    )}
-                  </div>
-                )}
 
               </div>
             </div>
+
+            {/* Your Item Preview - Separate Card */}
+            {hasSelectedAttributes && baseItem && (
+              <div className="mt-4 bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden">
+                {/* Header */}
+                <div className="px-5 py-3 border-b border-slate-700 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Your Item</span>
+                    <span className="text-xs text-slate-600">→ Next Step</span>
+                  </div>
+                  <span
+                    className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
+                    title="Preview your item as it would appear in a D&D sourcebook. Click attributes to hide them from the preview."
+                  >
+                    ⓘ
+                  </span>
+                </div>
+
+                {/* DMG-Style Item Card */}
+                <div className="relative bg-gradient-to-b from-amber-950/10 via-slate-800/50 to-slate-800/50">
+                  {/* Decorative top border accent */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-600/40 to-transparent" />
+
+                  <div className="p-5 space-y-4">
+                    {/* Item Name - Large, ornate */}
+                    <div className="border-b border-amber-900/30 pb-3">
+                      <h3
+                        className={`text-2xl font-bold tracking-wide ${getRarityColorClass(results.suggestedRarity)}`}
+                        style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}
+                      >
+                        {getDisplayName()}
+                      </h3>
+                      {/* Type Line - Italic, smaller */}
+                      <p className="text-sm italic text-slate-400 mt-1">
+                        {buildTypeLine()}
+                      </p>
+                    </div>
+
+                    {/* Attributes Section */}
+                    {previewAttributes.length > 0 && (
+                      <div className="space-y-2.5">
+                        {previewAttributes.map((attr) => (
+                          <div
+                            key={attr.key}
+                            className={`group flex items-start gap-2 text-sm transition-all cursor-pointer ${
+                              hiddenAttributes.has(attr.key)
+                                ? 'opacity-30 line-through'
+                                : 'opacity-100'
+                            }`}
+                            onClick={() => toggleAttributeVisibility(attr.key)}
+                            title={hiddenAttributes.has(attr.key) ? 'Click to show in preview' : 'Click to hide from preview'}
+                          >
+                            <span className="text-amber-600/70 select-none">•</span>
+                            <span className="text-slate-300">
+                              <span className="font-semibold text-slate-200">{attr.label}.</span>{' '}
+                              {attr.value}
+                            </span>
+                            <span className={`ml-auto text-[10px] transition-opacity ${
+                              hiddenAttributes.has(attr.key)
+                                ? 'opacity-100 text-emerald-400'
+                                : 'opacity-0 group-hover:opacity-100 text-slate-500'
+                            }`}>
+                              {hiddenAttributes.has(attr.key) ? 'show' : 'hide'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* User Description Textarea */}
+                    <div className="pt-3 border-t border-amber-900/20">
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        value={itemDescription}
+                        onChange={(e) => setItemDescription(e.target.value)}
+                        placeholder="Describe your item's appearance, history, or special properties..."
+                        rows={4}
+                        className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-amber-600/50 focus:outline-none focus:ring-1 focus:ring-amber-600/30 resize-none"
+                        style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Decorative bottom border accent */}
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-600/30 to-transparent" />
+                </div>
+
+                {/* Footer with hidden attributes hint */}
+                {hiddenAttributes.size > 0 && (
+                  <div className="px-5 py-2 border-t border-slate-700 bg-slate-800/50">
+                    <p className="text-[10px] text-slate-500 italic">
+                      {hiddenAttributes.size} attribute{hiddenAttributes.size > 1 ? 's' : ''} hidden from preview
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
