@@ -11,6 +11,7 @@ import {
 import { getWarningIndicator } from '@/lib/item-balance-flags';
 import { generateRandomItemName } from '@/lib/item-name-generator';
 import { decodeItemFromUrl, generateShareUrl } from '@/lib/item-url';
+import { useCommunityItemsPreference } from '@/lib/feature-flags';
 
 // Animated number component for smooth score transitions
 function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: number }) {
@@ -164,6 +165,9 @@ const CONDITIONS = [
 ];
 
 export default function CalculatorPage() {
+  // Community items preference
+  const { includeCommunityItems, toggle: toggleCommunityItems } = useCommunityItemsPreference();
+
   const [itemName, setItemName] = useState('');
   const [baseItem, setBaseItem] = useState('');
   const [enhancement, setEnhancement] = useState(0);
@@ -217,6 +221,11 @@ export default function CalculatorPage() {
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
   const [showAttunementInfo, setShowAttunementInfo] = useState(false);
+
+  // Item Details state (for community submissions)
+  const [specialMechanics, setSpecialMechanics] = useState('');
+  const [cosmeticFeatures, setCosmeticFeatures] = useState('');
+  const [showItemDetails, setShowItemDetails] = useState(false);
 
   // Item Preview state
   const [showItemPreview, setShowItemPreview] = useState(false);
@@ -361,7 +370,11 @@ export default function CalculatorPage() {
       armorProperties: armorProperties.length > 0 ? armorProperties : undefined,
     },
     attunement,
-  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties]);
+    description: specialMechanics.trim() || undefined,
+    ribbons: cosmeticFeatures.trim() ? {
+      cosmetic: cosmeticFeatures.split('\n').map(s => s.trim()).filter(Boolean),
+    } : undefined,
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties, specialMechanics, cosmeticFeatures]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -2278,6 +2291,64 @@ export default function CalculatorPage() {
                   )}
               </div>
             </div>
+
+            {/* Item Details Section (for community submissions) */}
+            <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+              <button
+                onClick={() => setShowItemDetails(!showItemDetails)}
+                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
+              >
+                <div>
+                  <span className="font-medium text-slate-200">Item Details</span>
+                  <span className="ml-2 text-xs text-slate-500">Special mechanics & flavor text</span>
+                </div>
+                <span className="text-slate-500 text-lg">{showItemDetails ? '−' : '+'}</span>
+              </button>
+
+              {showItemDetails && (
+                <div className="px-5 pb-5 space-y-4 border-t border-slate-700">
+                  {/* Special Mechanics */}
+                  <div className="pt-4">
+                    <label className="block text-xs font-medium text-slate-400 mb-2">
+                      Special Mechanics
+                      <span className="ml-2 text-slate-500 font-normal">
+                        (charge regain, activation triggers, unique rules)
+                      </span>
+                    </label>
+                    <textarea
+                      value={specialMechanics}
+                      onChange={(e) => setSpecialMechanics(e.target.value)}
+                      placeholder="e.g., Regains 1d4+1 charges at moonrise. While attuned, you can use a bonus action to..."
+                      rows={3}
+                      className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
+                    />
+                    <p className="mt-1.5 text-[10px] text-slate-500">
+                      Describe mechanics that affect power but aren&apos;t captured by the calculator
+                    </p>
+                  </div>
+
+                  {/* Flavor & Lore */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-2">
+                      Flavor & Lore
+                      <span className="ml-2 text-slate-500 font-normal">
+                        (cosmetic effects, history, appearance)
+                      </span>
+                    </label>
+                    <textarea
+                      value={cosmeticFeatures}
+                      onChange={(e) => setCosmeticFeatures(e.target.value)}
+                      placeholder="e.g., The blade glows faintly blue in the presence of orcs.&#10;Forged in the fires of Mount Veloth by the smith Keldara."
+                      rows={3}
+                      className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
+                    />
+                    <p className="mt-1.5 text-[10px] text-slate-500">
+                      One feature per line. These don&apos;t affect balance, just add character.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Column - Results */}
@@ -2314,14 +2385,25 @@ export default function CalculatorPage() {
                 {/* What's Similar? - Reference Comparisons */}
                 {topAnchors.length > 0 && baseItem && hasSelectedAttributes && (
                   <div className="pt-2">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">What&apos;s Similar?</span>
-                      <span
-                        className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
-                        title="Compare your item's power level against official SRD items with similar properties."
-                      >
-                        ⓘ
-                      </span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">What&apos;s Similar?</span>
+                        <span
+                          className="text-slate-500 hover:text-slate-300 cursor-help text-xs"
+                          title="Compare your item's power level against official SRD items with similar properties."
+                        >
+                          ⓘ
+                        </span>
+                      </div>
+                      <label className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-400 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={includeCommunityItems}
+                          onChange={toggleCommunityItems}
+                          className="w-3 h-3 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 focus:ring-1 cursor-pointer"
+                        />
+                        <span>Community</span>
+                      </label>
                     </div>
 
                     <div className="space-y-3">
