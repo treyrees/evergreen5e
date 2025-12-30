@@ -148,14 +148,14 @@ export function encodeItemToUrl(state: {
   if (state.abilityScoreSetter) {
     compact.ass = {
       a: state.abilityScoreSetter.ability,
-      v: state.abilityScoreSetter.value,
+      v: state.abilityScoreSetter.setValue,
     };
   }
 
   if (state.abilityScoreBonus) {
     compact.asb = {
       a: state.abilityScoreBonus.ability,
-      v: state.abilityScoreBonus.value,
+      v: state.abilityScoreBonus.bonus,
     };
   }
 
@@ -240,12 +240,12 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
       resistancesSometimes: compact.rs || false,
       attunement: compact.att || false,
       abilityScoreSetter: compact.ass ? {
-        ability: compact.ass.a,
-        value: compact.ass.v,
+        ability: compact.ass.a as 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA',
+        setValue: compact.ass.v,
       } : undefined,
       abilityScoreBonus: compact.asb ? {
-        ability: compact.asb.a,
-        value: compact.asb.v,
+        ability: compact.asb.a as 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA',
+        bonus: compact.asb.v,
       } : undefined,
       permanentBuffs: compact.pb || {},
       flightEnabled: !!compact.fl,
