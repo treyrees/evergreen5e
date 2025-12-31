@@ -477,63 +477,66 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     }
   }
 
-  // Damage immunities - roughly 1.5-2× resistance values since you take 0 instead of half
-  // Higher values for common damage types, lower for rare types
-  // Physical types individually worth less (need all 3 for full protection)
+  // Damage immunities - valued lower than you might expect because:
+  // 1. Single damage type immunity is very situational (one type at a time)
+  // 2. Resistance already provides 50% protection, so marginal value of immunity is limited
+  // 3. Calibrated against Periapt of Proof Against Poison (Rare = poison immunity + poisoned condition)
+  // Physical types slightly higher because all 3 combined = complete weapon immunity (Legendary)
   if (combat.damageImmunities && combat.damageImmunities.length > 0) {
     const immunityMultiplier = combat.damageImmunitiesMultiplier ?? 1.0;
     const DAMAGE_IMMUNITY_VALUES: Record<string, number> = {
-      // Very common damage sources - immunity is extremely valuable
-      'fire': 4.0,        // Dragons, elementals, spells - never worry about fireballs
-      'poison': 4.0,      // Many monsters + often blocks poisoned condition too
-      'cold': 3.5,        // Dragons, winter environments, ice spells
+      // Common damage sources - still situational despite frequency
+      'fire': 2.0,         // Dragons, elementals, spells - upper Rare
+      'poison': 1.75,      // Calibrated to Periapt of Proof Against Poison
+      'cold': 1.75,        // Dragons, winter environments
       // Moderately common damage sources
-      'necrotic': 3.0,    // Undead deal this frequently
-      'lightning': 3.0,   // Blue dragons, storm creatures
-      'acid': 2.5,        // Black dragons, oozes - less common
-      // Physical types - worth less individually (need all 3 for full protection)
-      // Combined (all physical) = 6.75 pts ≈ Legendary+ equivalent
-      'bludgeoning': 2.25, // Clubs, fists, tails, constrict
-      'piercing': 2.25,    // Bites, claws, arrows
-      'slashing': 2.25,    // Swords, axes, some claws
+      'necrotic': 1.5,     // Undead deal this frequently
+      'lightning': 1.5,    // Blue dragons, storm creatures
+      'acid': 1.25,        // Black dragons, oozes - less common
+      // Physical types - higher because all 3 = complete weapon immunity
+      // Combined (all physical) = 4.2 pts = Legendary
+      'bludgeoning': 1.4,  // Clubs, fists, tails, constrict
+      'piercing': 1.4,     // Bites, claws, arrows
+      'slashing': 1.4,     // Swords, axes, some claws
       // Rare damage sources - immunity less impactful
-      'thunder': 2.0,      // Rarely needed
-      'psychic': 1.75,     // Mind flayers, few others
-      'radiant': 1.25,     // Few monsters deal radiant
-      'force': 0.75,       // Almost never relevant defensively
+      'thunder': 1.0,      // Rarely dealt by monsters
+      'psychic': 1.0,      // Mind flayers, intellect devourers
+      'radiant': 0.75,     // Almost no monsters deal radiant
+      'force': 0.5,        // Nothing deals force to players
     };
 
     for (const immunity of combat.damageImmunities) {
       const immunityLower = immunity.toLowerCase();
-      score += (DAMAGE_IMMUNITY_VALUES[immunityLower] ?? 2.5) * immunityMultiplier;
+      score += (DAMAGE_IMMUNITY_VALUES[immunityLower] ?? 1.25) * immunityMultiplier;
     }
   }
 
-  // Condition immunities - varies by condition severity (with optional "Sometimes" multiplier)
-  // Some conditions are devastating (paralyzed, stunned), others are minor (prone)
-  // Values calibrated to match item rarity for condition-focused items
+  // Condition immunities - valued lower because they're extremely specific
+  // Being immune to ONE condition rarely matters more than once per campaign arc
+  // Even devastating conditions (paralyzed, stunned) come from limited monster types
+  // Calibrated so single condition immunity = Uncommon, multiple = scales toward Rare
   if (combat.conditionImmunities && combat.conditionImmunities.length > 0) {
     const conditionMultiplier = combat.conditionImmunitiesMultiplier ?? 1.0;
     const CONDITION_IMMUNITY_VALUES: Record<string, number> = {
-      'paralyzed': 1.5,    // Devastating - can't act, auto-crit
-      'stunned': 1.25,     // Very bad - can't act, advantage against
-      'petrified': 1.25,   // Very bad - essentially dead
-      'incapacitated': 1.0, // Bad - can't take actions
-      'unconscious': 1.0,  // Bad - but usually from 0 HP anyway
-      'charmed': 0.75,     // Common and dangerous - dominated by enemies
-      'frightened': 0.75,  // Common - disadvantage and can't approach
-      'restrained': 0.75,  // Bad - speed 0, advantage against you
-      'poisoned': 0.5,     // Common condition, disadvantage on attacks/checks
-      'blinded': 0.5,      // Bad but situational
-      'deafened': 0.25,    // Minor - mostly ribbon
-      'grappled': 0.25,    // Minor - speed 0 but can still act
-      'prone': 0.25,       // Minor - half movement to stand
-      'exhaustion': 1.0,   // Cumulative and dangerous
+      'paralyzed': 0.75,   // Devastating but rare - ghouls, some spells
+      'stunned': 0.65,     // Very bad - can't act, advantage against
+      'petrified': 0.65,   // Essentially death - basilisks, medusae
+      'incapacitated': 0.5, // Bad - can't take actions
+      'unconscious': 0.5,  // Usually from 0 HP anyway
+      'exhaustion': 0.5,   // Cumulative but slow-building
+      'charmed': 0.5,      // Common, dangerous - vampires, fey
+      'frightened': 0.5,   // Common - dragons, undead
+      'restrained': 0.4,   // Speed 0, advantage against you
+      'poisoned': 0.3,     // Calibrated to Periapt (with poison immunity)
+      'blinded': 0.3,      // Situational
+      'deafened': 0.15,    // Ribbon - rarely matters
+      'grappled': 0.15,    // Minor - speed 0 but can still act
+      'prone': 0.15,       // Minor - half movement to stand
     };
 
     for (const condition of combat.conditionImmunities) {
       const conditionLower = condition.toLowerCase();
-      score += (CONDITION_IMMUNITY_VALUES[conditionLower] ?? 0.5) * conditionMultiplier;
+      score += (CONDITION_IMMUNITY_VALUES[conditionLower] ?? 0.35) * conditionMultiplier;
     }
   }
 
