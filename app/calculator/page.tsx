@@ -1175,6 +1175,8 @@ export default function CalculatorPage() {
                           <option value="">None (always applies)</option>
                           <option value="creature-common">vs Common (undead, fiends)</option>
                           <option value="creature-rare">vs Rare (giants, dragons)</option>
+                          <option value="sworn-enemy">vs Sworn Enemy (Oathbow)</option>
+                          <option value="environmental">Environmental (darkness, etc.)</option>
                         </select>
                       </div>
                     </div>

@@ -53,6 +53,9 @@ export const SPECIAL_MECHANICS = new Set([
 
   // Niche spell effects (too situational to fully model)
   'Trident of Fish Command',   // Dominate Beast on swimming creatures only
+
+  // Unique targeting mechanics
+  'Oathbow',                   // Sworn enemy mechanic with advantage
 ]);
 
 /**
@@ -226,6 +229,11 @@ export function getItemExplanation(itemName: string): string {
   // Niche spell effects
   if (itemName === 'Trident of Fish Command') {
     return '+1 trident (1.0 pts base). Bonus +0.25 for 3 charges of Dominate Beast, restricted to beasts with a swimming speed. The low bonus reflects how rarely most campaigns encounter aquatic beasts; in a seafaring campaign, this item is significantly stronger.';
+  }
+
+  // Unique targeting mechanics
+  if (itemName === 'Oathbow') {
+    return '3d6 piercing (3.0 pts) × sworn-enemy (0.6×) = 1.8 pts + advantage on attacks (1.5 pts) = 3.3 pts (Very Rare). Sworn enemy: declare one target per long rest; bonus damage and advantage apply to all attacks against that target until it dies.';
   }
 
   // === COMMUNITY NOTES (no override, just explanation) ===
