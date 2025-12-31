@@ -141,8 +141,11 @@
         "type": "piercing",
         "conditionalType": "sworn-enemy"
       },
-      "advantage": ["attack"]
-    }
+      "advantage": ["attack"],
+      "advantageMultiplier": 0.5
+    },
+    "overrideBonus": 0.7,
+    "description": "Ignores cover against sworn enemy (+); forces disadvantage on other targets when sworn enemy is within 60 ft (–). Net +0.7 pts."
   },
   {
     "name": "Dagger of Venom",
