@@ -5,7 +5,7 @@
  * Excludes UI state and description (too long for URLs).
  */
 
-import { DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType, AdvantageType } from '@/types/magic-item';
+import { DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType, AdvantageType, BonusTargetType } from '@/types/magic-item';
 
 // The shareable state - excludes UI state and description
 export interface ShareableItemState {
@@ -55,9 +55,16 @@ export interface ShareableItemState {
   wp?: WeaponProperty[];
   // Armor properties
   ap?: ArmorProperty[];
-  // Advantage
+  // Advantage & Proficiencies
   adv?: AdvantageType[];
-  advs?: boolean; // advantagesSometimes
+  prof?: BonusTargetType[]; // proficiencies (excluding 'attack' which is always included)
+  osk?: {  // otherSkillsBonus
+    c: number;   // count
+    a: boolean;  // hasAdvantage
+    p: boolean;  // hasProficiency
+  };
+  bs?: boolean; // bonusesSometimes (replaces advantagesSometimes)
+  advs?: boolean; // advantagesSometimes (deprecated, for backwards compatibility)
   // Charge pool
   cp?: {
     m: number;  // maxCharges
@@ -100,7 +107,12 @@ export interface DecodedItemState {
   weaponProperties: WeaponProperty[];
   armorProperties: ArmorProperty[];
   advantages: AdvantageType[];
-  advantagesSometimes: boolean;
+  proficiencies: BonusTargetType[];
+  otherSkillsCount: number;
+  otherSkillsAdvantage: boolean;
+  otherSkillsProficiency: boolean;
+  bonusesSometimes: boolean;
+  advantagesSometimes: boolean; // deprecated, for backwards compatibility
   maxCharges: number;
   chargesPerShortRest: number;
   chargesPerLongRest: number;
@@ -138,7 +150,11 @@ export function encodeItemToUrl(state: {
   weaponProperties: WeaponProperty[];
   armorProperties: ArmorProperty[];
   advantages: AdvantageType[];
-  advantagesSometimes: boolean;
+  proficiencies: BonusTargetType[];
+  otherSkillsCount: number;
+  otherSkillsAdvantage: boolean;
+  otherSkillsProficiency: boolean;
+  bonusesSometimes: boolean;
   maxCharges: number;
   chargesPerShortRest: number;
   chargesPerLongRest: number;
@@ -225,8 +241,20 @@ export function encodeItemToUrl(state: {
   if (state.advantages.length > 0) {
     compact.adv = state.advantages;
   }
-  if (state.advantagesSometimes) {
-    compact.advs = true;
+  // Only include proficiencies that aren't 'attack' (since attack is always included)
+  const profWithoutAttack = state.proficiencies.filter(p => p !== 'attack');
+  if (profWithoutAttack.length > 0) {
+    compact.prof = profWithoutAttack;
+  }
+  if (state.otherSkillsCount > 0 && (state.otherSkillsAdvantage || state.otherSkillsProficiency)) {
+    compact.osk = {
+      c: state.otherSkillsCount,
+      a: state.otherSkillsAdvantage,
+      p: state.otherSkillsProficiency,
+    };
+  }
+  if (state.bonusesSometimes) {
+    compact.bs = true;
   }
 
   if (state.maxCharges > 0 || state.abilities.length > 0) {
@@ -313,7 +341,12 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
       weaponProperties: compact.wp || [],
       armorProperties: compact.ap || [],
       advantages: compact.adv || [],
-      advantagesSometimes: compact.advs || false,
+      proficiencies: compact.prof ? [...compact.prof, 'attack'] : ['attack'],
+      otherSkillsCount: compact.osk?.c || 0,
+      otherSkillsAdvantage: compact.osk?.a || false,
+      otherSkillsProficiency: compact.osk?.p || false,
+      bonusesSometimes: compact.bs || compact.advs || false, // fallback to advs for backwards compatibility
+      advantagesSometimes: compact.advs || false, // deprecated, kept for backwards compatibility
       maxCharges: compact.cp?.m || 0,
       chargesPerShortRest: compact.cp?.sr || 0,
       chargesPerLongRest: compact.cp?.lr || 0,

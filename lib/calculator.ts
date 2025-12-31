@@ -571,25 +571,53 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
   // Advantage on checks/saves
   // Individual saves calibrated so all six sum to 5.0 pts (Very Rare)
   // Validated against Mantle of Spell Resistance: ~40% of saves are vs spells → 5.0 × 0.4 = 2.0 pts (Rare) ✓
+  // Shared point values for advantage and proficiency bonuses
+  // Both advantage (~+3.5 effective) and proficiency (~+3.5 at mid-tier) are roughly equivalent
+  const BONUS_VALUES: Record<string, number> = {
+    // Combat
+    'initiative': 0.75,      // Going first is tactically powerful
+    'attack': 1.0,           // Advantage on attacks with this weapon (~+3.5 to hit)
+    // Individual saves (sum to 5.0 pts when all selected)
+    'dex-saves': 1.25,       // Most common - Fireball, dragon breath, AoE
+    'wis-saves': 1.10,       // Charm, fear, dominate, hold person
+    'con-saves': 1.00,       // Concentration, poison, stun
+    'str-saves': 0.65,       // Grapple, push, prone effects
+    'cha-saves': 0.60,       // Banishment, possession, planar
+    'int-saves': 0.40,       // Mind flayers, rare illusions
+    // Skills
+    'perception': 0.25,      // Detecting ambushes, traps
+    'stealth': 0.25,         // Surprise rounds, avoiding detection
+  };
+  const OTHER_SKILL_VALUE = 0.15; // Each skill beyond perception/stealth
+
+  // Advantage bonuses
   if (combat.advantage && combat.advantage.length > 0) {
     const advantageMultiplier = combat.advantageMultiplier ?? 1.0;
-    const ADVANTAGE_VALUES: Record<string, number> = {
-      // Combat
-      'initiative': 0.75,      // Going first is tactically powerful
-      'attack': 1.0,           // Advantage on attacks with this weapon (~+3.5 to hit)
-      // Individual saves (sum to 5.0 pts when all selected)
-      'dex-saves': 1.25,       // Most common - Fireball, dragon breath, AoE
-      'wis-saves': 1.10,       // Charm, fear, dominate, hold person
-      'con-saves': 1.00,       // Concentration, poison, stun
-      'str-saves': 0.65,       // Grapple, push, prone effects
-      'cha-saves': 0.60,       // Banishment, possession, planar
-      'int-saves': 0.40,       // Mind flayers, rare illusions
-      // Skills
-      'perception': 0.25,      // Detecting ambushes, traps
-      'stealth': 0.25,         // Surprise rounds, avoiding detection
-    };
     for (const adv of combat.advantage) {
-      score += (ADVANTAGE_VALUES[adv] || 0.25) * advantageMultiplier;
+      score += (BONUS_VALUES[adv] || 0.25) * advantageMultiplier;
+    }
+  }
+
+  // Proficiency bonuses (same values as advantage)
+  if (combat.proficiencyBonuses && combat.proficiencyBonuses.length > 0) {
+    const profMultiplier = combat.advantageMultiplier ?? 1.0;
+    for (const prof of combat.proficiencyBonuses) {
+      // Skip 'attack' since you always add proficiency to attacks (it's auto-checked in UI)
+      if (prof === 'attack') continue;
+      score += (BONUS_VALUES[prof] || 0.25) * profMultiplier;
+    }
+  }
+
+  // Other skills bonus (skills beyond perception/stealth)
+  if (combat.otherSkillsBonus && combat.otherSkillsBonus.count > 0) {
+    const { count, hasAdvantage, hasProficiency } = combat.otherSkillsBonus;
+    const multiplier = combat.advantageMultiplier ?? 1.0;
+    const skillCount = Math.min(count, 16); // Cap at 16 other skills
+    if (hasAdvantage) {
+      score += skillCount * OTHER_SKILL_VALUE * multiplier;
+    }
+    if (hasProficiency) {
+      score += skillCount * OTHER_SKILL_VALUE * multiplier;
     }
   }
 
