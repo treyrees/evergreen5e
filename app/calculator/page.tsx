@@ -2239,8 +2239,8 @@ export default function CalculatorPage() {
                         <div className="flex gap-1">
                           {Array.from({ length: 10 }, (_, i) => {
                             const isFilled = i <= scaleData.position;
-                            // Use exact same color as rarity text
-                            const rarityBgClass = getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-');
+                            // Use full brightness color (strip /80 opacity)
+                            const rarityBgClass = getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-').replace('/80', '');
                             return (
                               <div
                                 key={i}
