@@ -648,7 +648,7 @@ export default function CalculatorPage() {
     }
 
     if (abilities.length > 0) {
-      const spellList = abilities.map(a => `${a.spell} (${a.chargesPerUse} charge${a.chargesPerUse > 1 ? 's' : ''}${a.canUpcast ? '+' : ''})`).join(', ');
+      const spellList = abilities.map(a => `${a.spell} (Lv${a.spellLevel}, ${a.chargesPerUse} charge${a.chargesPerUse > 1 ? 's' : ''}${a.canUpcast ? '+' : ''})`).join(', ');
       attrs.push({ key: 'spells', label: 'Spells', value: spellList });
     }
 
@@ -3033,22 +3033,16 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Your Item Preview - Collapsible Card */}
+            {/* Your Item Preview */}
             {hasSelectedAttributes && baseItem && (
               <div className="mt-4 bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
-                {/* Collapsible Header */}
-                <button
-                  onClick={() => setShowItemPreview(!showItemPreview)}
-                  className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
-                >
-                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Your Item</span>
-                  <span className="text-slate-500 text-lg">{showItemPreview ? '−' : '+'}</span>
-                </button>
+                {/* Header */}
+                <div className="px-5 py-4">
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Your Item</span>
+                </div>
 
-                {showItemPreview && (
-                  <>
-                    {/* DMG-Style Item Card */}
-                    <div className="border-t border-slate-700 p-5 space-y-4">
+                {/* DMG-Style Item Card */}
+                <div className="border-t border-slate-700 p-5 space-y-4">
                       {/* Item Name - Large, ornate */}
                       <div className="border-b border-slate-600 pb-3">
                         <h3
@@ -3101,10 +3095,10 @@ export default function CalculatorPage() {
                           <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
                             Description
                           </label>
-                          <div className="text-sm text-slate-300 bg-slate-900/50 border border-slate-700 rounded-md px-3 py-2.5">
+                          <p className="text-sm text-slate-300 whitespace-pre-wrap">
                             {previewDescription}
-                          </div>
-                          <p className="mt-1.5 text-[10px] text-slate-600">
+                          </p>
+                          <p className="mt-2 text-[10px] text-slate-600">
                             Edit in Unique Item Details above
                           </p>
                         </div>
@@ -3242,8 +3236,6 @@ export default function CalculatorPage() {
                         </p>
                       </div>
                     )}
-                  </>
-                )}
 
                 {/* Hidden canvas for image generation */}
                 <canvas ref={canvasRef} className="hidden" />
