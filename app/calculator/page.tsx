@@ -2240,16 +2240,17 @@ export default function CalculatorPage() {
                           {Array.from({ length: 10 }, (_, i) => {
                             const isActive = i === scaleData.position;
                             const isFilled = i <= scaleData.position;
+                            const rarityBgClass = getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-').replace('/80', '');
                             return (
                               <div
                                 key={i}
                                 className={`
                                   h-1.5 flex-1 rounded-sm transition-all duration-300
-                                  ${isActive
-                                    ? `${getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-')} shadow-sm`
-                                    : isFilled
-                                      ? 'bg-slate-500/40'
-                                      : 'bg-slate-700/50'
+                                  ${isFilled
+                                    ? isActive
+                                      ? `${rarityBgClass} shadow-sm`
+                                      : `${rarityBgClass} opacity-40`
+                                    : 'bg-slate-700/50'
                                   }
                                 `}
                               />
