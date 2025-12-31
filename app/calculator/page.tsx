@@ -11,7 +11,6 @@ import {
 import { getWarningIndicator } from '@/lib/item-balance-flags';
 import { generateRandomItemName } from '@/lib/item-name-generator';
 import { decodeItemFromUrl, generateShareUrl } from '@/lib/item-url';
-import { useCommunityItemsPreference } from '@/lib/feature-flags';
 import { useAuth } from '@/components/auth';
 import { SignInModal, UserMenu } from '@/components/auth';
 import { saveItem, getSavedItems, deleteSavedItem, SavedItem } from '@/lib/actions/saved-items';
@@ -39,9 +38,6 @@ export default function CalculatorPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
-
-  // Community items preference
-  const { includeCommunityItems, toggle: toggleCommunityItems } = useCommunityItemsPreference();
 
   const [itemName, setItemName] = useState('');
   const [baseItem, setBaseItem] = useState('');
@@ -2217,17 +2213,6 @@ export default function CalculatorPage() {
                           ⓘ
                         </span>
                       </div>
-                      {communityModeEnabled && (
-                        <label className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-400 cursor-pointer transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={includeCommunityItems}
-                            onChange={toggleCommunityItems}
-                            className="w-3 h-3 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 focus:ring-1 cursor-pointer"
-                          />
-                          <span>Community</span>
-                        </label>
-                      )}
                     </div>
 
                     <div className="space-y-3">
