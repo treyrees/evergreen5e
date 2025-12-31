@@ -213,6 +213,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================================
+   TOUCH-FRIENDLY HOVER ACTIONS
+   Only hide action buttons on devices with true hover support (mouse)
+   Touch devices (iPad, phones) always show buttons
+   ============================================ */
+.hover-action-buttons {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hover-action-buttons {
+    opacity: 0;
+  }
+
+  .group:hover .hover-action-buttons,
+  .group:focus-within .hover-action-buttons {
+    opacity: 1;
+  }
+}
+
+/* ============================================
    FANTASY SAVE BUTTON EFFECTS
    ============================================ */
 

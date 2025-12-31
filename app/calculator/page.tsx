@@ -2613,7 +2613,7 @@ export default function CalculatorPage() {
                               {item.baseItem} · {item.score.toFixed(1)} pts
                             </p>
                           </div>
-                          <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-1.5 hover-action-buttons">
                             <button
                               onClick={() => loadSavedItem(item)}
                               className="p-1.5 rounded bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 transition-colors"
