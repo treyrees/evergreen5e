@@ -89,16 +89,20 @@ export interface ConditionInfliction {
 }
 
 // Advantage types for checks and saves
+// Individual saves sum to 5.0 pts (Very Rare); select all 6 for "all saves"
 export type AdvantageType =
-  | 'initiative' // Advantage on Initiative rolls
-  | 'perception' // Advantage on Perception checks
-  | 'acrobatics' // Advantage on Acrobatics checks
-  | 'stealth' // Advantage on Stealth checks
-  | 'attack' // Advantage on attack rolls
-  | 'saves' // Advantage on all saving throws
-  | 'dex-saves' // Advantage on DEX saves
-  | 'str-saves' // Advantage on STR saves
-  | 'con-saves'; // Advantage on CON saves
+  | 'initiative'      // Advantage on Initiative rolls (0.75 pts)
+  | 'attack'          // Advantage on attack rolls with this weapon (1.0 pts)
+  // Individual saves (sum to 5.0 pts when all selected)
+  | 'dex-saves'       // Advantage on DEX saves (1.25 pts)
+  | 'wis-saves'       // Advantage on WIS saves (1.10 pts)
+  | 'con-saves'       // Advantage on CON saves (1.00 pts)
+  | 'str-saves'       // Advantage on STR saves (0.65 pts)
+  | 'cha-saves'       // Advantage on CHA saves (0.60 pts)
+  | 'int-saves'       // Advantage on INT saves (0.40 pts)
+  // Skills
+  | 'perception'      // Advantage on Perception checks (0.25 pts)
+  | 'stealth';        // Advantage on Stealth checks (0.25 pts)
 
 // Weapon properties that can be added to magic weapons
 // These represent properties not normally on the base weapon type
@@ -145,6 +149,7 @@ export interface CombatFeatures {
 
   // New SRD 5.2.1 mechanics
   advantage?: AdvantageType[]; // Advantage on specific checks/saves (e.g., Sentinel Shield: initiative, perception)
+  advantageMultiplier?: number; // 0.5 for "Sometimes" active advantages
   reactionAC?: ReactionAC; // Reaction-based AC bonus (e.g., Quarterstaff of the Acrobat: +5 AC)
   bonusActionDamage?: BonusActionDamage; // Damage as bonus action (e.g., Shield of the Cavalier bash)
   conditionInfliction?: ConditionInfliction; // Inflict conditions on attacks (e.g., Energy Bow restraint)
