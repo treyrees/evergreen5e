@@ -36,6 +36,7 @@ export default function CalculatorPage() {
   const { user, loading: authLoading } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
@@ -111,14 +112,6 @@ export default function CalculatorPage() {
     setRandomPlaceholder(generateRandomItemName());
   }, []);
 
-  // Check for community mode URL parameter (?community=1)
-  const [communityModeEnabled, setCommunityModeEnabled] = useState(false);
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time URL check
-    setCommunityModeEnabled(params.get('community') === '1');
-  }, []);
-
   // Parse URL params on mount to restore shared item state
   const [urlImported, setUrlImported] = useState(false);
   useEffect(() => {
@@ -159,11 +152,8 @@ export default function CalculatorPage() {
         setChargesPerShortRest(decoded.chargesPerShortRest);
         setChargesPerLongRest(decoded.chargesPerLongRest);
         setAbilities(decoded.abilities);
-        // Clean URL after import (preserve community param if present)
-        const preserveParams = new URLSearchParams();
-        if (params.get('community') === '1') preserveParams.set('community', '1');
-        const newUrl = preserveParams.toString() ? `/calculator?${preserveParams}` : '/calculator';
-        window.history.replaceState({}, '', newUrl);
+        // Clean URL after import
+        window.history.replaceState({}, '', '/calculator');
       }
     }
     setUrlImported(true);
@@ -569,11 +559,22 @@ export default function CalculatorPage() {
       return;
     }
 
-    if (!baseItem || !itemName.trim()) {
-      return; // Need at least a name and base item
+    // Validation with user feedback
+    if (!itemName.trim()) {
+      setSaveStatus('error');
+      setSaveErrorMessage('Please enter an item name');
+      setTimeout(() => { setSaveStatus('idle'); setSaveErrorMessage(null); }, 3000);
+      return;
+    }
+    if (!baseItem) {
+      setSaveStatus('error');
+      setSaveErrorMessage('Please select a base item');
+      setTimeout(() => { setSaveStatus('idle'); setSaveErrorMessage(null); }, 3000);
+      return;
     }
 
     setSaveStatus('saving');
+    setSaveErrorMessage(null);
 
     const result = await saveItem({
       name: itemName.trim(),
@@ -626,7 +627,8 @@ export default function CalculatorPage() {
       }
     } else {
       setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3000);
+      setSaveErrorMessage(result.error || 'Failed to save item');
+      setTimeout(() => { setSaveStatus('idle'); setSaveErrorMessage(null); }, 3000);
     }
   };
 
@@ -661,11 +663,11 @@ export default function CalculatorPage() {
     // Flight
     if (combat.flight) {
       setFlightEnabled(true);
-      setFlySpeed(combat.flight.flySpeed ?? 60);
+      setFlySpeed(combat.flight.flySpeed ?? 30);
       setFlyDuration(combat.flight.flyDuration ?? 'unlimited');
     } else {
       setFlightEnabled(false);
-      setFlySpeed(60);
+      setFlySpeed(30);
       setFlyDuration('unlimited');
     }
 
@@ -839,8 +841,8 @@ export default function CalculatorPage() {
             <Link href="/" className="text-slate-500 hover:text-slate-300 transition-colors">
               Home
             </Link>
-            {/* Auth UI - Hidden unless ?community=1 */}
-            {communityModeEnabled && !authLoading && (
+            {/* Auth UI */}
+            {!authLoading && (
               user ? (
                 <UserMenu />
               ) : (
@@ -2419,67 +2421,65 @@ export default function CalculatorPage() {
                         </div>
                       )}
 
-                      {/* Save to Collection Button - Hidden unless ?community=1 */}
-                      {communityModeEnabled && (
-                        <button
-                          onClick={handleSaveItem}
-                          disabled={saveStatus === 'saving' || saveStatus === 'saved'}
-                          className={`w-full py-3.5 px-4 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2.5 ${
-                            saveStatus === 'saved'
-                              ? 'btn-fantasy-saved text-white cursor-default'
-                              : saveStatus === 'error'
-                              ? 'bg-red-600 text-white'
-                              : user
-                              ? 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-900/30 hover:shadow-violet-900/40'
-                              : 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-900/30 hover:shadow-violet-900/40'
-                          }`}
-                        >
-                          {saveStatus === 'saving' ? (
-                            <>
-                              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                              </svg>
-                              Enchanting...
-                            </>
-                          ) : saveStatus === 'saved' ? (
-                            <>
-                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                <path
-                                  className="checkmark-animated"
-                                  stroke="currentColor"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2.5}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                              Saved!
-                            </>
-                          ) : saveStatus === 'error' ? (
-                            <>
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              Failed to Save
-                            </>
-                          ) : user ? (
-                            <>
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                              </svg>
-                              Save to Collection
-                            </>
-                          ) : (
-                            <>
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                              </svg>
-                              Sign in to Save
-                            </>
-                          )}
-                        </button>
-                      )}
+                      {/* Save to Collection Button */}
+                      <button
+                        onClick={handleSaveItem}
+                        disabled={saveStatus === 'saving' || saveStatus === 'saved'}
+                        className={`w-full py-3.5 px-4 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2.5 ${
+                          saveStatus === 'saved'
+                            ? 'btn-fantasy-saved text-white cursor-default'
+                            : saveStatus === 'error'
+                            ? 'bg-red-600 text-white'
+                            : user
+                            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-900/30 hover:shadow-violet-900/40'
+                            : 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-900/30 hover:shadow-violet-900/40'
+                        }`}
+                      >
+                        {saveStatus === 'saving' ? (
+                          <>
+                            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Enchanting...
+                          </>
+                        ) : saveStatus === 'saved' ? (
+                          <>
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
+                              <path
+                                className="checkmark-animated"
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2.5}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            Saved!
+                          </>
+                        ) : saveStatus === 'error' ? (
+                          <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {saveErrorMessage || 'Failed to Save'}
+                          </>
+                        ) : user ? (
+                          <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
+                            Save to Collection
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                            </svg>
+                            Sign in to Save
+                          </>
+                        )}
+                      </button>
 
                       {/* Action Buttons */}
                       <div className="flex gap-2">
@@ -2559,7 +2559,7 @@ export default function CalculatorPage() {
 
           {/* My Items Section */}
           <AnimatePresence>
-            {communityModeEnabled && user && savedItems.length > 0 && (
+            {user && savedItems.length > 0 && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
@@ -2787,7 +2787,6 @@ export default function CalculatorPage() {
       <SignInModal
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
-        redirectTo="/calculator"
       />
     </div>
   );
