@@ -50,6 +50,9 @@ export const SPECIAL_MECHANICS = new Set([
   'Circlet of Blasting',       // Scorching Ray value bump
   'Cloak of Arachnida',        // Ceiling walking and web immunity
   'Mace of Terror',            // Fear effect (crowd control)
+
+  // Niche spell effects (too situational to fully model)
+  'Trident of Fish Command',   // Dominate Beast on swimming creatures only
 ]);
 
 /**
@@ -218,6 +221,11 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Mace of Terror') {
     return 'No base enhancement. Bonus +2.0 for fear aura (3 charges, DC 15 WIS); frightened condition is powerful crowd control that denies enemy actions and forces disadvantage.';
+  }
+
+  // Niche spell effects
+  if (itemName === 'Trident of Fish Command') {
+    return '+1 trident (1.0 pts base). Has 3 charges to cast Dominate Beast (4th-level spell), but ONLY on beasts with a swimming speed. Bonus +0.25 acknowledges the spell without fully pricing it. Why so low? Most campaigns rarely encounter aquatic beasts, and when you do, Dominate Beast competes with just killing them. In a seafaring or underwater campaign, this trident becomes much stronger; a dominated Giant Shark or Killer Whale is a serious combat asset. For typical land-based adventures, treat this as a +1 trident with a ribbon ability.';
   }
 
   // === COMMUNITY NOTES (no override, just explanation) ===
