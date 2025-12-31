@@ -846,9 +846,10 @@ const BASE_ITEM_OBJECTS: Record<string, string[]> = {
  * not "Ring of Fire" or "Cloak of Shadows".
  *
  * @param baseItem The base item type (e.g., 'longsword', 'crossbow (heavy)', 'ring')
+ * @param theme Optional theme to influence name generation (e.g., 'fire', 'ice', 'shadow')
  * @returns A randomly generated fantasy item name appropriate for the item type
  */
-export function generateRandomItemNameForBase(baseItem: string): string {
+export function generateRandomItemNameForBase(baseItem: string, theme?: string): string {
   const normalizedBase = baseItem.toLowerCase();
   const appropriateObjects = BASE_ITEM_OBJECTS[normalizedBase];
 
@@ -857,43 +858,203 @@ export function generateRandomItemNameForBase(baseItem: string): string {
     return generateRandomItemName();
   }
 
-  // Use the first object as the "main" representation for compound patterns
   const pickObject = () => pick(appropriateObjects);
+
+  // Theme-aware vocabulary selection
+  const themedAdjectives = theme ? getThemedAdjectives(theme) : ADJECTIVES;
+  const themedNouns = theme ? getThemedNouns(theme) : NOUNS;
+  const themedPrefixes = theme ? getThemedPrefixes(theme) : COMPOUND_PREFIXES;
+
+  // Mix themed with generic for variety (70% themed, 30% any)
+  const pickAdj = () => theme && Math.random() < 0.7 ? pick(themedAdjectives) : pick(ADJECTIVES);
+  const pickNoun = () => theme && Math.random() < 0.7 ? pick(themedNouns) : pick(NOUNS);
+  const pickPrefix = () => theme && Math.random() < 0.7 ? pick(themedPrefixes) : pick(COMPOUND_PREFIXES);
 
   // Generate using weighted pattern selection with appropriate objects
   const patterns: NamePattern[] = [
+    // ============================================
+    // COMMON PATTERNS (weight: 15-20)
+    // ============================================
+
     // "[Adjective] [Object]" - e.g., "Blazing Sword"
-    { weight: 20, generate: () => `${pick(ADJECTIVES)} ${pickObject()}` },
+    { weight: 18, generate: () => `${pickAdj()} ${pickObject()}` },
 
     // "[Object] of [Noun]" - e.g., "Blade of Flame"
-    { weight: 20, generate: () => `${pickObject()} of ${pick(NOUNS)}` },
+    { weight: 18, generate: () => `${pickObject()} of ${pickNoun()}` },
 
     // "[Object] of the [Noun]" - e.g., "Sword of the Phoenix"
-    { weight: 15, generate: () => `${pickObject()} of the ${pick(NOUNS)}` },
+    { weight: 14, generate: () => `${pickObject()} of the ${pickNoun()}` },
+
+    // ============================================
+    // MEDIUM PATTERNS (weight: 8-12)
+    // ============================================
 
     // "The [Adjective] [Object]" - e.g., "The Frozen Blade"
-    { weight: 12, generate: () => `The ${pick(ADJECTIVES)} ${pickObject()}` },
+    { weight: 10, generate: () => `The ${pickAdj()} ${pickObject()}` },
 
     // "[Noun]'s [Object]" - e.g., "Dragon's Claw"
-    { weight: 12, generate: () => `${pick(NOUNS)}'s ${pickObject()}` },
+    { weight: 10, generate: () => `${pickNoun()}'s ${pickObject()}` },
 
     // "The [Noun]'s [Object]" - e.g., "The Phoenix's Sword"
-    { weight: 10, generate: () => `The ${pick(NOUNS)}'s ${pickObject()}` },
+    { weight: 8, generate: () => `The ${pickNoun()}'s ${pickObject()}` },
 
     // "[Adjective] [Object] of [Noun]" - e.g., "Ancient Blade of Kings"
-    { weight: 10, generate: () => `${pick(ADJECTIVES)} ${pickObject()} of ${pick(NOUNS)}` },
+    { weight: 8, generate: () => `${pickAdj()} ${pickObject()} of ${pickNoun()}` },
 
     // "[Object] of [Adjective] [Noun]" - e.g., "Sword of Eternal Flame"
-    { weight: 10, generate: () => `${pickObject()} of ${pick(ADJECTIVES)} ${pick(NOUNS)}` },
+    { weight: 8, generate: () => `${pickObject()} of ${pickAdj()} ${pickNoun()}` },
 
-    // Compound word - e.g., "Stormbringer" (works for any item type)
-    { weight: 8, generate: () => capitalize(`${pick(COMPOUND_PREFIXES)}${pick(COMPOUND_SUFFIXES)}`) },
+    // "[Adjective] [Object] of the [Noun]" - e.g., "Holy Sword of the Crusader"
+    { weight: 6, generate: () => `${pickAdj()} ${pickObject()} of the ${pickNoun()}` },
+
+    // ============================================
+    // COMPOUND PATTERNS (weight: 6-10)
+    // ============================================
+
+    // Compound word - e.g., "Stormbringer", "Frostmourne"
+    { weight: 10, generate: () => capitalize(`${pickPrefix()}${pick(COMPOUND_SUFFIXES)}`) },
+
+    // "The [Compound]" - e.g., "The Worldbreaker"
+    { weight: 5, generate: () => `The ${capitalize(pickPrefix())}${pick(COMPOUND_SUFFIXES)}` },
+
+    // "[Noun]-[Suffix] [Object]" - e.g., "Doom-forged Blade"
+    {
+      weight: 6,
+      generate: () => {
+        const prefix = pickPrefix();
+        const suffix = pick(['forged', 'blessed', 'cursed', 'touched', 'born', 'wrought', 'hewn', 'tempered', 'bound', 'kissed']);
+        return `${prefix}-${suffix} ${pickObject()}`;
+      },
+    },
+
+    // ============================================
+    // PROPER NAME PATTERNS (weight: 4-8)
+    // ============================================
 
     // Just a proper name - e.g., "Excalibur"
-    { weight: 6, generate: () => pickCategory(PROPER_NAMES) },
+    { weight: 7, generate: () => pickCategory(PROPER_NAMES) },
 
     // "[ProperName], the [Epithet]" - e.g., "Glamdring, the Foe-hammer"
-    { weight: 4, generate: () => `${pickCategory(PROPER_NAMES)}, ${pickCategory(EPITHETS)}` },
+    {
+      weight: 5,
+      generate: () => {
+        const name = pickCategory(PROPER_NAMES);
+        const epithet = pickCategory(EPITHETS);
+        return `${name}, ${epithet}`;
+      },
+    },
+
+    // "The [ProperName]" - e.g., "The Andúril"
+    { weight: 3, generate: () => `The ${pickCategory(PROPER_NAMES)}` },
+
+    // ============================================
+    // ELABORATE PATTERNS (weight: 3-6)
+    // ============================================
+
+    // "[Object] of the [Plural Noun]" - e.g., "Sword of the Fallen Kings"
+    {
+      weight: 5,
+      generate: () => {
+        const noun = pickNoun();
+        const adjective = pickAdj();
+        return `${pickObject()} of the ${adjective} ${pluralize(noun)}`;
+      },
+    },
+
+    // "The [Adjective] [Object] of the [Noun]" - e.g., "The Ancient Blade of the Phoenix"
+    { weight: 4, generate: () => `The ${pickAdj()} ${pickObject()} of the ${pickNoun()}` },
+
+    // "[Object] [Epithet]" - e.g., "Blade that Sings of Sorrow"
+    {
+      weight: 4,
+      generate: () => {
+        const object = pickObject();
+        const epithet = pick(EPITHETS.poetic);
+        return `${object} ${epithet}`;
+      },
+    },
+
+    // ============================================
+    // RARE/EPIC PATTERNS (weight: 1-3)
+    // ============================================
+
+    // Full title - "[ProperName], [Object] of [Noun]"
+    {
+      weight: 3,
+      generate: () => {
+        const name = pickCategory(PROPER_NAMES);
+        const object = pickObject();
+        const noun = pickNoun();
+        return `${name}, ${object} of ${noun}`;
+      },
+    },
+
+    // "[ProperName], the [Adjective] [Object]"
+    {
+      weight: 3,
+      generate: () => {
+        const name = pickCategory(PROPER_NAMES);
+        const adj = pickAdj();
+        const obj = pickObject();
+        return `${name}, the ${adj} ${obj}`;
+      },
+    },
+
+    // Poetic construction - "The [Object] of [Noun]'s [Noun]"
+    {
+      weight: 2,
+      generate: () => {
+        return `The ${pickObject()} of ${pickNoun()}'s ${pickNoun()}`;
+      },
+    },
+
+    // Triple compound - "[Prefix][Suffix] of [Noun]"
+    {
+      weight: 2,
+      generate: () => {
+        const compound = capitalize(`${pickPrefix()}${pick(COMPOUND_SUFFIXES)}`);
+        return `${compound} of ${pickNoun()}`;
+      },
+    },
+
+    // Definite compound with noun - "The [Compound] of the [Noun]"
+    {
+      weight: 2,
+      generate: () => {
+        const compound = capitalize(`${pickPrefix()}${pick(COMPOUND_SUFFIXES)}`);
+        return `The ${compound} of the ${pickNoun()}`;
+      },
+    },
+
+    // Legendary title pattern - "[ProperName], [Slayer], the [Object] of [Noun]"
+    {
+      weight: 1,
+      generate: () => {
+        const name = pickCategory(PROPER_NAMES);
+        const epithet = pick(EPITHETS.slayer);
+        const noun = pickNoun();
+        return `${name}, ${epithet}, ${pickObject()} of the ${noun}`;
+      },
+    },
+
+    // Archaic definite - "[Object] of a Thousand [Plural Noun]"
+    {
+      weight: 2,
+      generate: () => {
+        const quantities = ['a Thousand', 'a Hundred', 'Ten Thousand', 'Countless', 'Seven', 'Nine', 'Twelve'];
+        const noun = pickNoun();
+        return `${pickObject()} of ${pick(quantities)} ${pluralize(noun)}`;
+      },
+    },
+
+    // Fated item - "The [Noun]-[Object]" - e.g., "The Doom-Blade"
+    {
+      weight: 3,
+      generate: () => {
+        const concepts = ['Doom', 'Fate', 'Death', 'War', 'Soul', 'Blood', 'Dream', 'Void', 'Night', 'Dawn'];
+        return `The ${pick(concepts)}-${pickObject()}`;
+      },
+    },
   ];
 
   // Calculate total weight
@@ -911,6 +1072,137 @@ export function generateRandomItemNameForBase(baseItem: string): string {
 
   // Fallback
   return `${pick(ADJECTIVES)} ${pickObject()}`;
+}
+
+// ============================================================================
+// THEMED VOCABULARY FOR COHERENT GENERATION
+// ============================================================================
+
+const THEME_ADJECTIVES: Record<string, string[]> = {
+  fire: [
+    'Blazing', 'Burning', 'Smoldering', 'Scorching', 'Searing', 'Molten',
+    'Volcanic', 'Incandescent', 'Pyretic', 'Cinderous', 'Ashen', 'Ember',
+    'Infernal', 'Flame-touched', 'Phoenix-born', 'Radiant', 'Sunlit',
+  ],
+  cold: [
+    'Frozen', 'Icy', 'Frigid', 'Glacial', 'Frostbitten', 'Hoarfrost',
+    'Crystalline', 'Permafrost', 'Boreal', 'Hyperborean', 'Rime-touched',
+    'Winter', 'Pale', 'Bitter', 'Shivering', 'Snowbound',
+  ],
+  lightning: [
+    'Thundering', 'Stormy', 'Tempestuous', 'Crackling', 'Galvanic',
+    'Roaring', 'Raging', 'Furious', 'Wrathful', 'Cyclonic', 'Electric',
+    'Storm-forged', 'Thunder-touched', 'Skyborn', 'Voltaic',
+  ],
+  radiant: [
+    'Radiant', 'Luminous', 'Gleaming', 'Shimmering', 'Glowing', 'Brilliant',
+    'Resplendent', 'Divine', 'Sacred', 'Holy', 'Blessed', 'Hallowed',
+    'Sunlit', 'Starlit', 'Auroral', 'Prismatic', 'Celestial', 'Golden',
+  ],
+  necrotic: [
+    'Necrotic', 'Withering', 'Life-drinking', 'Soul-rending', 'Grave-touched',
+    'Deathly', 'Cursed', 'Damned', 'Forsaken', 'Unholy', 'Profane', 'Blighted',
+    'Spectral', 'Ghostly', 'Wraithlike', 'Bone', 'Skeletal', 'Pale',
+  ],
+  force: [
+    'Ethereal', 'Astral', 'Planar', 'Dimensional', 'Eldritch', 'Arcane',
+    'Mystic', 'Runic', 'Thaumic', 'Sorcerous', 'Void-touched', 'Cosmic',
+    'Stellar', 'Invisible', 'Phantom', 'Shimmering',
+  ],
+  thunder: [
+    'Thundering', 'Roaring', 'Howling', 'Raging', 'Furious', 'Bellowing',
+    'Deafening', 'Resounding', 'Booming', 'Rumbling', 'Crashing',
+    'Storm-born', 'Tempest-forged', 'Sky-shaking',
+  ],
+  psychic: [
+    'Mind-rending', 'Thought-stealing', 'Dream-walking', 'Nightmare',
+    'Aberrant', 'Alien', 'Otherworldly', 'Eldritch', 'Maddening',
+    'Whispering', 'Silent', 'Screaming', 'Keening', 'Haunting',
+  ],
+  poison: [
+    'Venomous', 'Toxic', 'Pestilent', 'Virulent', 'Noxious', 'Corrupting',
+    'Putrid', 'Festering', 'Serpentine', 'Viper', 'Caustic', 'Acidic',
+  ],
+  acid: [
+    'Caustic', 'Acidic', 'Corrosive', 'Dissolving', 'Etching', 'Burning',
+    'Vitriol', 'Searing', 'Melting', 'Consuming', 'Devouring',
+  ],
+};
+
+const THEME_NOUNS: Record<string, string[]> = {
+  fire: [
+    'Flame', 'Fire', 'Blaze', 'Inferno', 'Conflagration', 'Pyre',
+    'Ember', 'Cinder', 'Ash', 'Spark', 'Phoenix', 'Sun', 'Dawn',
+    'Volcano', 'Furnace', 'Hellfire', 'Dragons', 'Salamander',
+  ],
+  cold: [
+    'Frost', 'Ice', 'Glacier', 'Avalanche', 'Blizzard', 'Winter',
+    'Snow', 'Hail', 'Rime', 'Cold', 'North', 'Tundra', 'Permafrost',
+    'Yeti', 'Wendigo', 'Pale', 'Moon', 'Midnight',
+  ],
+  lightning: [
+    'Storm', 'Tempest', 'Thunder', 'Lightning', 'Cyclone', 'Hurricane',
+    'Typhoon', 'Tornado', 'Gale', 'Squall', 'Whirlwind', 'Sky',
+    'Cloud', 'Heavens', 'Zeus', 'Thor', 'Raijin',
+  ],
+  radiant: [
+    'Light', 'Radiance', 'Brilliance', 'Luminance', 'Glow', 'Sun',
+    'Dawn', 'Stars', 'Heaven', 'Angels', 'Seraph', 'Saints',
+    'Virtue', 'Glory', 'Hope', 'Salvation', 'Redemption', 'Paradise',
+  ],
+  necrotic: [
+    'Death', 'Soul', 'Spirit', 'Ghost', 'Shade', 'Wraith', 'Specter',
+    'Grave', 'Tomb', 'Corpse', 'Bone', 'Lich', 'Vampire', 'Undead',
+    'Oblivion', 'Void', 'Entropy', 'Despair', 'Sorrow', 'Dread',
+  ],
+  force: [
+    'Void', 'Abyss', 'Cosmos', 'Dimension', 'Plane', 'Realm', 'Ether',
+    'Astral', 'Magic', 'Arcana', 'Power', 'Will', 'Mind', 'Infinity',
+    'Stars', 'Galaxies', 'Reality', 'Truth',
+  ],
+  thunder: [
+    'Thunder', 'Storm', 'Roar', 'Fury', 'Rage', 'Wrath', 'Bellowing',
+    'Mountains', 'Giants', 'Titans', 'War', 'Battle', 'Conquest',
+    'Drums', 'Hammers', 'Anvils',
+  ],
+  psychic: [
+    'Mind', 'Thought', 'Dream', 'Nightmare', 'Madness', 'Insanity',
+    'Whispers', 'Screams', 'Secrets', 'Fear', 'Dread', 'Horror',
+    'Void', 'Abyss', 'Illusion', 'Delusion', 'Paranoia',
+  ],
+  poison: [
+    'Venom', 'Poison', 'Toxin', 'Plague', 'Pestilence', 'Disease',
+    'Serpent', 'Viper', 'Spider', 'Scorpion', 'Corruption', 'Decay',
+  ],
+  acid: [
+    'Acid', 'Vitriol', 'Corrosion', 'Dissolution', 'Ooze', 'Slime',
+    'Bile', 'Ichor', 'Caustic', 'Burning',
+  ],
+};
+
+const THEME_PREFIXES: Record<string, string[]> = {
+  fire: ['Fire', 'Flame', 'Blaze', 'Ember', 'Cinder', 'Sun', 'Dawn', 'Ash', 'Pyre', 'Burn', 'Scorch', 'Heat'],
+  cold: ['Frost', 'Ice', 'Snow', 'Winter', 'Glacier', 'Cold', 'Rime', 'Hail', 'Chill', 'Freeze', 'North'],
+  lightning: ['Storm', 'Thunder', 'Lightning', 'Sky', 'Cloud', 'Wind', 'Tempest', 'Gale', 'Bolt', 'Spark'],
+  radiant: ['Sun', 'Star', 'Light', 'Dawn', 'Day', 'Gold', 'Heaven', 'Holy', 'Divine', 'Bright', 'Glory'],
+  necrotic: ['Death', 'Soul', 'Ghost', 'Shade', 'Night', 'Grave', 'Bone', 'Blood', 'Doom', 'Dread', 'Blight'],
+  force: ['Void', 'Star', 'Spell', 'Rune', 'Arcane', 'Mystic', 'Ether', 'Mind', 'Will', 'Power', 'Sigil'],
+  thunder: ['Thunder', 'Storm', 'War', 'Battle', 'Rage', 'Fury', 'Roar', 'Crash', 'Drum', 'Hammer'],
+  psychic: ['Mind', 'Dream', 'Thought', 'Fear', 'Dread', 'Whisper', 'Scream', 'Mad', 'Void', 'Shadow'],
+  poison: ['Venom', 'Viper', 'Serpent', 'Fang', 'Toxin', 'Plague', 'Blight', 'Rot', 'Corrupt'],
+  acid: ['Acid', 'Bile', 'Caustic', 'Etch', 'Burn', 'Melt', 'Dissolve', 'Corrode'],
+};
+
+function getThemedAdjectives(theme: string): string[] {
+  return THEME_ADJECTIVES[theme.toLowerCase()] || ADJECTIVES;
+}
+
+function getThemedNouns(theme: string): string[] {
+  return THEME_NOUNS[theme.toLowerCase()] || NOUNS;
+}
+
+function getThemedPrefixes(theme: string): string[] {
+  return THEME_PREFIXES[theme.toLowerCase()] || COMPOUND_PREFIXES;
 }
 
 // Export vocabularies for potential external use
