@@ -30,6 +30,7 @@ import {
 } from '@/lib/calculator-constants';
 import { generateSurpriseItem as generateSurpriseItemConfig, SurpriseItemConfig } from '@/lib/surprise-item-generator';
 import { generatePreviewImage as generatePreviewImageFn, PreviewAttribute } from '@/lib/preview-image-generator';
+import { DiceRollAnimation, useDiceRollAnimation } from '@/components/DiceRollAnimation';
 
 export default function CalculatorPage() {
   // Auth state
@@ -98,6 +99,10 @@ export default function CalculatorPage() {
   const [specialMechanics, setSpecialMechanics] = useState('');
   const [cosmeticFeatures, setCosmeticFeatures] = useState('');
   const [showItemDetails, setShowItemDetails] = useState(false);
+
+  // Dice roll animation state for "Surprise me" button
+  const { isPlaying: isDiceRolling, triggerRoll, handleComplete: handleDiceRollComplete } = useDiceRollAnimation();
+  const [pendingSurpriseConfig, setPendingSurpriseConfig] = useState<SurpriseItemConfig | null>(null);
 
   // Item Preview state
   const [showItemPreview, setShowItemPreview] = useState(false);
@@ -707,12 +712,8 @@ export default function CalculatorPage() {
     setDeletingItemId(null);
   };
 
-  // Generate a random "Surprise me" item with high variety
-  const generateSurpriseItem = () => {
-    // Generate config using extracted function
-    const config = generateSurpriseItemConfig();
-
-    // Apply config to state (reset fields not in config)
+  // Apply a surprise item config to the form state
+  const applySurpriseConfig = (config: SurpriseItemConfig) => {
     setItemName(config.itemName);
     setBaseItem(config.baseItem);
     setEnhancement(config.enhancement);
@@ -742,6 +743,24 @@ export default function CalculatorPage() {
     setChargesPerLongRest(config.chargesPerLongRest);
     setAbilities(config.abilities);
   };
+
+  // Generate a random "Surprise me" item with high variety and dice roll animation
+  const generateSurpriseItem = () => {
+    // Generate config first, store it, then trigger animation
+    const config = generateSurpriseItemConfig();
+    setPendingSurpriseConfig(config);
+    triggerRoll();
+  };
+
+  // Apply the surprise config after dice roll animation completes
+  useEffect(() => {
+    if (!isDiceRolling && pendingSurpriseConfig) {
+      /* eslint-disable react-hooks/set-state-in-effect -- Intentional: apply pending config after animation completes */
+      applySurpriseConfig(pendingSurpriseConfig);
+      setPendingSurpriseConfig(null);
+      /* eslint-enable react-hooks/set-state-in-effect */
+    }
+  }, [isDiceRolling, pendingSurpriseConfig]);
 
   // Quick start templates for new users
   const applyTemplate = (template: 'plus1-longsword' | 'flametongue' | 'holy-avenger') => {
@@ -828,6 +847,9 @@ export default function CalculatorPage() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
+      {/* Dice Roll Animation for "Surprise me" */}
+      <DiceRollAnimation isPlaying={isDiceRolling} onComplete={handleDiceRollComplete} />
+
       <div className="max-w-6xl mx-auto">
         {/* Header - Minimal */}
         <div className="mb-6 flex items-center justify-between">
