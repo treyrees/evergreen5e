@@ -2238,20 +2238,15 @@ export default function CalculatorPage() {
                         </div>
                         <div className="flex gap-1">
                           {Array.from({ length: 10 }, (_, i) => {
-                            const isActive = i === scaleData.position;
                             const isFilled = i <= scaleData.position;
-                            const rarityBgClass = getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-').replace('/80', '');
+                            // Use exact same color as rarity text
+                            const rarityBgClass = getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-');
                             return (
                               <div
                                 key={i}
                                 className={`
                                   h-1.5 flex-1 rounded-sm transition-all duration-300
-                                  ${isFilled
-                                    ? isActive
-                                      ? `${rarityBgClass} shadow-sm`
-                                      : `${rarityBgClass} opacity-40`
-                                    : 'bg-slate-700/50'
-                                  }
+                                  ${isFilled ? rarityBgClass : 'bg-slate-700/50'}
                                 `}
                               />
                             );
