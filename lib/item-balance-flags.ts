@@ -50,6 +50,9 @@ export const SPECIAL_MECHANICS = new Set([
   'Circlet of Blasting',       // Scorching Ray value bump
   'Cloak of Arachnida',        // Ceiling walking and web immunity
   'Mace of Terror',            // Fear effect (crowd control)
+
+  // Niche spell effects (too situational to fully model)
+  'Trident of Fish Command',   // Dominate Beast on swimming creatures only
 ]);
 
 /**
@@ -218,6 +221,11 @@ export function getItemExplanation(itemName: string): string {
   }
   if (itemName === 'Mace of Terror') {
     return 'No base enhancement. Bonus +2.0 for fear aura (3 charges, DC 15 WIS); frightened condition is powerful crowd control that denies enemy actions and forces disadvantage.';
+  }
+
+  // Niche spell effects
+  if (itemName === 'Trident of Fish Command') {
+    return '+1 trident (1.0 pts base). Bonus +0.25 for 3 charges of Dominate Beast, restricted to beasts with a swimming speed. The low bonus reflects how rarely most campaigns encounter aquatic beasts; in a seafaring campaign, this item is significantly stronger.';
   }
 
   // === COMMUNITY NOTES (no override, just explanation) ===
