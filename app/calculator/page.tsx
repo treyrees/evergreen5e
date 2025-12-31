@@ -14,7 +14,7 @@ import { decodeItemFromUrl, generateShareUrl } from '@/lib/item-url';
 import { useCommunityItemsPreference } from '@/lib/feature-flags';
 import { useAuth } from '@/components/auth';
 import { SignInModal, UserMenu } from '@/components/auth';
-import { saveItem } from '@/lib/actions/saved-items';
+import { saveItem, getSavedItems, deleteSavedItem, SavedItem } from '@/lib/actions/saved-items';
 
 // Animated number component for smooth score transitions
 function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: number }) {
@@ -172,6 +172,9 @@ export default function CalculatorPage() {
   const { user, loading: authLoading } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [myItemsExpanded, setMyItemsExpanded] = useState(false);
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
   // Community items preference
   const { includeCommunityItems, toggle: toggleCommunityItems } = useCommunityItemsPreference();
@@ -440,6 +443,22 @@ export default function CalculatorPage() {
       document.body.classList.remove('fast-transition');
     };
   }, [hasSelectedAttributes, results.suggestedRarity]);
+
+  // Load saved items when user logs in
+  useEffect(() => {
+    const loadSavedItems = async () => {
+      if (user) {
+        const result = await getSavedItems();
+        if (result.success) {
+          setSavedItems(result.data);
+        }
+      } else {
+        setSavedItems([]);
+        setSaveStatus('idle'); // Reset save status when user logs out
+      }
+    };
+    loadSavedItems();
+  }, [user]);
 
   const addAbility = () => {
     const errors = {
@@ -738,11 +757,93 @@ export default function CalculatorPage() {
 
     if (result.success) {
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      // Perpetually stay in saved state - no reset to idle
+      // Refresh the saved items list
+      const refreshResult = await getSavedItems();
+      if (refreshResult.success) {
+        setSavedItems(refreshResult.data);
+      }
     } else {
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 3000);
     }
+  };
+
+  // Load a saved item into the calculator
+  const loadSavedItem = (item: SavedItem) => {
+    // Set basic info
+    setItemName(item.name);
+    setBaseItem(item.baseItem);
+    setAttunement(item.attunement);
+
+    // Combat features
+    const combat = item.combat;
+    setEnhancement(combat.enhancement || 0);
+    setEnhancementSometimes(combat.enhancementMultiplier === 0.5);
+    setDamageBonus(combat.damageBonus);
+    setAcBonus(combat.acBonus || 0);
+    setAcBonusSometimes(combat.acBonusMultiplier === 0.5);
+    setSavingThrowBonus(combat.savingThrowBonus || 0);
+    setSaveBonusSometimes(combat.savingThrowBonusMultiplier === 0.5);
+    setResistances(combat.resistances || []);
+    setResistancesSometimes(combat.resistancesMultiplier === 0.5);
+    setDamageImmunities(combat.damageImmunities || []);
+    setDamageImmunitiesSometimes(combat.damageImmunitiesMultiplier === 0.5);
+    setConditionImmunities(combat.conditionImmunities || []);
+    setConditionImmunitiesSometimes(combat.conditionImmunitiesMultiplier === 0.5);
+    setSpellSaveDCBonus(combat.spellSaveDCBonus || 0);
+    setSpellAttackBonus(combat.spellAttackBonus || 0);
+    setAbilityScoreSetter(combat.abilityScoreSetter);
+    setAbilityScoreBonus(combat.abilityScoreBonus);
+    setPermanentBuffs(combat.permanentBuffs || {});
+
+    // Flight
+    if (combat.flight) {
+      setFlightEnabled(true);
+      setFlySpeed(combat.flight.flySpeed);
+      setFlyDuration(combat.flight.flyDuration);
+    } else {
+      setFlightEnabled(false);
+      setFlySpeed(60);
+      setFlyDuration('unlimited');
+    }
+
+    // Weapon/Armor properties
+    setWeaponProperties(combat.weaponProperties || []);
+    setArmorProperties(combat.armorProperties || []);
+
+    // Charge pool
+    if (combat.chargePool) {
+      setMaxCharges(combat.chargePool.maxCharges);
+      setChargesPerShortRest(combat.chargePool.chargesPerShortRest || 0);
+      setChargesPerLongRest(combat.chargePool.chargesPerLongRest || 0);
+      setAbilities(combat.chargePool.abilities || []);
+    } else {
+      setMaxCharges(0);
+      setChargesPerShortRest(0);
+      setChargesPerLongRest(0);
+      setAbilities([]);
+    }
+
+    // Cosmetic/special mechanics
+    setCosmeticFeatures(item.cosmeticFeatures || '');
+    setSpecialMechanics(item.specialMechanics || '');
+
+    // Reset save status since we're loading an existing item
+    setSaveStatus('saved');
+
+    // Collapse My Items section after loading
+    setMyItemsExpanded(false);
+  };
+
+  // Delete a saved item
+  const handleDeleteItem = async (itemId: string) => {
+    setDeletingItemId(itemId);
+    const result = await deleteSavedItem(itemId);
+    if (result.success) {
+      setSavedItems(prev => prev.filter(item => item.id !== itemId));
+    }
+    setDeletingItemId(null);
   };
 
   // Generate a random "Surprise me" item with high variety
@@ -3015,10 +3116,10 @@ export default function CalculatorPage() {
                       {communityModeEnabled && (
                         <button
                           onClick={handleSaveItem}
-                          disabled={saveStatus === 'saving'}
+                          disabled={saveStatus === 'saving' || saveStatus === 'saved'}
                           className={`w-full py-3.5 px-4 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2.5 ${
                             saveStatus === 'saved'
-                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                              ? 'btn-fantasy-saved text-white cursor-default'
                               : saveStatus === 'error'
                               ? 'bg-red-600 text-white'
                               : user
@@ -3032,14 +3133,29 @@ export default function CalculatorPage() {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                               </svg>
-                              Saving...
+                              Enchanting...
                             </>
                           ) : saveStatus === 'saved' ? (
                             <>
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              {/* Sparkle particles */}
+                              <div className="btn-sparkles">
+                                <div className="sparkle"></div>
+                                <div className="sparkle"></div>
+                                <div className="sparkle"></div>
+                                <div className="sparkle"></div>
+                              </div>
+                              {/* Animated checkmark with scroll icon */}
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                <path
+                                  className="checkmark-animated"
+                                  stroke="currentColor"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2.5}
+                                  d="M5 13l4 4L19 7"
+                                />
                               </svg>
-                              Saved to Collection!
+                              <span className="relative z-10">Successfully Saved!</span>
                             </>
                           ) : saveStatus === 'error' ? (
                             <>
@@ -3064,6 +3180,93 @@ export default function CalculatorPage() {
                             </>
                           )}
                         </button>
+                      )}
+
+                      {/* My Items Section - Hidden unless ?community=1 and user is logged in */}
+                      {communityModeEnabled && user && savedItems.length > 0 && (
+                        <div className="border-t border-slate-700 pt-4">
+                          <button
+                            onClick={() => setMyItemsExpanded(!myItemsExpanded)}
+                            className="w-full flex items-center justify-between text-left group"
+                          >
+                            <div className="flex items-center gap-2">
+                              <svg className="w-5 h-5 text-emerald-400 scroll-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">
+                                My Items ({savedItems.length})
+                              </span>
+                            </div>
+                            <svg
+                              className={`w-4 h-4 text-slate-500 transition-transform ${myItemsExpanded ? 'rotate-180' : ''}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+
+                          <AnimatePresence>
+                            {myItemsExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1">
+                                  {savedItems.map((item) => (
+                                    <div
+                                      key={item.id}
+                                      className="bg-slate-800/50 border border-slate-700 rounded-lg p-3 hover:border-slate-600 transition-colors group"
+                                    >
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                          <h4 className={`font-medium truncate ${getRarityColorClass(item.suggestedRarity)}`}>
+                                            {item.name}
+                                          </h4>
+                                          <p className="text-xs text-slate-500 mt-0.5">
+                                            {item.baseItem} · {item.score.toFixed(1)} pts
+                                          </p>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <button
+                                            onClick={() => loadSavedItem(item)}
+                                            className="p-1.5 rounded bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 transition-colors"
+                                            title="Load item"
+                                          >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                            </svg>
+                                          </button>
+                                          <button
+                                            onClick={() => handleDeleteItem(item.id)}
+                                            disabled={deletingItemId === item.id}
+                                            className="p-1.5 rounded bg-red-600/20 hover:bg-red-600/40 text-red-400 transition-colors disabled:opacity-50"
+                                            title="Delete item"
+                                          >
+                                            {deletingItemId === item.id ? (
+                                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                              </svg>
+                                            ) : (
+                                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                              </svg>
+                                            )}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       )}
 
                       {/* Action Buttons */}
