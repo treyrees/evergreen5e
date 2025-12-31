@@ -21,6 +21,7 @@ import {
   getRarityBgClass,
   getMedalBorderClass,
   getRarityScaleData,
+  getRarityScalePipClass,
 } from '@/lib/calculator-ui-utils';
 import {
   BASE_ITEMS,
@@ -2228,7 +2229,7 @@ export default function CalculatorPage() {
                     const scaleData = getRarityScaleData(results.combatScore);
                     const isLegendary = results.suggestedRarity === 'Legendary';
                     const showSecondRow = isLegendary && results.combatScore >= 5.0;
-                    const rarityBgClass = getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-').replace('/80', '');
+                    const pipClass = getRarityScalePipClass(results.suggestedRarity);
 
                     // For legendary: row1 is 4.0-4.9, row2 is 5.0-5.9
                     // Position in row1: 0-9 maps to 4.0-4.9
@@ -2259,7 +2260,7 @@ export default function CalculatorPage() {
                                 key={i}
                                 className={`
                                   h-1.5 flex-1 rounded-sm transition-all duration-300
-                                  ${isFilled ? rarityBgClass : 'bg-slate-700/50'}
+                                  ${isFilled ? pipClass : 'bg-slate-700/50'}
                                 `}
                               />
                             );
@@ -2280,7 +2281,7 @@ export default function CalculatorPage() {
                                     key={i}
                                     className={`
                                       h-1.5 flex-1 rounded-sm transition-all duration-300
-                                      ${isFilled ? rarityBgClass : 'bg-slate-700/50'}
+                                      ${isFilled ? pipClass : 'bg-slate-700/50'}
                                     `}
                                   />
                                 );

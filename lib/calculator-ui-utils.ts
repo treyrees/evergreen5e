@@ -46,6 +46,20 @@ export function getMedalBorderClass(index: number): string {
 }
 
 /**
+ * Get bright background color for scale indicator pips
+ * Full brightness colors matching the rarity text colors
+ */
+export function getRarityScalePipClass(rarity: string): string {
+  const r = rarity.toLowerCase();
+  if (r === 'common') return 'bg-slate-400';
+  if (r === 'uncommon') return 'bg-emerald-400';
+  if (r === 'rare') return 'bg-sky-400';
+  if (r === 'very rare') return 'bg-violet-400';
+  if (r === 'legendary') return 'bg-amber-400';
+  return 'bg-slate-400';
+}
+
+/**
  * Rarity tier definitions for the scale indicator
  */
 const RARITY_TIERS = [
