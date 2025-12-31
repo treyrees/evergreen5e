@@ -2116,7 +2116,7 @@ export default function CalculatorPage() {
                 className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
               >
                 <div>
-                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Unique Item Details</span>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Unique Item Details</span>
                   <span className="ml-2 text-xs text-slate-500">What makes this item special?</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showItemDetails ? '−' : '+'}</span>
@@ -2353,7 +2353,7 @@ export default function CalculatorPage() {
               <div className="mt-4 bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
                 {/* Header */}
                 <div className="px-5 py-4">
-                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Your Item</span>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Your Item</span>
                 </div>
 
                 {/* DMG-Style Item Card */}
