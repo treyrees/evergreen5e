@@ -2709,19 +2709,20 @@ export default function CalculatorPage() {
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Damage Immunities:</div>
-                      <div>• Fire/Poison: 4.0 pts (very common damage)</div>
-                      <div>• Cold: 3.5 pts | Necrotic/Lightning: 3.0 pts</div>
-                      <div>• Acid: 2.5 pts | Physical (each): 2.25 pts</div>
-                      <div>• Thunder: 2.0 pts | Psychic: 1.75 pts</div>
-                      <div>• Radiant: 1.25 pts | Force: 0.75 pts (very rare)</div>
+                      <div className="text-slate-500 text-[10px] mb-1">Valued lower than resistance because immunity to one type is very situational</div>
+                      <div>• Fire: 2.0 pts | Poison/Cold: 1.75 pts</div>
+                      <div>• Necrotic/Lightning: 1.5 pts | Acid: 1.25 pts</div>
+                      <div>• Physical (each): 1.4 pts <span className="text-slate-500">(all 3 = 4.2 pts Legendary)</span></div>
+                      <div>• Thunder/Psychic: 1.0 pts | Radiant: 0.75 pts | Force: 0.5 pts</div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Condition Immunities:</div>
-                      <div>• Paralyzed: 1.5 pts | Stunned/Petrified: 1.25 pts</div>
-                      <div>• Incapacitated/Unconscious/Exhaustion: 1.0 pts</div>
-                      <div>• Charmed/Frightened/Restrained: 0.75 pts</div>
-                      <div>• Poisoned/Blinded: 0.5 pts | Deafened/Grappled/Prone: 0.25 pts</div>
+                      <div className="text-slate-500 text-[10px] mb-1">Very specific; one condition rarely matters more than once per arc</div>
+                      <div>• Paralyzed: 0.75 pts | Stunned/Petrified: 0.65 pts</div>
+                      <div>• Incapacitated/Unconscious/Exhaustion: 0.5 pts</div>
+                      <div>• Charmed/Frightened: 0.5 pts | Restrained: 0.4 pts</div>
+                      <div>• Poisoned/Blinded: 0.3 pts | Deafened/Grappled/Prone: 0.15 pts</div>
                     </div>
 
                     <div className="space-y-1">
