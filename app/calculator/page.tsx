@@ -648,7 +648,7 @@ export default function CalculatorPage() {
     }
 
     if (abilities.length > 0) {
-      const spellList = abilities.map(a => `${a.spell} (${a.chargesPerUse} charge${a.chargesPerUse > 1 ? 's' : ''}${a.canUpcast ? '+' : ''})`).join(', ');
+      const spellList = abilities.map(a => `${a.spell} (Lv${a.spellLevel}, ${a.chargesPerUse} charge${a.chargesPerUse > 1 ? 's' : ''}${a.canUpcast ? '+' : ''})`).join(', ');
       attrs.push({ key: 'spells', label: 'Spells', value: spellList });
     }
 
@@ -2790,7 +2790,7 @@ export default function CalculatorPage() {
                 className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
               >
                 <div>
-                  <span className="font-medium text-slate-200">Unique Item Details</span>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Unique Item Details</span>
                   <span className="ml-2 text-xs text-slate-500">What makes this item special?</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showItemDetails ? '−' : '+'}</span>
@@ -2814,7 +2814,7 @@ export default function CalculatorPage() {
                       className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
                     />
                     <p className="mt-1.5 text-[10px] text-slate-500">
-                      Focus on what makes your item <span className="text-slate-400">interesting</span>, not just powerful. Describe tradeoffs, conditional triggers, and how spells behave differently when cast through this item.
+                      This is the <span className="text-slate-400">essence</span> of your item. Mechanics here should be <span className="text-slate-400">balance-neutral</span> (no net power change) or <span className="text-slate-400">equally kissed and cursed</span> (benefits balanced by drawbacks).
                     </p>
                   </div>
 
@@ -2834,7 +2834,7 @@ export default function CalculatorPage() {
                       className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
                     />
                     <p className="mt-1.5 text-[10px] text-slate-500">
-                      One feature per line. These don&apos;t affect balance, just add character.
+                      Cosmetic details that add character without affecting balance.
                     </p>
                   </div>
                 </div>
@@ -3033,22 +3033,16 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Your Item Preview - Collapsible Card */}
+            {/* Your Item Preview */}
             {hasSelectedAttributes && baseItem && (
               <div className="mt-4 bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
-                {/* Collapsible Header */}
-                <button
-                  onClick={() => setShowItemPreview(!showItemPreview)}
-                  className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
-                >
-                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Your Item</span>
-                  <span className="text-slate-500 text-lg">{showItemPreview ? '−' : '+'}</span>
-                </button>
+                {/* Header */}
+                <div className="px-5 py-4">
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Your Item</span>
+                </div>
 
-                {showItemPreview && (
-                  <>
-                    {/* DMG-Style Item Card */}
-                    <div className="border-t border-slate-700 p-5 space-y-4">
+                {/* DMG-Style Item Card */}
+                <div className="border-t border-slate-700 p-5 space-y-4">
                       {/* Item Name - Large, ornate */}
                       <div className="border-b border-slate-600 pb-3">
                         <h3
@@ -3101,10 +3095,10 @@ export default function CalculatorPage() {
                           <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-2">
                             Description
                           </label>
-                          <div className="text-sm text-slate-300 bg-slate-900/50 border border-slate-700 rounded-md px-3 py-2.5">
+                          <p className="text-sm text-slate-300 whitespace-pre-wrap">
                             {previewDescription}
-                          </div>
-                          <p className="mt-1.5 text-[10px] text-slate-600">
+                          </p>
+                          <p className="mt-2 text-[10px] text-slate-600">
                             Edit in Unique Item Details above
                           </p>
                         </div>
@@ -3242,8 +3236,6 @@ export default function CalculatorPage() {
                         </p>
                       </div>
                     )}
-                  </>
-                )}
 
                 {/* Hidden canvas for image generation */}
                 <canvas ref={canvasRef} className="hidden" />
@@ -3265,7 +3257,7 @@ export default function CalculatorPage() {
                     <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span className="font-medium text-slate-200">
+                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">
                       My Items ({savedItems.length})
                     </span>
                   </div>
