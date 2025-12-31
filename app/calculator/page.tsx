@@ -1760,7 +1760,7 @@ export default function CalculatorPage() {
 
                   {/* Collapsible Helper Guide */}
                   <details className="mb-3 bg-slate-700/30 border border-slate-600 rounded-md">
-                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>
+                    <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
                       Power Level Guide
                     </summary>
                     <div className="px-3 py-3 text-xs text-slate-300 space-y-3 border-t border-slate-600">
@@ -1868,7 +1868,7 @@ export default function CalculatorPage() {
                   {/* Charge Pool Configuration */}
                   {(maxCharges > 0 || chargesPerShortRest > 0 || chargesPerLongRest > 0 || abilities.length > 0) && (
                     <div className="mb-4 p-3 bg-slate-700/30 rounded border border-slate-600">
-                      <label className="block text-xs font-medium text-slate-400 mb-2" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>
+                      <label className="block text-xs font-medium text-slate-400 mb-2">
                         Charge Pool
                       </label>
                       <div className="grid grid-cols-3 gap-2">
