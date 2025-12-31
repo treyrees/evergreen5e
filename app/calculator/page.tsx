@@ -800,8 +800,8 @@ export default function CalculatorPage() {
     // Flight
     if (combat.flight) {
       setFlightEnabled(true);
-      setFlySpeed(combat.flight.flySpeed);
-      setFlyDuration(combat.flight.flyDuration);
+      setFlySpeed(combat.flight.flySpeed ?? 60);
+      setFlyDuration(combat.flight.flyDuration ?? 'unlimited');
     } else {
       setFlightEnabled(false);
       setFlySpeed(60);
