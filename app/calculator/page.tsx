@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { motion, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType } from '@/types/magic-item';
 import {
   getSuggestedRarity,
@@ -15,157 +15,22 @@ import { useCommunityItemsPreference } from '@/lib/feature-flags';
 import { useAuth } from '@/components/auth';
 import { SignInModal, UserMenu } from '@/components/auth';
 import { saveItem, getSavedItems, deleteSavedItem, SavedItem } from '@/lib/actions/saved-items';
-
-// Animated number component for smooth score transitions
-function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: number }) {
-  const spring = useSpring(value, { stiffness: 100, damping: 20 });
-  const display = useTransform(spring, (current) => current.toFixed(decimals));
-
-  useEffect(() => {
-    spring.set(value);
-  }, [spring, value]);
-
-  return <motion.span>{display}</motion.span>;
-}
-
-// Capitalize rarity for display (e.g., "very rare" → "Very Rare")
-function capitalizeRarity(rarity: string): string {
-  return rarity.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
-
-// Get rarity color class based on rarity tier (case-insensitive)
-function getRarityColorClass(rarity: string): string {
-  const r = rarity.toLowerCase();
-  if (r === 'common') return 'text-slate-400';
-  if (r === 'uncommon') return 'text-emerald-400/80';
-  if (r === 'rare') return 'text-sky-400/80';
-  if (r === 'very rare') return 'text-violet-400/80';
-  if (r === 'legendary') return 'text-amber-400/80';
-  return 'text-slate-400';
-}
-
-// Get muted rarity background class for comparison cards
-function getRarityBgClass(rarity: string): string {
-  const r = rarity.toLowerCase();
-  if (r === 'common') return 'bg-slate-700/30';
-  if (r === 'uncommon') return 'bg-emerald-950/20';
-  if (r === 'rare') return 'bg-sky-950/20';
-  if (r === 'very rare') return 'bg-violet-950/20';
-  if (r === 'legendary') return 'bg-amber-950/20';
-  return 'bg-slate-700/30';
-}
-
-// Get medal border class (gold/silver/bronze) for comparison ranking
-function getMedalBorderClass(index: number): string {
-  if (index === 0) return 'border-amber-500/60'; // Gold
-  if (index === 1) return 'border-slate-400/60'; // Silver
-  return 'border-amber-700/50'; // Bronze
-}
-
-const BASE_ITEMS = {
-  'Melee Weapons (Simple)': [
-    'club',
-    'dagger',
-    'greatclub',
-    'handaxe',
-    'javelin',
-    'mace',
-    'quarterstaff',
-    'spear',
-  ],
-  'Melee Weapons (Martial)': [
-    'battleaxe',
-    'flail',
-    'glaive',
-    'greataxe',
-    'greatsword',
-    'halberd',
-    'lance',
-    'longsword',
-    'maul',
-    'morningstar',
-    'pike',
-    'rapier',
-    'scimitar',
-    'shortsword',
-    'trident',
-    'warhammer',
-    'whip',
-  ],
-  'Ranged Weapons': [
-    'crossbow (hand)',
-    'crossbow (heavy)',
-    'crossbow (light)',
-    'longbow',
-    'shortbow',
-  ],
-  'Armor': [
-    'armor (light)',
-    'armor (medium)',
-    'armor (heavy)',
-    'shield',
-  ],
-  'Implements': [
-    'rod',
-    'staff',
-    'wand',
-  ],
-  'Accessories': [
-    'amulet',
-    'boots',
-    'cloak',
-    'gloves',
-    'ring',
-  ],
-  'Wondrous Items': [
-    'wondrous item',
-  ],
-};
-
-// Helper to check if a base item is a weapon
-const WEAPON_ITEMS = new Set([
-  ...BASE_ITEMS['Melee Weapons (Simple)'],
-  ...BASE_ITEMS['Melee Weapons (Martial)'],
-  ...BASE_ITEMS['Ranged Weapons'],
-]);
-
-// Helper to check if a base item is armor/shield
-const ARMOR_ITEMS = new Set([
-  ...BASE_ITEMS['Armor'],
-]);
-
-const DAMAGE_TYPES = [
-  'fire',
-  'cold',
-  'lightning',
-  'acid',
-  'poison',
-  'thunder',
-  'radiant',
-  'necrotic',
-  'psychic',
-  'force',
-  'piercing',
-  'slashing',
-  'bludgeoning',
-];
-
-// Conditions ordered by combat severity (most impactful first)
-const CONDITIONS = [
-  'paralyzed',
-  'stunned',
-  'petrified',
-  'charmed',
-  'frightened',
-  'restrained',
-  'poisoned',
-  'blinded',
-  'incapacitated',
-  'prone',
-  'grappled',
-  'deafened',
-  'exhaustion',
-];
+import { AnimatedNumber } from '@/packages/evergreen-ui/src/components/AnimatedNumber';
+import {
+  capitalizeRarity,
+  getRarityColorClass,
+  getRarityBgClass,
+  getMedalBorderClass,
+} from '@/lib/calculator-ui-utils';
+import {
+  BASE_ITEMS,
+  WEAPON_ITEMS,
+  ARMOR_ITEMS,
+  DAMAGE_TYPES,
+  CONDITIONS,
+} from '@/lib/calculator-constants';
+import { generateSurpriseItem as generateSurpriseItemConfig, SurpriseItemConfig } from '@/lib/surprise-item-generator';
+import { generatePreviewImage as generatePreviewImageFn, PreviewAttribute } from '@/lib/preview-image-generator';
 
 export default function CalculatorPage() {
   // Auth state
@@ -846,419 +711,38 @@ export default function CalculatorPage() {
 
   // Generate a random "Surprise me" item with high variety
   const generateSurpriseItem = () => {
-    // Reset form first
-    setDamageBonus(undefined);
-    setAcBonus(0);
+    // Generate config using extracted function
+    const config = generateSurpriseItemConfig();
+
+    // Apply config to state (reset fields not in config)
+    setItemName(config.itemName);
+    setBaseItem(config.baseItem);
+    setEnhancement(config.enhancement);
+    setEnhancementSometimes(false);
+    setAttunement(config.attunement);
+    setDamageBonus(config.damageBonus);
+    setAcBonus(config.acBonus);
     setAcBonusSometimes(false);
-    setSavingThrowBonus(0);
+    setSavingThrowBonus(config.savingThrowBonus);
     setSaveBonusSometimes(false);
-    setResistances([]);
+    setResistances(config.resistances);
     setResistancesSometimes(false);
     setDamageImmunities([]);
     setDamageImmunitiesSometimes(false);
-    setConditionImmunities([]);
+    setConditionImmunities(config.conditionImmunities);
     setConditionImmunitiesSometimes(false);
-    setSpellSaveDCBonus(0);
-    setSpellAttackBonus(0);
-    setAbilityScoreSetter(undefined);
+    setSpellSaveDCBonus(config.spellSaveDCBonus);
+    setSpellAttackBonus(config.spellAttackBonus);
+    setAbilityScoreSetter(config.abilityScoreSetter);
     setAbilityScoreBonus(undefined);
-    setPermanentBuffs({});
+    setPermanentBuffs(config.permanentBuffs);
     setFlightEnabled(false);
     setWeaponProperties([]);
     setArmorProperties([]);
-    setMaxCharges(0);
-    setChargesPerShortRest(0);
-    setChargesPerLongRest(0);
-    setAbilities([]);
-    setEnhancement(0);
-    setEnhancementSometimes(false);
-
-    // Pick target rarity: Uncommon 50%, Rare 35%, Very Rare 15%
-    const rarityRoll = Math.random();
-    const targetRarity = rarityRoll < 0.5 ? 'uncommon' : rarityRoll < 0.85 ? 'rare' : 'very rare';
-
-    // Point budgets to stay under 3.9 (cap at Very Rare, no Legendary)
-    const pointBudget = targetRarity === 'uncommon' ? 1.4 : targetRarity === 'rare' ? 2.4 : 3.8;
-
-    // Decide on item archetype first (affects base item selection)
-    // Archetypes: weapon-focused, armor-focused, spellcaster, utility, hybrid
-    const archetypeRoll = Math.random();
-    type Archetype = 'weapon' | 'armor' | 'spellcaster' | 'utility' | 'hybrid';
-    let archetype: Archetype;
-    if (archetypeRoll < 0.25) archetype = 'weapon';
-    else if (archetypeRoll < 0.40) archetype = 'armor';
-    else if (archetypeRoll < 0.60) archetype = 'spellcaster';
-    else if (archetypeRoll < 0.80) archetype = 'utility';
-    else archetype = 'hybrid';
-
-    // Select base item based on archetype
-    let baseItemPool: string[];
-    switch (archetype) {
-      case 'weapon':
-        baseItemPool = [...BASE_ITEMS['Melee Weapons (Simple)'], ...BASE_ITEMS['Melee Weapons (Martial)'], ...BASE_ITEMS['Ranged Weapons']];
-        break;
-      case 'armor':
-        baseItemPool = [...BASE_ITEMS['Armor']];
-        break;
-      case 'spellcaster':
-        // Implements and accessories are great for spells
-        baseItemPool = [...BASE_ITEMS['Implements'], ...BASE_ITEMS['Accessories'], 'wondrous item'];
-        break;
-      case 'utility':
-        // Accessories and wondrous items for utility effects
-        baseItemPool = [...BASE_ITEMS['Accessories'], ...BASE_ITEMS['Implements'], 'wondrous item'];
-        break;
-      case 'hybrid':
-        // Any item type
-        baseItemPool = Object.values(BASE_ITEMS).flat();
-        break;
-    }
-    const randomBaseItem = baseItemPool[Math.floor(Math.random() * baseItemPool.length)];
-    setBaseItem(randomBaseItem);
-
-    const isWeapon = WEAPON_ITEMS.has(randomBaseItem);
-    const isArmor = ARMOR_ITEMS.has(randomBaseItem);
-    const isImplement = ['rod', 'staff', 'wand'].includes(randomBaseItem);
-
-    // Spell database for random selection (organized by level for appropriate rarity)
-    const SPELLS_BY_LEVEL: Record<number, { name: string; theme: string }[]> = {
-      1: [
-        { name: 'Magic Missile', theme: 'force' },
-        { name: 'Shield', theme: 'defense' },
-        { name: 'Cure Wounds', theme: 'healing' },
-        { name: 'Faerie Fire', theme: 'utility' },
-        { name: 'Thunderwave', theme: 'thunder' },
-        { name: 'Burning Hands', theme: 'fire' },
-        { name: 'Detect Magic', theme: 'utility' },
-        { name: 'Fog Cloud', theme: 'utility' },
-        { name: 'Charm Person', theme: 'enchantment' },
-        { name: 'Feather Fall', theme: 'utility' },
-      ],
-      2: [
-        { name: 'Scorching Ray', theme: 'fire' },
-        { name: 'Hold Person', theme: 'enchantment' },
-        { name: 'Invisibility', theme: 'illusion' },
-        { name: 'Misty Step', theme: 'teleportation' },
-        { name: 'Shatter', theme: 'thunder' },
-        { name: 'Web', theme: 'control' },
-        { name: 'Darkness', theme: 'shadow' },
-        { name: 'Lesser Restoration', theme: 'healing' },
-        { name: 'Levitate', theme: 'utility' },
-        { name: 'See Invisibility', theme: 'utility' },
-      ],
-      3: [
-        { name: 'Fireball', theme: 'fire' },
-        { name: 'Lightning Bolt', theme: 'lightning' },
-        { name: 'Fly', theme: 'movement' },
-        { name: 'Counterspell', theme: 'defense' },
-        { name: 'Dispel Magic', theme: 'utility' },
-        { name: 'Haste', theme: 'buff' },
-        { name: 'Fear', theme: 'enchantment' },
-        { name: 'Slow', theme: 'debuff' },
-        { name: 'Spirit Guardians', theme: 'radiant' },
-        { name: 'Call Lightning', theme: 'lightning' },
-      ],
-      4: [
-        { name: 'Dimension Door', theme: 'teleportation' },
-        { name: 'Polymorph', theme: 'transmutation' },
-        { name: 'Wall of Fire', theme: 'fire' },
-        { name: 'Greater Invisibility', theme: 'illusion' },
-        { name: 'Ice Storm', theme: 'cold' },
-        { name: 'Banishment', theme: 'abjuration' },
-        { name: 'Confusion', theme: 'enchantment' },
-        { name: 'Freedom of Movement', theme: 'buff' },
-      ],
-      5: [
-        { name: 'Cone of Cold', theme: 'cold' },
-        { name: 'Hold Monster', theme: 'enchantment' },
-        { name: 'Wall of Force', theme: 'force' },
-        { name: 'Cloudkill', theme: 'poison' },
-        { name: 'Flame Strike', theme: 'fire' },
-        { name: 'Greater Restoration', theme: 'healing' },
-        { name: 'Teleportation Circle', theme: 'teleportation' },
-      ],
-    };
-
-    // Track points spent
-    let pointsSpent = 0;
-
-    // Define attribute types
-    type MajorAttr = 'enhancement' | 'damage' | 'ac' | 'saves' | 'spells' | 'abilityScore';
-    type MinorAttr = 'resistance' | 'conditionImmunity' | 'permanentBuff' | 'spellBonus' | 'advantage';
-
-    // Build attribute pools based on archetype
-    const possibleMajor: MajorAttr[] = [];
-    const possibleMinor: MinorAttr[] = [];
-
-    // Major attributes
-    if (isWeapon) {
-      possibleMajor.push('enhancement', 'damage');
-    }
-    if (isArmor) {
-      possibleMajor.push('enhancement', 'ac');
-    }
-    if (!isWeapon && !isArmor) {
-      possibleMajor.push('ac', 'saves');
-    }
-    // Spells can appear on any item, but more likely on implements/accessories
-    if (archetype === 'spellcaster' || archetype === 'hybrid' || isImplement) {
-      possibleMajor.push('spells', 'spells'); // Double weight for spell-focused
-    } else if (Math.random() < 0.3) {
-      possibleMajor.push('spells'); // 30% chance for other archetypes
-    }
-    // Ability score setters for rare+ items
-    if (targetRarity !== 'uncommon' && Math.random() < 0.25) {
-      possibleMajor.push('abilityScore');
-    }
-
-    // Minor attributes (all items can have these)
-    possibleMinor.push('resistance', 'conditionImmunity', 'permanentBuff');
-    if (archetype === 'spellcaster' || isImplement) {
-      possibleMinor.push('spellBonus');
-    }
-    if (isWeapon || archetype === 'utility') {
-      possibleMinor.push('advantage');
-    }
-
-    // Shuffle and select attributes
-    const shuffledMajor = [...new Set(possibleMajor)].sort(() => Math.random() - 0.5);
-    const shuffledMinor = [...new Set(possibleMinor)].sort(() => Math.random() - 0.5);
-
-    // Pick 1-2 major, 0-2 minor depending on rarity
-    const numMajorTarget = targetRarity === 'uncommon' ? 1 : Math.random() < 0.6 ? 1 : 2;
-    const numMinorTarget = Math.random() < 0.4 ? 1 : Math.random() < 0.8 ? 2 : 0;
-
-    // Damage types
-    const goodDamageTypes = ['fire', 'cold', 'lightning', 'radiant', 'necrotic', 'force', 'thunder', 'psychic'];
-    const resistanceTypes = ['fire', 'cold', 'lightning', 'acid', 'poison', 'thunder', 'necrotic', 'radiant', 'psychic'];
-    const conditions = ['frightened', 'charmed', 'poisoned', 'paralyzed', 'stunned'];
-    const abilities: ('STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA')[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
-
-    // Apply major attributes
-    let majorsApplied = 0;
-    for (const attr of shuffledMajor) {
-      if (majorsApplied >= numMajorTarget) break;
-      if (pointsSpent >= pointBudget - 0.3) break; // Leave room for minors
-
-      switch (attr) {
-        case 'enhancement':
-          if (isWeapon || isArmor) {
-            const bonus = targetRarity === 'uncommon' ? 1 : targetRarity === 'rare' ? (Math.random() < 0.7 ? 1 : 2) : 2;
-            const cost = bonus * 1.0;
-            if (pointsSpent + cost <= pointBudget) {
-              setEnhancement(bonus);
-              pointsSpent += cost;
-              majorsApplied++;
-            }
-          }
-          break;
-
-        case 'damage':
-          if (isWeapon) {
-            // Scale dice by rarity and remaining budget
-            let dice = '1d6';
-            let cost = 1.0;
-            if (targetRarity === 'very rare' && pointBudget - pointsSpent >= 2.0) {
-              dice = Math.random() < 0.5 ? '2d6' : '1d8';
-              cost = dice === '2d6' ? 2.0 : 1.1;
-            } else if (targetRarity === 'rare' && Math.random() < 0.3 && pointBudget - pointsSpent >= 1.5) {
-              dice = '1d8';
-              cost = 1.1;
-            }
-            if (pointsSpent + cost <= pointBudget) {
-              const dmgType = goodDamageTypes[Math.floor(Math.random() * goodDamageTypes.length)];
-              setDamageBonus({ dice, type: dmgType as DamageBonus['type'], frequency: 'per-hit' });
-              pointsSpent += cost;
-              majorsApplied++;
-            }
-          }
-          break;
-
-        case 'ac':
-          if (!isWeapon) {
-            const bonus = targetRarity === 'uncommon' ? 1 : targetRarity === 'rare' ? 1 : (Math.random() < 0.5 ? 1 : 2);
-            // AC on non-armor is 1.5 pts per +1, on armor is 1.0
-            const costPer = isArmor ? 1.0 : 1.5;
-            const cost = bonus * costPer;
-            if (pointsSpent + cost <= pointBudget) {
-              setAcBonus(bonus);
-              pointsSpent += cost;
-              majorsApplied++;
-            }
-          }
-          break;
-
-        case 'saves':
-          {
-            const bonus = targetRarity === 'uncommon' ? 1 : Math.random() < 0.7 ? 1 : 2;
-            const cost = bonus * 1.0;
-            if (pointsSpent + cost <= pointBudget) {
-              setSavingThrowBonus(bonus);
-              pointsSpent += cost;
-              majorsApplied++;
-            }
-          }
-          break;
-
-        case 'spells':
-          {
-            // Pick spell level based on rarity
-            // Uncommon: level 1-2, Rare: level 2-4, Very Rare: level 3-5
-            let maxSpellLevel: number;
-            let minSpellLevel: number;
-            if (targetRarity === 'uncommon') {
-              minSpellLevel = 1; maxSpellLevel = 2;
-            } else if (targetRarity === 'rare') {
-              minSpellLevel = 2; maxSpellLevel = 4;
-            } else {
-              minSpellLevel = 3; maxSpellLevel = 5;
-            }
-            const spellLevel = minSpellLevel + Math.floor(Math.random() * (maxSpellLevel - minSpellLevel + 1));
-            const spellPool = SPELLS_BY_LEVEL[spellLevel] || SPELLS_BY_LEVEL[3];
-            const spell = spellPool[Math.floor(Math.random() * spellPool.length)];
-
-            // Determine charges based on spell level and rarity
-            // Higher level = fewer uses, lower level = more uses
-            let maxChargesVal: number;
-            let chargesPerLongRestVal: number;
-            if (spellLevel <= 2) {
-              maxChargesVal = targetRarity === 'uncommon' ? 3 : targetRarity === 'rare' ? 5 : 7;
-              chargesPerLongRestVal = maxChargesVal;
-            } else if (spellLevel <= 3) {
-              maxChargesVal = targetRarity === 'uncommon' ? 3 : targetRarity === 'rare' ? 5 : 7;
-              chargesPerLongRestVal = Math.ceil(maxChargesVal * 0.7);
-            } else {
-              maxChargesVal = targetRarity === 'rare' ? 3 : 5;
-              chargesPerLongRestVal = Math.ceil(maxChargesVal * 0.6);
-            }
-
-            // Estimate cost (simplified: level * uses_per_day * 0.2)
-            const usesPerDay = chargesPerLongRestVal / spellLevel;
-            const SPELL_VALUES: Record<number, number> = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 };
-            const effectiveLevel = SPELL_VALUES[spellLevel] || spellLevel;
-            const estimatedCost = effectiveLevel * usesPerDay * 0.2;
-
-            if (pointsSpent + estimatedCost <= pointBudget) {
-              setMaxCharges(maxChargesVal);
-              setChargesPerLongRest(chargesPerLongRestVal);
-              // Small chance for short rest recharge too
-              if (Math.random() < 0.2) {
-                setChargesPerShortRest(Math.floor(maxChargesVal / 3));
-              }
-              setAbilities([{
-                spell: spell.name,
-                spellLevel,
-                chargesPerUse: spellLevel,
-                canUpcast: Math.random() < 0.3 && spellLevel >= 1 && maxChargesVal >= spellLevel + 1,
-              }]);
-              pointsSpent += estimatedCost;
-              majorsApplied++;
-            }
-          }
-          break;
-
-        case 'abilityScore':
-          {
-            // Pick an ability and a value based on rarity
-            const ability = abilities[Math.floor(Math.random() * abilities.length)];
-            const setValue = targetRarity === 'rare' ? 19 : 21; // 19 for rare, 21 for very rare
-            const cost = setValue === 19 ? 1.5 : 2.5;
-            if (pointsSpent + cost <= pointBudget) {
-              setAbilityScoreSetter({ ability, setValue });
-              pointsSpent += cost;
-              majorsApplied++;
-            }
-          }
-          break;
-      }
-    }
-
-    // Apply minor attributes
-    let minorsApplied = 0;
-    for (const attr of shuffledMinor) {
-      if (minorsApplied >= numMinorTarget) break;
-      if (pointsSpent >= pointBudget) break;
-
-      switch (attr) {
-        case 'resistance':
-          {
-            const cost = 0.5;
-            if (pointsSpent + cost <= pointBudget) {
-              const resistance = resistanceTypes[Math.floor(Math.random() * resistanceTypes.length)];
-              setResistances([resistance]);
-              pointsSpent += cost;
-              minorsApplied++;
-            }
-          }
-          break;
-
-        case 'conditionImmunity':
-          {
-            const cost = 0.3;
-            if (pointsSpent + cost <= pointBudget) {
-              const condition = conditions[Math.floor(Math.random() * conditions.length)];
-              setConditionImmunities([condition]);
-              pointsSpent += cost;
-              minorsApplied++;
-            }
-          }
-          break;
-
-        case 'permanentBuff':
-          {
-            // Pick a permanent buff
-            const buffOptions: { key: keyof typeof permanentBuffs; cost: number }[] = [
-              { key: 'darkvision', cost: 0.2 },
-              { key: 'speedBonus', cost: 0.3 },
-              { key: 'swimming', cost: 0.2 },
-              { key: 'climbBurrow', cost: 0.5 },
-            ];
-            // Flight only for rare+ due to high value
-            if (targetRarity !== 'uncommon') {
-              buffOptions.push({ key: 'flight', cost: 1.0 });
-            }
-            const buff = buffOptions[Math.floor(Math.random() * buffOptions.length)];
-            if (pointsSpent + buff.cost <= pointBudget) {
-              setPermanentBuffs({ [buff.key]: true });
-              pointsSpent += buff.cost;
-              minorsApplied++;
-            }
-          }
-          break;
-
-        case 'spellBonus':
-          {
-            // +1 or +2 to spell save DC or spell attack
-            const bonus = targetRarity === 'uncommon' ? 1 : Math.random() < 0.7 ? 1 : 2;
-            const cost = bonus * 0.5;
-            if (pointsSpent + cost <= pointBudget) {
-              if (Math.random() < 0.5) {
-                setSpellSaveDCBonus(bonus);
-              } else {
-                setSpellAttackBonus(bonus);
-              }
-              pointsSpent += cost;
-              minorsApplied++;
-            }
-          }
-          break;
-
-        case 'advantage':
-          // Advantage on specific rolls (not implemented in state, skip for now)
-          break;
-      }
-    }
-
-    // Set attunement: always for rare+ or items with 2+ features, sometimes for uncommon
-    const totalFeatures = majorsApplied + minorsApplied;
-    if (targetRarity !== 'uncommon' || totalFeatures >= 2) {
-      setAttunement(true);
-    } else {
-      setAttunement(Math.random() < 0.4);
-    }
-
-    // Generate a random item name
-    setItemName(generateRandomItemName());
+    setMaxCharges(config.maxCharges);
+    setChargesPerShortRest(config.chargesPerShortRest);
+    setChargesPerLongRest(config.chargesPerLongRest);
+    setAbilities(config.abilities);
   };
 
   // Quick start templates for new users
@@ -1329,173 +813,19 @@ export default function CalculatorPage() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const dataUrl = generatePreviewImageFn(canvas, {
+      displayName: getDisplayName(),
+      typeLine: buildTypeLine(),
+      description: previewDescription,
+      attributes: previewAttributes,
+      hiddenAttributeKeys: hiddenAttributes,
+      suggestedRarity: results.suggestedRarity,
+      combatScore: results.combatScore,
+    });
 
-    // DMG-style colors
-    const parchment = '#f4e4bc';
-    const headerRed = '#58180D';
-    const bodyText = '#1a1a1a';
-    const accentGold = '#c9ad6a';
-
-    const width = 400;
-    const padding = 24;
-
-    // Filter visible attributes
-    const visibleAttrs = previewAttributes.filter(attr => !hiddenAttributes.has(attr.key));
-
-    // Calculate dynamic height based on content
-    let contentHeight = 0;
-    contentHeight += 36; // Name
-    contentHeight += 20; // Type line
-    contentHeight += 16; // Spacing after header
-    contentHeight += visibleAttrs.length * 22; // Attributes
-    if (visibleAttrs.length > 0) contentHeight += 12; // Spacing after attributes
-    if (previewDescription.trim()) {
-      // Estimate description lines
-      ctx.font = '13px Georgia, serif';
-      const words = previewDescription.split(' ');
-      let lineCount = 1;
-      let testLine = '';
-      for (const word of words) {
-        const test = testLine + word + ' ';
-        if (testLine && ctx.measureText(test).width > width - padding * 2 - 10) {
-          lineCount++;
-          testLine = word + ' ';
-        } else {
-          testLine = test;
-        }
-      }
-      contentHeight += lineCount * 18 + 8;
+    if (dataUrl) {
+      setPreviewImageUrl(dataUrl);
     }
-    contentHeight += 36; // Score badge
-
-    const height = Math.max(200, contentHeight + padding * 2 + 20);
-    canvas.width = width;
-    canvas.height = height;
-
-    // Parchment background
-    ctx.fillStyle = parchment;
-    ctx.fillRect(0, 0, width, height);
-
-    // Add subtle texture/grain effect
-    ctx.fillStyle = 'rgba(139, 119, 85, 0.03)';
-    for (let i = 0; i < 2000; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      ctx.fillRect(x, y, 1, 1);
-    }
-
-    // Simple border
-    ctx.strokeStyle = headerRed;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(6, 6, width - 12, height - 12);
-
-    let y = padding + 8;
-
-    // Item Name - Large, in header red
-    ctx.fillStyle = headerRed;
-    ctx.font = 'bold 22px Georgia, serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(getDisplayName(), padding, y);
-    y += 24;
-
-    // Type line - Italic
-    ctx.fillStyle = bodyText;
-    ctx.font = 'italic 12px Georgia, serif';
-    ctx.fillText(buildTypeLine(), padding, y);
-    y += 20;
-
-    // Red decorative line under header
-    ctx.strokeStyle = headerRed;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(padding, y);
-    ctx.lineTo(width - padding, y);
-    ctx.stroke();
-    y += 16;
-
-    // Attributes
-    ctx.textAlign = 'left';
-    for (const attr of visibleAttrs) {
-      // Bullet
-      ctx.fillStyle = bodyText;
-      ctx.font = '13px Georgia, serif';
-      ctx.fillText('•', padding + 4, y);
-
-      // Bold label
-      ctx.font = 'bold 13px Georgia, serif';
-      ctx.fillText(`${attr.label}.`, padding + 18, y);
-      const labelWidth = ctx.measureText(`${attr.label}. `).width;
-
-      // Value
-      ctx.font = '13px Georgia, serif';
-      const maxValueWidth = width - padding * 2 - 18 - labelWidth - 8;
-      let valueText = attr.value;
-      if (ctx.measureText(valueText).width > maxValueWidth) {
-        while (ctx.measureText(valueText + '...').width > maxValueWidth && valueText.length > 0) {
-          valueText = valueText.slice(0, -1);
-        }
-        valueText += '...';
-      }
-      ctx.fillText(valueText, padding + 18 + labelWidth + 4, y);
-      y += 20;
-    }
-
-    // Description
-    if (previewDescription.trim()) {
-      y += 4;
-      ctx.fillStyle = bodyText;
-      ctx.font = '13px Georgia, serif';
-      ctx.textAlign = 'left';
-
-      // Word wrap description
-      const words = previewDescription.split(' ');
-      let line = '';
-      const maxWidth = width - padding * 2 - 10;
-
-      for (const word of words) {
-        const testLine = line + word + ' ';
-        if (ctx.measureText(testLine).width > maxWidth && line !== '') {
-          ctx.fillText(line.trim(), padding + 4, y);
-          line = word + ' ';
-          y += 18;
-        } else {
-          line = testLine;
-        }
-      }
-      if (line.trim()) {
-        ctx.fillText(line.trim(), padding + 4, y);
-        y += 18;
-      }
-    }
-
-    // Bottom section with rarity and score
-    y = height - padding - 24;
-
-    // Gold accent line
-    ctx.strokeStyle = accentGold;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(padding, y);
-    ctx.lineTo(width - padding, y);
-    ctx.stroke();
-    y += 18;
-
-    // Rarity and Score on same line
-    ctx.fillStyle = headerRed;
-    ctx.font = 'bold 14px Georgia, serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(results.suggestedRarity.toUpperCase(), padding, y);
-
-    ctx.fillStyle = '#666';
-    ctx.font = '12px Georgia, serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${results.combatScore.toFixed(1)} pts`, width - padding, y);
-
-    // Generate image URL
-    const dataUrl = canvas.toDataURL('image/png');
-    setPreviewImageUrl(dataUrl);
   };
 
   return (
