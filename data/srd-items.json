@@ -515,6 +515,19 @@
     }
   },
   {
+    "name": "Periapt of Proof Against Poison",
+    "baseItem": "amulet",
+    "rarity": "rare",
+    "attunement": true,
+    "dndbeyondSlug": "4693-periapt-of-proof-against-poison",
+    "combat": {
+      "enhancement": 0,
+      "damageImmunities": ["poison"],
+      "conditionImmunities": ["poisoned"]
+    },
+    "description": "Immunity to poison damage and the poisoned condition. Key calibration item for immunity values."
+  },
+  {
     "name": "Headband of Intellect",
     "baseItem": "headband",
     "rarity": "uncommon",
