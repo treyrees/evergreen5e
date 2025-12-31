@@ -88,21 +88,32 @@ export interface ConditionInfliction {
   dc: number; // Save DC
 }
 
-// Advantage types for checks and saves
-// Individual saves sum to 5.0 pts (Very Rare); select all 6 for "all saves"
-export type AdvantageType =
-  | 'initiative'      // Advantage on Initiative rolls (0.75 pts)
-  | 'attack'          // Advantage on attack rolls with this weapon (1.0 pts)
+// Bonus target types for advantage and proficiency bonuses
+// These are the things you can have advantage on or add proficiency bonus to
+// Individual saves sum to 5.0 pts (Very Rare) when all selected
+export type BonusTargetType =
+  | 'initiative'      // Initiative rolls (0.75 pts)
+  | 'attack'          // Attack rolls with this weapon (1.0 pts)
   // Individual saves (sum to 5.0 pts when all selected)
-  | 'dex-saves'       // Advantage on DEX saves (1.25 pts)
-  | 'wis-saves'       // Advantage on WIS saves (1.10 pts)
-  | 'con-saves'       // Advantage on CON saves (1.00 pts)
-  | 'str-saves'       // Advantage on STR saves (0.65 pts)
-  | 'cha-saves'       // Advantage on CHA saves (0.60 pts)
-  | 'int-saves'       // Advantage on INT saves (0.40 pts)
+  | 'dex-saves'       // DEX saves (1.25 pts)
+  | 'wis-saves'       // WIS saves (1.10 pts)
+  | 'con-saves'       // CON saves (1.00 pts)
+  | 'str-saves'       // STR saves (0.65 pts)
+  | 'cha-saves'       // CHA saves (0.60 pts)
+  | 'int-saves'       // INT saves (0.40 pts)
   // Skills
-  | 'perception'      // Advantage on Perception checks (0.25 pts)
-  | 'stealth';        // Advantage on Stealth checks (0.25 pts)
+  | 'perception'      // Perception checks (0.25 pts)
+  | 'stealth';        // Stealth checks (0.25 pts)
+
+// Legacy alias for backwards compatibility
+export type AdvantageType = BonusTargetType;
+
+// Other skills bonus tracking (for skills beyond perception/stealth)
+export interface OtherSkillsBonus {
+  count: number;           // How many other skills (0-16)
+  hasAdvantage: boolean;   // Advantage on those skills
+  hasProficiency: boolean; // Add proficiency to those skills
+}
 
 // Weapon properties that can be added to magic weapons
 // These represent properties not normally on the base weapon type
@@ -147,9 +158,13 @@ export interface CombatFeatures {
   flight?: Flight; // Grants flight (e.g., Broom of Flying, Winged Boots) - LEGACY: use permanentBuffs.flight instead
   permanentBuffs?: PermanentBuffs; // Always-on passive benefits (flight, senses, speed)
 
-  // New SRD 5.2.1 mechanics
+  // Advantage & Proficiency Bonuses
   advantage?: AdvantageType[]; // Advantage on specific checks/saves (e.g., Sentinel Shield: initiative, perception)
-  advantageMultiplier?: number; // 0.5 for "Sometimes" active advantages
+  proficiencyBonuses?: BonusTargetType[]; // Add proficiency bonus to checks/saves (e.g., +Prof to initiative)
+  otherSkillsBonus?: OtherSkillsBonus; // Advantage/proficiency on skills beyond perception/stealth
+  advantageMultiplier?: number; // 0.5 for "Sometimes" active advantages/proficiencies
+
+  // New SRD 5.2.1 mechanics
   reactionAC?: ReactionAC; // Reaction-based AC bonus (e.g., Quarterstaff of the Acrobat: +5 AC)
   bonusActionDamage?: BonusActionDamage; // Damage as bonus action (e.g., Shield of the Cavalier bash)
   conditionInfliction?: ConditionInfliction; // Inflict conditions on attacks (e.g., Energy Bow restraint)

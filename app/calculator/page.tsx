@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType, AdvantageType } from '@/types/magic-item';
+import { MagicItem, DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType, AdvantageType, BonusTargetType } from '@/types/magic-item';
 import {
   getSuggestedRarity,
   findTopAnchorItems,
@@ -84,9 +84,13 @@ export default function CalculatorPage() {
   // Armor properties state (for adding properties to armor/shields)
   const [armorProperties, setArmorProperties] = useState<ArmorProperty[]>([]);
 
-  // Advantage state (advantage on saves, checks, etc.)
+  // Advantage & Proficiencies state
   const [advantages, setAdvantages] = useState<AdvantageType[]>([]);
-  const [advantagesSometimes, setAdvantagesSometimes] = useState(false);
+  const [proficiencies, setProficiencies] = useState<BonusTargetType[]>(['attack']); // 'attack' always checked (you always add prof to attacks)
+  const [otherSkillsCount, setOtherSkillsCount] = useState(0);
+  const [otherSkillsAdvantage, setOtherSkillsAdvantage] = useState(false);
+  const [otherSkillsProficiency, setOtherSkillsProficiency] = useState(false);
+  const [bonusesSometimes, setBonusesSometimes] = useState(false);
 
   // Charge pool state (new intuitive system)
   const [maxCharges, setMaxCharges] = useState(0);
@@ -160,7 +164,11 @@ export default function CalculatorPage() {
         setWeaponProperties(decoded.weaponProperties);
         setArmorProperties(decoded.armorProperties);
         setAdvantages(decoded.advantages);
-        setAdvantagesSometimes(decoded.advantagesSometimes);
+        setProficiencies(decoded.proficiencies || ['attack']);
+        setOtherSkillsCount(decoded.otherSkillsCount || 0);
+        setOtherSkillsAdvantage(decoded.otherSkillsAdvantage || false);
+        setOtherSkillsProficiency(decoded.otherSkillsProficiency || false);
+        setBonusesSometimes(decoded.bonusesSometimes || decoded.advantagesSometimes || false);
         setMaxCharges(decoded.maxCharges);
         setChargesPerShortRest(decoded.chargesPerShortRest);
         setChargesPerLongRest(decoded.chargesPerLongRest);
@@ -267,14 +275,20 @@ export default function CalculatorPage() {
       weaponProperties: weaponProperties.length > 0 ? weaponProperties : undefined,
       armorProperties: armorProperties.length > 0 ? armorProperties : undefined,
       advantage: advantages.length > 0 ? advantages : undefined,
-      advantageMultiplier: advantagesSometimes ? 0.5 : undefined,
+      proficiencyBonuses: proficiencies.filter(p => p !== 'attack').length > 0 ? proficiencies.filter(p => p !== 'attack') : undefined,
+      otherSkillsBonus: (otherSkillsCount > 0 && (otherSkillsAdvantage || otherSkillsProficiency)) ? {
+        count: otherSkillsCount,
+        hasAdvantage: otherSkillsAdvantage,
+        hasProficiency: otherSkillsProficiency,
+      } : undefined,
+      advantageMultiplier: bonusesSometimes ? 0.5 : undefined,
     },
     attunement,
     description: specialMechanics.trim() || undefined,
     ribbons: cosmeticFeatures.trim() ? {
       cosmetic: cosmeticFeatures.split('\n').map(s => s.trim()).filter(Boolean),
     } : undefined,
-  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties, advantages, advantagesSometimes, specialMechanics, cosmeticFeatures]);
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties, advantages, proficiencies, otherSkillsCount, otherSkillsAdvantage, otherSkillsProficiency, bonusesSometimes, specialMechanics, cosmeticFeatures]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -285,6 +299,8 @@ export default function CalculatorPage() {
   // Update body background based on rarity when item is populated
   useEffect(() => {
     if (hasSelectedAttributes) {
+      // Enable background transitions (not on by default to prevent flash on page load)
+      document.body.classList.add('rarity-transition');
       // First transition is 3s, subsequent are 1s
       if (isFirstTransition.current) {
         document.body.classList.remove('fast-transition');
@@ -306,6 +322,7 @@ export default function CalculatorPage() {
     return () => {
       delete document.body.dataset.rarity;
       document.body.classList.remove('fast-transition');
+      document.body.classList.remove('rarity-transition');
     };
   }, [hasSelectedAttributes, results.suggestedRarity]);
 
@@ -487,22 +504,37 @@ export default function CalculatorPage() {
       attrs.push({ key: 'buffs', label: 'Senses & Movement', value: buffs.join(', ') });
     }
 
+    // Build advantage & proficiency summary
+    const bonusLabels: Record<string, string> = {
+      'initiative': 'initiative',
+      'attack': 'attacks',
+      'dex-saves': 'DEX saves',
+      'con-saves': 'CON saves',
+      'wis-saves': 'WIS saves',
+      'str-saves': 'STR saves',
+      'int-saves': 'INT saves',
+      'cha-saves': 'CHA saves',
+      'perception': 'Perception',
+      'stealth': 'Stealth',
+    };
+    const suffix = bonusesSometimes ? ' (conditional)' : '';
+
     if (advantages.length > 0) {
-      const advLabels: Record<string, string> = {
-        'initiative': 'initiative',
-        'attack': 'attacks with this weapon',
-        'dex-saves': 'DEX saves',
-        'con-saves': 'CON saves',
-        'wis-saves': 'WIS saves',
-        'str-saves': 'STR saves',
-        'int-saves': 'INT saves',
-        'cha-saves': 'CHA saves',
-        'perception': 'Perception checks',
-        'stealth': 'Stealth checks',
-      };
-      const advText = advantages.map(a => advLabels[a] || a).join(', ');
-      const suffix = advantagesSometimes ? ' (conditional)' : '';
+      const advText = advantages.map(a => bonusLabels[a] || a).join(', ');
       attrs.push({ key: 'advantage', label: 'Advantage', value: `Advantage on ${advText}${suffix}` });
+    }
+
+    const profWithoutAttack = proficiencies.filter(p => p !== 'attack');
+    if (profWithoutAttack.length > 0) {
+      const profText = profWithoutAttack.map(p => bonusLabels[p] || p).join(', ');
+      attrs.push({ key: 'proficiency', label: '+Proficiency', value: `Add proficiency bonus to ${profText}${suffix}` });
+    }
+
+    if (otherSkillsCount > 0 && (otherSkillsAdvantage || otherSkillsProficiency)) {
+      const bonusTypes = [];
+      if (otherSkillsAdvantage) bonusTypes.push('advantage');
+      if (otherSkillsProficiency) bonusTypes.push('+proficiency');
+      attrs.push({ key: 'otherSkills', label: 'Other Skills', value: `${bonusTypes.join(' & ')} on ${otherSkillsCount} other skill${otherSkillsCount === 1 ? '' : 's'}${suffix}` });
     }
 
     if (weaponProperties.length > 0) {
@@ -544,7 +576,7 @@ export default function CalculatorPage() {
     }
 
     return attrs;
-  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, advantages, advantagesSometimes, weaponProperties, armorProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
+  }, [enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, flightEnabled, flySpeed, flyDuration, permanentBuffs, advantages, proficiencies, otherSkillsCount, otherSkillsAdvantage, otherSkillsProficiency, bonusesSometimes, weaponProperties, armorProperties, abilities, maxCharges, chargesPerLongRest, chargesPerShortRest]);
 
   // Copy shareable link to clipboard
   const copyShareLink = async () => {
@@ -576,7 +608,11 @@ export default function CalculatorPage() {
       weaponProperties,
       armorProperties,
       advantages,
-      advantagesSometimes,
+      proficiencies,
+      otherSkillsCount,
+      otherSkillsAdvantage,
+      otherSkillsProficiency,
+      bonusesSometimes,
       maxCharges,
       chargesPerShortRest,
       chargesPerLongRest,
@@ -1660,198 +1696,259 @@ export default function CalculatorPage() {
                     </div>
                   </details>
 
-                  {/* Advantage - Collapsible */}
+                  {/* Advantage & Proficiencies - Collapsible */}
                   <details className="bg-slate-700/30 border border-slate-600 rounded-md font-sans">
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
-                      Advantage
-                      {advantages.length > 0 && (
-                        <span className="ml-2 text-xs text-slate-500">({advantages.length} selected{advantagesSometimes ? ', sometimes' : ''})</span>
+                      Advantage & Proficiencies
+                      {(advantages.length > 0 || proficiencies.filter(p => p !== 'attack').length > 0 || (otherSkillsCount > 0 && (otherSkillsAdvantage || otherSkillsProficiency))) && (
+                        <span className="ml-2 text-xs text-slate-500">
+                          ({advantages.length + proficiencies.filter(p => p !== 'attack').length + (otherSkillsCount > 0 && (otherSkillsAdvantage || otherSkillsProficiency) ? 1 : 0)} selected{bonusesSometimes ? ', sometimes' : ''})
+                        </span>
                       )}
                     </summary>
                     <div className="px-3 pb-3 pt-2 border-t border-slate-600">
+                      {/* Column Headers */}
+                      <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center mb-2 pb-2 border-b border-slate-600/50">
+                        <div className="text-xs text-slate-500"></div>
+                        <div className="text-xs text-slate-400 text-center w-12">Adv</div>
+                        <div className="text-xs text-slate-400 text-center w-12">+Prof</div>
+                      </div>
+
                       {/* Combat */}
                       <div className="mb-3">
                         <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">Combat</div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('initiative')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'initiative']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'initiative'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
+                        <div className="space-y-1">
+                          {/* Initiative */}
+                          <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center py-1.5 px-2 rounded hover:bg-slate-700/30">
                             <span className="text-sm text-slate-300">Initiative</span>
-                          </label>
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('attack')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'attack']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'attack'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
-                            <span className="text-sm text-slate-300">Attacks (this weapon)</span>
-                          </label>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={advantages.includes('initiative')}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setAdvantages([...advantages, 'initiative']);
+                                  } else {
+                                    setAdvantages(advantages.filter(a => a !== 'initiative'));
+                                  }
+                                }}
+                                className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                              />
+                            </div>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={proficiencies.includes('initiative')}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setProficiencies([...proficiencies, 'initiative']);
+                                  } else {
+                                    setProficiencies(proficiencies.filter(p => p !== 'initiative'));
+                                  }
+                                }}
+                                className="h-4 w-4 text-blue-500 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                          {/* Attacks */}
+                          <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center py-1.5 px-2 rounded hover:bg-slate-700/30">
+                            <span className="text-sm text-slate-300">Attacks</span>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={advantages.includes('attack')}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setAdvantages([...advantages, 'attack']);
+                                  } else {
+                                    setAdvantages(advantages.filter(a => a !== 'attack'));
+                                  }
+                                }}
+                                className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                              />
+                            </div>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={true}
+                                disabled
+                                title="You always add proficiency to attack rolls"
+                                className="h-4 w-4 text-blue-500 rounded border-slate-600 bg-slate-700 cursor-not-allowed opacity-50"
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
 
                       {/* Saving Throws */}
                       <div className="mb-3">
                         <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">Saving Throws</div>
-                        <div className="grid grid-cols-2 gap-2 mb-2">
-                          {/* Individual saves - common three */}
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('dex-saves')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'dex-saves']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'dex-saves'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
-                            <span className="text-sm text-slate-300">DEX saves</span>
-                          </label>
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('con-saves')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'con-saves']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'con-saves'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
-                            <span className="text-sm text-slate-300">CON saves</span>
-                          </label>
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('wis-saves')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'wis-saves']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'wis-saves'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
-                            <span className="text-sm text-slate-300">WIS saves</span>
-                          </label>
-                          {/* Individual saves - uncommon three */}
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('str-saves')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'str-saves']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'str-saves'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
-                            <span className="text-sm text-slate-300">STR saves</span>
-                          </label>
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('int-saves')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'int-saves']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'int-saves'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
-                            <span className="text-sm text-slate-300">INT saves</span>
-                          </label>
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('cha-saves')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'cha-saves']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'cha-saves'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
-                            <span className="text-sm text-slate-300">CHA saves</span>
-                          </label>
+                        <div className="space-y-1">
+                          {(['dex-saves', 'con-saves', 'wis-saves', 'str-saves', 'int-saves', 'cha-saves'] as const).map((save) => {
+                            const label = save.replace('-saves', '').toUpperCase();
+                            return (
+                              <div key={save} className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center py-1.5 px-2 rounded hover:bg-slate-700/30">
+                                <span className="text-sm text-slate-300">{label} saves</span>
+                                <div className="w-12 flex justify-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={advantages.includes(save)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setAdvantages([...advantages, save]);
+                                      } else {
+                                        setAdvantages(advantages.filter(a => a !== save));
+                                      }
+                                    }}
+                                    className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                                  />
+                                </div>
+                                <div className="w-12 flex justify-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={proficiencies.includes(save)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setProficiencies([...proficiencies, save]);
+                                      } else {
+                                        setProficiencies(proficiencies.filter(p => p !== save));
+                                      }
+                                    }}
+                                    className="h-4 w-4 text-blue-500 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
 
                       {/* Skills */}
                       <div className="mb-3">
                         <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">Skills</div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('perception')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'perception']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'perception'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
+                        <div className="space-y-1">
+                          {/* Perception */}
+                          <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center py-1.5 px-2 rounded hover:bg-slate-700/30">
                             <span className="text-sm text-slate-300">Perception</span>
-                          </label>
-                          <label className="flex items-center gap-2.5 p-2.5 rounded border border-slate-600 hover:bg-slate-700/50 cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={advantages.includes('stealth')}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAdvantages([...advantages, 'stealth']);
-                                } else {
-                                  setAdvantages(advantages.filter(a => a !== 'stealth'));
-                                }
-                              }}
-                              className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900"
-                            />
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={advantages.includes('perception')}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setAdvantages([...advantages, 'perception']);
+                                  } else {
+                                    setAdvantages(advantages.filter(a => a !== 'perception'));
+                                  }
+                                }}
+                                className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                              />
+                            </div>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={proficiencies.includes('perception')}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setProficiencies([...proficiencies, 'perception']);
+                                  } else {
+                                    setProficiencies(proficiencies.filter(p => p !== 'perception'));
+                                  }
+                                }}
+                                className="h-4 w-4 text-blue-500 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                          {/* Stealth */}
+                          <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center py-1.5 px-2 rounded hover:bg-slate-700/30">
                             <span className="text-sm text-slate-300">Stealth</span>
-                          </label>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={advantages.includes('stealth')}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setAdvantages([...advantages, 'stealth']);
+                                  } else {
+                                    setAdvantages(advantages.filter(a => a !== 'stealth'));
+                                  }
+                                }}
+                                className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                              />
+                            </div>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={proficiencies.includes('stealth')}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setProficiencies([...proficiencies, 'stealth']);
+                                  } else {
+                                    setProficiencies(proficiencies.filter(p => p !== 'stealth'));
+                                  }
+                                }}
+                                className="h-4 w-4 text-blue-500 rounded border-slate-600 bg-slate-900 cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                          {/* Other Skills */}
+                          <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center py-1.5 px-2 rounded hover:bg-slate-700/30">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-slate-300">Other skills</span>
+                              <div className="flex items-center border border-slate-600 rounded">
+                                <button
+                                  type="button"
+                                  onClick={() => setOtherSkillsCount(Math.max(0, otherSkillsCount - 1))}
+                                  className="px-1.5 py-0.5 text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-l transition-colors"
+                                  disabled={otherSkillsCount === 0}
+                                >
+                                  −
+                                </button>
+                                <span className="px-2 py-0.5 text-sm text-slate-300 bg-slate-800 min-w-[2rem] text-center">
+                                  {otherSkillsCount}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setOtherSkillsCount(Math.min(16, otherSkillsCount + 1))}
+                                  className="px-1.5 py-0.5 text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-r transition-colors"
+                                  disabled={otherSkillsCount === 16}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={otherSkillsAdvantage}
+                                onChange={(e) => setOtherSkillsAdvantage(e.target.checked)}
+                                disabled={otherSkillsCount === 0}
+                                className="h-4 w-4 text-emerald-600 rounded border-slate-600 bg-slate-900 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                              />
+                            </div>
+                            <div className="w-12 flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={otherSkillsProficiency}
+                                onChange={(e) => setOtherSkillsProficiency(e.target.checked)}
+                                disabled={otherSkillsCount === 0}
+                                className="h-4 w-4 text-blue-500 rounded border-slate-600 bg-slate-900 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
 
                       {/* Sometimes checkbox */}
-                      {advantages.length > 0 && (
+                      {(advantages.length > 0 || proficiencies.filter(p => p !== 'attack').length > 0 || (otherSkillsCount > 0 && (otherSkillsAdvantage || otherSkillsProficiency))) && (
                         <label className="flex items-center gap-1.5 pt-2 border-t border-slate-600 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
                           <input
                             type="checkbox"
-                            checked={advantagesSometimes}
-                            onChange={(e) => setAdvantagesSometimes(e.target.checked)}
+                            checked={bonusesSometimes}
+                            onChange={(e) => setBonusesSometimes(e.target.checked)}
                             className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
                           />
-                          <span className={advantagesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                          <span className={bonusesSometimes ? 'text-amber-400' : ''}>Sometimes</span>
                           <span className="text-slate-500">(×0.5 pts)</span>
                         </label>
                       )}
@@ -3020,14 +3117,14 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-slate-200 font-semibold">Advantage:</div>
-                      <div className="text-slate-500 text-[10px] mb-1">Calibrated so all 6 saves sum to 5.0 pts; validated vs Mantle of Spell Resistance (Rare)</div>
-                      <div>• Initiative: 0.75 pts | Attacks (this weapon): 1.0 pts</div>
+                      <div className="text-slate-200 font-semibold">Advantage & Proficiencies:</div>
+                      <div className="text-slate-500 text-[10px] mb-1">Advantage (~+3.5 effective) and +Proficiency (~+3.5 at mid-tier) are roughly equivalent; they stack additively</div>
+                      <div>• Initiative: 0.75 pts | Attacks: 1.0 pts</div>
                       <div>• DEX saves: 1.25 pts | WIS saves: 1.1 pts | CON saves: 1.0 pts</div>
                       <div>• STR saves: 0.65 pts | CHA saves: 0.6 pts | INT saves: 0.4 pts</div>
-                      <div className="text-slate-500 pl-2 text-[10px]">Select all 6 saves = 5.0 pts (Very Rare tier)</div>
-                      <div>• Perception/Stealth: 0.25 pts each</div>
-                      <div className="text-slate-500 text-[10px] pl-2">Sometimes checkbox applies ×0.5 for conditional advantages</div>
+                      <div className="text-slate-500 pl-2 text-[10px]">All 6 saves = 5.0 pts (Very Rare); calibrated vs Mantle of Spell Resistance</div>
+                      <div>• Perception/Stealth: 0.25 pts each | Other skills: 0.15 pts each</div>
+                      <div className="text-slate-500 text-[10px] pl-2">Sometimes checkbox applies ×0.5 for conditional bonuses</div>
                     </div>
 
                     <div className="space-y-1">
