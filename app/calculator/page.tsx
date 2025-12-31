@@ -12,6 +12,9 @@ import { getWarningIndicator } from '@/lib/item-balance-flags';
 import { generateRandomItemName } from '@/lib/item-name-generator';
 import { decodeItemFromUrl, generateShareUrl } from '@/lib/item-url';
 import { useCommunityItemsPreference } from '@/lib/feature-flags';
+import { useAuth } from '@/components/auth';
+import { SignInModal, UserMenu } from '@/components/auth';
+import { saveItem } from '@/lib/actions/saved-items';
 
 // Animated number component for smooth score transitions
 function AnimatedNumber({ value, decimals = 1 }: { value: number; decimals?: number }) {
@@ -165,6 +168,11 @@ const CONDITIONS = [
 ];
 
 export default function CalculatorPage() {
+  // Auth state
+  const { user, loading: authLoading } = useAuth();
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
   // Community items preference
   const { includeCommunityItems, toggle: toggleCommunityItems } = useCommunityItemsPreference();
 
@@ -673,6 +681,68 @@ export default function CalculatorPage() {
     await navigator.clipboard.writeText(url);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  // Save item to user's collection
+  const handleSaveItem = async () => {
+    if (!user) {
+      setShowSignInModal(true);
+      return;
+    }
+
+    if (!baseItem || !itemName.trim()) {
+      return; // Need at least a name and base item
+    }
+
+    setSaveStatus('saving');
+
+    const result = await saveItem({
+      name: itemName.trim(),
+      baseItem,
+      attunement,
+      combat: {
+        enhancement,
+        enhancementMultiplier: enhancementSometimes ? 0.5 : undefined,
+        damageBonus,
+        acBonus: acBonus > 0 ? acBonus : undefined,
+        acBonusMultiplier: acBonusSometimes ? 0.5 : undefined,
+        savingThrowBonus: savingThrowBonus > 0 ? savingThrowBonus : undefined,
+        savingThrowBonusMultiplier: saveBonusSometimes ? 0.5 : undefined,
+        spellSaveDCBonus: spellSaveDCBonus > 0 ? spellSaveDCBonus : undefined,
+        spellAttackBonus: spellAttackBonus > 0 ? spellAttackBonus : undefined,
+        resistances: resistances.length > 0 ? resistances : undefined,
+        resistancesMultiplier: resistancesSometimes ? 0.5 : undefined,
+        damageImmunities: damageImmunities.length > 0 ? damageImmunities : undefined,
+        damageImmunitiesMultiplier: damageImmunitiesSometimes ? 0.5 : undefined,
+        conditionImmunities: conditionImmunities.length > 0 ? conditionImmunities : undefined,
+        conditionImmunitiesMultiplier: conditionImmunitiesSometimes ? 0.5 : undefined,
+        abilityScoreSetter,
+        abilityScoreBonus,
+        permanentBuffs: Object.keys(permanentBuffs).length > 0 ? permanentBuffs : undefined,
+        flight: flightEnabled ? { flySpeed, flyDuration } : undefined,
+        weaponProperties: weaponProperties.length > 0 ? weaponProperties : undefined,
+        armorProperties: armorProperties.length > 0 ? armorProperties : undefined,
+        chargePool: maxCharges > 0 ? {
+          maxCharges,
+          chargesPerShortRest,
+          chargesPerLongRest,
+          abilities,
+        } : undefined,
+      },
+      ribbons: cosmeticFeatures.trim() ? { cosmetic: cosmeticFeatures.split('\n').filter(Boolean) } : undefined,
+      specialMechanics: specialMechanics.trim() || undefined,
+      cosmeticFeatures: cosmeticFeatures.trim() || undefined,
+      score: results.combatScore,
+      suggestedRarity: results.suggestedRarity,
+    });
+
+    if (result.success) {
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } else {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
   };
 
   // Generate a random "Surprise me" item with high variety
@@ -1337,13 +1407,26 @@ export default function CalculatorPage() {
           <h1 className="text-2xl font-bold text-slate-100">
             Evergreen5e Magic Item Balancer
           </h1>
-          <div className="flex gap-4 text-sm">
+          <div className="flex items-center gap-4 text-sm">
             <Link href="/items" className="text-slate-500 hover:text-slate-300 transition-colors">
               Browse Items
             </Link>
             <Link href="/" className="text-slate-500 hover:text-slate-300 transition-colors">
               Home
             </Link>
+            {/* Auth UI - Hidden unless ?community=1 */}
+            {communityModeEnabled && !authLoading && (
+              user ? (
+                <UserMenu />
+              ) : (
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="px-3 py-1.5 text-sm font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-md transition-colors"
+                >
+                  Sign In
+                </button>
+              )
+            )}
           </div>
         </div>
 
@@ -2601,7 +2684,7 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Unique Item Details Section (for community submissions) */}
+            {/* Unique Item Details Section */}
             <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
               <button
                 onClick={() => setShowItemDetails(!showItemDetails)}
@@ -2689,6 +2772,26 @@ export default function CalculatorPage() {
                   <div className={`text-3xl font-bold ${getRarityColorClass(results.suggestedRarity)}`}>
                     {results.suggestedRarity}
                   </div>
+
+                  {/* Save Button - Hidden unless ?community=1 */}
+                  {communityModeEnabled && hasSelectedAttributes && itemName.trim() && (
+                    <button
+                      onClick={handleSaveItem}
+                      disabled={saveStatus === 'saving'}
+                      className={`mt-3 w-full py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                        saveStatus === 'saved'
+                          ? 'bg-emerald-600 text-white'
+                          : saveStatus === 'error'
+                          ? 'bg-red-600 text-white'
+                          : 'bg-slate-600 hover:bg-slate-500 text-slate-200'
+                      }`}
+                    >
+                      {saveStatus === 'saving' ? 'Saving...' :
+                       saveStatus === 'saved' ? 'Saved!' :
+                       saveStatus === 'error' ? 'Failed to save' :
+                       user ? 'Save to Collection' : 'Sign in to Save'}
+                    </button>
+                  )}
                 </div>
 
                 {/* What's Similar? - Reference Comparisons */}
@@ -3157,6 +3260,13 @@ export default function CalculatorPage() {
           </div>
         </div>
       </div>
+
+      {/* Sign In Modal */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        redirectTo="/calculator"
+      />
     </div>
   );
 }
