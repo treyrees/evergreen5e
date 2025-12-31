@@ -2814,7 +2814,7 @@ export default function CalculatorPage() {
                       className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
                     />
                     <p className="mt-1.5 text-[10px] text-slate-500">
-                      Focus on what makes your item <span className="text-slate-400">interesting</span>, not just powerful. Describe tradeoffs, conditional triggers, and how spells behave differently when cast through this item.
+                      This is the <span className="text-slate-400">essence</span> of your item. Mechanics here should be <span className="text-slate-400">balance-neutral</span> (no net power change) or <span className="text-slate-400">equally kissed and cursed</span> (benefits balanced by drawbacks).
                     </p>
                   </div>
 
@@ -2834,7 +2834,7 @@ export default function CalculatorPage() {
                       className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
                     />
                     <p className="mt-1.5 text-[10px] text-slate-500">
-                      One feature per line. These don&apos;t affect balance, just add character.
+                      Cosmetic details that add character without affecting balance.
                     </p>
                   </div>
                 </div>
