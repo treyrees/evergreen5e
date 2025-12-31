@@ -2,33 +2,7 @@
 
 import { ReactNode } from 'react';
 import { CommunityItem, ACCENT_COLORS, AccentColor } from '@/types/magic-item';
-
-// Get rarity color class
-function getRarityColorClass(rarity: string): string {
-  const r = rarity.toLowerCase();
-  if (r === 'common') return 'text-slate-400';
-  if (r === 'uncommon') return 'text-emerald-400/80';
-  if (r === 'rare') return 'text-sky-400/80';
-  if (r === 'very rare') return 'text-violet-400/80';
-  if (r === 'legendary') return 'text-amber-400/80';
-  return 'text-slate-400';
-}
-
-// Get rarity background class
-function getRarityBgClass(rarity: string): string {
-  const r = rarity.toLowerCase();
-  if (r === 'common') return 'bg-slate-700/30';
-  if (r === 'uncommon') return 'bg-emerald-950/20';
-  if (r === 'rare') return 'bg-sky-950/20';
-  if (r === 'very rare') return 'bg-violet-950/20';
-  if (r === 'legendary') return 'bg-amber-950/20';
-  return 'bg-slate-700/30';
-}
-
-// Capitalize rarity
-function capitalizeRarity(rarity: string): string {
-  return rarity.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
+import { capitalizeRarity, getRarityColorClass, getRarityBgClass } from '@/lib/utils/rarity';
 
 // Get accent color hex value
 function getAccentColorHex(color: AccentColor): string {
