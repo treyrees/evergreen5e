@@ -225,7 +225,7 @@ export function getItemExplanation(itemName: string): string {
 
   // Niche spell effects
   if (itemName === 'Trident of Fish Command') {
-    return '+1 trident (1.0 pts base). Has 3 charges to cast Dominate Beast (4th-level spell), but ONLY on beasts with a swimming speed. Bonus +0.25 acknowledges the spell without fully pricing it. Why so low? Most campaigns rarely encounter aquatic beasts, and when you do, Dominate Beast competes with just killing them. In a seafaring or underwater campaign, this trident becomes much stronger; a dominated Giant Shark or Killer Whale is a serious combat asset. For typical land-based adventures, treat this as a +1 trident with a ribbon ability.';
+    return '+1 trident (1.0 pts base). Bonus +0.25 for 3 charges of Dominate Beast, restricted to beasts with a swimming speed. The low bonus reflects how rarely most campaigns encounter aquatic beasts; in a seafaring campaign, this item is significantly stronger.';
   }
 
   // === COMMUNITY NOTES (no override, just explanation) ===
