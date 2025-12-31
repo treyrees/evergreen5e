@@ -2790,7 +2790,7 @@ export default function CalculatorPage() {
                 className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
               >
                 <div>
-                  <span className="font-medium text-slate-200">Unique Item Details</span>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Unique Item Details</span>
                   <span className="ml-2 text-xs text-slate-500">What makes this item special?</span>
                 </div>
                 <span className="text-slate-500 text-lg">{showItemDetails ? '−' : '+'}</span>
@@ -3265,7 +3265,7 @@ export default function CalculatorPage() {
                     <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span className="font-medium text-slate-200">
+                    <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide">
                       My Items ({savedItems.length})
                     </span>
                   </div>
