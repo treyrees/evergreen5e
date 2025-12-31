@@ -372,12 +372,12 @@ function getSpellsForArchetype(archetype: ItemArchetype, minLevel: number, maxLe
  * Returns a configuration object that can be applied to form state.
  */
 export function generateSurpriseItem(): SurpriseItemConfig {
-  // Pick target rarity with more variety: Common 5%, Uncommon 45%, Rare 35%, Very Rare 15%
-  const rarityRoll = Math.random();
-  const targetRarity = rarityRoll < 0.05 ? 'common' : rarityRoll < 0.5 ? 'uncommon' : rarityRoll < 0.85 ? 'rare' : 'very rare';
+  // Pick target rarity with ratio Uncommon:Rare:Very Rare:Legendary = 2:3:3:1
+  const rarityRoll = Math.random() * 9;
+  const targetRarity = rarityRoll < 2 ? 'uncommon' : rarityRoll < 5 ? 'rare' : rarityRoll < 8 ? 'very rare' : 'legendary';
 
-  // Point budgets (common items are simple, mostly flavor)
-  const pointBudget = targetRarity === 'common' ? 0.4 : targetRarity === 'uncommon' ? 1.4 : targetRarity === 'rare' ? 2.4 : 3.8;
+  // Point budgets by rarity (targeting upper half of each tier)
+  const pointBudget = targetRarity === 'uncommon' ? 1.4 : targetRarity === 'rare' ? 2.4 : targetRarity === 'very rare' ? 3.8 : 4.5;
 
   // Select an archetype (weighted random selection)
   const archetype = weightedPick(ITEM_ARCHETYPES);
@@ -486,7 +486,7 @@ export function generateSurpriseItem(): SurpriseItemConfig {
   }
 
   // Ability score setters for rare+ items - use archetype's preferred abilities
-  if (targetRarity !== 'uncommon' && targetRarity !== 'common' && Math.random() < 0.3 && archetype.abilityScores.length > 0) {
+  if (targetRarity !== 'uncommon' && Math.random() < 0.3 && archetype.abilityScores.length > 0) {
     possibleMajor.push('abilityScore');
   }
 
@@ -517,18 +517,19 @@ export function generateSurpriseItem(): SurpriseItemConfig {
   // Pick number of attributes based on rarity with more variance
   let numMajorTarget: number;
   let numMinorTarget: number;
-  if (targetRarity === 'common') {
-    numMajorTarget = 0;
-    numMinorTarget = Math.random() < 0.7 ? 1 : 0;
-  } else if (targetRarity === 'uncommon') {
+  if (targetRarity === 'uncommon') {
     numMajorTarget = 1;
     numMinorTarget = Math.random() < 0.5 ? 1 : 0;
   } else if (targetRarity === 'rare') {
     numMajorTarget = Math.random() < 0.4 ? 2 : 1;
     numMinorTarget = Math.random() < 0.6 ? 1 : Math.random() < 0.8 ? 2 : 0;
-  } else {
+  } else if (targetRarity === 'very rare') {
     numMajorTarget = Math.random() < 0.6 ? 2 : (Math.random() < 0.8 ? 1 : 3);
     numMinorTarget = Math.random() < 0.5 ? 2 : 1;
+  } else {
+    // Legendary: 2-3 major, 2-3 minor
+    numMajorTarget = Math.random() < 0.5 ? 3 : 2;
+    numMinorTarget = Math.random() < 0.5 ? 3 : 2;
   }
 
   // Apply major attributes using archetype-themed selections
@@ -541,10 +542,10 @@ export function generateSurpriseItem(): SurpriseItemConfig {
       case 'enhancement':
         if (isWeapon || isArmor) {
           let bonus: number;
-          if (targetRarity === 'common') bonus = 0;
-          else if (targetRarity === 'uncommon') bonus = 1;
+          if (targetRarity === 'uncommon') bonus = 1;
           else if (targetRarity === 'rare') bonus = Math.random() < 0.7 ? 1 : 2;
-          else bonus = Math.random() < 0.3 ? 3 : 2;
+          else if (targetRarity === 'very rare') bonus = Math.random() < 0.3 ? 3 : 2;
+          else bonus = 3; // Legendary always +3
           const cost = bonus * 1.0;
           if (bonus > 0 && pointsSpent + cost <= pointBudget) {
             result.enhancement = bonus;
@@ -566,12 +567,17 @@ export function generateSurpriseItem(): SurpriseItemConfig {
           let cost = 1.0;
           const budgetRemaining = pointBudget - pointsSpent;
 
-          if (targetRarity === 'very rare' && budgetRemaining >= 2.5) {
+          if (targetRarity === 'legendary' && budgetRemaining >= 3.0) {
+            const diceRoll = Math.random();
+            if (diceRoll < 0.4) { dice = '3d6'; cost = 3.0; }
+            else if (diceRoll < 0.7) { dice = '2d8'; cost = 2.2; }
+            else { dice = '2d6'; cost = 2.0; }
+          } else if ((targetRarity === 'legendary' || targetRarity === 'very rare') && budgetRemaining >= 2.5) {
             const diceRoll = Math.random();
             if (diceRoll < 0.3) { dice = '3d6'; cost = 3.0; }
             else if (diceRoll < 0.6) { dice = '2d6'; cost = 2.0; }
             else { dice = '2d8'; cost = 2.2; }
-          } else if (targetRarity === 'very rare' && budgetRemaining >= 2.0) {
+          } else if ((targetRarity === 'legendary' || targetRarity === 'very rare') && budgetRemaining >= 2.0) {
             dice = Math.random() < 0.5 ? '2d6' : '1d10';
             cost = dice === '2d6' ? 2.0 : 1.3;
           } else if (targetRarity === 'rare' && budgetRemaining >= 1.5) {
@@ -592,10 +598,10 @@ export function generateSurpriseItem(): SurpriseItemConfig {
       case 'ac':
         if (!isWeapon) {
           let bonus: number;
-          if (targetRarity === 'common') bonus = 0;
-          else if (targetRarity === 'uncommon') bonus = 1;
+          if (targetRarity === 'uncommon') bonus = 1;
           else if (targetRarity === 'rare') bonus = Math.random() < 0.8 ? 1 : 2;
-          else bonus = Math.random() < 0.4 ? 2 : 1;
+          else if (targetRarity === 'very rare') bonus = Math.random() < 0.4 ? 2 : 1;
+          else bonus = 2; // Legendary always +2
 
           const costPer = isArmor ? 1.0 : 1.5;
           const cost = bonus * costPer;
@@ -612,7 +618,8 @@ export function generateSurpriseItem(): SurpriseItemConfig {
           let bonus: number;
           if (targetRarity === 'uncommon') bonus = 1;
           else if (targetRarity === 'rare') bonus = Math.random() < 0.7 ? 1 : 2;
-          else bonus = Math.random() < 0.5 ? 2 : 1;
+          else if (targetRarity === 'very rare') bonus = Math.random() < 0.5 ? 2 : 1;
+          else bonus = Math.random() < 0.6 ? 2 : 3; // Legendary: +2 or +3
 
           const cost = bonus * 1.0;
           if (pointsSpent + cost <= pointBudget) {
@@ -632,8 +639,11 @@ export function generateSurpriseItem(): SurpriseItemConfig {
             minSpellLevel = 1; maxSpellLevel = 2;
           } else if (targetRarity === 'rare') {
             minSpellLevel = 2; maxSpellLevel = 4;
-          } else {
+          } else if (targetRarity === 'very rare') {
             minSpellLevel = 3; maxSpellLevel = 5;
+          } else {
+            // Legendary: focus on high-level spells
+            minSpellLevel = 4; maxSpellLevel = 5;
           }
 
           // Get themed spells for this archetype
@@ -704,8 +714,11 @@ export function generateSurpriseItem(): SurpriseItemConfig {
           let setValue: number;
           if (targetRarity === 'rare') {
             setValue = Math.random() < 0.7 ? 19 : 18;
-          } else {
+          } else if (targetRarity === 'very rare') {
             setValue = Math.random() < 0.6 ? 21 : (Math.random() < 0.7 ? 19 : 23);
+          } else {
+            // Legendary: higher ability scores
+            setValue = Math.random() < 0.5 ? 23 : 21;
           }
 
           const cost = setValue <= 18 ? 1.2 : setValue <= 19 ? 1.5 : setValue <= 21 ? 2.5 : 3.5;
@@ -769,7 +782,7 @@ export function generateSurpriseItem(): SurpriseItemConfig {
               case 'swimming': buffOptions.push({ key: 'swimming', cost: 0.2 }); break;
               case 'climbBurrow': buffOptions.push({ key: 'climbBurrow', cost: 0.5 }); break;
               case 'flight':
-                if (targetRarity !== 'uncommon' && targetRarity !== 'common') {
+                if (targetRarity !== 'uncommon') {
                   buffOptions.push({ key: 'flight', cost: 1.0 });
                 }
                 break;
@@ -781,7 +794,7 @@ export function generateSurpriseItem(): SurpriseItemConfig {
             buffOptions.push({ key: 'darkvision', cost: 0.2 });
             buffOptions.push({ key: 'speedBonus', cost: 0.3 });
             buffOptions.push({ key: 'swimming', cost: 0.2 });
-            if (targetRarity !== 'uncommon' && targetRarity !== 'common') {
+            if (targetRarity !== 'uncommon') {
               buffOptions.push({ key: 'climbBurrow', cost: 0.5 });
               buffOptions.push({ key: 'flight', cost: 1.0 });
             }
@@ -800,9 +813,10 @@ export function generateSurpriseItem(): SurpriseItemConfig {
       case 'spellBonus':
         {
           let bonus: number;
-          if (targetRarity === 'uncommon' || targetRarity === 'common') bonus = 1;
+          if (targetRarity === 'uncommon') bonus = 1;
           else if (targetRarity === 'rare') bonus = Math.random() < 0.7 ? 1 : 2;
-          else bonus = Math.random() < 0.5 ? 2 : (Math.random() < 0.8 ? 1 : 3);
+          else if (targetRarity === 'very rare') bonus = Math.random() < 0.5 ? 2 : (Math.random() < 0.8 ? 1 : 3);
+          else bonus = Math.random() < 0.6 ? 3 : 2; // Legendary: +3 or +2
 
           const cost = bonus * 0.5;
           if (pointsSpent + cost <= pointBudget) {
@@ -822,11 +836,10 @@ export function generateSurpriseItem(): SurpriseItemConfig {
 
   // Set attunement based on complexity and rarity
   const totalFeatures = majorsApplied + minorsApplied;
-  if (targetRarity === 'common') {
-    result.attunement = totalFeatures >= 2 && Math.random() < 0.3;
-  } else if (targetRarity === 'uncommon') {
+  if (targetRarity === 'uncommon') {
     result.attunement = totalFeatures >= 2 || Math.random() < 0.4;
   } else {
+    // Rare, Very Rare, Legendary always require attunement
     result.attunement = true;
   }
 
