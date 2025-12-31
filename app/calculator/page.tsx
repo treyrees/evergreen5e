@@ -299,6 +299,8 @@ export default function CalculatorPage() {
   // Update body background based on rarity when item is populated
   useEffect(() => {
     if (hasSelectedAttributes) {
+      // Enable background transitions (not on by default to prevent flash on page load)
+      document.body.classList.add('rarity-transition');
       // First transition is 3s, subsequent are 1s
       if (isFirstTransition.current) {
         document.body.classList.remove('fast-transition');
@@ -320,6 +322,7 @@ export default function CalculatorPage() {
     return () => {
       delete document.body.dataset.rarity;
       document.body.classList.remove('fast-transition');
+      document.body.classList.remove('rarity-transition');
     };
   }, [hasSelectedAttributes, results.suggestedRarity]);
 
