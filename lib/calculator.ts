@@ -477,37 +477,35 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     }
   }
 
-  // Damage immunities - valued lower than you might expect because:
-  // 1. Single damage type immunity is very situational (one type at a time)
-  // 2. Resistance already provides 50% protection, so marginal value of immunity is limited
-  // 3. Calibrated against Periapt of Proof Against Poison (Rare = poison immunity + poisoned condition)
-  // Physical types slightly higher because all 3 combined = complete weapon immunity (Legendary)
+  // Damage immunities - valued at 1.2× corresponding resistance values
+  // Immunity must always be worth MORE than resistance (you take 0 instead of half)
+  // Calibrated against Periapt of Proof Against Poison (Rare = poison immunity + poisoned condition)
+  // Physical types: all 3 combined = 4.5 pts (Legendary) for complete weapon immunity
   if (combat.damageImmunities && combat.damageImmunities.length > 0) {
     const immunityMultiplier = combat.damageImmunitiesMultiplier ?? 1.0;
     const DAMAGE_IMMUNITY_VALUES: Record<string, number> = {
-      // Common damage sources - still situational despite frequency
-      'fire': 2.0,         // Dragons, elementals, spells - upper Rare
-      'poison': 1.75,      // Calibrated to Periapt of Proof Against Poison
-      'cold': 1.75,        // Dragons, winter environments
+      // Common damage sources (1.2× resistance)
+      'fire': 2.7,         // 2.25 × 1.2 - dragons, elementals, spells
+      'poison': 2.4,       // 2.0 × 1.2 - calibrated to Periapt
+      'cold': 2.4,         // 2.0 × 1.2 - dragons, winter environments
       // Moderately common damage sources
-      'necrotic': 1.5,     // Undead deal this frequently
-      'lightning': 1.5,    // Blue dragons, storm creatures
-      'acid': 1.25,        // Black dragons, oozes - less common
-      // Physical types - higher because all 3 = complete weapon immunity
-      // Combined (all physical) = 4.2 pts = Legendary
-      'bludgeoning': 1.4,  // Clubs, fists, tails, constrict
-      'piercing': 1.4,     // Bites, claws, arrows
-      'slashing': 1.4,     // Swords, axes, some claws
-      // Rare damage sources - immunity less impactful
-      'thunder': 1.0,      // Rarely dealt by monsters
-      'psychic': 1.0,      // Mind flayers, intellect devourers
-      'radiant': 0.75,     // Almost no monsters deal radiant
-      'force': 0.5,        // Nothing deals force to players
+      'necrotic': 2.1,     // 1.75 × 1.2 - undead
+      'lightning': 2.1,    // 1.75 × 1.2 - blue dragons, storms
+      'acid': 1.8,         // 1.5 × 1.2 - black dragons, oozes
+      // Physical types - all 3 = 4.5 pts (Legendary)
+      'bludgeoning': 1.5,  // 1.25 × 1.2
+      'piercing': 1.5,     // 1.25 × 1.2
+      'slashing': 1.5,     // 1.25 × 1.2
+      // Less common damage sources
+      'thunder': 1.5,      // 1.25 × 1.2
+      'psychic': 1.2,      // 1.0 × 1.2
+      'radiant': 1.0,      // 0.75 × 1.2 → rounded up
+      'force': 0.75,       // 0.5 × 1.2 → rounded up
     };
 
     for (const immunity of combat.damageImmunities) {
       const immunityLower = immunity.toLowerCase();
-      score += (DAMAGE_IMMUNITY_VALUES[immunityLower] ?? 1.25) * immunityMultiplier;
+      score += (DAMAGE_IMMUNITY_VALUES[immunityLower] ?? 1.5) * immunityMultiplier;
     }
   }
 

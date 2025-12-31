@@ -2709,11 +2709,11 @@ export default function CalculatorPage() {
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Damage Immunities:</div>
-                      <div className="text-slate-500 text-[10px] mb-1">Valued lower than resistance because immunity to one type is very situational</div>
-                      <div>• Fire: 2.0 pts | Poison/Cold: 1.75 pts</div>
-                      <div>• Necrotic/Lightning: 1.5 pts | Acid: 1.25 pts</div>
-                      <div>• Physical (each): 1.4 pts <span className="text-slate-500">(all 3 = 4.2 pts Legendary)</span></div>
-                      <div>• Thunder/Psychic: 1.0 pts | Radiant: 0.75 pts | Force: 0.5 pts</div>
+                      <div className="text-slate-500 text-[10px] mb-1">Valued at 1.2× corresponding resistance (immunity &gt; resistance always)</div>
+                      <div>• Fire: 2.7 pts | Poison/Cold: 2.4 pts</div>
+                      <div>• Necrotic/Lightning: 2.1 pts | Acid: 1.8 pts</div>
+                      <div>• Physical (each): 1.5 pts <span className="text-slate-500">(all 3 = 4.5 pts Legendary)</span></div>
+                      <div>• Thunder: 1.5 pts | Psychic: 1.2 pts | Radiant: 1.0 pts | Force: 0.75 pts</div>
                     </div>
 
                     <div className="space-y-1">
