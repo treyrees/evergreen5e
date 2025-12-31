@@ -20,6 +20,7 @@ import {
   getRarityColorClass,
   getRarityBgClass,
   getMedalBorderClass,
+  getRarityScaleData,
 } from '@/lib/calculator-ui-utils';
 import {
   BASE_ITEMS,
@@ -2221,6 +2222,47 @@ export default function CalculatorPage() {
                   <div className={`text-3xl font-bold ${getRarityColorClass(results.suggestedRarity)}`}>
                     {results.suggestedRarity}
                   </div>
+
+                  {/* Rarity Scale Indicator */}
+                  {(() => {
+                    const scaleData = getRarityScaleData(results.combatScore);
+                    return (
+                      <div className="mt-3 pt-3 border-t border-slate-600/50">
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5">
+                          <span className={scaleData.prevRarity ? 'opacity-100' : 'opacity-0'}>
+                            {scaleData.prevRarity || '-'}
+                          </span>
+                          <span className={scaleData.nextRarity ? 'opacity-100' : 'opacity-0'}>
+                            {scaleData.nextRarity || '-'}
+                          </span>
+                        </div>
+                        <div className="flex gap-1">
+                          {Array.from({ length: 10 }, (_, i) => {
+                            const isActive = i === scaleData.position;
+                            const isFilled = i <= scaleData.position;
+                            return (
+                              <div
+                                key={i}
+                                className={`
+                                  h-1.5 flex-1 rounded-sm transition-all duration-300
+                                  ${isActive
+                                    ? `${getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-')} shadow-sm`
+                                    : isFilled
+                                      ? 'bg-slate-500/40'
+                                      : 'bg-slate-700/50'
+                                  }
+                                `}
+                              />
+                            );
+                          })}
+                        </div>
+                        <div className="flex justify-between text-[10px] text-slate-600 mt-1">
+                          <span>.0</span>
+                          <span>.9</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                 </div>
 
