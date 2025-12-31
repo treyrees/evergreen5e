@@ -2773,25 +2773,6 @@ export default function CalculatorPage() {
                     {results.suggestedRarity}
                   </div>
 
-                  {/* Save Button - Hidden unless ?community=1 */}
-                  {communityModeEnabled && hasSelectedAttributes && itemName.trim() && (
-                    <button
-                      onClick={handleSaveItem}
-                      disabled={saveStatus === 'saving'}
-                      className={`mt-3 w-full py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                        saveStatus === 'saved'
-                          ? 'bg-emerald-600 text-white'
-                          : saveStatus === 'error'
-                          ? 'bg-red-600 text-white'
-                          : 'bg-slate-600 hover:bg-slate-500 text-slate-200'
-                      }`}
-                    >
-                      {saveStatus === 'saving' ? 'Saving...' :
-                       saveStatus === 'saved' ? 'Saved!' :
-                       saveStatus === 'error' ? 'Failed to save' :
-                       user ? 'Save to Collection' : 'Sign in to Save'}
-                    </button>
-                  )}
                 </div>
 
                 {/* What's Similar? - Reference Comparisons */}
@@ -3028,6 +3009,61 @@ export default function CalculatorPage() {
                             Edit in Unique Item Details above
                           </p>
                         </div>
+                      )}
+
+                      {/* Save to Collection Button - Hidden unless ?community=1 */}
+                      {communityModeEnabled && (
+                        <button
+                          onClick={handleSaveItem}
+                          disabled={saveStatus === 'saving'}
+                          className={`w-full py-3.5 px-4 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2.5 ${
+                            saveStatus === 'saved'
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                              : saveStatus === 'error'
+                              ? 'bg-red-600 text-white'
+                              : user
+                              ? 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-900/30 hover:shadow-violet-900/40'
+                              : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-slate-200'
+                          }`}
+                        >
+                          {saveStatus === 'saving' ? (
+                            <>
+                              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              Saving...
+                            </>
+                          ) : saveStatus === 'saved' ? (
+                            <>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Saved to Collection!
+                            </>
+                          ) : saveStatus === 'error' ? (
+                            <>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Failed to Save
+                            </>
+                          ) : user ? (
+                            <>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                              </svg>
+                              Save to Collection
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                              </svg>
+                              Sign in to Save
+                            </>
+                          )}
+                        </button>
                       )}
 
                       {/* Action Buttons */}
