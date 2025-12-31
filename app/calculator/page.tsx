@@ -2226,6 +2226,20 @@ export default function CalculatorPage() {
                   {/* Rarity Scale Indicator */}
                   {(() => {
                     const scaleData = getRarityScaleData(results.combatScore);
+                    const isLegendary = results.suggestedRarity === 'Legendary';
+                    const showSecondRow = isLegendary && results.combatScore >= 5.0;
+                    const rarityBgClass = getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-').replace('/80', '');
+
+                    // For legendary: row1 is 4.0-4.9, row2 is 5.0-5.9
+                    // Position in row1: 0-9 maps to 4.0-4.9
+                    // Position in row2: 0-9 maps to 5.0-5.9
+                    const row1Position = isLegendary
+                      ? Math.min(9, Math.floor((results.combatScore - 4) * 10))
+                      : scaleData.position;
+                    const row2Position = showSecondRow
+                      ? Math.min(9, Math.floor((results.combatScore - 5) * 10))
+                      : -1;
+
                     return (
                       <div className="mt-3 pt-3 border-t border-slate-600/50">
                         <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5">
@@ -2236,11 +2250,10 @@ export default function CalculatorPage() {
                             {scaleData.nextRarity || '-'}
                           </span>
                         </div>
+                        {/* Row 1: x.0-x.9 (or 4.0-4.9 for Legendary) */}
                         <div className="flex gap-1">
                           {Array.from({ length: 10 }, (_, i) => {
-                            const isFilled = i <= scaleData.position;
-                            // Use full brightness color (strip /80 opacity)
-                            const rarityBgClass = getRarityColorClass(results.suggestedRarity).replace('text-', 'bg-').replace('/80', '');
+                            const isFilled = showSecondRow ? true : i <= row1Position;
                             return (
                               <div
                                 key={i}
@@ -2253,9 +2266,32 @@ export default function CalculatorPage() {
                           })}
                         </div>
                         <div className="flex justify-between text-[10px] text-slate-600 mt-1">
-                          <span>.0</span>
-                          <span>.9</span>
+                          <span>{isLegendary ? '4.0' : '.0'}</span>
+                          <span>{isLegendary ? '4.9' : '.9'}</span>
                         </div>
+                        {/* Row 2: 5.0-5.9 (Legendary only, when score >= 5.0) */}
+                        {showSecondRow && (
+                          <>
+                            <div className="flex gap-1 mt-2">
+                              {Array.from({ length: 10 }, (_, i) => {
+                                const isFilled = i <= row2Position;
+                                return (
+                                  <div
+                                    key={i}
+                                    className={`
+                                      h-1.5 flex-1 rounded-sm transition-all duration-300
+                                      ${isFilled ? rarityBgClass : 'bg-slate-700/50'}
+                                    `}
+                                  />
+                                );
+                              })}
+                            </div>
+                            <div className="flex justify-between text-[10px] text-slate-600 mt-1">
+                              <span>5.0</span>
+                              <span>5.9</span>
+                            </div>
+                          </>
+                        )}
                       </div>
                     );
                   })()}
