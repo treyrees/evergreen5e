@@ -4,7 +4,7 @@
  */
 
 import { DamageBonus, ChargedAbility, AbilityScoreSetter, PermanentBuffs } from '@/types/magic-item';
-import { generateRandomItemName } from '@/lib/item-name-generator';
+import { generateRandomItemNameForBase } from '@/lib/item-name-generator';
 import { BASE_ITEMS, WEAPON_ITEMS, ARMOR_ITEMS } from '@/lib/calculator-constants';
 
 /**
@@ -435,8 +435,8 @@ export function generateSurpriseItem(): SurpriseItemConfig {
     result.attunement = Math.random() < 0.4;
   }
 
-  // Generate a random item name
-  result.itemName = generateRandomItemName();
+  // Generate a random item name that matches the base item type
+  result.itemName = generateRandomItemNameForBase(result.baseItem);
 
   return result;
 }

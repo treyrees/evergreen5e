@@ -763,6 +763,156 @@ export function generateNameByStyle(style: 'simple' | 'compound' | 'proper' | 'e
   }
 }
 
+// ============================================================================
+// BASE ITEM TO OBJECT MAPPING
+// ============================================================================
+
+/**
+ * Maps base item types to appropriate fantasy object names for thematic naming.
+ * Used to generate item names that match the actual item type.
+ */
+const BASE_ITEM_OBJECTS: Record<string, string[]> = {
+  // Swords
+  'longsword': ['Sword', 'Blade', 'Longsword', 'Claymore', 'Saber'],
+  'shortsword': ['Sword', 'Blade', 'Shortsword', 'Gladius', 'Falchion'],
+  'greatsword': ['Sword', 'Blade', 'Greatsword', 'Claymore', 'Zweihander'],
+  'rapier': ['Rapier', 'Blade', 'Sword', 'Stiletto'],
+  'scimitar': ['Scimitar', 'Blade', 'Sword', 'Saber', 'Cutlass', 'Falchion'],
+
+  // Daggers
+  'dagger': ['Dagger', 'Blade', 'Dirk', 'Stiletto', 'Kris', 'Knife', 'Fang'],
+
+  // Axes
+  'battleaxe': ['Axe', 'Battleaxe', 'Cleaver', 'Labrys'],
+  'greataxe': ['Axe', 'Greataxe', 'Cleaver', 'Labrys'],
+  'handaxe': ['Axe', 'Hatchet', 'Tomahawk', 'Cleaver'],
+
+  // Bludgeoning
+  'club': ['Club', 'Cudgel', 'Mace'],
+  'greatclub': ['Club', 'Cudgel', 'Maul'],
+  'mace': ['Mace', 'Scepter', 'Club'],
+  'maul': ['Maul', 'Warhammer', 'Mace'],
+  'morningstar': ['Morningstar', 'Mace', 'Flail'],
+  'flail': ['Flail', 'Morningstar', 'Mace'],
+  'warhammer': ['Warhammer', 'Maul', 'Mace'],
+
+  // Polearms
+  'spear': ['Spear', 'Javelin', 'Lance', 'Pike'],
+  'javelin': ['Javelin', 'Spear', 'Pike'],
+  'quarterstaff': ['Staff', 'Stave', 'Quarterstaff'],
+  'glaive': ['Glaive', 'Poleaxe', 'Halberd', 'Naginata'],
+  'halberd': ['Halberd', 'Poleaxe', 'Glaive', 'Bardiche'],
+  'pike': ['Pike', 'Spear', 'Lance', 'Partisan'],
+  'lance': ['Lance', 'Spear', 'Pike'],
+  'trident': ['Trident', 'Spear', 'Fork'],
+
+  // Exotic
+  'whip': ['Whip', 'Lash', 'Scourge'],
+
+  // Ranged - Bows
+  'longbow': ['Bow', 'Longbow', 'Arc'],
+  'shortbow': ['Bow', 'Shortbow', 'Arc'],
+
+  // Ranged - Crossbows
+  'crossbow (light)': ['Crossbow', 'Arbalest'],
+  'crossbow (heavy)': ['Crossbow', 'Arbalest'],
+  'crossbow (hand)': ['Crossbow', 'Arbalest'],
+
+  // Armor
+  'armor (light)': ['Armor', 'Leather', 'Jerkin', 'Mail', 'Garb'],
+  'armor (medium)': ['Armor', 'Breastplate', 'Mail', 'Hauberk', 'Brigandine'],
+  'armor (heavy)': ['Armor', 'Plate', 'Mail', 'Cuirass', 'Hauberk'],
+  'shield': ['Shield', 'Buckler', 'Aegis', 'Bulwark'],
+
+  // Implements
+  'rod': ['Rod', 'Scepter', 'Baton', 'Wand'],
+  'staff': ['Staff', 'Stave', 'Cane', 'Crook'],
+  'wand': ['Wand', 'Rod', 'Baton', 'Switch'],
+
+  // Accessories
+  'amulet': ['Amulet', 'Pendant', 'Necklace', 'Medallion', 'Talisman', 'Torc'],
+  'boots': ['Boots', 'Treads', 'Sabatons', 'Greaves', 'Sandals'],
+  'cloak': ['Cloak', 'Cape', 'Mantle', 'Shroud', 'Cowl'],
+  'gloves': ['Gloves', 'Gauntlets', 'Bracers', 'Fists', 'Vambraces'],
+  'ring': ['Ring', 'Band', 'Signet', 'Loop'],
+
+  // Wondrous
+  'wondrous item': ['Relic', 'Artifact', 'Talisman', 'Token', 'Charm', 'Icon'],
+};
+
+/**
+ * Generate a random fantasy item name that matches the given base item type.
+ * For example, a longsword will get names like "Blazing Blade" or "Sword of Flame",
+ * not "Ring of Fire" or "Cloak of Shadows".
+ *
+ * @param baseItem The base item type (e.g., 'longsword', 'crossbow (heavy)', 'ring')
+ * @returns A randomly generated fantasy item name appropriate for the item type
+ */
+export function generateRandomItemNameForBase(baseItem: string): string {
+  const normalizedBase = baseItem.toLowerCase();
+  const appropriateObjects = BASE_ITEM_OBJECTS[normalizedBase];
+
+  // If we don't have a mapping, fall back to generic name
+  if (!appropriateObjects || appropriateObjects.length === 0) {
+    return generateRandomItemName();
+  }
+
+  // Use the first object as the "main" representation for compound patterns
+  const pickObject = () => pick(appropriateObjects);
+
+  // Generate using weighted pattern selection with appropriate objects
+  const patterns: NamePattern[] = [
+    // "[Adjective] [Object]" - e.g., "Blazing Sword"
+    { weight: 20, generate: () => `${pick(ADJECTIVES)} ${pickObject()}` },
+
+    // "[Object] of [Noun]" - e.g., "Blade of Flame"
+    { weight: 20, generate: () => `${pickObject()} of ${pick(NOUNS)}` },
+
+    // "[Object] of the [Noun]" - e.g., "Sword of the Phoenix"
+    { weight: 15, generate: () => `${pickObject()} of the ${pick(NOUNS)}` },
+
+    // "The [Adjective] [Object]" - e.g., "The Frozen Blade"
+    { weight: 12, generate: () => `The ${pick(ADJECTIVES)} ${pickObject()}` },
+
+    // "[Noun]'s [Object]" - e.g., "Dragon's Claw"
+    { weight: 12, generate: () => `${pick(NOUNS)}'s ${pickObject()}` },
+
+    // "The [Noun]'s [Object]" - e.g., "The Phoenix's Sword"
+    { weight: 10, generate: () => `The ${pick(NOUNS)}'s ${pickObject()}` },
+
+    // "[Adjective] [Object] of [Noun]" - e.g., "Ancient Blade of Kings"
+    { weight: 10, generate: () => `${pick(ADJECTIVES)} ${pickObject()} of ${pick(NOUNS)}` },
+
+    // "[Object] of [Adjective] [Noun]" - e.g., "Sword of Eternal Flame"
+    { weight: 10, generate: () => `${pickObject()} of ${pick(ADJECTIVES)} ${pick(NOUNS)}` },
+
+    // Compound word - e.g., "Stormbringer" (works for any item type)
+    { weight: 8, generate: () => capitalize(`${pick(COMPOUND_PREFIXES)}${pick(COMPOUND_SUFFIXES)}`) },
+
+    // Just a proper name - e.g., "Excalibur"
+    { weight: 6, generate: () => pickCategory(PROPER_NAMES) },
+
+    // "[ProperName], the [Epithet]" - e.g., "Glamdring, the Foe-hammer"
+    { weight: 4, generate: () => `${pickCategory(PROPER_NAMES)}, ${pickCategory(EPITHETS)}` },
+  ];
+
+  // Calculate total weight
+  const totalWeight = patterns.reduce((sum, p) => sum + p.weight, 0);
+
+  // Random selection based on weight
+  let random = Math.random() * totalWeight;
+
+  for (const pattern of patterns) {
+    random -= pattern.weight;
+    if (random <= 0) {
+      return pattern.generate();
+    }
+  }
+
+  // Fallback
+  return `${pick(ADJECTIVES)} ${pickObject()}`;
+}
+
 // Export vocabularies for potential external use
 export {
   OBJECTS,
