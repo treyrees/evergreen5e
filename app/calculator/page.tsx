@@ -1036,40 +1036,55 @@ export default function CalculatorPage() {
                   </div>
                 </div>
 
-                {/* Quick Start Templates - only show when form is empty */}
-                {!hasSelectedAttributes && !baseItem && (
-                  <div className="pt-3 border-t border-slate-700/50">
-                    <p className="text-xs text-slate-500 mb-2">Or start from an example:</p>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() => applyTemplate('plus1-longsword')}
-                          className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
-                        >
-                          +1 Longsword
-                        </button>
-                        <button
-                          onClick={() => applyTemplate('flametongue')}
-                          className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
-                        >
-                          Flame Tongue
-                        </button>
-                        <button
-                          onClick={() => applyTemplate('holy-avenger')}
-                          className="px-2.5 py-1 text-xs bg-slate-700/50 hover:bg-slate-600 text-slate-300 rounded border border-slate-600/50 transition-colors"
-                        >
-                          Holy Avenger
-                        </button>
-                      </div>
+                {/* Quick Start Templates & Surprise Me */}
+                <div className="pt-3 border-t border-slate-700/50">
+                  <p className="text-xs text-slate-500 mb-2">
+                    {hasSelectedAttributes || baseItem ? 'Generate a random item:' : 'Or start from an example:'}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
-                        onClick={generateSurpriseItem}
-                        className="px-2.5 py-1 text-xs bg-violet-900/40 hover:bg-violet-800/50 text-violet-300 rounded border border-violet-600/40 transition-colors"
+                        onClick={() => applyTemplate('plus1-longsword')}
+                        disabled={hasSelectedAttributes || !!baseItem}
+                        className={`px-2.5 py-1 text-xs rounded border transition-colors ${
+                          hasSelectedAttributes || baseItem
+                            ? 'bg-slate-800/50 text-slate-600 border-slate-700/50 cursor-not-allowed'
+                            : 'bg-slate-700/50 hover:bg-slate-600 text-slate-300 border-slate-600/50'
+                        }`}
                       >
-                        Surprise me
+                        +1 Longsword
+                      </button>
+                      <button
+                        onClick={() => applyTemplate('flametongue')}
+                        disabled={hasSelectedAttributes || !!baseItem}
+                        className={`px-2.5 py-1 text-xs rounded border transition-colors ${
+                          hasSelectedAttributes || baseItem
+                            ? 'bg-slate-800/50 text-slate-600 border-slate-700/50 cursor-not-allowed'
+                            : 'bg-slate-700/50 hover:bg-slate-600 text-slate-300 border-slate-600/50'
+                        }`}
+                      >
+                        Flame Tongue
+                      </button>
+                      <button
+                        onClick={() => applyTemplate('holy-avenger')}
+                        disabled={hasSelectedAttributes || !!baseItem}
+                        className={`px-2.5 py-1 text-xs rounded border transition-colors ${
+                          hasSelectedAttributes || baseItem
+                            ? 'bg-slate-800/50 text-slate-600 border-slate-700/50 cursor-not-allowed'
+                            : 'bg-slate-700/50 hover:bg-slate-600 text-slate-300 border-slate-600/50'
+                        }`}
+                      >
+                        Holy Avenger
                       </button>
                     </div>
+                    <button
+                      onClick={generateSurpriseItem}
+                      className="px-2.5 py-1 text-xs bg-violet-900/40 hover:bg-violet-800/50 text-violet-300 rounded border border-violet-600/40 transition-colors"
+                    >
+                      Surprise me
+                    </button>
                   </div>
-                )}
+                </div>
               </div>
             </div>
 

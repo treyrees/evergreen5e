@@ -4,7 +4,7 @@
  */
 
 import { DamageBonus, ChargedAbility, AbilityScoreSetter, PermanentBuffs } from '@/types/magic-item';
-import { generateRandomItemName } from '@/lib/item-name-generator';
+import { generateRandomItemNameForBase } from '@/lib/item-name-generator';
 import { BASE_ITEMS, WEAPON_ITEMS, ARMOR_ITEMS } from '@/lib/calculator-constants';
 
 /**
@@ -103,33 +103,26 @@ export function generateSurpriseItem(): SurpriseItemConfig {
   // Point budgets to stay under 3.9 (cap at Very Rare, no Legendary)
   const pointBudget = targetRarity === 'uncommon' ? 1.4 : targetRarity === 'rare' ? 2.4 : 3.8;
 
-  // Decide on item archetype first (affects base item selection)
-  const archetypeRoll = Math.random();
-  type Archetype = 'weapon' | 'armor' | 'spellcaster' | 'utility' | 'hybrid';
-  let archetype: Archetype;
-  if (archetypeRoll < 0.25) archetype = 'weapon';
-  else if (archetypeRoll < 0.40) archetype = 'armor';
-  else if (archetypeRoll < 0.60) archetype = 'spellcaster';
-  else if (archetypeRoll < 0.80) archetype = 'utility';
-  else archetype = 'hybrid';
+  // Decide on item category first - equal distribution across weapon/armor/trinket
+  // This ensures balanced representation regardless of how many items are in each category
+  const categoryRoll = Math.random();
+  type Category = 'weapon' | 'armor' | 'trinket';
+  let category: Category;
+  if (categoryRoll < 0.33) category = 'weapon';
+  else if (categoryRoll < 0.66) category = 'armor';
+  else category = 'trinket';
 
-  // Select base item based on archetype
+  // Select base item based on category
   let baseItemPool: string[];
-  switch (archetype) {
+  switch (category) {
     case 'weapon':
       baseItemPool = [...BASE_ITEMS['Melee Weapons (Simple)'], ...BASE_ITEMS['Melee Weapons (Martial)'], ...BASE_ITEMS['Ranged Weapons']];
       break;
     case 'armor':
       baseItemPool = [...BASE_ITEMS['Armor']];
       break;
-    case 'spellcaster':
+    case 'trinket':
       baseItemPool = [...BASE_ITEMS['Implements'], ...BASE_ITEMS['Accessories'], 'wondrous item'];
-      break;
-    case 'utility':
-      baseItemPool = [...BASE_ITEMS['Accessories'], ...BASE_ITEMS['Implements'], 'wondrous item'];
-      break;
-    case 'hybrid':
-      baseItemPool = Object.values(BASE_ITEMS).flat();
       break;
   }
   const randomBaseItem = baseItemPool[Math.floor(Math.random() * baseItemPool.length)];
@@ -166,7 +159,7 @@ export function generateSurpriseItem(): SurpriseItemConfig {
   type MajorAttr = 'enhancement' | 'damage' | 'ac' | 'saves' | 'spells' | 'abilityScore';
   type MinorAttr = 'resistance' | 'conditionImmunity' | 'permanentBuff' | 'spellBonus' | 'advantage';
 
-  // Build attribute pools based on archetype
+  // Build attribute pools based on category
   const possibleMajor: MajorAttr[] = [];
   const possibleMinor: MinorAttr[] = [];
 
@@ -180,11 +173,11 @@ export function generateSurpriseItem(): SurpriseItemConfig {
   if (!isWeapon && !isArmor) {
     possibleMajor.push('ac', 'saves');
   }
-  // Spells can appear on any item, but more likely on implements/accessories
-  if (archetype === 'spellcaster' || archetype === 'hybrid' || isImplement) {
+  // Spells can appear on any item, but more likely on trinkets (implements/accessories)
+  if (category === 'trinket') {
     possibleMajor.push('spells', 'spells'); // Double weight for spell-focused
   } else if (Math.random() < 0.3) {
-    possibleMajor.push('spells'); // 30% chance for other archetypes
+    possibleMajor.push('spells'); // 30% chance for weapons/armor
   }
   // Ability score setters for rare+ items
   if (targetRarity !== 'uncommon' && Math.random() < 0.25) {
@@ -193,10 +186,10 @@ export function generateSurpriseItem(): SurpriseItemConfig {
 
   // Minor attributes (all items can have these)
   possibleMinor.push('resistance', 'conditionImmunity', 'permanentBuff');
-  if (archetype === 'spellcaster' || isImplement) {
+  if (category === 'trinket') {
     possibleMinor.push('spellBonus');
   }
-  if (isWeapon || archetype === 'utility') {
+  if (isWeapon || category === 'trinket') {
     possibleMinor.push('advantage');
   }
 
@@ -435,8 +428,8 @@ export function generateSurpriseItem(): SurpriseItemConfig {
     result.attunement = Math.random() < 0.4;
   }
 
-  // Generate a random item name
-  result.itemName = generateRandomItemName();
+  // Generate a random item name that matches the base item type
+  result.itemName = generateRandomItemNameForBase(result.baseItem);
 
   return result;
 }
