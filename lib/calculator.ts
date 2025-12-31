@@ -569,21 +569,27 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
   // === NEW SRD 5.2.1 MECHANICS ===
 
   // Advantage on checks/saves
-  // Values calibrated so Sentinel Shield (initiative + perception) = ~1.0 (Uncommon)
+  // Individual saves calibrated so all six sum to 5.0 pts (Very Rare)
+  // Validated against Mantle of Spell Resistance: ~40% of saves are vs spells → 5.0 × 0.4 = 2.0 pts (Rare) ✓
   if (combat.advantage && combat.advantage.length > 0) {
+    const advantageMultiplier = combat.advantageMultiplier ?? 1.0;
     const ADVANTAGE_VALUES: Record<string, number> = {
-      'initiative': 0.75,    // Very valuable - going first in combat
-      'attack': 1.5,         // Extremely valuable - affects every attack
-      'saves': 1.5,          // Very valuable - affects all saves
-      'dex-saves': 0.5,      // Common save type
-      'str-saves': 0.25,     // Less common
-      'con-saves': 0.5,      // Common for concentration
-      'perception': 0.25,    // Mostly utility
-      'stealth': 0.25,       // Situational
-      'acrobatics': 0.25,    // Situational
+      // Combat
+      'initiative': 0.75,      // Going first is tactically powerful
+      'attack': 1.0,           // Advantage on attacks with this weapon (~+3.5 to hit)
+      // Individual saves (sum to 5.0 pts when all selected)
+      'dex-saves': 1.25,       // Most common - Fireball, dragon breath, AoE
+      'wis-saves': 1.10,       // Charm, fear, dominate, hold person
+      'con-saves': 1.00,       // Concentration, poison, stun
+      'str-saves': 0.65,       // Grapple, push, prone effects
+      'cha-saves': 0.60,       // Banishment, possession, planar
+      'int-saves': 0.40,       // Mind flayers, rare illusions
+      // Skills
+      'perception': 0.25,      // Detecting ambushes, traps
+      'stealth': 0.25,         // Surprise rounds, avoiding detection
     };
     for (const adv of combat.advantage) {
-      score += ADVANTAGE_VALUES[adv] || 0.25;
+      score += (ADVANTAGE_VALUES[adv] || 0.25) * advantageMultiplier;
     }
   }
 

@@ -5,7 +5,7 @@
  * Excludes UI state and description (too long for URLs).
  */
 
-import { DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType } from '@/types/magic-item';
+import { DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType, AdvantageType } from '@/types/magic-item';
 
 // The shareable state - excludes UI state and description
 export interface ShareableItemState {
@@ -55,6 +55,9 @@ export interface ShareableItemState {
   wp?: WeaponProperty[];
   // Armor properties
   ap?: ArmorProperty[];
+  // Advantage
+  adv?: AdvantageType[];
+  advs?: boolean; // advantagesSometimes
   // Charge pool
   cp?: {
     m: number;  // maxCharges
@@ -96,6 +99,8 @@ export interface DecodedItemState {
   flyDuration: number | 'unlimited';
   weaponProperties: WeaponProperty[];
   armorProperties: ArmorProperty[];
+  advantages: AdvantageType[];
+  advantagesSometimes: boolean;
   maxCharges: number;
   chargesPerShortRest: number;
   chargesPerLongRest: number;
@@ -132,6 +137,8 @@ export function encodeItemToUrl(state: {
   flyDuration: number | 'unlimited';
   weaponProperties: WeaponProperty[];
   armorProperties: ArmorProperty[];
+  advantages: AdvantageType[];
+  advantagesSometimes: boolean;
   maxCharges: number;
   chargesPerShortRest: number;
   chargesPerLongRest: number;
@@ -213,6 +220,13 @@ export function encodeItemToUrl(state: {
 
   if (state.armorProperties.length > 0) {
     compact.ap = state.armorProperties;
+  }
+
+  if (state.advantages.length > 0) {
+    compact.adv = state.advantages;
+  }
+  if (state.advantagesSometimes) {
+    compact.advs = true;
   }
 
   if (state.maxCharges > 0 || state.abilities.length > 0) {
@@ -298,6 +312,8 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
       flyDuration: compact.fl?.d || 4,
       weaponProperties: compact.wp || [],
       armorProperties: compact.ap || [],
+      advantages: compact.adv || [],
+      advantagesSometimes: compact.advs || false,
       maxCharges: compact.cp?.m || 0,
       chargesPerShortRest: compact.cp?.sr || 0,
       chargesPerLongRest: compact.cp?.lr || 0,
