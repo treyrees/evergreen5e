@@ -21,10 +21,12 @@ export function SignInModal({ isOpen, onClose, redirectTo }: SignInModalProps) {
 
     try {
       const supabase = createClient();
+      // Use current page URL if no redirectTo provided, URL-encode to preserve query params
+      const returnTo = redirectTo || window.location.pathname + window.location.search;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'discord',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?next=${redirectTo}` : ''}`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(returnTo)}`,
         },
       });
 

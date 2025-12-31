@@ -36,6 +36,7 @@ export default function CalculatorPage() {
   const { user, loading: authLoading } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
@@ -569,11 +570,22 @@ export default function CalculatorPage() {
       return;
     }
 
-    if (!baseItem || !itemName.trim()) {
-      return; // Need at least a name and base item
+    // Validation with user feedback
+    if (!itemName.trim()) {
+      setSaveStatus('error');
+      setSaveErrorMessage('Please enter an item name');
+      setTimeout(() => { setSaveStatus('idle'); setSaveErrorMessage(null); }, 3000);
+      return;
+    }
+    if (!baseItem) {
+      setSaveStatus('error');
+      setSaveErrorMessage('Please select a base item');
+      setTimeout(() => { setSaveStatus('idle'); setSaveErrorMessage(null); }, 3000);
+      return;
     }
 
     setSaveStatus('saving');
+    setSaveErrorMessage(null);
 
     const result = await saveItem({
       name: itemName.trim(),
@@ -626,7 +638,8 @@ export default function CalculatorPage() {
       }
     } else {
       setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3000);
+      setSaveErrorMessage(result.error || 'Failed to save item');
+      setTimeout(() => { setSaveStatus('idle'); setSaveErrorMessage(null); }, 3000);
     }
   };
 
@@ -661,11 +674,11 @@ export default function CalculatorPage() {
     // Flight
     if (combat.flight) {
       setFlightEnabled(true);
-      setFlySpeed(combat.flight.flySpeed ?? 60);
+      setFlySpeed(combat.flight.flySpeed ?? 30);
       setFlyDuration(combat.flight.flyDuration ?? 'unlimited');
     } else {
       setFlightEnabled(false);
-      setFlySpeed(60);
+      setFlySpeed(30);
       setFlyDuration('unlimited');
     }
 
@@ -2461,7 +2474,7 @@ export default function CalculatorPage() {
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
-                              Failed to Save
+                              {saveErrorMessage || 'Failed to Save'}
                             </>
                           ) : user ? (
                             <>
@@ -2787,7 +2800,6 @@ export default function CalculatorPage() {
       <SignInModal
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
-        redirectTo="/calculator"
       />
     </div>
   );

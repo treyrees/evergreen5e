@@ -5,7 +5,7 @@
  * Excludes UI state and description (too long for URLs).
  */
 
-import { DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty } from '@/types/magic-item';
+import { DamageBonus, ChargedAbility, AbilityScoreSetter, AbilityScoreBonus, PermanentBuffs, WeaponProperty, ArmorProperty, ConditionalType } from '@/types/magic-item';
 
 // The shareable state - excludes UI state and description
 export interface ShareableItemState {
@@ -17,7 +17,8 @@ export interface ShareableItemState {
     di: string;  // dice (e.g. "1d6")
     t: string;   // type (damage type)
     f?: 'per-hit' | 'per-turn'; // frequency
-    c?: boolean; // conditional
+    c?: boolean; // conditional (deprecated)
+    ct?: ConditionalType; // conditionalType
     v?: boolean; // vicious
   };
   ac?: number;  // acBonus
@@ -152,7 +153,10 @@ export function encodeItemToUrl(state: {
     if (state.damageBonus.frequency && state.damageBonus.frequency !== 'per-hit') {
       compact.d.f = state.damageBonus.frequency;
     }
-    if (state.damageBonus.conditional) {
+    if (state.damageBonus.conditionalType) {
+      compact.d.ct = state.damageBonus.conditionalType;
+    } else if (state.damageBonus.conditional) {
+      // Backwards compatibility: encode deprecated conditional as creature-common
       compact.d.c = true;
     }
     if (state.damageBonus.vicious) {
@@ -263,7 +267,8 @@ export function decodeItemFromUrl(encoded: string): DecodedItemState | null {
         dice: compact.d.di,
         type: compact.d.t,
         frequency: compact.d.f || 'per-hit',
-        conditional: compact.d.c || false,
+        conditionalType: compact.d.ct,
+        conditional: compact.d.c || false, // deprecated, kept for backwards compatibility
         vicious: compact.d.v || false,
       } : undefined,
       acBonus: compact.ac || 0,
