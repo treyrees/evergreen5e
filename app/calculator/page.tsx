@@ -1414,8 +1414,8 @@ export default function CalculatorPage() {
             <Link href="/" className="text-slate-500 hover:text-slate-300 transition-colors">
               Home
             </Link>
-            {/* Auth UI */}
-            {!authLoading && (
+            {/* Auth UI - Hidden unless ?community=1 */}
+            {communityModeEnabled && !authLoading && (
               user ? (
                 <UserMenu />
               ) : (
@@ -2773,8 +2773,8 @@ export default function CalculatorPage() {
                     {results.suggestedRarity}
                   </div>
 
-                  {/* Save Button */}
-                  {hasSelectedAttributes && itemName.trim() && (
+                  {/* Save Button - Hidden unless ?community=1 */}
+                  {communityModeEnabled && hasSelectedAttributes && itemName.trim() && (
                     <button
                       onClick={handleSaveItem}
                       disabled={saveStatus === 'saving'}
