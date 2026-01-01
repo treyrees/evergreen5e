@@ -249,8 +249,11 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
 
   // Determine if this is an armor/shield item (AC doesn't stack) or other (AC stacks)
   // AC on non-armor items is more valuable because it stacks with armor+shield
+  // Progressive multiplier: each additional +1 AC on non-armor is MORE game-breaking
+  // +1 AC = 1.5x, +2 AC = 2.0x, +3 AC = 2.5x (breaks bounded accuracy progressively)
   const isArmorOrShield = baseItem && ['armor (light)', 'armor (medium)', 'armor (heavy)', 'shield'].includes(baseItem);
-  const acStackingMultiplier = isArmorOrShield ? 1.0 : 1.5;
+  const acBonus = combat.acBonus || 0;
+  const acStackingMultiplier = isArmorOrShield ? 1.0 : (1.0 + (0.5 * acBonus));
 
   // Enhancement bonus (with optional "Sometimes" multiplier)
   const enhancementMultiplier = combat.enhancementMultiplier ?? 1.0;
@@ -444,68 +447,80 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     }
   }
 
-  // Damage resistances - value varies by damage type based on monster damage frequency
-  // Higher values for common damage types (fire, poison), lower for rare (force, radiant)
-  // Physical types (bludgeoning/piercing/slashing) are individually worth less since you need all 3
-  // to be fully protected from physical attacks - combined they'd total 3.75 pts (Very Rare equivalent)
+  // Damage resistances and immunities - with DIMINISHING RETURNS for stacking
+  // You can only benefit from one defense per attack, so stacking has decreasing value
+  // First defense: 100%, Second: 60%, Third: 35%, Fourth+: 20%
+  const DAMAGE_RESISTANCE_VALUES: Record<string, number> = {
+    // Very common damage sources
+    'fire': 2.25,         // Dragons, elementals, traps, spells - extremely common
+    'poison': 2.0,        // Many monsters deal poison, often with condition
+    'cold': 2.0,          // Dragons (white/silver), winter creatures, spells
+    // Moderately common damage sources
+    'necrotic': 1.75,     // Undead are common enemies
+    'lightning': 1.75,    // Blue dragons, storm creatures
+    'acid': 1.5,          // Black dragons, oozes - less common
+    // Physical types - worth less individually since you need all 3 for full protection
+    'bludgeoning': 1.25,  // Clubs, fists, tails, constrict, falling
+    'piercing': 1.25,     // Bites, claws, arrows, spears
+    'slashing': 1.25,     // Swords, axes, some claws
+    // Rare damage sources
+    'thunder': 1.25,      // Rarely dealt by monsters
+    'psychic': 1.0,       // Mind flayers, intellect devourers
+    'radiant': 0.75,      // Almost no monsters deal radiant damage
+    'force': 0.5,         // Nothing deals force damage to players
+  };
+
+  const DAMAGE_IMMUNITY_VALUES: Record<string, number> = {
+    // Immunity = 1.2× resistance (you take 0 instead of half)
+    'fire': 2.7,         // 2.25 × 1.2
+    'poison': 2.4,       // 2.0 × 1.2 - calibrated to Periapt
+    'cold': 2.4,         // 2.0 × 1.2
+    'necrotic': 2.1,     // 1.75 × 1.2
+    'lightning': 2.1,    // 1.75 × 1.2
+    'acid': 1.8,         // 1.5 × 1.2
+    'bludgeoning': 1.5,  // 1.25 × 1.2
+    'piercing': 1.5,     // 1.25 × 1.2
+    'slashing': 1.5,     // 1.25 × 1.2
+    'thunder': 1.5,      // 1.25 × 1.2
+    'psychic': 1.2,      // 1.0 × 1.2
+    'radiant': 1.0,      // 0.75 × 1.2 → rounded up
+    'force': 0.75,       // 0.5 × 1.2 → rounded up
+  };
+
+  // Collect all resistances and immunities for diminishing returns calculation
+  const allDefenses: Array<{ value: number; multiplier: number }> = [];
+
   if (combat.resistances && combat.resistances.length > 0) {
     const resistMultiplier = combat.resistancesMultiplier ?? 1.0;
-    const DAMAGE_RESISTANCE_VALUES: Record<string, number> = {
-      // Very common damage sources - single category covers all fire/poison/cold
-      'fire': 2.25,         // Dragons, elementals, traps, spells - extremely common
-      'poison': 2.0,        // Many monsters deal poison, often with condition
-      'cold': 2.0,          // Dragons (white/silver), winter creatures, spells
-      // Moderately common damage sources
-      'necrotic': 1.75,     // Undead are common enemies
-      'lightning': 1.75,    // Blue dragons, storm creatures
-      'acid': 1.5,          // Black dragons, oozes - less common
-      // Physical types - worth less individually since you need all 3 for full protection
-      // Combined (all physical) = 3.75 pts ≈ Very Rare
-      'bludgeoning': 1.25,  // Clubs, fists, tails, constrict, falling
-      'piercing': 1.25,     // Bites, claws, arrows, spears
-      'slashing': 1.25,     // Swords, axes, some claws
-      // Rare damage sources - fewer monsters deal these
-      'thunder': 1.25,      // Rarely dealt by monsters
-      'psychic': 1.0,       // Mind flayers, intellect devourers
-      'radiant': 0.75,      // Almost no monsters deal radiant damage
-      'force': 0.5,         // Nothing deals force damage to players
-    };
-
     for (const resistance of combat.resistances) {
       const resistanceLower = resistance.toLowerCase();
-      score += (DAMAGE_RESISTANCE_VALUES[resistanceLower] ?? 1.5) * resistMultiplier;
+      allDefenses.push({
+        value: DAMAGE_RESISTANCE_VALUES[resistanceLower] ?? 1.5,
+        multiplier: resistMultiplier,
+      });
     }
   }
 
-  // Damage immunities - valued at 1.2× corresponding resistance values
-  // Immunity must always be worth MORE than resistance (you take 0 instead of half)
-  // Calibrated against Periapt of Proof Against Poison (Rare = poison immunity + poisoned condition)
-  // Physical types: all 3 combined = 4.5 pts (Legendary) for complete weapon immunity
   if (combat.damageImmunities && combat.damageImmunities.length > 0) {
     const immunityMultiplier = combat.damageImmunitiesMultiplier ?? 1.0;
-    const DAMAGE_IMMUNITY_VALUES: Record<string, number> = {
-      // Common damage sources (1.2× resistance)
-      'fire': 2.7,         // 2.25 × 1.2 - dragons, elementals, spells
-      'poison': 2.4,       // 2.0 × 1.2 - calibrated to Periapt
-      'cold': 2.4,         // 2.0 × 1.2 - dragons, winter environments
-      // Moderately common damage sources
-      'necrotic': 2.1,     // 1.75 × 1.2 - undead
-      'lightning': 2.1,    // 1.75 × 1.2 - blue dragons, storms
-      'acid': 1.8,         // 1.5 × 1.2 - black dragons, oozes
-      // Physical types - all 3 = 4.5 pts (Legendary)
-      'bludgeoning': 1.5,  // 1.25 × 1.2
-      'piercing': 1.5,     // 1.25 × 1.2
-      'slashing': 1.5,     // 1.25 × 1.2
-      // Less common damage sources
-      'thunder': 1.5,      // 1.25 × 1.2
-      'psychic': 1.2,      // 1.0 × 1.2
-      'radiant': 1.0,      // 0.75 × 1.2 → rounded up
-      'force': 0.75,       // 0.5 × 1.2 → rounded up
-    };
-
     for (const immunity of combat.damageImmunities) {
       const immunityLower = immunity.toLowerCase();
-      score += (DAMAGE_IMMUNITY_VALUES[immunityLower] ?? 1.5) * immunityMultiplier;
+      allDefenses.push({
+        value: DAMAGE_IMMUNITY_VALUES[immunityLower] ?? 1.5,
+        multiplier: immunityMultiplier,
+      });
+    }
+  }
+
+  // Apply diminishing returns: sort by value (highest first), then apply stacking discount
+  // 1st: 100%, 2nd: 60%, 3rd: 35%, 4th+: 20%
+  if (allDefenses.length > 0) {
+    allDefenses.sort((a, b) => b.value - a.value);
+    const STACKING_MULTIPLIERS = [1.0, 0.6, 0.35, 0.2];
+
+    for (let i = 0; i < allDefenses.length; i++) {
+      const stackingMult = STACKING_MULTIPLIERS[Math.min(i, 3)];
+      score += allDefenses[i].value * allDefenses[i].multiplier * stackingMult;
     }
   }
 
@@ -513,6 +528,7 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
   // Being immune to ONE condition rarely matters more than once per campaign arc
   // Even devastating conditions (paralyzed, stunned) come from limited monster types
   // Calibrated so single condition immunity = Uncommon, multiple = scales toward Rare
+  // SYNERGY: Bundles that cover tactical categories are worth more than sum of parts
   if (combat.conditionImmunities && combat.conditionImmunities.length > 0) {
     const conditionMultiplier = combat.conditionImmunitiesMultiplier ?? 1.0;
     const CONDITION_IMMUNITY_VALUES: Record<string, number> = {
@@ -524,18 +540,37 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
       'exhaustion': 0.5,   // Cumulative but slow-building
       'charmed': 0.5,      // Common, dangerous - vampires, fey
       'frightened': 0.5,   // Common - dragons, undead
-      'restrained': 0.4,   // Speed 0, advantage against you
+      'restrained': 0.6,   // Speed 0, advantage against you (buffed for physical control synergy)
       'poisoned': 0.3,     // Calibrated to Periapt (with poison immunity)
       'blinded': 0.3,      // Situational
       'deafened': 0.15,    // Ribbon - rarely matters
-      'grappled': 0.15,    // Minor - speed 0 but can still act
-      'prone': 0.15,       // Minor - half movement to stand
+      'grappled': 0.3,     // Movement lockdown (buffed for physical control synergy)
+      'prone': 0.3,        // Knocked down, melee advantage (buffed for physical control synergy)
     };
 
-    for (const condition of combat.conditionImmunities) {
-      const conditionLower = condition.toLowerCase();
-      score += (CONDITION_IMMUNITY_VALUES[conditionLower] ?? 0.35) * conditionMultiplier;
+    const conditionsLower = combat.conditionImmunities.map(c => c.toLowerCase());
+
+    for (const condition of conditionsLower) {
+      score += (CONDITION_IMMUNITY_VALUES[condition] ?? 0.35) * conditionMultiplier;
     }
+
+    // Synergy bonuses for condition immunity bundles
+    // Physical control bundle (grappled, prone, restrained) - immunity to battlefield lockdown
+    const physicalControl = ['grappled', 'prone', 'restrained'];
+    const physicalCount = physicalControl.filter(c => conditionsLower.includes(c)).length;
+    if (physicalCount >= 3) score += 1.0 * conditionMultiplier;
+    else if (physicalCount >= 2) score += 0.5 * conditionMultiplier;
+
+    // Mental control bundle (charmed, frightened) - immunity to mind control
+    const mentalControl = ['charmed', 'frightened'];
+    const mentalCount = mentalControl.filter(c => conditionsLower.includes(c)).length;
+    if (mentalCount >= 2) score += 0.5 * conditionMultiplier;
+
+    // Incapacitation bundle (stunned, paralyzed, incapacitated) - immunity to action denial
+    const incapBundle = ['stunned', 'paralyzed', 'incapacitated'];
+    const incapCount = incapBundle.filter(c => conditionsLower.includes(c)).length;
+    if (incapCount >= 3) score += 1.0 * conditionMultiplier;
+    else if (incapCount >= 2) score += 0.5 * conditionMultiplier;
   }
 
   // Spell charges (legacy format)
