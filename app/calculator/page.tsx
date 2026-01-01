@@ -3084,8 +3084,8 @@ export default function CalculatorPage() {
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Base Values:</div>
                       <div>• Enhancement: 1 point per +1</div>
-                      <div>• AC Bonus: 1 pt/+1 on armor/shields, <span className="text-amber-400">1.5 pt/+1 on other items</span></div>
-                      <div className="text-slate-500 pl-2 text-[10px]">(Non-armor AC stacks with armor, breaking bounded accuracy)</div>
+                      <div>• AC Bonus: 1 pt/+1 on armor/shields, <span className="text-amber-400">progressive on other items</span></div>
+                      <div className="text-slate-500 pl-2 text-[10px]">(Non-armor AC: +1=1.5 pts, +2=4.0 pts, +3=7.5 pts; stacking breaks bounded accuracy)</div>
                       <div>• Saving Throw Bonus: 1 point per +1</div>
                       <div>• Spell Save DC Bonus: 1.0 pts per +1</div>
                       <div>• Spell Attack Bonus: 0.75 pts per +1</div>
@@ -3143,32 +3143,29 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-slate-200 font-semibold">Damage Resistances:</div>
-                      <div>• Fire: 2.25 pts (dragons, elementals, spells - very common)</div>
-                      <div>• Poison/Cold: 2.0 pts (common damage sources)</div>
-                      <div>• Necrotic/Lightning: 1.75 pts (moderately common)</div>
-                      <div>• Acid: 1.5 pts | Thunder: 1.25 pts</div>
-                      <div>• Physical (each): 1.25 pts <span className="text-slate-500">(all 3 = 3.75 pts)</span></div>
-                      <div>• Psychic: 1.0 pts | Radiant: 0.75 pts | Force: 0.5 pts</div>
-                      <div className="text-slate-500 text-[10px] pl-2">Physical types worth less individually since you need all 3 for full protection</div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="text-slate-200 font-semibold">Damage Immunities:</div>
-                      <div className="text-slate-500 text-[10px] mb-1">Valued at 1.2× corresponding resistance (immunity &gt; resistance always)</div>
-                      <div>• Fire: 2.7 pts | Poison/Cold: 2.4 pts</div>
-                      <div>• Necrotic/Lightning: 2.1 pts | Acid: 1.8 pts</div>
-                      <div>• Physical (each): 1.5 pts <span className="text-slate-500">(all 3 = 4.5 pts Legendary)</span></div>
-                      <div>• Thunder: 1.5 pts | Psychic: 1.2 pts | Radiant: 1.0 pts | Force: 0.75 pts</div>
+                      <div className="text-slate-200 font-semibold">Damage Resistances & Immunities:</div>
+                      <div className="text-amber-400 text-[10px] mb-1">Diminishing returns: 1st=100%, 2nd=60%, 3rd=35%, 4th+=20%</div>
+                      <div className="text-slate-500 text-[10px] mb-1">(You can only benefit from one defense per attack; stacking has decreasing value)</div>
+                      <div>• Fire: 2.25 pts (res) / 2.7 pts (imm)</div>
+                      <div>• Poison/Cold: 2.0 pts / 2.4 pts</div>
+                      <div>• Necrotic/Lightning: 1.75 pts / 2.1 pts</div>
+                      <div>• Acid: 1.5 pts / 1.8 pts | Thunder: 1.25 pts / 1.5 pts</div>
+                      <div>• Physical (each): 1.25 pts / 1.5 pts</div>
+                      <div>• Psychic: 1.0 pts / 1.2 pts | Radiant: 0.75 pts / 1.0 pts</div>
+                      <div>• Force: 0.5 pts / 0.75 pts</div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="text-slate-200 font-semibold">Condition Immunities:</div>
-                      <div className="text-slate-500 text-[10px] mb-1">Very specific; one condition rarely matters more than once per arc</div>
+                      <div className="text-slate-500 text-[10px] mb-1">Individual conditions are situational, but bundles covering tactical categories get synergy bonuses</div>
                       <div>• Paralyzed: 0.75 pts | Stunned/Petrified: 0.65 pts</div>
                       <div>• Incapacitated/Unconscious/Exhaustion: 0.5 pts</div>
-                      <div>• Charmed/Frightened: 0.5 pts | Restrained: 0.4 pts</div>
-                      <div>• Poisoned/Blinded: 0.3 pts | Deafened/Grappled/Prone: 0.15 pts</div>
+                      <div>• Charmed/Frightened: 0.5 pts | Restrained: 0.6 pts</div>
+                      <div>• Grappled/Prone: 0.3 pts | Poisoned/Blinded: 0.3 pts | Deafened: 0.15 pts</div>
+                      <div className="text-amber-400 text-[10px] mt-1">Synergy bonuses:</div>
+                      <div className="text-slate-500 text-[10px] pl-2">• Physical control (grappled+prone+restrained): 2/3=+0.5, 3/3=+1.0</div>
+                      <div className="text-slate-500 text-[10px] pl-2">• Mental control (charmed+frightened): 2/2=+0.5</div>
+                      <div className="text-slate-500 text-[10px] pl-2">• Incapacitation (stunned+paralyzed+incap): 2/3=+0.5, 3/3=+1.0</div>
                     </div>
 
                     <div className="space-y-1">
