@@ -34,12 +34,20 @@ export function Nav() {
               Items
             </Link>
             {isDevUser && (
-              <Link
-                href="/vote"
-                className="text-slate-400 hover:text-slate-200 transition-colors"
-              >
-                Vote
-              </Link>
+              <>
+                <Link
+                  href="/community"
+                  className="text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  Community
+                </Link>
+                <Link
+                  href="/vote"
+                  className="text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  Vote
+                </Link>
+              </>
             )}
           </div>
         </div>
