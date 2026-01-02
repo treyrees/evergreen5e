@@ -8,6 +8,7 @@ import { Nav } from '@/components/Nav';
 import { getItemsToVote, castVote } from '@/lib/actions/community';
 import { CommunityItem, ACCENT_COLORS, AccentColor } from '@/types/magic-item';
 import { capitalizeRarity, getRarityColorClass, getRarityBgClass } from '@/lib/calculator-ui-utils';
+import { getItemEmoji } from '@/lib/item-balance-flags';
 
 // Get accent color hex value
 function getAccentColorHex(color: AccentColor): string {
@@ -240,6 +241,7 @@ export default function VotePage() {
               const accentHex = getAccentColorHex(item.creatorAccentColor);
               const isWinner = selectedWinner === item.id;
               const isLoser = selectedWinner && selectedWinner !== item.id;
+              const itemEmoji = getItemEmoji(item.baseItem);
 
               return (
                 <motion.div
@@ -275,15 +277,18 @@ export default function VotePage() {
                   <div className="p-4">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-slate-100 font-semibold text-lg truncate">{item.name}</h3>
-                        <div className="flex items-center gap-2 text-sm text-slate-400 mt-0.5">
-                          <span className="capitalize">{item.baseItem}</span>
-                          {item.attunement && (
-                            <span className="text-[10px] px-1 py-0.5 bg-violet-900/50 text-violet-300 rounded">
-                              A
-                            </span>
-                          )}
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <span className="text-xl flex-shrink-0">{itemEmoji}</span>
+                        <div className="min-w-0">
+                          <h3 className="text-slate-100 font-semibold text-lg truncate">{item.name}</h3>
+                          <div className="flex items-center gap-2 text-sm text-slate-400 mt-0.5">
+                            <span className="capitalize">{item.baseItem}</span>
+                            {item.attunement && (
+                              <span className="text-[10px] px-1 py-0.5 bg-violet-900/50 text-violet-300 rounded">
+                                A
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -319,6 +324,12 @@ export default function VotePage() {
                           {item.combat.chargePool.abilities.length > 1 ? 's' : ''}
                         </div>
                       )}
+                      {item.combat.resistances && item.combat.resistances.length > 0 && (
+                        <div>
+                          Resist: {item.combat.resistances.slice(0, 2).join(', ')}
+                          {item.combat.resistances.length > 2 && '...'}
+                        </div>
+                      )}
                       {item.description && (
                         <div className="text-slate-500 italic truncate">{item.description}</div>
                       )}
@@ -348,7 +359,12 @@ export default function VotePage() {
                     }}
                   >
                     <span className="text-lg">{item.creatorEmoji}</span>
-                    <span className="text-sm text-slate-400 truncate">by {item.creatorDisplayName}</span>
+                    <Link
+                      href={`/profile/${encodeURIComponent(item.creatorDisplayName)}`}
+                      className="text-sm text-slate-400 hover:text-slate-200 truncate transition-colors"
+                    >
+                      by {item.creatorDisplayName}
+                    </Link>
                     <div
                       className="ml-auto w-3 h-3 rounded-full flex-shrink-0"
                       style={{ backgroundColor: accentHex }}
