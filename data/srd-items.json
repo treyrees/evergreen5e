@@ -246,13 +246,12 @@
     "rarity": "very rare",
     "attunement": true,
     "dndbeyondSlug": "9229098-staff-of-power",
-    "overrideBonus": -3.5,
+    "overrideBonus": -0.5,
     "combat": {
       "enhancement": 2,
-      "acBonus": 2,
       "savingThrowBonus": 2
     },
-    "description": "+2 enhancement, +2 AC, +2 saves calculates as 7.0 pts (Legendary). Override -3.5 for spellcaster-only attunement (limits to ~40% of builds)."
+    "description": "+2 enhancement + +2 saves = 4.0 pts base. The +2 AC requires holding the staff and is for spellcasters who rarely wear armor, so it doesn't 'stack' in the bounded-accuracy-breaking way. Override -0.5: +1.0 for +2 AC while holding (valued like armor) minus -1.5 for spellcaster-only attunement. Spell charges are part of Very Rare value but not separately modeled."
   },
   {
     "name": "Wand of Fireballs",
@@ -899,12 +898,12 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "4572-armor-of-invulnerability",
-    "overrideBonus": 0.5,
+    "overrideBonus": 1.75,
     "combat": {
       "enhancement": 0,
       "resistances": ["bludgeoning", "piercing", "slashing"]
     },
-    "description": "Resistance to nonmagical B/P/S (3.75 pts). Override +0.5 for 10-minute immunity to nonmagical damage (1/day)."
+    "description": "Resistance to nonmagical B/P/S (2.44 pts with diminishing returns). Override +1.75: +0.75 for B/P/S bundle synergy (covers ~80% of monster attacks together), +1.0 for 10-minute immunity to nonmagical damage (1/day)."
   },
   {
     "name": "Bracers of Defense",
@@ -912,12 +911,12 @@
     "rarity": "rare",
     "attunement": true,
     "dndbeyondSlug": "4590-bracers-of-defense",
-    "overrideBonus": -0.5,
+    "overrideBonus": -1.5,
     "combat": {
       "enhancement": 0,
       "acBonus": 2
     },
-    "description": "+2 AC (stacking = 3.0 pts base). Override -0.5 for restriction: only works when wearing no armor and not using a shield."
+    "description": "+2 AC on accessory (4.0 pts with stacking multiplier). Override -1.5 for severe restriction: only works when wearing no armor and not using a shield. The AC doesn't actually stack with armor, making the stacking multiplier inappropriate for this item."
   },
   {
     "name": "Brooch of Shielding",
