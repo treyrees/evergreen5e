@@ -3,8 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/components/auth';
-import { SignInModal } from '@/components/auth';
+import { useAuth, SignInModal } from '@/components/auth';
+import { Nav } from '@/components/Nav';
 import { getItemsToVote, castVote } from '@/lib/actions/community';
 import { CommunityItem, ACCENT_COLORS, AccentColor } from '@/types/magic-item';
 import { capitalizeRarity, getRarityColorClass, getRarityBgClass } from '@/lib/calculator-ui-utils';
@@ -98,26 +98,29 @@ export default function VotePage() {
   // Not logged in state
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="text-5xl mb-4">👑</div>
-          <h1 className="text-2xl font-bold text-slate-100 mb-2">Crown the Best Items</h1>
-          <p className="text-slate-400 mb-6">
-            Vote on community-submitted magic items. Pick your favorite from each matchup to help the best items rise to the Evergreen Collection.
-          </p>
-          <button
-            onClick={() => setShowSignInModal(true)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-          >
-            Sign in to Vote
-          </button>
-        </div>
+      <div className="min-h-screen">
+        <Nav />
+        <div className="flex flex-col items-center justify-center p-8 mt-20">
+          <div className="text-center max-w-md">
+            <div className="text-5xl mb-4">👑</div>
+            <h1 className="text-2xl font-bold text-slate-100 mb-2">Crown the Best Items</h1>
+            <p className="text-slate-400 mb-6">
+              Vote on community-submitted magic items. Pick your favorite from each matchup to help the best items rise to the Evergreen Collection.
+            </p>
+            <button
+              onClick={() => setShowSignInModal(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Sign in to Vote
+            </button>
+          </div>
 
-        <SignInModal
-          isOpen={showSignInModal}
-          onClose={() => setShowSignInModal(false)}
-          redirectTo="/vote"
-        />
+          <SignInModal
+            isOpen={showSignInModal}
+            onClose={() => setShowSignInModal(false)}
+            redirectTo="/vote"
+          />
+        </div>
       </div>
     );
   }
@@ -125,8 +128,11 @@ export default function VotePage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-slate-400">Loading items...</div>
+      <div className="min-h-screen">
+        <Nav />
+        <div className="flex items-center justify-center mt-32">
+          <div className="text-slate-400">Loading items...</div>
+        </div>
       </div>
     );
   }
@@ -134,26 +140,29 @@ export default function VotePage() {
   // No items to vote on
   if (!items.length && !error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="text-5xl mb-4">🎉</div>
-          <h1 className="text-2xl font-bold text-slate-100 mb-2">All Caught Up!</h1>
-          <p className="text-slate-400 mb-6">
-            You&apos;ve voted on all available items. Check back later for more submissions, or publish your own items to get votes!
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Link
-              href="/calculator"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-            >
-              Create an Item
-            </Link>
-            <button
-              onClick={loadItems}
-              className="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-            >
-              Refresh
-            </button>
+      <div className="min-h-screen">
+        <Nav />
+        <div className="flex flex-col items-center justify-center p-8 mt-20">
+          <div className="text-center max-w-md">
+            <div className="text-5xl mb-4">🎉</div>
+            <h1 className="text-2xl font-bold text-slate-100 mb-2">All Caught Up!</h1>
+            <p className="text-slate-400 mb-6">
+              You&apos;ve voted on all available items. Check back later for more submissions, or publish your own items to get votes!
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Link
+                href="/calculator"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+              >
+                Create an Item
+              </Link>
+              <button
+                onClick={loadItems}
+                className="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -163,47 +172,36 @@ export default function VotePage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8">
-        <div className="text-center">
-          <div className="text-red-400 mb-4">{error}</div>
-          <button
-            onClick={loadItems}
-            className="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-          >
-            Try Again
-          </button>
+      <div className="min-h-screen">
+        <Nav />
+        <div className="flex flex-col items-center justify-center p-8 mt-20">
+          <div className="text-center">
+            <div className="text-red-400 mb-4">{error}</div>
+            <button
+              onClick={loadItems}
+              className="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen">
+      <Nav />
+      <div className="p-4 md:p-8 max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
-              <span className="text-amber-400">👑</span>
-              Crown the Best
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Pick your favorite item. Every 15 votes earns a ticket!
-            </p>
-          </div>
-          <div className="flex gap-4 text-sm">
-            <Link href="/calculator" className="text-slate-500 hover:text-slate-300 transition-colors">
-              Calculator
-            </Link>
-            {profile && (
-              <Link
-                href={`/profile/${encodeURIComponent(profile.displayName)}`}
-                className="text-slate-500 hover:text-slate-300 transition-colors"
-              >
-                Profile
-              </Link>
-            )}
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
+            <span className="text-amber-400">👑</span>
+            Crown the Best
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">
+            Pick your favorite item. Every 15 votes earns a ticket!
+          </p>
         </div>
 
         {/* Vote progress indicator */}

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/components/auth';
+import { Nav } from '@/components/Nav';
 import { getProfileByDisplayName, ProfileWithItems } from '@/lib/actions/profile';
 import { publishItem } from '@/lib/actions/community';
 import { ACCENT_COLORS, AccentColor } from '@/types/magic-item';
@@ -78,19 +79,25 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-slate-400">Loading profile...</div>
+      <div className="min-h-screen">
+        <Nav />
+        <div className="flex items-center justify-center mt-32">
+          <div className="text-slate-400">Loading profile...</div>
+        </div>
       </div>
     );
   }
 
   if (error || !profileData) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div className="text-slate-400">{error || 'Profile not found'}</div>
-        <Link href="/" className="text-emerald-400 hover:text-emerald-300">
-          Go home
-        </Link>
+      <div className="min-h-screen">
+        <Nav />
+        <div className="flex flex-col items-center justify-center gap-4 mt-32">
+          <div className="text-slate-400">{error || 'Profile not found'}</div>
+          <Link href="/" className="text-emerald-400 hover:text-emerald-300">
+            Go home
+          </Link>
+        </div>
       </div>
     );
   }
@@ -99,22 +106,9 @@ export default function ProfilePage() {
   const accentHex = getAccentColorHex(profile.accentColor);
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header nav */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex gap-4 text-sm">
-            <Link href="/calculator" className="text-slate-500 hover:text-slate-300 transition-colors">
-              Calculator
-            </Link>
-            <Link href="/vote" className="text-slate-500 hover:text-slate-300 transition-colors">
-              Vote
-            </Link>
-          </div>
-          <Link href="/" className="text-slate-500 hover:text-slate-300 transition-colors text-sm">
-            Home
-          </Link>
-        </div>
+    <div className="min-h-screen">
+      <Nav />
+      <div className="p-4 md:p-8 max-w-4xl mx-auto">
 
         {/* Profile Header */}
         <div
