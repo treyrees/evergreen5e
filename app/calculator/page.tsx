@@ -2561,6 +2561,12 @@ export default function CalculatorPage() {
                   <div className={`text-3xl font-bold ${getRarityColorClass(results.suggestedRarity)}`}>
                     {results.suggestedRarity}
                   </div>
+                  {/* Note for items bumped to Uncommon minimum */}
+                  {results.combatScore < 1.0 && results.suggestedRarity === 'Uncommon' && (
+                    <div className="text-[10px] text-slate-500 mt-1 italic">
+                      Minimum tier for items with combat features
+                    </div>
+                  )}
 
                   {/* Rarity Scale Indicator */}
                   {(() => {
@@ -3184,6 +3190,9 @@ export default function CalculatorPage() {
                       <div className="text-slate-200 font-semibold">Rarity Thresholds:</div>
                       <div>• Common: &lt;1.0 pts | Uncommon: 1.0-1.9 pts | Rare: 2.0-2.9 pts</div>
                       <div>• Very Rare: 3.0-3.9 pts | Legendary: 4.0+ pts</div>
+                      <div className="text-slate-500 italic text-[10px] mt-1">
+                        Items with combat features are at least Uncommon (Common tier not used).
+                      </div>
                     </div>
 
                     <div className="space-y-1">
