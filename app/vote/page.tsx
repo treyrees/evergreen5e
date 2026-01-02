@@ -2,9 +2,11 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth, SignInModal } from '@/components/auth';
 import { Nav } from '@/components/Nav';
+import { isDevFeaturesEnabled } from '@/lib/dev-features';
 import { getItemsToVote, castVote } from '@/lib/actions/community';
 import { CommunityItem, ACCENT_COLORS, AccentColor } from '@/types/magic-item';
 import { capitalizeRarity, getRarityColorClass, getRarityBgClass } from '@/lib/calculator-ui-utils';
@@ -24,6 +26,7 @@ function CrownIcon({ className }: { className?: string }) {
 }
 
 export default function VotePage() {
+  const devFeaturesEnabled = isDevFeaturesEnabled();
   const { user, profile, refreshProfile } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
 
@@ -34,6 +37,11 @@ export default function VotePage() {
   const [selectedWinner, setSelectedWinner] = useState<string | null>(null);
   const [earnedTicket, setEarnedTicket] = useState(false);
   const [showResults, setShowResults] = useState(false);
+
+  // Dev features not enabled - show 404
+  if (!devFeaturesEnabled) {
+    notFound();
+  }
 
   const loadItems = useCallback(async () => {
     if (!user) return;

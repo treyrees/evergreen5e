@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { notFound } from 'next/navigation';
 import { Nav } from '@/components/Nav';
 import { useAuth, SignInModal } from '@/components/auth';
+import { isDevFeaturesEnabled } from '@/lib/dev-features';
 import { getGraduatedItems } from '@/lib/actions/community';
 import { CommunityItem, ACCENT_COLORS, AccentColor } from '@/types/magic-item';
 import { capitalizeRarity, getRarityColorClass } from '@/lib/calculator-ui-utils';
 
 export default function CommunityPage() {
+  const devFeaturesEnabled = isDevFeaturesEnabled();
   const { user, loading: authLoading } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [items, setItems] = useState<CommunityItem[]>([]);
@@ -33,6 +36,11 @@ export default function CommunityPage() {
       loadItems();
     }
   }, [user]);
+
+  // Dev features not enabled - show 404
+  if (!devFeaturesEnabled) {
+    notFound();
+  }
 
   // Filter and sort items
   const filteredAndSortedItems = useMemo(() => {

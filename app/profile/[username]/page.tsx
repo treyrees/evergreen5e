@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/components/auth';
 import { Nav } from '@/components/Nav';
+import { isDevFeaturesEnabled } from '@/lib/dev-features';
 import { getProfileByDisplayName, ProfileWithItems } from '@/lib/actions/profile';
 import { publishItem } from '@/lib/actions/community';
 import { ACCENT_COLORS, AccentColor } from '@/types/magic-item';
@@ -20,9 +21,15 @@ function getAccentColorHex(color: AccentColor): string {
 const ENDORSEMENT_THRESHOLD = 10;
 
 export default function ProfilePage() {
+  const devFeaturesEnabled = isDevFeaturesEnabled();
   const params = useParams();
   const username = decodeURIComponent(params.username as string);
   const { user } = useAuth();
+
+  // Dev features not enabled - show 404
+  if (!devFeaturesEnabled) {
+    notFound();
+  }
 
   const [profileData, setProfileData] = useState<ProfileWithItems | null>(null);
   const [loading, setLoading] = useState(true);

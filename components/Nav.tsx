@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth, SignInModal, UserMenu } from '@/components/auth';
+import { isDevFeaturesEnabled } from '@/lib/dev-features';
 import { useState, useEffect, useRef } from 'react';
 
 export function Nav() {
@@ -11,6 +12,7 @@ export function Nav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
+  const devFeaturesEnabled = isDevFeaturesEnabled();
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -43,8 +45,8 @@ export function Nav() {
     { href: '/items', label: 'Items' },
   ];
 
-  // Auth-required links (only visible when logged in)
-  const authLinks = [
+  // Dev-only links (only visible when NEXT_PUBLIC_DEV_FEATURES=true and logged in)
+  const devLinks = [
     { href: '/community', label: 'Community' },
     { href: '/vote', label: 'Vote' },
   ];
@@ -69,7 +71,7 @@ export function Nav() {
                   {link.label}
                 </Link>
               ))}
-              {user && authLinks.map((link) => (
+              {devFeaturesEnabled && user && devLinks.map((link) => (
                 <Link key={link.href} href={link.href} className={linkClass(link.href)}>
                   {link.label}
                 </Link>
@@ -126,7 +128,7 @@ export function Nav() {
                   {link.label}
                 </Link>
               ))}
-              {user && authLinks.map((link) => (
+              {devFeaturesEnabled && user && devLinks.map((link) => (
                 <Link key={link.href} href={link.href} className={linkClass(link.href)}>
                   {link.label}
                 </Link>
