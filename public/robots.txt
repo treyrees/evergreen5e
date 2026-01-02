@@ -1,0 +1,8 @@
+# Evergreen5e - D&D 5e Magic Item Balance Calculator
+# https://evergreen5e.vercel.app
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://evergreen5e.vercel.app/sitemap.xml
