@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/components/auth';
 import { Nav } from '@/components/Nav';
-import { isDevFeaturesEnabled } from '@/lib/dev-features';
+import { isDevUser } from '@/lib/dev-features';
 import { getProfileByDisplayName, ProfileWithItems } from '@/lib/actions/profile';
 import { publishItem } from '@/lib/actions/community';
 import { ACCENT_COLORS, AccentColor } from '@/types/magic-item';
@@ -21,15 +21,9 @@ function getAccentColorHex(color: AccentColor): string {
 const ENDORSEMENT_THRESHOLD = 10;
 
 export default function ProfilePage() {
-  const devFeaturesEnabled = isDevFeaturesEnabled();
   const params = useParams();
   const username = decodeURIComponent(params.username as string);
-  const { user } = useAuth();
-
-  // Dev features not enabled - show 404
-  if (!devFeaturesEnabled) {
-    notFound();
-  }
+  const { user, loading: authLoading } = useAuth();
 
   const [profileData, setProfileData] = useState<ProfileWithItems | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +31,13 @@ export default function ProfilePage() {
   const [publishingItemId, setPublishingItemId] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
 
+  const isAllowedUser = isDevUser(user?.email);
   const isOwnProfile = user && profileData?.profile.id === user.id;
+
+  // Not the dev user - show 404
+  if (!authLoading && !isAllowedUser) {
+    notFound();
+  }
 
   useEffect(() => {
     async function loadProfile() {

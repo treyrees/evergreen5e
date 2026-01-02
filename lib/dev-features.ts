@@ -1,13 +1,16 @@
 /**
- * Dev Features Flag
+ * Dev User Detection
  *
- * Controls visibility of in-development features (Community, Vote, Profile, etc.)
- * Set NEXT_PUBLIC_DEV_FEATURES=true in your environment to enable.
- *
- * Usage:
- * - Preview deployments: Add NEXT_PUBLIC_DEV_FEATURES=true to Vercel env vars
- * - Local dev: Add to .env.local
+ * Dev features (Community, Vote, Profile) are only visible to the dev test user
+ * created via /auth/dev-login. This keeps features hidden from production users
+ * while allowing testing in preview deployments.
  */
-export function isDevFeaturesEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_DEV_FEATURES === 'true';
+
+const DEV_USER_EMAIL = 'dev-tester@evergreen5e.local';
+
+/**
+ * Check if the given user email is the dev test user
+ */
+export function isDevUser(email: string | undefined | null): boolean {
+  return email === DEV_USER_EMAIL;
 }

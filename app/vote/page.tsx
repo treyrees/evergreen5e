@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth, SignInModal } from '@/components/auth';
 import { Nav } from '@/components/Nav';
-import { isDevFeaturesEnabled } from '@/lib/dev-features';
+import { isDevUser } from '@/lib/dev-features';
 import { getItemsToVote, castVote } from '@/lib/actions/community';
 import { CommunityItem, ACCENT_COLORS, AccentColor } from '@/types/magic-item';
 import { capitalizeRarity, getRarityColorClass, getRarityBgClass } from '@/lib/calculator-ui-utils';
@@ -26,8 +26,7 @@ function CrownIcon({ className }: { className?: string }) {
 }
 
 export default function VotePage() {
-  const devFeaturesEnabled = isDevFeaturesEnabled();
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, loading: authLoading } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
 
   const [items, setItems] = useState<CommunityItem[]>([]);
@@ -38,8 +37,10 @@ export default function VotePage() {
   const [earnedTicket, setEarnedTicket] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
-  // Dev features not enabled - show 404
-  if (!devFeaturesEnabled) {
+  const isAllowedUser = isDevUser(user?.email);
+
+  // Not the dev user - show 404
+  if (!authLoading && !isAllowedUser) {
     notFound();
   }
 
