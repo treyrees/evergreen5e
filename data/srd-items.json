@@ -233,11 +233,12 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "5384-defender",
-    "overrideBonus": -5.5,
-    "description": "+3 enhancement (3.0) + +3 AC on weapon (7.5 with progressive stacking) = 10.5 pts base. Override -5.5 for transfer limitation: you split the +3 each turn between attack and AC, so you never have both at full. Effectively ~7.5 pts (the better option each turn).",
+    "description": "Transfer mechanic: split +3 between attack and AC each turn, never both at full. Both use 0.5x 'Sometimes' multiplier: enhancement 3×0.5=1.5 pts, AC 3×0.5×2.5=3.75 pts. Total: 5.25 pts.",
     "combat": {
       "enhancement": 3,
-      "acBonus": 3
+      "enhancementMultiplier": 0.5,
+      "acBonus": 3,
+      "acBonusMultiplier": 0.5
     }
   },
   {
