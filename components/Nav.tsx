@@ -33,6 +33,12 @@ export function Nav() {
             >
               Items
             </Link>
+            <Link
+              href="/community"
+              className="text-slate-400 hover:text-slate-200 transition-colors"
+            >
+              Community
+            </Link>
             {user && (
               <Link
                 href="/vote"
