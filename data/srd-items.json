@@ -233,11 +233,12 @@
     "rarity": "legendary",
     "attunement": true,
     "dndbeyondSlug": "5384-defender",
-    "overrideBonus": -2.25,
-    "description": "+3 enhancement and +3 AC calculates as 7.5 pts, but you must split the bonus each turn (can't have both at once). Override -2.25 (0.7x penalty) for this limitation.",
+    "description": "Transfer mechanic: split +3 between attack and AC each turn, never both at full. Both use 0.5x 'Sometimes' multiplier: enhancement 3×0.5=1.5 pts, AC 3×0.5×2.5=3.75 pts. Total: 5.25 pts.",
     "combat": {
       "enhancement": 3,
-      "acBonus": 3
+      "enhancementMultiplier": 0.5,
+      "acBonus": 3,
+      "acBonusMultiplier": 0.5
     }
   },
   {
@@ -464,7 +465,7 @@
         "conditionalType": "creature-common"
       }
     },
-    "description": "+3 sword with 2d10 radiant vs fiends/undead (~4.0 pts base). Override +0.6 for 10ft aura granting advantage on saves vs spells. Helps the whole party and rewards good positioning."
+    "description": "+3 sword with 2d10 radiant vs fiends/undead (~5.0 pts base). Override +0.6 for 10ft aura granting advantage on saves vs spells. Helps the whole party and rewards good positioning."
   },
   {
     "name": "Sword of Sharpness",
