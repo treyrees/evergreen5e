@@ -6,7 +6,7 @@ import { useAuth } from './AuthProvider';
 import { ACCENT_COLORS } from '@/types/magic-item';
 
 export function UserMenu() {
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, loading, signOut, isDevUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -39,8 +39,8 @@ export function UserMenu() {
 
   return (
     <div className="relative flex items-center gap-3" ref={menuRef}>
-      {/* Ticket balance */}
-      {profile && (
+      {/* Ticket balance (dev only) */}
+      {isDevUser && profile && (
         <div className="hidden sm:flex items-center gap-1.5 text-sm">
           <span className="text-amber-400">🎫</span>
           <span className="text-slate-300 font-medium">{profile.tickets}</span>
@@ -91,8 +91,8 @@ export function UserMenu() {
             </div>
           </div>
 
-          {/* Ticket balance (mobile) */}
-          {profile && (
+          {/* Ticket balance (mobile, dev only) */}
+          {isDevUser && profile && (
             <div className="sm:hidden px-4 py-2 border-b border-slate-700 flex items-center justify-between">
               <span className="text-sm text-slate-400">Tickets</span>
               <div className="flex items-center gap-1.5">
@@ -113,13 +113,15 @@ export function UserMenu() {
             </Link>
           )}
 
-          <Link
-            href="/vote"
-            onClick={() => setIsOpen(false)}
-            className="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700/50 transition-colors"
-          >
-            Vote on Items
-          </Link>
+          {isDevUser && (
+            <Link
+              href="/vote"
+              onClick={() => setIsOpen(false)}
+              className="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700/50 transition-colors"
+            >
+              Vote on Items
+            </Link>
+          )}
 
           <button
             onClick={() => {

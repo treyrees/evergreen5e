@@ -58,6 +58,15 @@ This tool helps D&D 5e players and DMs create balanced homebrew magic items by:
 - **`data/srd-items.json`** - Reference database of official SRD magic items with modeled attributes
 - **`types/magic-item.ts`** - TypeScript interfaces for item data structures
 
+### User Profiles
+
+Profiles are created automatically when users sign up via Discord OAuth or dev bypass. Display names are:
+1. Pulled from Discord username (`user_name`, `preferred_username`, `name`, or `full_name`)
+2. Sanitized to alphanumeric characters, underscores, and hyphens
+3. Made unique by appending a random 4-character suffix if needed (e.g., "CoolUser-x7Kp")
+
+The `generate_unique_display_name()` function in `supabase/migrations/003_unique_display_names.sql` handles uniqueness. A unique constraint on `profiles.display_name` prevents collisions.
+
 ### Scoring System
 
 Rarity thresholds (in points):
@@ -129,6 +138,55 @@ There will be TypeScript errors related to Google Fonts (next/font/google). **Do
 ## Style Guide
 
 - **No em dashes**: Never use em dashes (—) in UI copy. Use commas, semicolons, or rephrase instead.
+
+## Community Features (Dev-Only)
+
+Community features are in active development and should **only be visible to dev bypass users**. Regular production users should not see these features until they're ready for launch.
+
+### What's Behind the Dev Gate
+
+- **Voting system** (`/vote`) - Crown mechanic for endorsing items
+- **Tickets** - Currency earned by voting, spent to publish
+- **Publishing** - Submitting items for community voting
+- **Endorsements** - Vote counts and progress toward Evergreen Collection
+- **Graduated items** - Items that reached 10 endorsements
+
+### How Dev Gating Works
+
+The `isDevUser` flag in `AuthContext` checks if the logged-in user's email matches `dev-tester@evergreen5e.local`. This user is created via the dev bypass route:
+
+```
+/auth/dev-login?token=YOUR_DEV_TOKEN&next=/vote
+```
+
+### Using isDevUser in Components
+
+```tsx
+const { user, isDevUser } = useAuth();
+
+// Hide community features for non-dev users
+{isDevUser && (
+  <Link href="/vote">Vote</Link>
+)}
+
+// Show "Coming Soon" instead of blocking
+if (!isDevUser) {
+  return <ComingSoon feature="Community voting" />;
+}
+```
+
+### Files with Dev Gates
+
+- `components/Nav.tsx` - Vote link
+- `components/auth/UserMenu.tsx` - Tickets display, Vote link
+- `app/vote/page.tsx` - Entire page blocked
+- `app/profile/[username]/page.tsx` - Publish buttons, published items, endorsement counts
+
+### When Adding New Community Features
+
+1. Always wrap in `{isDevUser && ...}` or check `if (!isDevUser)` early
+2. For pages, show a "Coming Soon" message rather than 404
+3. For UI elements, simply hide them (don't show disabled states)
 
 ## Philosophy
 

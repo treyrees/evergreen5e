@@ -14,10 +14,14 @@ export interface UserProfile {
   totalVotes: number;
 }
 
+// Dev bypass users can access community features that are still in development
+const DEV_USER_EMAIL = 'dev-tester@evergreen5e.local';
+
 interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
+  isDevUser: boolean; // True if user logged in via dev bypass
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -26,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   loading: true,
+  isDevUser: false,
   signOut: async () => {},
   refreshProfile: async () => {},
 });
@@ -97,8 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
+  // Check if user logged in via dev bypass
+  const isDevUser = user?.email === DEV_USER_EMAIL;
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, isDevUser, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
