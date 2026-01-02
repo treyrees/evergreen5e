@@ -2,11 +2,14 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Nav } from '@/components/Nav';
+import { useAuth, SignInModal } from '@/components/auth';
 import { getGraduatedItems } from '@/lib/actions/community';
 import { CommunityItem, ACCENT_COLORS, AccentColor } from '@/types/magic-item';
 import { capitalizeRarity, getRarityColorClass } from '@/lib/calculator-ui-utils';
 
 export default function CommunityPage() {
+  const { user, loading: authLoading } = useAuth();
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const [items, setItems] = useState<CommunityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +20,7 @@ export default function CommunityPage() {
 
   useEffect(() => {
     async function loadItems() {
+      if (!user) return;
       const result = await getGraduatedItems();
       if (result.success) {
         setItems(result.data);
@@ -25,8 +29,10 @@ export default function CommunityPage() {
       }
       setLoading(false);
     }
-    loadItems();
-  }, []);
+    if (user) {
+      loadItems();
+    }
+  }, [user]);
 
   // Filter and sort items
   const filteredAndSortedItems = useMemo(() => {
@@ -98,7 +104,37 @@ export default function CommunityPage() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  if (loading) {
+  // Not logged in state
+  if (!authLoading && !user) {
+    return (
+      <div className="min-h-screen">
+        <Nav />
+        <div className="flex flex-col items-center justify-center p-8 mt-20">
+          <div className="text-center max-w-md">
+            <div className="text-5xl mb-4">👑</div>
+            <h1 className="text-2xl font-bold text-slate-100 mb-2">Community Items</h1>
+            <p className="text-slate-400 mb-6">
+              Browse magic items endorsed by the community. Sign in to see what the community has created and approved.
+            </p>
+            <button
+              onClick={() => setShowSignInModal(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Sign in to Browse
+            </button>
+          </div>
+
+          <SignInModal
+            isOpen={showSignInModal}
+            onClose={() => setShowSignInModal(false)}
+            redirectTo="/community"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen">
         <Nav />
