@@ -174,7 +174,7 @@ export function getItemExplanation(itemName: string): string {
     return '+2 enhancement, +2 AC, +2 saves (7.0 pts base). Bonus -3.5 for spellcaster-only attunement. Community consensus: appropriately balanced at Very Rare; class restriction and hand-occupation are key constraints.';
   }
   if (itemName === 'Defender') {
-    return '+3 enhancement and +3 AC (7.5 pts base). Bonus -2.25 for transfer limitation: must split the bonus each turn, can\'t have both.';
+    return 'Transfer mechanic: split +3 between attack and AC each turn, never both at full. Both effects use 0.5x multiplier: 1.5 pts (attack) + 3.75 pts (AC) = 5.25 pts total.';
   }
   if (itemName === 'Holy Avenger') {
     return '+3 sword with 2d10 radiant vs fiends/undead (~5.0 pts base). Bonus +0.5 for 10-ft aura granting advantage on saves vs spells to you and all allies. Paladin-only attunement limits availability but doesn\'t reduce power for paladins. Community consensus: quintessential paladin weapon, appropriately Legendary.';
