@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth, SignInModal } from '@/components/auth';
+import { useAuth } from '@/components/auth';
 import { Nav } from '@/components/Nav';
 import { getItemsToVote, castVote } from '@/lib/actions/community';
 import { CommunityItem, ACCENT_COLORS, AccentColor } from '@/types/magic-item';
@@ -24,8 +24,7 @@ function CrownIcon({ className }: { className?: string }) {
 }
 
 export default function VotePage() {
-  const { user, profile, refreshProfile } = useAuth();
-  const [showSignInModal, setShowSignInModal] = useState(false);
+  const { user, profile, refreshProfile, isDevUser } = useAuth();
 
   const [items, setItems] = useState<CommunityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,31 +94,25 @@ export default function VotePage() {
     setVoting(false);
   };
 
-  // Not logged in state
-  if (!user) {
+  // Not logged in or not dev user - show coming soon
+  if (!user || !isDevUser) {
     return (
       <div className="min-h-screen">
         <Nav />
         <div className="flex flex-col items-center justify-center p-8 mt-20">
           <div className="text-center max-w-md">
-            <div className="text-5xl mb-4">👑</div>
-            <h1 className="text-2xl font-bold text-slate-100 mb-2">Crown the Best Items</h1>
+            <div className="text-5xl mb-4">🚧</div>
+            <h1 className="text-2xl font-bold text-slate-100 mb-2">Coming Soon</h1>
             <p className="text-slate-400 mb-6">
-              Vote on community-submitted magic items. Pick your favorite from each matchup to help the best items rise to the Evergreen Collection.
+              Community voting is coming soon! Check back later to vote on community-submitted magic items and help the best ones rise to the Evergreen Collection.
             </p>
-            <button
-              onClick={() => setShowSignInModal(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            <Link
+              href="/calculator"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors inline-block"
             >
-              Sign in to Vote
-            </button>
+              Go to Calculator
+            </Link>
           </div>
-
-          <SignInModal
-            isOpen={showSignInModal}
-            onClose={() => setShowSignInModal(false)}
-            redirectTo="/vote"
-          />
         </div>
       </div>
     );

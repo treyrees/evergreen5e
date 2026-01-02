@@ -22,7 +22,7 @@ const ENDORSEMENT_THRESHOLD = 10;
 export default function ProfilePage() {
   const params = useParams();
   const username = decodeURIComponent(params.username as string);
-  const { user } = useAuth();
+  const { user, isDevUser } = useAuth();
 
   const [profileData, setProfileData] = useState<ProfileWithItems | null>(null);
   const [loading, setLoading] = useState(true);
@@ -133,21 +133,23 @@ export default function ProfilePage() {
                   style={{ backgroundColor: accentHex }}
                 />
               </h1>
-              <div className="flex items-center gap-4 mt-1 text-sm">
-                <span className="text-slate-400">
-                  <span className="text-emerald-400 font-semibold">{graduatedCount}</span>
-                  {' '}item{graduatedCount !== 1 ? 's' : ''} in the Evergreen Collection
-                </span>
-                {isOwnProfile && (
-                  <>
-                    <span className="text-slate-600">|</span>
-                    <span className="text-slate-400">
-                      <span className="text-amber-400 font-semibold">{profile.tickets}</span>
-                      {' '}ticket{profile.tickets !== 1 ? 's' : ''}
-                    </span>
-                  </>
-                )}
-              </div>
+              {isDevUser && (
+                <div className="flex items-center gap-4 mt-1 text-sm">
+                  <span className="text-slate-400">
+                    <span className="text-emerald-400 font-semibold">{graduatedCount}</span>
+                    {' '}item{graduatedCount !== 1 ? 's' : ''} in the Evergreen Collection
+                  </span>
+                  {isOwnProfile && (
+                    <>
+                      <span className="text-slate-600">|</span>
+                      <span className="text-slate-400">
+                        <span className="text-amber-400 font-semibold">{profile.tickets}</span>
+                        {' '}ticket{profile.tickets !== 1 ? 's' : ''}
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -161,7 +163,7 @@ export default function ProfilePage() {
               <span className="text-sm font-normal text-slate-500">({savedItems.length})</span>
             </h2>
 
-            {publishError && (
+            {isDevUser && publishError && (
               <div className="mb-4 p-3 bg-red-900/30 border border-red-800 rounded-lg text-red-300 text-sm">
                 {publishError}
               </div>
@@ -193,27 +195,29 @@ export default function ProfilePage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        {isPublished ? (
-                          <span className="text-sm text-slate-500 italic">Published</span>
-                        ) : (
-                          <button
-                            onClick={() => handlePublish(item.id)}
-                            disabled={publishingItemId === item.id || profile.tickets < 1}
-                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                              profile.tickets < 1
-                                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                                : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                            }`}
-                          >
-                            {publishingItemId === item.id ? (
-                              'Publishing...'
-                            ) : (
-                              <>Publish <span className="text-emerald-300/70">(1 ticket)</span></>
-                            )}
-                          </button>
-                        )}
-                      </div>
+                      {isDevUser && (
+                        <div className="flex items-center gap-3">
+                          {isPublished ? (
+                            <span className="text-sm text-slate-500 italic">Published</span>
+                          ) : (
+                            <button
+                              onClick={() => handlePublish(item.id)}
+                              disabled={publishingItemId === item.id || profile.tickets < 1}
+                              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                                profile.tickets < 1
+                                  ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                              }`}
+                            >
+                              {publishingItemId === item.id ? (
+                                'Publishing...'
+                              ) : (
+                                <>Publish <span className="text-emerald-300/70">(1 ticket)</span></>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -222,8 +226,8 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Published Items */}
-        {publishedItems.length > 0 && (
+        {/* Published Items (dev only) */}
+        {isDevUser && publishedItems.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
               <span className="text-slate-500">🏆</span>
@@ -303,7 +307,7 @@ export default function ProfilePage() {
         )}
 
         {/* Empty state */}
-        {publishedItems.length === 0 && (!isOwnProfile || savedItems.length === 0) && (
+        {(!isDevUser || publishedItems.length === 0) && (!isOwnProfile || savedItems.length === 0) && (
           <div className="text-center py-12 text-slate-500">
             {isOwnProfile ? (
               <>
@@ -313,7 +317,7 @@ export default function ProfilePage() {
                 </Link>
               </>
             ) : (
-              <div className="text-lg">No published items yet</div>
+              <div className="text-lg">No items yet</div>
             )}
           </div>
         )}
