@@ -58,6 +58,15 @@ This tool helps D&D 5e players and DMs create balanced homebrew magic items by:
 - **`data/srd-items.json`** - Reference database of official SRD magic items with modeled attributes
 - **`types/magic-item.ts`** - TypeScript interfaces for item data structures
 
+### User Profiles
+
+Profiles are created automatically when users sign up via Discord OAuth or dev bypass. Display names are:
+1. Pulled from Discord username (`user_name`, `preferred_username`, `name`, or `full_name`)
+2. Sanitized to alphanumeric characters, underscores, and hyphens
+3. Made unique by appending a random 4-character suffix if needed (e.g., "CoolUser-x7Kp")
+
+The `generate_unique_display_name()` function in `supabase/migrations/003_unique_display_names.sql` handles uniqueness. A unique constraint on `profiles.display_name` prevents collisions.
+
 ### Scoring System
 
 Rarity thresholds (in points):
