@@ -1206,11 +1206,10 @@ function compareToAnchor(
   if (userEnh !== anchorEnh) {
     const diff = userEnh - anchorEnh;
     const magnitude = Math.abs(diff) * 1.0;
-    if (diff > 0) {
-      differences.push({ text: `+${diff} higher enhancement`, magnitude });
-    } else {
-      differences.push({ text: `+${-diff} lower enhancement`, magnitude });
-    }
+    differences.push({
+      text: diff > 0 ? `+${diff} enhancement` : `${diff} enhancement`,
+      magnitude
+    });
   }
 
   // Damage comparison (estimate ~1.0 pts for presence, varies by dice)
@@ -1218,28 +1217,22 @@ function compareToAnchor(
   const anchorDmg = anchorCombat.damageBonus?.dice;
   const userFreq = userCombat.damageBonus?.frequency || 'per-hit';
   const anchorFreq = anchorCombat.damageBonus?.frequency || 'per-hit';
+  const freqLabel = (f: string) => f === 'per-turn' ? '/turn' : '';
 
   if (userDmg && !anchorDmg) {
-    const freqText = userFreq === 'per-turn' ? ' per turn' : '';
     const magnitude = getDiceValue(userDmg) * (userFreq === 'per-turn' ? 0.4 : 1.0);
-    differences.push({ text: `has ${userDmg}${freqText} damage (reference has none)`, magnitude });
+    differences.push({ text: `+${userDmg}${freqLabel(userFreq)} damage`, magnitude });
   } else if (!userDmg && anchorDmg) {
-    const freqText = anchorFreq === 'per-turn' ? ' per turn' : '';
     const magnitude = getDiceValue(anchorDmg) * (anchorFreq === 'per-turn' ? 0.4 : 1.0);
-    differences.push({ text: `no damage bonus (reference has ${anchorDmg}${freqText})`, magnitude });
-  } else if (userDmg && anchorDmg) {
-    const userFreqText = userFreq === 'per-turn' ? ' per turn' : '';
-    const anchorFreqText = anchorFreq === 'per-turn' ? ' per turn' : '';
-
-    if (userDmg !== anchorDmg || userFreq !== anchorFreq) {
-      const userVal = getDiceValue(userDmg) * (userFreq === 'per-turn' ? 0.4 : 1.0);
-      const anchorVal = getDiceValue(anchorDmg) * (anchorFreq === 'per-turn' ? 0.4 : 1.0);
-      const magnitude = Math.abs(userVal - anchorVal);
-      differences.push({
-        text: `${userDmg}${userFreqText} vs reference's ${anchorDmg}${anchorFreqText} damage`,
-        magnitude: Math.max(magnitude, 0.3) // Damage differences are always notable
-      });
-    }
+    differences.push({ text: `no bonus damage`, magnitude });
+  } else if (userDmg && anchorDmg && (userDmg !== anchorDmg || userFreq !== anchorFreq)) {
+    const userVal = getDiceValue(userDmg) * (userFreq === 'per-turn' ? 0.4 : 1.0);
+    const anchorVal = getDiceValue(anchorDmg) * (anchorFreq === 'per-turn' ? 0.4 : 1.0);
+    const magnitude = Math.abs(userVal - anchorVal);
+    differences.push({
+      text: `${userDmg}${freqLabel(userFreq)} vs ${anchorDmg}${freqLabel(anchorFreq)}`,
+      magnitude: Math.max(magnitude, 0.3)
+    });
   }
 
   // Saving throw bonus comparison (1.0 pts per +1)
@@ -1248,18 +1241,15 @@ function compareToAnchor(
   if (userSaves !== anchorSaves) {
     const diff = userSaves - anchorSaves;
     const magnitude = Math.abs(diff) * 1.0;
-    if (diff > 0) {
-      if (anchorSaves === 0) {
-        differences.push({ text: `+${userSaves} to saves (reference has none)`, magnitude });
-      } else {
-        differences.push({ text: `+${diff} higher save bonus`, magnitude });
-      }
+    if (userSaves === 0) {
+      differences.push({ text: `no save bonus`, magnitude });
+    } else if (anchorSaves === 0) {
+      differences.push({ text: `+${userSaves} saves`, magnitude });
     } else {
-      if (userSaves === 0) {
-        differences.push({ text: `no save bonus (reference has +${anchorSaves})`, magnitude });
-      } else {
-        differences.push({ text: `+${-diff} lower save bonus`, magnitude });
-      }
+      differences.push({
+        text: diff > 0 ? `+${diff} saves` : `${diff} saves`,
+        magnitude
+      });
     }
   }
 
@@ -1269,11 +1259,10 @@ function compareToAnchor(
   if (userAC !== anchorAC) {
     const diff = userAC - anchorAC;
     const magnitude = Math.abs(diff) * acMultiplier;
-    if (diff > 0) {
-      differences.push({ text: `+${diff} higher AC bonus`, magnitude });
-    } else {
-      differences.push({ text: `+${-diff} lower AC bonus`, magnitude });
-    }
+    differences.push({
+      text: diff > 0 ? `+${diff} AC` : `${diff} AC`,
+      magnitude
+    });
   }
 
   // Spell Save DC comparison (1.0 pts per +1 - same as enhancement, very impactful for casters)
@@ -1282,18 +1271,15 @@ function compareToAnchor(
   if (userSpellDC !== anchorSpellDC) {
     const diff = userSpellDC - anchorSpellDC;
     const magnitude = Math.abs(diff) * 1.0;
-    if (diff > 0) {
-      if (anchorSpellDC === 0) {
-        differences.push({ text: `+${userSpellDC} spell save DC (reference has none)`, magnitude });
-      } else {
-        differences.push({ text: `+${diff} higher spell save DC`, magnitude });
-      }
+    if (userSpellDC === 0) {
+      differences.push({ text: `no spell DC bonus`, magnitude });
+    } else if (anchorSpellDC === 0) {
+      differences.push({ text: `+${userSpellDC} spell DC`, magnitude });
     } else {
-      if (userSpellDC === 0) {
-        differences.push({ text: `no spell DC bonus (reference has +${anchorSpellDC})`, magnitude });
-      } else {
-        differences.push({ text: `+${-diff} lower spell save DC`, magnitude });
-      }
+      differences.push({
+        text: diff > 0 ? `+${diff} spell DC` : `${diff} spell DC`,
+        magnitude
+      });
     }
   }
 
@@ -1303,18 +1289,15 @@ function compareToAnchor(
   if (userSpellAtk !== anchorSpellAtk) {
     const diff = userSpellAtk - anchorSpellAtk;
     const magnitude = Math.abs(diff) * 0.75;
-    if (diff > 0) {
-      if (anchorSpellAtk === 0) {
-        differences.push({ text: `+${userSpellAtk} spell attack (reference has none)`, magnitude });
-      } else {
-        differences.push({ text: `+${diff} higher spell attack`, magnitude });
-      }
+    if (userSpellAtk === 0) {
+      differences.push({ text: `no spell attack bonus`, magnitude });
+    } else if (anchorSpellAtk === 0) {
+      differences.push({ text: `+${userSpellAtk} spell attack`, magnitude });
     } else {
-      if (userSpellAtk === 0) {
-        differences.push({ text: `no spell attack bonus (reference has +${anchorSpellAtk})`, magnitude });
-      } else {
-        differences.push({ text: `+${-diff} lower spell attack`, magnitude });
-      }
+      differences.push({
+        text: diff > 0 ? `+${diff} spell attack` : `${diff} spell attack`,
+        magnitude
+      });
     }
   }
 
@@ -1324,15 +1307,15 @@ function compareToAnchor(
   if (userImmunities !== anchorImmunities) {
     const diff = userImmunities - anchorImmunities;
     const magnitude = Math.abs(diff) * 2.5;
-    if (userImmunities > 0 && anchorImmunities === 0) {
+    if (userImmunities === 0) {
+      differences.push({ text: `no dmg immunities`, magnitude });
+    } else if (anchorImmunities === 0) {
+      differences.push({ text: `+${userImmunities} dmg ${userImmunities === 1 ? 'immunity' : 'immunities'}`, magnitude });
+    } else {
       differences.push({
-        text: `${userImmunities} damage ${userImmunities === 1 ? 'immunity' : 'immunities'} (reference has none)`,
+        text: diff > 0 ? `+${diff} dmg immunities` : `${diff} dmg immunities`,
         magnitude
       });
-    } else if (userImmunities === 0 && anchorImmunities > 0) {
-      differences.push({ text: `no immunities (reference has ${anchorImmunities})`, magnitude });
-    } else {
-      differences.push({ text: `${userImmunities} vs ${anchorImmunities} damage immunities`, magnitude });
     }
   }
 
@@ -1342,15 +1325,15 @@ function compareToAnchor(
   if (userResistances !== anchorResistances) {
     const diff = userResistances - anchorResistances;
     const magnitude = Math.abs(diff) * 1.5;
-    if (userResistances > 0 && anchorResistances === 0) {
+    if (userResistances === 0) {
+      differences.push({ text: `no resistances`, magnitude });
+    } else if (anchorResistances === 0) {
+      differences.push({ text: `+${userResistances} ${userResistances === 1 ? 'resistance' : 'resistances'}`, magnitude });
+    } else {
       differences.push({
-        text: `${userResistances} ${userResistances === 1 ? 'resistance' : 'resistances'} (reference has none)`,
+        text: diff > 0 ? `+${diff} resistances` : `${diff} resistances`,
         magnitude
       });
-    } else if (userResistances === 0 && anchorResistances > 0) {
-      differences.push({ text: `no resistances (reference has ${anchorResistances})`, magnitude });
-    } else {
-      differences.push({ text: `${userResistances} vs ${anchorResistances} resistances`, magnitude });
     }
   }
 
@@ -1360,15 +1343,15 @@ function compareToAnchor(
   if (userConditions !== anchorConditions) {
     const diff = userConditions - anchorConditions;
     const magnitude = Math.abs(diff) * 0.75;
-    if (userConditions > 0 && anchorConditions === 0) {
+    if (userConditions === 0) {
+      differences.push({ text: `no condition immunities`, magnitude });
+    } else if (anchorConditions === 0) {
+      differences.push({ text: `+${userConditions} condition ${userConditions === 1 ? 'immunity' : 'immunities'}`, magnitude });
+    } else {
       differences.push({
-        text: `${userConditions} condition ${userConditions === 1 ? 'immunity' : 'immunities'} (reference has none)`,
+        text: diff > 0 ? `+${diff} condition immunities` : `${diff} condition immunities`,
         magnitude
       });
-    } else if (userConditions === 0 && anchorConditions > 0) {
-      differences.push({ text: `no condition immunities (reference has ${anchorConditions})`, magnitude });
-    } else {
-      differences.push({ text: `${userConditions} vs ${anchorConditions} condition immunities`, magnitude });
     }
   }
 
@@ -1377,16 +1360,19 @@ function compareToAnchor(
   const anchorHasFlight = anchorCombat.flight || anchorCombat.permanentBuffs?.flight;
   if (userHasFlight && !anchorHasFlight) {
     const speed = userCombat.flight?.flySpeed || 30;
-    differences.push({ text: `grants ${speed} ft flight (reference has none)`, magnitude: 1.5 });
+    differences.push({ text: `+${speed} ft flight`, magnitude: 1.5 });
   } else if (!userHasFlight && anchorHasFlight) {
-    const speed = anchorCombat.flight?.flySpeed || 30;
-    differences.push({ text: `no flight (reference has ${speed} ft)`, magnitude: 1.5 });
+    differences.push({ text: `no flight`, magnitude: 1.5 });
   } else if (userHasFlight && anchorHasFlight) {
     const userSpeed = userCombat.flight?.flySpeed || 30;
     const anchorSpeed = anchorCombat.flight?.flySpeed || 30;
     if (userSpeed !== anchorSpeed) {
-      const magnitude = Math.abs(userSpeed - anchorSpeed) >= 20 ? 0.5 : 0.25;
-      differences.push({ text: `${userSpeed} ft fly speed vs reference's ${anchorSpeed} ft`, magnitude });
+      const diff = userSpeed - anchorSpeed;
+      const magnitude = Math.abs(diff) >= 20 ? 0.5 : 0.25;
+      differences.push({
+        text: diff > 0 ? `+${diff} ft fly speed` : `${diff} ft fly speed`,
+        magnitude
+      });
     }
   }
 
@@ -1411,16 +1397,19 @@ function compareToAnchor(
   const anchorHasSpells = (anchorPool && anchorPool.abilities.length > 0) || anchorLegacyCharges > 0;
 
   if (userHasSpells && !anchorHasSpells) {
-    const levelText = userMaxLevel === 0 ? 'cantrip' : `level ${userMaxLevel}`;
+    const levelText = userMaxLevel === 0 ? 'cantrips' : `L${userMaxLevel} spells`;
     const magnitude = Math.max(userMaxLevel * 0.5, 0.5);
-    differences.push({ text: `has spell abilities (${levelText})`, magnitude });
+    differences.push({ text: `+${levelText}`, magnitude });
   } else if (!userHasSpells && anchorHasSpells) {
-    const levelText = anchorMaxLevel === 0 ? 'cantrip' : `level ${anchorMaxLevel}`;
     const magnitude = Math.max(anchorMaxLevel * 0.5, 0.5);
-    differences.push({ text: `no spell abilities (reference has ${levelText})`, magnitude });
+    differences.push({ text: `no spells`, magnitude });
   } else if (userHasSpells && anchorHasSpells && userMaxLevel !== anchorMaxLevel) {
-    const magnitude = Math.abs(userMaxLevel - anchorMaxLevel) * 0.5;
-    differences.push({ text: `spells up to level ${userMaxLevel} vs reference's level ${anchorMaxLevel}`, magnitude });
+    const diff = userMaxLevel - anchorMaxLevel;
+    const magnitude = Math.abs(diff) * 0.5;
+    differences.push({
+      text: `L${userMaxLevel} vs L${anchorMaxLevel} spells`,
+      magnitude
+    });
   }
 
   // Filter to significant differences (>= 0.3 pts) and sort by magnitude
