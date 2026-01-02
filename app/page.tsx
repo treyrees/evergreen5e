@@ -1,8 +1,45 @@
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Is Your Homebrew Balanced? | Free D&D 5e Magic Item Calculator",
+  description: "Check if your D&D 5e homebrew magic item is balanced. Compare against 67 official SRD items using transparent formulas. Free, instant results, no signup required.",
+  alternates: {
+    canonical: "/",
+  },
+};
+
+// JSON-LD structured data for rich search results
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Evergreen5e Magic Item Balance Calculator",
+  description: "Free tool to check if your D&D 5e homebrew magic item is balanced by comparing against official SRD items",
+  url: "https://evergreen5e.vercel.app",
+  applicationCategory: "GameApplication",
+  operatingSystem: "Any",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  featureList: [
+    "Calculate magic item balance scores",
+    "Compare against 67 official SRD items",
+    "Suggest appropriate rarity tier",
+    "Transparent math-based formulas",
+    "No AI or guesswork",
+  ],
+};
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="flex-1 flex flex-col items-center justify-center max-w-xl w-full text-center space-y-8">
         <div className="space-y-4">
           <h1 className="text-5xl font-bold text-white">
@@ -30,5 +67,6 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </>
   );
 }

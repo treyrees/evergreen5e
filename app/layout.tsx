@@ -19,9 +19,67 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+const siteUrl = "https://evergreen5e.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Evergreen5e - D&D 5e Magic Item Balance Calculator",
-  description: "Balance custom D&D 5e magic items using deterministic formulas. No AI or LLMs - pure math-based calculations with SRD anchor comparisons.",
+  title: {
+    default: "Evergreen5e - D&D 5e Magic Item Balance Calculator",
+    template: "%s | Evergreen5e",
+  },
+  description: "Is your homebrew magic item balanced? Check it instantly with our free D&D 5e balance calculator. Compare against 67 official SRD items using transparent, math-based formulas.",
+  keywords: [
+    "D&D 5e",
+    "homebrew balance",
+    "magic item calculator",
+    "is my item balanced",
+    "D&D homebrew",
+    "5e magic items",
+    "homebrew magic item",
+    "D&D item rarity",
+    "balance calculator",
+    "SRD items",
+    "dungeons and dragons",
+    "homebrew tool",
+  ],
+  authors: [{ name: "Evergreen5e" }],
+  creator: "Evergreen5e",
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "Evergreen5e",
+    title: "Is Your Homebrew Balanced? | D&D 5e Magic Item Calculator",
+    description: "Free tool to check if your D&D 5e homebrew magic item is balanced. Compare against 67 official SRD items with transparent math-based formulas. No AI, no guesswork.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Evergreen5e - D&D 5e Magic Item Balance Calculator",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Is Your Homebrew Balanced? | D&D 5e Magic Item Calculator",
+    description: "Free tool to check if your D&D 5e homebrew magic item is balanced. Compare against 67 official SRD items.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
