@@ -33,11 +33,13 @@ import {
 import { generateSurpriseItem as generateSurpriseItemConfig, SurpriseItemConfig } from '@/lib/surprise-item-generator';
 import { generatePreviewImage as generatePreviewImageFn, PreviewAttribute } from '@/lib/preview-image-generator';
 import { DiceRollAnimation, useDiceRollAnimation } from '@/components/DiceRollAnimation';
+import { CertifyModal } from '@/components/CertifyModal';
 
 export default function CalculatorPage() {
   // Auth state
   const { user, loading: authLoading } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showCertifyModal, setShowCertifyModal] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
@@ -2959,6 +2961,15 @@ export default function CalculatorPage() {
                         </button>
                       </div>
 
+                      {/* Certify Button */}
+                      <button
+                        onClick={() => setShowCertifyModal(true)}
+                        className="w-full px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
+                      >
+                        <span className="text-base">🌿</span>
+                        <span>Certify This Item</span>
+                      </button>
+
                       {/* Hidden attributes hint */}
                       {hiddenAttributes.size > 0 && (
                         <p className="text-[10px] text-slate-500 italic">
@@ -3239,6 +3250,21 @@ export default function CalculatorPage() {
       <SignInModal
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
+      />
+
+      {/* Certify Modal */}
+      <CertifyModal
+        isOpen={showCertifyModal}
+        onClose={() => setShowCertifyModal(false)}
+        itemData={{
+          baseItem,
+          attunement,
+          combat: currentItem.combat!,
+          ribbons: currentItem.ribbons,
+          score: results.combatScore,
+          suggestedRarity: results.suggestedRarity,
+        }}
+        defaultItemName={itemName}
       />
     </div>
   );

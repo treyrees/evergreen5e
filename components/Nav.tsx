@@ -5,7 +5,7 @@ import { useAuth, SignInModal, UserMenu } from '@/components/auth';
 import { useState } from 'react';
 
 export function Nav() {
-  const { user, loading, isDevUser } = useAuth();
+  const { user, loading } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
 
   return (
@@ -33,22 +33,6 @@ export function Nav() {
             >
               Items
             </Link>
-            {isDevUser && (
-              <>
-                <Link
-                  href="/community"
-                  className="text-slate-400 hover:text-slate-200 transition-colors"
-                >
-                  Community
-                </Link>
-                <Link
-                  href="/vote"
-                  className="text-slate-400 hover:text-slate-200 transition-colors"
-                >
-                  Vote
-                </Link>
-              </>
-            )}
           </div>
         </div>
 
