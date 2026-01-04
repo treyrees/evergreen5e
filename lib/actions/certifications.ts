@@ -58,7 +58,14 @@ export async function createCertification(
 
     if (error) {
       console.error('Error creating certification:', error);
-      return { success: false, error: 'Failed to create certification' };
+      // Return more specific error message for debugging
+      if (error.code === '42P01') {
+        return { success: false, error: 'Database table not found. Please run migrations.' };
+      }
+      if (error.code === '42501') {
+        return { success: false, error: 'Permission denied. Check RLS policies.' };
+      }
+      return { success: false, error: error.message || 'Failed to create certification' };
     }
 
     return { success: true, data: { id: data.id } };

@@ -2643,17 +2643,6 @@ export default function CalculatorPage() {
                     );
                   })()}
 
-                  {/* Certify Button */}
-                  {hasSelectedAttributes && (
-                    <button
-                      onClick={() => setShowCertifyModal(true)}
-                      className="w-full mt-4 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      <span>🌿</span>
-                      <span>Certify This Item</span>
-                    </button>
-                  )}
-
                 </div>
 
                 {/* What's Similar? - Reference Comparisons */}
@@ -2971,6 +2960,15 @@ export default function CalculatorPage() {
                           Print Preview
                         </button>
                       </div>
+
+                      {/* Certify Button */}
+                      <button
+                        onClick={() => setShowCertifyModal(true)}
+                        className="w-full px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
+                      >
+                        <span className="text-base">🌿</span>
+                        <span>Certify This Item</span>
+                      </button>
 
                       {/* Hidden attributes hint */}
                       {hiddenAttributes.size > 0 && (
