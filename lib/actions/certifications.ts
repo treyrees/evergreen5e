@@ -20,6 +20,9 @@ export interface CreateCertificationInput {
   extraDamageType?: string;
   chargesDescription?: string;
 
+  // Full item attributes list (label + value pairs)
+  itemAttributes?: Array<{ label: string; value: string }>;
+
   // Flavor text (cosmetic description)
   flavorText?: string | null;
 }
@@ -45,10 +48,7 @@ export async function createCertification(
       userId = user?.id ?? null;
     }
 
-    // Insert the certification
-    // Note: Using only columns from original migration (004_certifications.sql)
-    // New columns (enhancement_bonus, ac_bonus, etc.) require migration 005 to be run first
-    // For now, these stats are computed client-side from the base item data
+    // Insert the certification with all item details
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('certifications')
@@ -60,6 +60,16 @@ export async function createCertification(
         attunement: input.attunement,
         score: input.score,
         suggested_rarity: input.suggestedRarity,
+        // Item details (from migration 005)
+        enhancement_bonus: input.enhancementBonus || null,
+        ac_bonus: input.acBonus || null,
+        saving_throw_bonus: input.savingThrowBonus || null,
+        extra_damage_dice: input.extraDamageDice || null,
+        extra_damage_type: input.extraDamageType || null,
+        charges_description: input.chargesDescription || null,
+        // Item attributes list (from migration 007)
+        item_attributes: input.itemAttributes || null,
+        flavor_text: input.flavorText || null,
       })
       .select('id')
       .single();
@@ -123,6 +133,8 @@ export async function getCertification(id: string): Promise<ActionResult<Certifi
       extraDamageDice: data.extra_damage_dice ?? undefined,
       extraDamageType: data.extra_damage_type ?? undefined,
       chargesDescription: data.charges_description ?? undefined,
+      // Item attributes list
+      itemAttributes: data.item_attributes ?? undefined,
       // Flavor text
       flavorText: data.flavor_text ?? undefined,
     };
@@ -176,6 +188,8 @@ export async function getUserCertifications(): Promise<ActionResult<Certificatio
       extraDamageDice: row.extra_damage_dice ?? undefined,
       extraDamageType: row.extra_damage_type ?? undefined,
       chargesDescription: row.charges_description ?? undefined,
+      // Item attributes list
+      itemAttributes: row.item_attributes ?? undefined,
       // Flavor text
       flavorText: row.flavor_text ?? undefined,
     }));

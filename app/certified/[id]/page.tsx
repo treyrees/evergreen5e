@@ -146,51 +146,90 @@ export default async function CertifiedPage({ params }: PageProps) {
               </div>
 
               {/* Item Details */}
-              <div className="bg-stone-900/40 rounded-lg p-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Base Item</span>
-                  <span className="text-stone-300 capitalize">{cert.baseItem}</span>
+              <div className="bg-stone-900/40 rounded-lg p-4 space-y-3 text-sm">
+                {/* Item Attributes List (like "Your Item" section) */}
+                {cert.itemAttributes && cert.itemAttributes.length > 0 && (
+                  <div className="space-y-2">
+                    {cert.itemAttributes.map((attr, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-stone-500 select-none">•</span>
+                        <span className="text-stone-300">
+                          <span className="font-semibold text-stone-200">{attr.label}.</span>{' '}
+                          {attr.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Fallback for old certifications without itemAttributes */}
+                {(!cert.itemAttributes || cert.itemAttributes.length === 0) && (
+                  <div className="space-y-2">
+                    {cert.enhancementBonus && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-stone-500 select-none">•</span>
+                        <span className="text-stone-300">
+                          <span className="font-semibold text-stone-200">Enhancement.</span>{' '}
+                          +{cert.enhancementBonus} bonus to attack and damage rolls
+                        </span>
+                      </div>
+                    )}
+                    {cert.acBonus && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-stone-500 select-none">•</span>
+                        <span className="text-stone-300">
+                          <span className="font-semibold text-stone-200">Armor Class.</span>{' '}
+                          +{cert.acBonus} bonus to AC
+                        </span>
+                      </div>
+                    )}
+                    {cert.savingThrowBonus && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-stone-500 select-none">•</span>
+                        <span className="text-stone-300">
+                          <span className="font-semibold text-stone-200">Saving Throws.</span>{' '}
+                          +{cert.savingThrowBonus} bonus to saving throws
+                        </span>
+                      </div>
+                    )}
+                    {cert.extraDamageDice && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-stone-500 select-none">•</span>
+                        <span className="text-stone-300">
+                          <span className="font-semibold text-stone-200">Bonus Damage.</span>{' '}
+                          {cert.extraDamageDice} {cert.extraDamageType} damage per hit
+                        </span>
+                      </div>
+                    )}
+                    {cert.chargesDescription && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-stone-500 select-none">•</span>
+                        <span className="text-stone-300">
+                          <span className="font-semibold text-stone-200">Charges.</span>{' '}
+                          {cert.chargesDescription}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Separator */}
+                <div className="border-t border-stone-700/50 pt-2 mt-2 space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-stone-500">Base Item</span>
+                    <span className="text-stone-400 capitalize">{cert.baseItem}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-stone-500">Attunement</span>
+                    <span className="text-stone-400">{cert.attunement ? 'Required' : 'Not Required'}</span>
+                  </div>
+                  {cert.creatorName && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-stone-500">Created by</span>
+                      <span className="text-stone-400">{cert.creatorName}</span>
+                    </div>
+                  )}
                 </div>
-                {cert.enhancementBonus && (
-                  <div className="flex justify-between">
-                    <span className="text-stone-500">Enhancement</span>
-                    <span className="text-stone-300">+{cert.enhancementBonus}</span>
-                  </div>
-                )}
-                {cert.acBonus && (
-                  <div className="flex justify-between">
-                    <span className="text-stone-500">AC Bonus</span>
-                    <span className="text-stone-300">+{cert.acBonus}</span>
-                  </div>
-                )}
-                {cert.savingThrowBonus && (
-                  <div className="flex justify-between">
-                    <span className="text-stone-500">Saving Throws</span>
-                    <span className="text-stone-300">+{cert.savingThrowBonus}</span>
-                  </div>
-                )}
-                {cert.extraDamageDice && (
-                  <div className="flex justify-between">
-                    <span className="text-stone-500">Extra Damage</span>
-                    <span className="text-stone-300">{cert.extraDamageDice} {cert.extraDamageType}</span>
-                  </div>
-                )}
-                {cert.chargesDescription && (
-                  <div className="flex justify-between">
-                    <span className="text-stone-500">Charges</span>
-                    <span className="text-stone-300">{cert.chargesDescription}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Attunement</span>
-                  <span className="text-stone-300">{cert.attunement ? 'Required' : 'Not Required'}</span>
-                </div>
-                {cert.creatorName && (
-                  <div className="flex justify-between">
-                    <span className="text-stone-500">Created by</span>
-                    <span className="text-stone-300">{cert.creatorName}</span>
-                  </div>
-                )}
               </div>
 
               {/* Flavor Text */}
