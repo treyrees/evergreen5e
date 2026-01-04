@@ -47,17 +47,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const cert = result.data;
   return {
-    title: `${cert.itemName} - Evergreen Certified`,
-    description: `${cert.itemName} is a ${cert.suggestedRarity} magic item, formulaically balanced by Evergreen5e. Score: ${cert.score.toFixed(2)} pts.`,
+    title: `${cert.itemName} - Balance Certified`,
+    description: `${cert.itemName} is a balanced ${cert.suggestedRarity} magic item. Score: ${cert.score.toFixed(2)} pts.`,
     openGraph: {
-      title: `${cert.itemName} - Evergreen Certified ${cert.suggestedRarity}`,
-      description: `A formulaically balanced ${cert.suggestedRarity} magic item.`,
+      title: `${cert.itemName} - Balance Certified ${cert.suggestedRarity}`,
+      description: `A balanced ${cert.suggestedRarity} magic item.`,
       images: [`/api/certified/${id}/badge`],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${cert.itemName} - Evergreen Certified`,
-      description: `A formulaically balanced ${cert.suggestedRarity} magic item.`,
+      title: `${cert.itemName} - Balance Certified`,
+      description: `A balanced ${cert.suggestedRarity} magic item.`,
       images: [`/api/certified/${id}/badge`],
     },
   };
@@ -108,7 +108,7 @@ export default async function CertifiedPage({ params }: PageProps) {
             <div className="relative p-8 md:p-10 space-y-6">
               {/* Header with seal */}
               <div className="text-center space-y-4">
-                {/* Evergreen seal */}
+                {/* Seal */}
                 <div className="inline-flex items-center justify-center">
                   <div className={`w-16 h-16 rounded-full border-2 ${borderColor} bg-stone-900/80 flex items-center justify-center`}>
                     <span className="text-2xl">🌿</span>
@@ -118,7 +118,7 @@ export default async function CertifiedPage({ params }: PageProps) {
                 {/* Title */}
                 <div>
                   <p className={`text-xs uppercase tracking-[0.3em] ${accentColor} font-medium mb-2`}>
-                    Certificate of Balance
+                    Balance Certification
                   </p>
                   <h1 className="font-cinzel text-3xl md:text-4xl font-bold text-amber-100/90 leading-tight">
                     {cert.itemName}
@@ -202,16 +202,16 @@ export default async function CertifiedPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Certification stamp */}
+              {/* Certification footer */}
               <div className="text-center pt-4 space-y-2">
-                <p className={`text-lg font-cinzel font-semibold ${accentColor}`}>
-                  Formulaically Balanced
-                </p>
                 <p className="text-xs text-stone-500">
                   Certified on {certDate}
                 </p>
                 <p className="text-xs text-stone-600 font-mono">
                   ID: {id.slice(0, 8)}
+                </p>
+                <p className="text-[10px] text-stone-600 mt-3">
+                  Scored using transparent balance formulas
                 </p>
               </div>
             </div>

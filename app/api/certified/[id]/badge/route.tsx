@@ -209,7 +209,7 @@ export async function GET(
                 textTransform: 'uppercase',
               }}
             >
-              Evergreen Certified
+              Balance Certified
             </span>
             <span
               style={{

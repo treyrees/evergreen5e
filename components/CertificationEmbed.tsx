@@ -17,8 +17,8 @@ export function CertificationEmbed({
 }: CertificationEmbedProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const htmlEmbed = `<a href="${certUrl}" target="_blank"><img src="${badgeUrl}" alt="${itemName} - Evergreen Certified ${suggestedRarity}" width="400" /></a>`;
-  const markdownEmbed = `[![${itemName} - Evergreen Certified](${badgeUrl})](${certUrl})`;
+  const htmlEmbed = `<a href="${certUrl}" target="_blank"><img src="${badgeUrl}" alt="${itemName} - Balance Certified ${suggestedRarity}" width="400" /></a>`;
+  const markdownEmbed = `[![${itemName} - Balance Certified](${badgeUrl})](${certUrl})`;
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
@@ -41,7 +41,7 @@ export function CertificationEmbed({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={badgeUrl}
-            alt={`${itemName} - Evergreen Certified ${suggestedRarity}`}
+            alt={`${itemName} - Balance Certified ${suggestedRarity}`}
             className="max-w-full h-auto rounded shadow-lg"
             width={400}
           />
@@ -108,7 +108,7 @@ export function CertificationEmbed({
       {/* Download Badge Button */}
       <a
         href={badgeUrl}
-        download={`${itemName.toLowerCase().replace(/\s+/g, '-')}-evergreen-certified.png`}
+        download={`${itemName.toLowerCase().replace(/\s+/g, '-')}-balance-certified.png`}
         className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
