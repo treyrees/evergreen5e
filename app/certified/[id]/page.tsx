@@ -51,13 +51,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: `${cert.itemName} is a ${cert.suggestedRarity} magic item, formulaically balanced by Evergreen5e. Score: ${cert.score.toFixed(2)} pts.`,
     openGraph: {
       title: `${cert.itemName} - Evergreen Certified ${cert.suggestedRarity}`,
-      description: cert.flavorText || `A formulaically balanced ${cert.suggestedRarity} magic item.`,
+      description: `A formulaically balanced ${cert.suggestedRarity} magic item.`,
       images: [`/api/certified/${id}/badge`],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${cert.itemName} - Evergreen Certified`,
-      description: cert.flavorText || `A formulaically balanced ${cert.suggestedRarity} magic item.`,
+      description: `A formulaically balanced ${cert.suggestedRarity} magic item.`,
       images: [`/api/certified/${id}/badge`],
     },
   };
@@ -162,13 +162,6 @@ export default async function CertifiedPage({ params }: PageProps) {
                   </div>
                 )}
               </div>
-
-              {/* Flavor Text */}
-              {cert.flavorText && (
-                <blockquote className="text-center italic text-stone-400 text-sm px-4">
-                  &ldquo;{cert.flavorText}&rdquo;
-                </blockquote>
-              )}
 
               {/* Certification stamp */}
               <div className="text-center pt-4 space-y-2">

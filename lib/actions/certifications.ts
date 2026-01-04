@@ -1,17 +1,14 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import type { CombatFeatures, RibbonFeatures, Rarity, Certification } from '@/types/magic-item';
+import type { Rarity, Certification } from '@/types/magic-item';
 
-// Input for creating a certification
+// Input for creating a certification (minimal - only what's displayed)
 export interface CreateCertificationInput {
   itemName: string;
   creatorName?: string | null;
-  flavorText?: string | null;
   baseItem: string;
   attunement: boolean;
-  combat: CombatFeatures;
-  ribbons?: RibbonFeatures | null;
   score: number;
   suggestedRarity: Rarity;
 }
@@ -45,11 +42,8 @@ export async function createCertification(
         user_id: userId,
         item_name: input.itemName,
         creator_name: input.creatorName || null,
-        flavor_text: input.flavorText || null,
         base_item: input.baseItem,
         attunement: input.attunement,
-        combat: input.combat,
-        ribbons: input.ribbons || null,
         score: input.score,
         suggested_rarity: input.suggestedRarity,
       })
@@ -103,11 +97,8 @@ export async function getCertification(id: string): Promise<ActionResult<Certifi
       userId: data.user_id,
       itemName: data.item_name,
       creatorName: data.creator_name,
-      flavorText: data.flavor_text,
       baseItem: data.base_item,
       attunement: data.attunement,
-      combat: data.combat as unknown as CombatFeatures,
-      ribbons: data.ribbons as unknown as RibbonFeatures | undefined,
       score: parseFloat(data.score),
       suggestedRarity: data.suggested_rarity as Rarity,
       createdAt: data.created_at,
@@ -150,11 +141,8 @@ export async function getUserCertifications(): Promise<ActionResult<Certificatio
       userId: row.user_id,
       itemName: row.item_name,
       creatorName: row.creator_name,
-      flavorText: row.flavor_text,
       baseItem: row.base_item,
       attunement: row.attunement,
-      combat: row.combat as unknown as CombatFeatures,
-      ribbons: row.ribbons as unknown as RibbonFeatures | undefined,
       score: parseFloat(row.score),
       suggestedRarity: row.suggested_rarity as Rarity,
       createdAt: row.created_at,

@@ -32,6 +32,7 @@ drop table if exists public.profiles cascade;
 -- ============================================
 -- CERTIFICATIONS TABLE
 -- Public balance certifications for magic items
+-- Minimal schema: only stores what's displayed on the certificate
 -- ============================================
 
 create table if not exists public.certifications (
@@ -43,13 +44,10 @@ create table if not exists public.certifications (
   -- Item identification
   item_name text not null,
   creator_name text, -- Optional creator attribution
-  flavor_text text, -- Optional flavor description
 
-  -- Item data
+  -- Item data (minimal - just what's displayed)
   base_item text not null,
   attunement boolean not null default false,
-  combat jsonb not null, -- CombatFeatures
-  ribbons jsonb, -- RibbonFeatures (optional)
 
   -- Calculated fields
   score numeric(5,2) not null,
@@ -61,7 +59,6 @@ create table if not exists public.certifications (
   -- Constraints
   constraint item_name_length check (char_length(item_name) >= 1 and char_length(item_name) <= 100),
   constraint creator_name_length check (creator_name is null or char_length(creator_name) <= 50),
-  constraint flavor_text_length check (flavor_text is null or char_length(flavor_text) <= 500),
   constraint valid_rarity check (suggested_rarity in ('Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'))
 );
 
