@@ -5,16 +5,24 @@
 -- DROP COMMUNITY FEATURES
 -- ============================================
 
--- Drop trigger FIRST (before the function it depends on)
-drop trigger if exists on_auth_user_created on auth.users;
+-- Drop trigger on auth.users FIRST (must happen before function drop)
+do $$
+begin
+  if exists (
+    select 1 from pg_trigger
+    where tgname = 'on_auth_user_created'
+  ) then
+    drop trigger on_auth_user_created on auth.users;
+  end if;
+end $$;
 
--- Drop functions (CASCADE to handle any dependent triggers)
-drop function if exists public.cast_vote(uuid, text) cascade;
-drop function if exists public.submit_item(text, text, boolean, jsonb, jsonb, text, numeric, text) cascade;
-drop function if exists public.get_items_to_vote(integer) cascade;
-drop function if exists public.graduate_items() cascade;
-drop function if exists public.handle_new_user() cascade;
-drop function if exists public.generate_unique_display_name(text) cascade;
+-- Drop functions (CASCADE to handle any remaining dependencies)
+drop function if exists public.handle_new_user cascade;
+drop function if exists public.generate_unique_display_name cascade;
+drop function if exists public.cast_vote cascade;
+drop function if exists public.submit_item cascade;
+drop function if exists public.get_items_to_vote cascade;
+drop function if exists public.graduate_items cascade;
 
 -- Drop tables (votes references community_items, community_items references profiles)
 drop table if exists public.votes cascade;
