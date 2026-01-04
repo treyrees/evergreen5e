@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import type { Rarity, Certification } from '@/types/magic-item';
 
-// Input for creating a certification (minimal - only what's displayed)
+// Input for creating a certification (includes item stats for display)
 export interface CreateCertificationInput {
   itemName: string;
   creatorName?: string | null;
@@ -11,6 +11,17 @@ export interface CreateCertificationInput {
   attunement: boolean;
   score: number;
   suggestedRarity: Rarity;
+
+  // Item stats (for display on certificate)
+  enhancementBonus?: number;
+  acBonus?: number;
+  savingThrowBonus?: number;
+  extraDamageDice?: string;
+  extraDamageType?: string;
+  chargesDescription?: string;
+
+  // Flavor text (cosmetic description)
+  flavorText?: string | null;
 }
 
 // Result types
@@ -35,6 +46,9 @@ export async function createCertification(
     }
 
     // Insert the certification
+    // Note: Using only columns from original migration (004_certifications.sql)
+    // New columns (enhancement_bonus, ac_bonus, etc.) require migration 005 to be run first
+    // For now, these stats are computed client-side from the base item data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('certifications')
@@ -102,6 +116,15 @@ export async function getCertification(id: string): Promise<ActionResult<Certifi
       score: parseFloat(data.score),
       suggestedRarity: data.suggested_rarity as Rarity,
       createdAt: data.created_at,
+      // Item stats
+      enhancementBonus: data.enhancement_bonus ?? undefined,
+      acBonus: data.ac_bonus ?? undefined,
+      savingThrowBonus: data.saving_throw_bonus ?? undefined,
+      extraDamageDice: data.extra_damage_dice ?? undefined,
+      extraDamageType: data.extra_damage_type ?? undefined,
+      chargesDescription: data.charges_description ?? undefined,
+      // Flavor text
+      flavorText: data.flavor_text ?? undefined,
     };
 
     return { success: true, data: certification };
@@ -146,6 +169,15 @@ export async function getUserCertifications(): Promise<ActionResult<Certificatio
       score: parseFloat(row.score),
       suggestedRarity: row.suggested_rarity as Rarity,
       createdAt: row.created_at,
+      // Item stats
+      enhancementBonus: row.enhancement_bonus ?? undefined,
+      acBonus: row.ac_bonus ?? undefined,
+      savingThrowBonus: row.saving_throw_bonus ?? undefined,
+      extraDamageDice: row.extra_damage_dice ?? undefined,
+      extraDamageType: row.extra_damage_type ?? undefined,
+      chargesDescription: row.charges_description ?? undefined,
+      // Flavor text
+      flavorText: row.flavor_text ?? undefined,
     }));
 
     return { success: true, data: certifications };

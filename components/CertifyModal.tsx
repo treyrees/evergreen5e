@@ -12,8 +12,9 @@ const FREE_CERT_KEY = 'evergreen5e_free_cert_used';
 interface CertifyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  itemData: Omit<CreateCertificationInput, 'itemName' | 'creatorName'>;
+  itemData: Omit<CreateCertificationInput, 'itemName' | 'creatorName' | 'flavorText'>;
   defaultItemName?: string;
+  defaultFlavorText?: string;
 }
 
 export function CertifyModal({
@@ -21,11 +22,13 @@ export function CertifyModal({
   onClose,
   itemData,
   defaultItemName = '',
+  defaultFlavorText = '',
 }: CertifyModalProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [itemName, setItemName] = useState(defaultItemName);
   const [creatorName, setCreatorName] = useState('');
+  const [flavorText, setFlavorText] = useState(defaultFlavorText);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasUsedFreeCert, setHasUsedFreeCert] = useState(false);
@@ -42,9 +45,10 @@ export function CertifyModal({
     if (isOpen) {
       setItemName(defaultItemName);
       setCreatorName('');
+      setFlavorText(defaultFlavorText);
       setError(null);
     }
-  }, [isOpen, defaultItemName]);
+  }, [isOpen, defaultItemName, defaultFlavorText]);
 
   const canCertify = user || !hasUsedFreeCert;
   const isLoggedIn = !!user;
@@ -71,6 +75,7 @@ export function CertifyModal({
           ...itemData,
           itemName: itemName.trim(),
           creatorName: creatorName.trim() || null,
+          flavorText: flavorText.trim() || null,
         },
         isLoggedIn // Link to user if logged in
       );
@@ -192,6 +197,26 @@ export function CertifyModal({
               maxLength={50}
               disabled={!canCertify}
             />
+          </div>
+
+          {/* Flavor Text */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1">
+              Flavor Text <span className="text-slate-500">(optional)</span>
+            </label>
+            <textarea
+              value={flavorText}
+              onChange={(e) => setFlavorText(e.target.value)}
+              placeholder="The blade glows faintly when orcs are near..."
+              className="w-full bg-slate-900 border border-slate-700 rounded-md px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+              rows={2}
+              maxLength={280}
+              disabled={!canCertify}
+            />
+            <div className="flex justify-between mt-1">
+              <span className="text-xs text-slate-500">Shown on your certificate</span>
+              <span className="text-xs text-slate-600">{flavorText.length}/280</span>
+            </div>
           </div>
 
           {/* Error message */}

@@ -47,17 +47,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const cert = result.data;
   return {
-    title: `${cert.itemName} - Evergreen Certified`,
-    description: `${cert.itemName} is a ${cert.suggestedRarity} magic item, formulaically balanced by Evergreen5e. Score: ${cert.score.toFixed(2)} pts.`,
+    title: `${cert.itemName} - Balance Certified`,
+    description: `${cert.itemName} is a balanced ${cert.suggestedRarity} magic item. Score: ${cert.score.toFixed(2)} pts.`,
     openGraph: {
-      title: `${cert.itemName} - Evergreen Certified ${cert.suggestedRarity}`,
-      description: `A formulaically balanced ${cert.suggestedRarity} magic item.`,
+      title: `${cert.itemName} - Balance Certified ${cert.suggestedRarity}`,
+      description: `A balanced ${cert.suggestedRarity} magic item.`,
       images: [`/api/certified/${id}/badge`],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${cert.itemName} - Evergreen Certified`,
-      description: `A formulaically balanced ${cert.suggestedRarity} magic item.`,
+      title: `${cert.itemName} - Balance Certified`,
+      description: `A balanced ${cert.suggestedRarity} magic item.`,
       images: [`/api/certified/${id}/badge`],
     },
   };
@@ -108,7 +108,7 @@ export default async function CertifiedPage({ params }: PageProps) {
             <div className="relative p-8 md:p-10 space-y-6">
               {/* Header with seal */}
               <div className="text-center space-y-4">
-                {/* Evergreen seal */}
+                {/* Seal */}
                 <div className="inline-flex items-center justify-center">
                   <div className={`w-16 h-16 rounded-full border-2 ${borderColor} bg-stone-900/80 flex items-center justify-center`}>
                     <span className="text-2xl">🌿</span>
@@ -118,7 +118,7 @@ export default async function CertifiedPage({ params }: PageProps) {
                 {/* Title */}
                 <div>
                   <p className={`text-xs uppercase tracking-[0.3em] ${accentColor} font-medium mb-2`}>
-                    Certificate of Balance
+                    Balance Certification
                   </p>
                   <h1 className="font-cinzel text-3xl md:text-4xl font-bold text-amber-100/90 leading-tight">
                     {cert.itemName}
@@ -151,6 +151,36 @@ export default async function CertifiedPage({ params }: PageProps) {
                   <span className="text-stone-500">Base Item</span>
                   <span className="text-stone-300 capitalize">{cert.baseItem}</span>
                 </div>
+                {cert.enhancementBonus && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Enhancement</span>
+                    <span className="text-stone-300">+{cert.enhancementBonus}</span>
+                  </div>
+                )}
+                {cert.acBonus && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">AC Bonus</span>
+                    <span className="text-stone-300">+{cert.acBonus}</span>
+                  </div>
+                )}
+                {cert.savingThrowBonus && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Saving Throws</span>
+                    <span className="text-stone-300">+{cert.savingThrowBonus}</span>
+                  </div>
+                )}
+                {cert.extraDamageDice && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Extra Damage</span>
+                    <span className="text-stone-300">{cert.extraDamageDice} {cert.extraDamageType}</span>
+                  </div>
+                )}
+                {cert.chargesDescription && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Charges</span>
+                    <span className="text-stone-300">{cert.chargesDescription}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-stone-500">Attunement</span>
                   <span className="text-stone-300">{cert.attunement ? 'Required' : 'Not Required'}</span>
@@ -163,16 +193,25 @@ export default async function CertifiedPage({ params }: PageProps) {
                 )}
               </div>
 
-              {/* Certification stamp */}
+              {/* Flavor Text */}
+              {cert.flavorText && (
+                <div className="text-center px-6">
+                  <p className="text-stone-400 italic text-sm leading-relaxed">
+                    &ldquo;{cert.flavorText}&rdquo;
+                  </p>
+                </div>
+              )}
+
+              {/* Certification footer */}
               <div className="text-center pt-4 space-y-2">
-                <p className={`text-lg font-cinzel font-semibold ${accentColor}`}>
-                  Formulaically Balanced
-                </p>
                 <p className="text-xs text-stone-500">
                   Certified on {certDate}
                 </p>
                 <p className="text-xs text-stone-600 font-mono">
                   ID: {id.slice(0, 8)}
+                </p>
+                <p className="text-[10px] text-stone-600 mt-3">
+                  Scored using transparent balance formulas
                 </p>
               </div>
             </div>
@@ -186,11 +225,17 @@ export default async function CertifiedPage({ params }: PageProps) {
             suggestedRarity={cert.suggestedRarity}
           />
 
-          {/* Back to Calculator */}
-          <div className="text-center">
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/calculator"
-              className="text-sm text-slate-400 hover:text-slate-300 transition-colors"
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors text-center"
+            >
+              Create Another
+            </Link>
+            <Link
+              href="/calculator"
+              className="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-medium transition-colors text-center"
             >
               ← Back to Calculator
             </Link>
