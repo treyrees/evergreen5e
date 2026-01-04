@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import type { CombatFeatures, RibbonFeatures, Rarity } from '@/types/magic-item';
+import type { CombatFeatures, Rarity } from '@/types/magic-item';
 
 // Types for saved item operations
 export interface SaveItemInput {
@@ -10,9 +10,7 @@ export interface SaveItemInput {
   baseItem: string;
   attunement: boolean;
   combat: CombatFeatures;
-  ribbons?: RibbonFeatures | null;
-  specialMechanics?: string | null;
-  cosmeticFeatures?: string | null;
+  flavorText?: string | null;
   score: number;
   suggestedRarity: Rarity;
 }
@@ -23,9 +21,7 @@ export interface SavedItem {
   baseItem: string;
   attunement: boolean;
   combat: CombatFeatures;
-  ribbons: RibbonFeatures | null;
-  specialMechanics: string | null;
-  cosmeticFeatures: string | null;
+  flavorText: string | null;
   score: number;
   suggestedRarity: Rarity;
   createdAt: string;
@@ -58,9 +54,7 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
         base_item: input.baseItem,
         attunement: input.attunement,
         combat: input.combat,
-        ribbons: input.ribbons || null,
-        special_mechanics: input.specialMechanics || null,
-        cosmetic_features: input.cosmeticFeatures || null,
+        flavor_text: input.flavorText || null,
         score: input.score,
         suggested_rarity: input.suggestedRarity,
       })
@@ -114,9 +108,8 @@ export async function getSavedItems(): Promise<ActionResult<SavedItem[]>> {
       baseItem: row.base_item,
       attunement: row.attunement,
       combat: row.combat as unknown as CombatFeatures,
-      ribbons: row.ribbons as unknown as RibbonFeatures | null,
-      specialMechanics: row.special_mechanics,
-      cosmeticFeatures: row.cosmetic_features,
+      // Support both old format (special_mechanics + cosmetic_features) and new (flavor_text)
+      flavorText: row.flavor_text || row.special_mechanics || row.cosmetic_features || null,
       score: row.score,
       suggestedRarity: row.suggested_rarity as Rarity,
       createdAt: row.created_at,
@@ -152,9 +145,7 @@ export async function updateSavedItem(
     if (input.baseItem !== undefined) updateData.base_item = input.baseItem;
     if (input.attunement !== undefined) updateData.attunement = input.attunement;
     if (input.combat !== undefined) updateData.combat = input.combat;
-    if (input.ribbons !== undefined) updateData.ribbons = input.ribbons;
-    if (input.specialMechanics !== undefined) updateData.special_mechanics = input.specialMechanics;
-    if (input.cosmeticFeatures !== undefined) updateData.cosmetic_features = input.cosmeticFeatures;
+    if (input.flavorText !== undefined) updateData.flavor_text = input.flavorText;
     if (input.score !== undefined) updateData.score = input.score;
     if (input.suggestedRarity !== undefined) updateData.suggested_rarity = input.suggestedRarity;
 

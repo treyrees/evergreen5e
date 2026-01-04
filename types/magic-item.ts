@@ -216,4 +216,15 @@ export interface Certification {
   score: number;
   suggestedRarity: Rarity;
   createdAt: string; // ISO date string
+
+  // Item stats (for display on certificate)
+  enhancementBonus?: number; // +1, +2, +3
+  acBonus?: number; // AC bonus
+  savingThrowBonus?: number; // Saving throw bonus
+  extraDamageDice?: string; // e.g., "2d6"
+  extraDamageType?: string; // e.g., "fire"
+  chargesDescription?: string; // e.g., "7 charges, regains 1d6+1 daily"
+
+  // Flavor text (cosmetic description)
+  flavorText?: string;
 }

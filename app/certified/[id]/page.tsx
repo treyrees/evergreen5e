@@ -151,6 +151,36 @@ export default async function CertifiedPage({ params }: PageProps) {
                   <span className="text-stone-500">Base Item</span>
                   <span className="text-stone-300 capitalize">{cert.baseItem}</span>
                 </div>
+                {cert.enhancementBonus && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Enhancement</span>
+                    <span className="text-stone-300">+{cert.enhancementBonus}</span>
+                  </div>
+                )}
+                {cert.acBonus && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">AC Bonus</span>
+                    <span className="text-stone-300">+{cert.acBonus}</span>
+                  </div>
+                )}
+                {cert.savingThrowBonus && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Saving Throws</span>
+                    <span className="text-stone-300">+{cert.savingThrowBonus}</span>
+                  </div>
+                )}
+                {cert.extraDamageDice && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Extra Damage</span>
+                    <span className="text-stone-300">{cert.extraDamageDice} {cert.extraDamageType}</span>
+                  </div>
+                )}
+                {cert.chargesDescription && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Charges</span>
+                    <span className="text-stone-300">{cert.chargesDescription}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-stone-500">Attunement</span>
                   <span className="text-stone-300">{cert.attunement ? 'Required' : 'Not Required'}</span>
@@ -162,6 +192,15 @@ export default async function CertifiedPage({ params }: PageProps) {
                   </div>
                 )}
               </div>
+
+              {/* Flavor Text */}
+              {cert.flavorText && (
+                <div className="text-center px-6">
+                  <p className="text-stone-400 italic text-sm leading-relaxed">
+                    &ldquo;{cert.flavorText}&rdquo;
+                  </p>
+                </div>
+              )}
 
               {/* Certification stamp */}
               <div className="text-center pt-4 space-y-2">
@@ -186,11 +225,17 @@ export default async function CertifiedPage({ params }: PageProps) {
             suggestedRarity={cert.suggestedRarity}
           />
 
-          {/* Back to Calculator */}
-          <div className="text-center">
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/calculator"
-              className="text-sm text-slate-400 hover:text-slate-300 transition-colors"
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors text-center"
+            >
+              Create Another
+            </Link>
+            <Link
+              href="/calculator"
+              className="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-medium transition-colors text-center"
             >
               ← Back to Calculator
             </Link>

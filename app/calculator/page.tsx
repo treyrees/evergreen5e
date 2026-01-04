@@ -106,10 +106,9 @@ export default function CalculatorPage() {
   const [expandedItemInfo, setExpandedItemInfo] = useState<string | null>(null);
   const [showAttunementInfo, setShowAttunementInfo] = useState(false);
 
-  // Unique Item Details state (for community submissions)
-  const [specialMechanics, setSpecialMechanics] = useState('');
-  const [cosmeticFeatures, setCosmeticFeatures] = useState('');
-  const [showItemDetails, setShowItemDetails] = useState(false);
+  // Flavor text state (for saved items and certifications)
+  const [flavorText, setFlavorText] = useState('');
+  const [showFlavorText, setShowFlavorText] = useState(false);
 
   // Dice roll animation state for "Surprise me" button
   const { isPlaying: isDiceRolling, triggerRoll, handleComplete: handleDiceRollComplete } = useDiceRollAnimation();
@@ -199,16 +198,10 @@ export default function CalculatorPage() {
   // Check if selected base item is armor/shield
   const isArmorSelected = useMemo(() => ARMOR_ITEMS.has(baseItem), [baseItem]);
 
-  // Combine specialMechanics and cosmeticFeatures for preview display
+  // Flavor text for preview display
   const previewDescription = useMemo(() => {
-    const parts: string[] = [];
-    if (specialMechanics.trim()) parts.push(specialMechanics.trim());
-    if (cosmeticFeatures.trim()) {
-      const cosmetics = cosmeticFeatures.split('\n').map(s => s.trim()).filter(Boolean);
-      parts.push(...cosmetics);
-    }
-    return parts.join(' ');
-  }, [specialMechanics, cosmeticFeatures]);
+    return flavorText.trim();
+  }, [flavorText]);
 
   // Check if any combat attributes are selected (for blur effect)
   const hasPermanentBuffs = Object.values(permanentBuffs).some(v => v === true);
@@ -279,11 +272,8 @@ export default function CalculatorPage() {
       advantageMultiplier: bonusesSometimes ? 0.5 : undefined,
     },
     attunement,
-    description: specialMechanics.trim() || undefined,
-    ribbons: cosmeticFeatures.trim() ? {
-      cosmetic: cosmeticFeatures.split('\n').map(s => s.trim()).filter(Boolean),
-    } : undefined,
-  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties, advantages, proficiencies, otherSkillsCount, otherSkillsAdvantage, otherSkillsProficiency, bonusesSometimes, specialMechanics, cosmeticFeatures]);
+    description: flavorText.trim() || undefined,
+  }), [itemName, baseItem, enhancement, enhancementSometimes, damageBonus, acBonus, acBonusSometimes, savingThrowBonus, saveBonusSometimes, resistances, resistancesSometimes, damageImmunities, damageImmunitiesSometimes, conditionImmunities, conditionImmunitiesSometimes, spellSaveDCBonus, spellAttackBonus, abilityScoreSetter, abilityScoreBonus, permanentBuffs, hasPermanentBuffs, flightEnabled, flySpeed, flyDuration, maxCharges, chargesPerShortRest, chargesPerLongRest, abilities, attunement, weaponProperties, armorProperties, advantages, proficiencies, otherSkillsCount, otherSkillsAdvantage, otherSkillsProficiency, bonusesSometimes, flavorText]);
 
   const results = useMemo(() => getSuggestedRarity(currentItem), [currentItem]);
   const topAnchors = useMemo(() => findTopAnchorItems(currentItem, 3), [currentItem]);
@@ -617,9 +607,7 @@ export default function CalculatorPage() {
           abilities,
         } : undefined,
       },
-      ribbons: cosmeticFeatures.trim() ? { cosmetic: cosmeticFeatures.split('\n').filter(Boolean) } : undefined,
-      specialMechanics: specialMechanics.trim() || undefined,
-      cosmeticFeatures: cosmeticFeatures.trim() || undefined,
+      flavorText: flavorText.trim() || undefined,
       score: results.combatScore,
       suggestedRarity: results.suggestedRarity,
     });
@@ -696,9 +684,8 @@ export default function CalculatorPage() {
       setAbilities([]);
     }
 
-    // Cosmetic/special mechanics
-    setCosmeticFeatures(item.cosmeticFeatures || '');
-    setSpecialMechanics(item.specialMechanics || '');
+    // Flavor text
+    setFlavorText(item.flavorText || '');
 
     // Show confirmation that item was loaded
     setSaveStatus('saved');
@@ -2390,59 +2377,36 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Unique Item Details Section */}
+            {/* Flavor Text Section */}
             <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
               <button
-                onClick={() => setShowItemDetails(!showItemDetails)}
+                onClick={() => setShowFlavorText(!showFlavorText)}
                 className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-700/50 transition-colors"
               >
                 <div>
-                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Unique Item Details</span>
-                  <span className="ml-2 text-xs text-slate-500">What makes this item special?</span>
+                  <span className="text-sm font-semibold text-slate-400 uppercase tracking-wide" style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}>Flavor Text</span>
+                  <span className="ml-2 text-xs text-slate-500">Appearance, lore, cosmetic effects</span>
                 </div>
-                <span className="text-slate-500 text-lg">{showItemDetails ? '−' : '+'}</span>
+                <span className="text-slate-500 text-lg">{showFlavorText ? '−' : '+'}</span>
               </button>
 
-              {showItemDetails && (
-                <div className="px-5 pb-5 space-y-4 border-t border-slate-700">
-                  {/* Special Mechanics */}
+              {showFlavorText && (
+                <div className="px-5 pb-5 border-t border-slate-700">
                   <div className="pt-4">
-                    <label className="block text-xs font-medium text-slate-400 mb-2">
-                      Special Mechanics
-                      <span className="ml-2 text-slate-500 font-normal">
-                        (tradeoffs, conditionals, spell modifications)
-                      </span>
-                    </label>
                     <textarea
-                      value={specialMechanics}
-                      onChange={(e) => setSpecialMechanics(e.target.value)}
-                      placeholder="e.g., Fireball cast through this staff deals cold damage instead and leaves frozen terrain. Regains charges only under moonlight..."
-                      rows={4}
-                      className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
-                    />
-                    <p className="mt-1.5 text-[10px] text-slate-500">
-                      This is the <span className="text-slate-400">essence</span> of your item. Mechanics here should be <span className="text-slate-400">balance-neutral</span> (no net power change) or <span className="text-slate-400">equally kissed and cursed</span> (benefits balanced by drawbacks).
-                    </p>
-                  </div>
-
-                  {/* Flavor & Lore */}
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-2">
-                      Flavor & Lore
-                      <span className="ml-2 text-slate-500 font-normal">
-                        (cosmetic effects, history, appearance)
-                      </span>
-                    </label>
-                    <textarea
-                      value={cosmeticFeatures}
-                      onChange={(e) => setCosmeticFeatures(e.target.value)}
-                      placeholder="e.g., The blade glows faintly blue in the presence of orcs.&#10;Forged in the fires of Mount Veloth by the smith Keldara."
+                      value={flavorText}
+                      onChange={(e) => setFlavorText(e.target.value)}
+                      placeholder="e.g., The blade glows faintly blue in the presence of orcs. Forged in the fires of Mount Veloth by the smith Keldara."
                       rows={3}
+                      maxLength={280}
                       className="w-full px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 bg-slate-900/50 border border-slate-700 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 resize-none"
                     />
-                    <p className="mt-1.5 text-[10px] text-slate-500">
-                      Cosmetic details that add character without affecting balance.
-                    </p>
+                    <div className="mt-1.5 flex justify-between items-center">
+                      <p className="text-[10px] text-slate-500">
+                        Cosmetic details that add character. Shown on certifications.
+                      </p>
+                      <span className="text-[10px] text-slate-600">{flavorText.length}/280</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -3092,8 +3056,16 @@ export default function CalculatorPage() {
           attunement,
           score: results.combatScore,
           suggestedRarity: results.suggestedRarity,
+          // Item stats for display on certificate
+          enhancementBonus: enhancement > 0 ? enhancement : undefined,
+          acBonus: acBonus > 0 ? acBonus : undefined,
+          savingThrowBonus: savingThrowBonus > 0 ? savingThrowBonus : undefined,
+          extraDamageDice: damageBonus?.dice,
+          extraDamageType: damageBonus?.type,
+          chargesDescription: maxCharges > 0 ? `${maxCharges} charges${chargesPerLongRest > 0 ? `, regains ${chargesPerLongRest} daily` : ''}${chargesPerShortRest > 0 ? `, ${chargesPerShortRest}/short rest` : ''}` : undefined,
         }}
         defaultItemName={itemName}
+        defaultFlavorText={flavorText}
       />
     </div>
   );

@@ -248,16 +248,29 @@ export async function GET(
             </span>
           </div>
 
-          {/* Tagline */}
-          <span
-            style={{
-              fontSize: 16,
-              color: colors.accent,
-              fontStyle: 'italic',
-            }}
-          >
-            Formulaically Balanced
-          </span>
+          {/* Stats Summary */}
+          {(() => {
+            const stats: string[] = [];
+            if (cert.enhancementBonus) stats.push(`+${cert.enhancementBonus}`);
+            if (cert.acBonus) stats.push(`+${cert.acBonus} AC`);
+            if (cert.savingThrowBonus) stats.push(`+${cert.savingThrowBonus} saves`);
+            if (cert.extraDamageDice) stats.push(`${cert.extraDamageDice} ${cert.extraDamageType || ''}`);
+            if (cert.chargesDescription) stats.push('charges');
+
+            const summary = stats.length > 0 ? stats.join(' • ') : cert.baseItem;
+
+            return (
+              <span
+                style={{
+                  fontSize: 14,
+                  color: '#a8a29e',
+                  textTransform: 'capitalize',
+                }}
+              >
+                {summary}
+              </span>
+            );
+          })()}
 
           {/* Score */}
           <span
