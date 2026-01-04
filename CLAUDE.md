@@ -58,14 +58,9 @@ This tool helps D&D 5e players and DMs create balanced homebrew magic items by:
 - **`data/srd-items.json`** - Reference database of official SRD magic items with modeled attributes
 - **`types/magic-item.ts`** - TypeScript interfaces for item data structures
 
-### User Profiles
+### Authentication
 
-Profiles are created automatically when users sign up via Discord OAuth or dev bypass. Display names are:
-1. Pulled from Discord username (`user_name`, `preferred_username`, `name`, or `full_name`)
-2. Sanitized to alphanumeric characters, underscores, and hyphens
-3. Made unique by appending a random 4-character suffix if needed (e.g., "CoolUser-x7Kp")
-
-The `generate_unique_display_name()` function in `supabase/migrations/003_unique_display_names.sql` handles uniqueness. A unique constraint on `profiles.display_name` prevents collisions.
+Users can sign in via Discord OAuth to save items across sessions. Authentication is handled by Supabase Auth.
 
 ### Scoring System
 
@@ -139,54 +134,50 @@ There will be TypeScript errors related to Google Fonts (next/font/google). **Do
 
 - **No em dashes**: Never use em dashes (—) in UI copy. Use commas, semicolons, or rephrase instead.
 
-## Community Features (Dev-Only)
+## Certification System
 
-Community features are in active development and should **only be visible to dev bypass users**. Regular production users should not see these features until they're ready for launch.
+The certification system allows users to get a shareable badge proving their item is balanced.
 
-### What's Behind the Dev Gate
+### User Flow
 
-- **Voting system** (`/vote`) - Crown mechanic for endorsing items
-- **Tickets** - Currency earned by voting, spent to publish
-- **Publishing** - Submitting items for community voting
-- **Endorsements** - Vote counts and progress toward Evergreen Collection
-- **Graduated items** - Items that reached 10 endorsements
+1. Build item in calculator
+2. Click "Certify This Item" button
+3. Fill in form: Item name (required), Creator name (optional), Flavor text (optional)
+4. Get redirected to `/certified/[id]` page with D&D 5e-styled certificate
+5. Share badge via embed code, direct link, or download PNG
 
-### How Dev Gating Works
+### Soft Gate for Free Certification
 
-The `isDevUser` flag in `AuthContext` checks if the logged-in user's email matches `dev-tester@evergreen5e.local`. This user is created via the dev bypass route:
+- **Anonymous users**: Get 1 free certification (tracked via localStorage)
+- **Signed-in users**: Unlimited certifications, linked to their account
+- Not bulletproof by design; using incognito/clearing storage grants another free one
 
-```
-/auth/dev-login?token=YOUR_DEV_TOKEN&next=/vote
-```
+### Key Files
 
-### Using isDevUser in Components
+- **`app/certified/[id]/page.tsx`** - Public certification display page with D&D 5e fantasy styling
+- **`app/api/certified/[id]/badge/route.tsx`** - Dynamic PNG badge generation using next/og
+- **`lib/actions/certifications.ts`** - Server actions for CRUD operations
+- **`components/CertifyModal.tsx`** - Modal for certification form
+- **`components/CertificationEmbed.tsx`** - Client component for copy/share functionality
 
-```tsx
-const { user, isDevUser } = useAuth();
+### Database
 
-// Hide community features for non-dev users
-{isDevUser && (
-  <Link href="/vote">Vote</Link>
-)}
+The `certifications` table stores:
+- `id` (uuid) - Unique certification ID
+- `user_id` (uuid, nullable) - Link to auth.users (null for anonymous)
+- `item_name`, `creator_name`, `flavor_text` - Display info
+- `base_item`, `attunement`, `combat`, `ribbons` - Full item data
+- `score`, `suggested_rarity` - Calculated values
+- `created_at` - Timestamp
 
-// Show "Coming Soon" instead of blocking
-if (!isDevUser) {
-  return <ComingSoon feature="Community voting" />;
-}
-```
+### Badge Design
 
-### Files with Dev Gates
-
-- `components/Nav.tsx` - Vote link
-- `components/auth/UserMenu.tsx` - Tickets display, Vote link
-- `app/vote/page.tsx` - Entire page blocked
-- `app/profile/[username]/page.tsx` - Publish buttons, published items, endorsement counts
-
-### When Adding New Community Features
-
-1. Always wrap in `{isDevUser && ...}` or check `if (!isDevUser)` early
-2. For pages, show a "Coming Soon" message rather than 404
-3. For UI elements, simply hide them (don't show disabled states)
+Badges use rarity-themed colors and D&D 5e fantasy styling:
+- Parchment-like background gradient
+- Ornate corner decorations
+- Rarity-colored borders and accents
+- "Formulaically Balanced" tagline
+- Evergreen seal with 🌿 emoji
 
 ## Philosophy
 
