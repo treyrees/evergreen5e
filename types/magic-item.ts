@@ -211,11 +211,8 @@ export interface Certification {
   userId?: string; // Optional - null for anonymous certifications
   itemName: string;
   creatorName?: string; // Optional creator attribution
-  flavorText?: string; // Optional flavor/description
   baseItem: string;
   attunement: boolean;
-  combat: CombatFeatures;
-  ribbons?: RibbonFeatures;
   score: number;
   suggestedRarity: Rarity;
   createdAt: string; // ISO date string

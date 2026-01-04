@@ -3090,8 +3090,6 @@ export default function CalculatorPage() {
         itemData={{
           baseItem,
           attunement,
-          combat: currentItem.combat!,
-          ribbons: currentItem.ribbons,
           score: results.combatScore,
           suggestedRarity: results.suggestedRarity,
         }}

@@ -12,7 +12,7 @@ const FREE_CERT_KEY = 'evergreen5e_free_cert_used';
 interface CertifyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  itemData: Omit<CreateCertificationInput, 'itemName' | 'creatorName' | 'flavorText'>;
+  itemData: Omit<CreateCertificationInput, 'itemName' | 'creatorName'>;
   defaultItemName?: string;
 }
 
@@ -71,7 +71,6 @@ export function CertifyModal({
           ...itemData,
           itemName: itemName.trim(),
           creatorName: creatorName.trim() || null,
-          flavorText: null,
         },
         isLoggedIn // Link to user if logged in
       );

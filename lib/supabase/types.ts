@@ -67,11 +67,8 @@ export interface Database {
           user_id: string | null;
           item_name: string;
           creator_name: string | null;
-          flavor_text: string | null;
           base_item: string;
           attunement: boolean;
-          combat: Json;
-          ribbons: Json | null;
           score: number;
           suggested_rarity: string;
           created_at: string;
@@ -81,11 +78,8 @@ export interface Database {
           user_id?: string | null;
           item_name: string;
           creator_name?: string | null;
-          flavor_text?: string | null;
           base_item: string;
           attunement?: boolean;
-          combat: Json;
-          ribbons?: Json | null;
           score: number;
           suggested_rarity: string;
           created_at?: string;
@@ -95,11 +89,8 @@ export interface Database {
           user_id?: string | null;
           item_name?: string;
           creator_name?: string | null;
-          flavor_text?: string | null;
           base_item?: string;
           attunement?: boolean;
-          combat?: Json;
-          ribbons?: Json | null;
           score?: number;
           suggested_rarity?: string;
           created_at?: string;
