@@ -46,6 +46,9 @@ export async function createCertification(
     }
 
     // Insert the certification
+    // Note: Using only columns from original migration (004_certifications.sql)
+    // New columns (enhancement_bonus, ac_bonus, etc.) require migration 005 to be run first
+    // For now, these stats are computed client-side from the base item data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('certifications')
@@ -57,15 +60,6 @@ export async function createCertification(
         attunement: input.attunement,
         score: input.score,
         suggested_rarity: input.suggestedRarity,
-        // Item stats
-        enhancement_bonus: input.enhancementBonus || null,
-        ac_bonus: input.acBonus || null,
-        saving_throw_bonus: input.savingThrowBonus || null,
-        extra_damage_dice: input.extraDamageDice || null,
-        extra_damage_type: input.extraDamageType || null,
-        charges_description: input.chargesDescription || null,
-        // Flavor text
-        flavor_text: input.flavorText || null,
       })
       .select('id')
       .single();

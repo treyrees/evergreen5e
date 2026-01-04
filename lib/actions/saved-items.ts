@@ -45,6 +45,7 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
     }
 
     // Insert the item
+    // Note: Using cosmetic_features for backwards compatibility until migration runs
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('saved_items')
@@ -54,7 +55,7 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
         base_item: input.baseItem,
         attunement: input.attunement,
         combat: input.combat,
-        flavor_text: input.flavorText || null,
+        cosmetic_features: input.flavorText || null, // Store in existing column
         score: input.score,
         suggested_rarity: input.suggestedRarity,
       })
@@ -140,12 +141,13 @@ export async function updateSavedItem(
     }
 
     // Build update object (only include provided fields)
+    // Note: Using cosmetic_features for backwards compatibility until migration runs
     const updateData: Record<string, unknown> = {};
     if (input.name !== undefined) updateData.name = input.name;
     if (input.baseItem !== undefined) updateData.base_item = input.baseItem;
     if (input.attunement !== undefined) updateData.attunement = input.attunement;
     if (input.combat !== undefined) updateData.combat = input.combat;
-    if (input.flavorText !== undefined) updateData.flavor_text = input.flavorText;
+    if (input.flavorText !== undefined) updateData.cosmetic_features = input.flavorText;
     if (input.score !== undefined) updateData.score = input.score;
     if (input.suggestedRarity !== undefined) updateData.suggested_rarity = input.suggestedRarity;
 
