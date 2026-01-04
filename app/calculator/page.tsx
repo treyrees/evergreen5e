@@ -606,6 +606,14 @@ export default function CalculatorPage() {
           chargesPerLongRest,
           abilities,
         } : undefined,
+        advantage: advantages.length > 0 ? advantages : undefined,
+        proficiencyBonuses: proficiencies.filter(p => p !== 'attack').length > 0 ? proficiencies.filter(p => p !== 'attack') : undefined,
+        otherSkillsBonus: (otherSkillsCount > 0 && (otherSkillsAdvantage || otherSkillsProficiency)) ? {
+          count: otherSkillsCount,
+          hasAdvantage: otherSkillsAdvantage,
+          hasProficiency: otherSkillsProficiency,
+        } : undefined,
+        advantageMultiplier: bonusesSometimes ? 0.5 : undefined,
       },
       flavorText: flavorText.trim() || undefined,
       score: results.combatScore,
@@ -683,6 +691,20 @@ export default function CalculatorPage() {
       setChargesPerLongRest(0);
       setAbilities([]);
     }
+
+    // Advantage & Proficiency bonuses
+    setAdvantages(combat.advantage || []);
+    setProficiencies(combat.proficiencyBonuses ? ['attack', ...combat.proficiencyBonuses] : ['attack']);
+    if (combat.otherSkillsBonus) {
+      setOtherSkillsCount(combat.otherSkillsBonus.count);
+      setOtherSkillsAdvantage(combat.otherSkillsBonus.hasAdvantage);
+      setOtherSkillsProficiency(combat.otherSkillsBonus.hasProficiency);
+    } else {
+      setOtherSkillsCount(0);
+      setOtherSkillsAdvantage(false);
+      setOtherSkillsProficiency(false);
+    }
+    setBonusesSometimes(combat.advantageMultiplier === 0.5);
 
     // Flavor text
     setFlavorText(item.flavorText || '');
