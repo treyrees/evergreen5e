@@ -94,6 +94,10 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
       if (error.code === '42501') {
         return { success: false, error: 'Permission denied. Please sign in again.' };
       }
+      // Handle missing table error (Supabase schema cache error)
+      if (error.code === '42P01' || error.message?.includes('schema cache') || error.message?.includes('relation') && error.message?.includes('does not exist')) {
+        return { success: false, error: 'Save feature is temporarily unavailable. Please try again later.' };
+      }
       // Include the actual error message for debugging
       return { success: false, error: error.message || 'Failed to save item' };
     }
@@ -130,6 +134,10 @@ export async function getSavedItems(): Promise<ActionResult<SavedItem[]>> {
 
     if (error) {
       console.error('Error fetching saved items:', error);
+      // Handle missing table error (Supabase schema cache error)
+      if (error.code === '42P01' || error.message?.includes('schema cache') || error.message?.includes('relation') && error.message?.includes('does not exist')) {
+        return { success: false, error: 'Save feature is temporarily unavailable. Please try again later.' };
+      }
       return { success: false, error: 'Failed to fetch items' };
     }
 
@@ -222,6 +230,10 @@ export async function updateSavedItem(
       if (error.code === '42501') {
         return { success: false, error: 'Permission denied. Please sign in again.' };
       }
+      // Handle missing table error (Supabase schema cache error)
+      if (error.code === '42P01' || error.message?.includes('schema cache') || error.message?.includes('relation') && error.message?.includes('does not exist')) {
+        return { success: false, error: 'Save feature is temporarily unavailable. Please try again later.' };
+      }
       return { success: false, error: error.message || 'Failed to update item' };
     }
 
@@ -257,6 +269,10 @@ export async function deleteSavedItem(id: string): Promise<ActionResult<null>> {
 
     if (error) {
       console.error('Error deleting item:', error);
+      // Handle missing table error (Supabase schema cache error)
+      if (error.code === '42P01' || error.message?.includes('schema cache') || error.message?.includes('relation') && error.message?.includes('does not exist')) {
+        return { success: false, error: 'Save feature is temporarily unavailable. Please try again later.' };
+      }
       return { success: false, error: 'Failed to delete item' };
     }
 
