@@ -3064,6 +3064,7 @@ export default function CalculatorPage() {
           extraDamageType: damageBonus?.type,
           chargesDescription: maxCharges > 0 ? `${maxCharges} charges${chargesPerLongRest > 0 ? `, regains ${chargesPerLongRest} daily` : ''}${chargesPerShortRest > 0 ? `, ${chargesPerShortRest}/short rest` : ''}` : undefined,
         }}
+        itemAttributes={previewAttributes}
         defaultItemName={itemName}
         defaultFlavorText={flavorText}
       />

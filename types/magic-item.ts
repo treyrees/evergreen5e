@@ -225,6 +225,9 @@ export interface Certification {
   extraDamageType?: string; // e.g., "fire"
   chargesDescription?: string; // e.g., "7 charges, regains 1d6+1 daily"
 
+  // Full item attributes list (label + value pairs)
+  itemAttributes?: Array<{ label: string; value: string }>;
+
   // Flavor text (cosmetic description)
   flavorText?: string;
 }
