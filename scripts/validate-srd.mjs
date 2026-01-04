@@ -257,6 +257,50 @@ function calculateCombatScore(combat, baseItem) {
     score += 3.0;
   }
 
+  // Reaction AC bonus (e.g., Quarterstaff of the Acrobat)
+  if (combat.reactionAC) {
+    const { bonus, usesPerShortRest = 0, usesPerLongRest = 0, unlimited = false } = combat.reactionAC;
+    if (unlimited) {
+      score += bonus * 0.5;
+    } else {
+      const dailyUses = usesPerLongRest + (usesPerShortRest * 3);
+      const useRate = Math.min(1, dailyUses / 10);
+      score += bonus * 0.3 * useRate * dailyUses;
+    }
+  }
+
+  // Bonus action damage (e.g., Shield of the Cavalier bash)
+  if (combat.bonusActionDamage) {
+    let bashValue = getDiceValue(combat.bonusActionDamage.dice);
+    const typeMultiplier = DAMAGE_TYPE_MULTIPLIERS[combat.bonusActionDamage.type?.toLowerCase() || 'bludgeoning'] || 1.0;
+    bashValue *= typeMultiplier;
+    if (combat.bonusActionDamage.flatBonus) {
+      bashValue += combat.bonusActionDamage.flatBonus * 0.3;
+    }
+    score += bashValue * 0.4;
+  }
+
+  // Condition infliction (e.g., Energy Bow restrain)
+  if (combat.conditionInfliction) {
+    const CONDITION_VALUES = {
+      'restrained': 1.5, 'prone': 0.5, 'frightened': 1.0,
+      'paralyzed': 2.0, 'stunned': 1.5, 'blinded': 1.0, 'poisoned': 0.75,
+    };
+    const baseValue = CONDITION_VALUES[combat.conditionInfliction.condition] || 0.5;
+    const dcModifier = (combat.conditionInfliction.dc - 10) * 0.05;
+    score += baseValue * (1 + dcModifier);
+  }
+
+  // Damage type override (e.g., Energy Bow: force instead of piercing)
+  if (combat.damageTypeOverride) {
+    const typeMultiplier = DAMAGE_TYPE_MULTIPLIERS[combat.damageTypeOverride.toLowerCase()] || 1.0;
+    const baseDamageTypeMultiplier = DAMAGE_TYPE_MULTIPLIERS['piercing'] || 1.0;
+    const typeUpgrade = (typeMultiplier - baseDamageTypeMultiplier) * 1.0;
+    if (typeUpgrade > 0) {
+      score += typeUpgrade;
+    }
+  }
+
   // NEW: Charge pool with shared charges fix
   if (combat.chargePool && combat.chargePool.abilities.length > 0) {
     const dailyRecharge = combat.chargePool.chargesPerLongRest + (combat.chargePool.chargesPerShortRest * 2);
