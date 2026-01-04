@@ -726,6 +726,9 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
   }
 
   // Charge pool (new intuitive format)
+  // IMPORTANT: Charges are SHARED across all abilities. You can only spend each charge once.
+  // The primary ability (best value-per-charge) is scored at full value.
+  // Secondary abilities add a small "flexibility bonus" (10% of independent value).
   if (combat.chargePool && combat.chargePool.abilities.length > 0) {
     // Effective spell level values - high level spells are exponentially more valuable
     // Same scale as legacy charges format for consistency
@@ -749,32 +752,52 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
       combat.chargePool.chargesPerLongRest +
       (combat.chargePool.chargesPerShortRest * 2);
 
-    // Calculate score for each ability
-    for (const ability of combat.chargePool.abilities) {
-      if (ability.chargesPerUse > 0) {
-        // Burst potential: you can nova ALL charges in a single fight
-        const burstUses = combat.chargePool.maxCharges / ability.chargesPerUse;
-
-        // Sustained uses: what you get back per day
-        // If no recharge specified (0/0), assume conservative 1 charge/day
-        // This encourages users to fill in actual recharge rates
-        const sustainedUses = dailyRecharge > 0
-          ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / ability.chargesPerUse
-          : 1 / ability.chargesPerUse;
-
-        // Blend burst and sustained: burst matters more for powerful spells
-        // Level 3 spell: ~45% burst weight (8 Fireballs in a boss fight is huge)
-        // Level 1 spell: ~15% burst weight (less impactful nova)
-        const burstWeight = Math.min(0.5, ability.spellLevel * 0.15);
-        const effectiveUses = sustainedUses * (1 - burstWeight) + burstUses * burstWeight;
-
-        // Use effective spell level (high-level spells scale non-linearly)
+    // Calculate value-per-charge for each ability to find the "primary" (best) option
+    const abilitiesWithValue = combat.chargePool.abilities
+      .filter(ability => ability.chargesPerUse > 0)
+      .map(ability => {
         const effectiveLevel = CHARGE_POOL_SPELL_VALUES[ability.spellLevel] ?? ability.spellLevel;
+        const valuePerCharge = effectiveLevel / ability.chargesPerUse;
+        return { ...ability, effectiveLevel, valuePerCharge };
+      });
 
-        // Multiplier tuned to balance charge-based items appropriately
-        // Calibrated so Wand of Fireballs (level 3, ~4 uses/day) ≈ 2.4 pts
-        const multiplier = 0.20;
-        score += effectiveLevel * effectiveUses * multiplier;
+    // Sort by value-per-charge (highest first) - the best way to spend charges
+    abilitiesWithValue.sort((a, b) => b.valuePerCharge - a.valuePerCharge);
+
+    // Score the PRIMARY ability at full value (this is what you'd use most charges on)
+    if (abilitiesWithValue.length > 0) {
+      const primary = abilitiesWithValue[0];
+
+      // Burst potential: you can nova ALL charges in a single fight
+      const burstUses = combat.chargePool.maxCharges / primary.chargesPerUse;
+
+      // Sustained uses: what you get back per day
+      // If no recharge specified (0/0), assume conservative 1 charge/day
+      const sustainedUses = dailyRecharge > 0
+        ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / primary.chargesPerUse
+        : 1 / primary.chargesPerUse;
+
+      // Blend burst and sustained: burst matters more for powerful spells
+      // Level 3 spell: ~45% burst weight (8 Fireballs in a boss fight is huge)
+      // Level 1 spell: ~15% burst weight (less impactful nova)
+      const burstWeight = Math.min(0.5, primary.spellLevel * 0.15);
+      const effectiveUses = sustainedUses * (1 - burstWeight) + burstUses * burstWeight;
+
+      // Multiplier tuned to balance charge-based items appropriately
+      // Calibrated so Wand of Fireballs (level 3, ~4 uses/day) ≈ 2.4 pts
+      const multiplier = 0.20;
+      score += primary.effectiveLevel * effectiveUses * multiplier;
+
+      // SECONDARY abilities add a small flexibility bonus
+      // Having options for leftover charges or when the primary would be overkill is worth something,
+      // but nowhere near the full value (you're still limited by the shared charge pool)
+      // 10% of what the ability would score independently
+      const FLEXIBILITY_MULTIPLIER = 0.10;
+      for (let i = 1; i < abilitiesWithValue.length; i++) {
+        const secondary = abilitiesWithValue[i];
+        // Flexibility value: small bonus based on spell level
+        // This represents "option value" without treating charges as additive
+        score += secondary.effectiveLevel * FLEXIBILITY_MULTIPLIER;
       }
     }
   }
