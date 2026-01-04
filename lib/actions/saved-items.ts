@@ -44,6 +44,26 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
       return { success: false, error: 'Not authenticated' };
     }
 
+    // Validate input data before saving
+    if (!input.name || input.name.trim().length === 0) {
+      return { success: false, error: 'Item name is required' };
+    }
+    if (input.name.length > 100) {
+      return { success: false, error: 'Item name must be 100 characters or less' };
+    }
+    if (!input.baseItem) {
+      return { success: false, error: 'Base item is required' };
+    }
+    // Check for invalid score values
+    if (typeof input.score !== 'number' || !isFinite(input.score)) {
+      return { success: false, error: 'Invalid score value' };
+    }
+    // Check rarity is valid
+    const validRarities = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
+    if (!validRarities.includes(input.suggestedRarity)) {
+      return { success: false, error: 'Invalid rarity value' };
+    }
+
     // Insert the item
     // Note: Using cosmetic_features for backwards compatibility until migration runs
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,7 +71,7 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
       .from('saved_items')
       .insert({
         user_id: user.id,
-        name: input.name,
+        name: input.name.trim(),
         base_item: input.baseItem,
         attunement: input.attunement,
         combat: input.combat,
@@ -64,14 +84,26 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
 
     if (error) {
       console.error('Error saving item:', error);
-      return { success: false, error: 'Failed to save item' };
+      // Return specific error message for common issues
+      if (error.code === '23505') {
+        return { success: false, error: 'An item with this name already exists' };
+      }
+      if (error.code === '23514') {
+        return { success: false, error: 'Invalid item data: constraint violation' };
+      }
+      if (error.code === '42501') {
+        return { success: false, error: 'Permission denied. Please sign in again.' };
+      }
+      // Include the actual error message for debugging
+      return { success: false, error: error.message || 'Failed to save item' };
     }
 
     revalidatePath('/calculator');
     return { success: true, data: { id: data.id } };
   } catch (err) {
     console.error('Unexpected error saving item:', err);
-    return { success: false, error: 'An unexpected error occurred' };
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+    return { success: false, error: message };
   }
 }
 
@@ -140,10 +172,29 @@ export async function updateSavedItem(
       return { success: false, error: 'Not authenticated' };
     }
 
+    // Validate input if provided
+    if (input.name !== undefined) {
+      if (!input.name || input.name.trim().length === 0) {
+        return { success: false, error: 'Item name is required' };
+      }
+      if (input.name.length > 100) {
+        return { success: false, error: 'Item name must be 100 characters or less' };
+      }
+    }
+    if (input.score !== undefined && (typeof input.score !== 'number' || !isFinite(input.score))) {
+      return { success: false, error: 'Invalid score value' };
+    }
+    if (input.suggestedRarity !== undefined) {
+      const validRarities = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
+      if (!validRarities.includes(input.suggestedRarity)) {
+        return { success: false, error: 'Invalid rarity value' };
+      }
+    }
+
     // Build update object (only include provided fields)
     // Note: Using cosmetic_features for backwards compatibility until migration runs
     const updateData: Record<string, unknown> = {};
-    if (input.name !== undefined) updateData.name = input.name;
+    if (input.name !== undefined) updateData.name = input.name.trim();
     if (input.baseItem !== undefined) updateData.base_item = input.baseItem;
     if (input.attunement !== undefined) updateData.attunement = input.attunement;
     if (input.combat !== undefined) updateData.combat = input.combat;
@@ -161,14 +212,25 @@ export async function updateSavedItem(
 
     if (error) {
       console.error('Error updating item:', error);
-      return { success: false, error: 'Failed to update item' };
+      // Return specific error message for common issues
+      if (error.code === '23505') {
+        return { success: false, error: 'An item with this name already exists' };
+      }
+      if (error.code === '23514') {
+        return { success: false, error: 'Invalid item data: constraint violation' };
+      }
+      if (error.code === '42501') {
+        return { success: false, error: 'Permission denied. Please sign in again.' };
+      }
+      return { success: false, error: error.message || 'Failed to update item' };
     }
 
     revalidatePath('/calculator');
     return { success: true, data: null };
   } catch (err) {
     console.error('Unexpected error updating item:', err);
-    return { success: false, error: 'An unexpected error occurred' };
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+    return { success: false, error: message };
   }
 }
 
