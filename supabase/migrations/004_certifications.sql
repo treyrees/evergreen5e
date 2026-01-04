@@ -5,16 +5,16 @@
 -- DROP COMMUNITY FEATURES
 -- ============================================
 
--- Drop functions first (they reference the tables)
+-- Drop trigger FIRST (before the function it depends on)
+drop trigger if exists on_auth_user_created on auth.users;
+
+-- Drop functions
 drop function if exists public.cast_vote(uuid, text);
 drop function if exists public.submit_item(text, text, boolean, jsonb, jsonb, text, numeric, text);
 drop function if exists public.get_items_to_vote(integer);
 drop function if exists public.graduate_items();
 drop function if exists public.handle_new_user();
 drop function if exists public.generate_unique_display_name(text);
-
--- Drop trigger
-drop trigger if exists on_auth_user_created on auth.users;
 
 -- Drop tables (votes references community_items, community_items references profiles)
 drop table if exists public.votes cascade;
