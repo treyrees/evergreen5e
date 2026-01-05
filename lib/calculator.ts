@@ -753,12 +753,18 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
       (combat.chargePool.chargesPerShortRest * 2);
 
     // Calculate value-per-charge for each ability to find the "primary" (best) option
+    // chargesPerUse conventions:
+    //   > 0: costs that many charges (e.g., 3 = costs 3 charges)
+    //   < 0: per-day ability (e.g., -3 = 3/day, treated as 3 uses at 1 charge each)
+    //   = 0: at-will (handled separately below)
     const abilitiesWithValue = combat.chargePool.abilities
-      .filter(ability => ability.chargesPerUse > 0)
+      .filter(ability => ability.chargesPerUse !== 0) // Exclude at-will
       .map(ability => {
         const effectiveLevel = CHARGE_POOL_SPELL_VALUES[ability.spellLevel] ?? ability.spellLevel;
-        const valuePerCharge = effectiveLevel / ability.chargesPerUse;
-        return { ...ability, effectiveLevel, valuePerCharge };
+        // Per-day abilities (negative) are treated as costing 1 charge per use
+        const actualCost = ability.chargesPerUse < 0 ? 1 : ability.chargesPerUse;
+        const valuePerCharge = effectiveLevel / actualCost;
+        return { ...ability, effectiveLevel, valuePerCharge, actualCost };
       });
 
     // Sort by value-per-charge (highest first) - the best way to spend charges
@@ -769,13 +775,13 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
       const primary = abilitiesWithValue[0];
 
       // Burst potential: you can nova ALL charges in a single fight
-      const burstUses = combat.chargePool.maxCharges / primary.chargesPerUse;
+      const burstUses = combat.chargePool.maxCharges / primary.actualCost;
 
       // Sustained uses: what you get back per day
       // If no recharge specified (0/0), assume conservative 1 charge/day
       const sustainedUses = dailyRecharge > 0
-        ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / primary.chargesPerUse
-        : 1 / primary.chargesPerUse;
+        ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / primary.actualCost
+        : 1 / primary.actualCost;
 
       // Blend burst and sustained: burst matters more for powerful spells
       // Level 3 spell: ~45% burst weight (8 Fireballs in a boss fight is huge)
@@ -802,27 +808,22 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     }
 
     // At-will abilities (chargesPerUse === 0)
-    // These are unlimited use abilities, typically cantrips or minor effects
+    // Capped at level 2; higher level at-will would be game-breaking
     const atWillAbilities = combat.chargePool.abilities.filter(ability => ability.chargesPerUse === 0);
     for (const ability of atWillAbilities) {
-      // At-will scoring based on spell level
-      // Cantrips (level 0) are minor utility: ~0.2 pts
-      // Level 1 at-will is significant: ~0.5 pts (like detect magic at will)
-      // Level 2 at-will is powerful: ~1.0 pts (like invisibility at will)
-      // Level 3+ at-will would be game-breaking, score heavily
+      // At-will scoring: only levels 0-2 are appropriate for unlimited use
+      // Values calibrated to be meaningful but not dominant:
+      // - Cantrip: minor convenience (Light, Prestidigitation)
+      // - Level 1: useful utility (Detect Magic, Comprehend Languages)
+      // - Level 2: significant power (See Invisibility, Alter Self)
       const AT_WILL_VALUES: Record<number, number> = {
-        0: 0.2,   // Cantrip at-will: minor utility (Light, Prestidigitation)
-        1: 0.5,   // Level 1 at-will: useful utility (Detect Magic)
-        2: 1.0,   // Level 2 at-will: powerful (Invisibility, Levitate)
-        3: 2.0,   // Level 3 at-will: very powerful (Fly, Haste)
-        4: 3.0,   // Level 4+ at-will: potentially game-breaking
-        5: 4.0,
-        6: 5.0,
-        7: 6.0,
-        8: 8.0,
-        9: 10.0,
+        0: 0.15,  // Cantrip at-will
+        1: 0.4,   // Level 1 at-will
+        2: 0.8,   // Level 2 at-will (max supported level)
       };
-      score += AT_WILL_VALUES[ability.spellLevel] ?? ability.spellLevel;
+      // Treat any level above 2 as level 2 for scoring (UI should prevent this)
+      const effectiveLevel = Math.min(ability.spellLevel, 2);
+      score += AT_WILL_VALUES[effectiveLevel] ?? 0.15;
     }
   }
 

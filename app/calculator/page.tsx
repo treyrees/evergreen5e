@@ -362,15 +362,15 @@ export default function CalculatorPage() {
     const spellLevel = newAbility.spellLevel as number;
 
     if (newAbility.usageMode === 'per-day') {
-      // Per-day mode: Create a simple "X uses per day" setup
-      // Internally, each ability costs 1 charge, and we auto-configure the pool
+      // Per-day mode: "Cast X times per day"
+      // Store as NEGATIVE chargesPerUse to indicate "X per day" (not charge cost)
+      // Calculator will convert: -3 means "3/day" → treated as 3 charges at 1 per use
       const usesPerDay = newAbility.usesPerDay as number;
 
-      // Check if there are already charge-based abilities (cost > 1)
-      const hasChargeAbilities = abilities.some((a: ChargedAbility) => a.chargesPerUse > 1);
+      // Auto-expand pool for per-day abilities (negative chargesPerUse)
+      const hasManualChargeConfig = abilities.some((a: ChargedAbility) => a.chargesPerUse > 0);
 
-      if (!hasChargeAbilities && maxCharges === 0) {
-        // First per-day ability with no existing charge pool: auto-configure
+      if (!hasManualChargeConfig) {
         setMaxCharges((prev: number) => prev + usesPerDay);
         setChargesPerLongRest((prev: number) => prev + usesPerDay);
       }
@@ -378,8 +378,8 @@ export default function CalculatorPage() {
       setAbilities([...abilities, {
         spell: newAbility.spell,
         spellLevel,
-        chargesPerUse: 1, // Per-day abilities cost 1 charge each
-        canUpcast: false, // Per-day abilities don't upcast
+        chargesPerUse: -usesPerDay, // Negative = per-day (e.g., -3 means "3/day")
+        canUpcast: false,
       }]);
     } else if (newAbility.usageMode === 'at-will') {
       // At-will mode: Unlimited uses (modeled as 0 cost, special handling)
@@ -2270,12 +2270,14 @@ export default function CalculatorPage() {
                     <div className="space-y-2 mb-3">
                       {abilities.map((ability, index) => {
                         // Determine how to display the usage
+                        // chargesPerUse: negative = per-day, 0 = at-will, positive = charges
                         const isAtWill = ability.chargesPerUse === 0;
-                        const isPerDay = ability.chargesPerUse === 1 && maxCharges > 0 && chargesPerLongRest === maxCharges;
+                        const isPerDay = ability.chargesPerUse < 0;
+                        const perDayCount = isPerDay ? Math.abs(ability.chargesPerUse) : 0;
                         const usageText = isAtWill
                           ? 'at will'
                           : isPerDay
-                            ? `${maxCharges}/day`
+                            ? `${perDayCount}/day`
                             : `${ability.chargesPerUse} charge${ability.chargesPerUse !== 1 ? 's' : ''}`;
 
                         return (
@@ -2344,11 +2346,16 @@ export default function CalculatorPage() {
                               onClick={() => {
                                 setSpellFormErrors(prev => ({ ...prev, level: false }));
                                 // Reset upcast if level changes
-                                setNewAbility({ ...newAbility, spellLevel: level, canUpcast: false });
-                                // Auto-switch to at-will for cantrips
+                                let newMode = newAbility.usageMode;
+                                // Auto-switch to at-will for cantrips (if using charges mode)
                                 if (level === 0 && newAbility.usageMode === 'charges') {
-                                  setNewAbility(prev => ({ ...prev, spellLevel: level, usageMode: 'at-will', canUpcast: false }));
+                                  newMode = 'at-will';
                                 }
+                                // Auto-switch away from at-will for levels 3+ (not supported)
+                                if (level > 2 && newAbility.usageMode === 'at-will') {
+                                  newMode = 'per-day';
+                                }
+                                setNewAbility({ ...newAbility, spellLevel: level, usageMode: newMode, canUpcast: false });
                               }}
                               className={`flex-1 py-2 text-sm rounded transition-colors ${
                                 newAbility.spellLevel === level
@@ -2401,11 +2408,15 @@ export default function CalculatorPage() {
                           </button>
                           <button
                             onClick={() => setNewAbility({ ...newAbility, usageMode: 'at-will', canUpcast: false })}
+                            disabled={newAbility.spellLevel !== null && newAbility.spellLevel > 2}
                             className={`px-3 py-2.5 text-sm rounded border transition-colors ${
                               newAbility.usageMode === 'at-will'
                                 ? 'bg-sky-600/20 border-sky-500 text-sky-300'
-                                : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
+                                : newAbility.spellLevel !== null && newAbility.spellLevel > 2
+                                  ? 'bg-slate-800/50 border-slate-700 text-slate-600 cursor-not-allowed'
+                                  : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
                             }`}
+                            title={newAbility.spellLevel !== null && newAbility.spellLevel > 2 ? 'At-will is only available for levels 0-2' : ''}
                           >
                             At will
                           </button>
@@ -2499,7 +2510,7 @@ export default function CalculatorPage() {
 
                         {newAbility.usageMode === 'at-will' && (
                           <p className="text-xs text-slate-500">
-                            Unlimited uses. Best for cantrips and minor utility effects.
+                            Unlimited uses. Only available for levels 0-2 (cantrips through 2nd-level spells).
                           </p>
                         )}
 
