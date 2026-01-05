@@ -811,14 +811,13 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
     // Capped at level 2; higher level at-will would be game-breaking
     const atWillAbilities = combat.chargePool.abilities.filter(ability => ability.chargesPerUse === 0);
     for (const ability of atWillAbilities) {
-      // At-will scoring calibrated against official D&D items:
-      // - Ring of Invisibility (at-will L2 Invisibility) is LEGENDARY
-      // - At-will Shatter/Darkness = unlimited AoE damage or battlefield control
-      // Values assume user picks a strong spell at that level:
+      // At-will scoring: unlimited casting breaks bounded resource assumptions
+      // Reference: Ring of Invisibility (at-will L2) is a LEGENDARY item
+      // At-will L1 spells like Shield, Charm Person, Detect Magic are very strong
       const AT_WILL_VALUES: Record<number, number> = {
         0: 0.2,   // Cantrip at-will: minor ribbon (Light, Prestidigitation) → Common
-        1: 0.75,  // Level 1 at-will: strong utility (Detect Magic, Charm Person) → Uncommon
-        2: 2.5,   // Level 2 at-will: powerful (Shatter, Darkness, Invisibility) → Rare/Very Rare
+        1: 2.0,   // Level 1 at-will: (Detect Magic, Charm Person, Shield) → Rare
+        2: 4.5,   // Level 2 at-will: (Shatter, Darkness, Invisibility) → Legendary
       };
       // Treat any level above 2 as level 2 for scoring (UI should prevent this)
       const effectiveLevel = Math.min(ability.spellLevel, 2);
