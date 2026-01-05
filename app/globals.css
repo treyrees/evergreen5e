@@ -309,3 +309,79 @@ h1, h2, h3, h4, h5, h6 {
   stroke-dashoffset: 24;
   animation: checkmark-draw 0.4s ease-out forwards;
 }
+
+/* ============================================
+   CERTIFICATION PAGE ANIMATIONS
+   ============================================ */
+
+/* Certificate entrance animation */
+@keyframes certificate-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.certificate-animate-in {
+  animation: certificate-entrance 0.6s ease-out forwards;
+}
+
+/* Seal pulse for legendary items */
+@keyframes seal-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+  }
+}
+
+.seal-legendary {
+  animation: seal-pulse 3s ease-in-out infinite;
+}
+
+/* Feature list stagger animation */
+@keyframes feature-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.feature-animate {
+  animation: feature-slide-in 0.4s ease-out forwards;
+  animation-fill-mode: forwards;
+}
+
+.feature-animate:nth-child(1) { animation-delay: 0.1s; }
+.feature-animate:nth-child(2) { animation-delay: 0.15s; }
+.feature-animate:nth-child(3) { animation-delay: 0.2s; }
+.feature-animate:nth-child(4) { animation-delay: 0.25s; }
+.feature-animate:nth-child(5) { animation-delay: 0.3s; }
+.feature-animate:nth-child(6) { animation-delay: 0.35s; }
+.feature-animate:nth-child(7) { animation-delay: 0.4s; }
+.feature-animate:nth-child(8) { animation-delay: 0.45s; }
+
+/* Glow border animation for very rare+ items */
+@keyframes border-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--glow-color, rgba(139, 92, 246, 0.3));
+  }
+  50% {
+    box-shadow: 0 0 35px var(--glow-color, rgba(139, 92, 246, 0.5));
+  }
+}
+
+.border-glow-animate {
+  animation: border-glow 4s ease-in-out infinite;
+}
