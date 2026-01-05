@@ -1,3 +1,4 @@
+import React from 'react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -88,7 +89,7 @@ function getFeatureIcon(label: string): string {
   return FEATURE_ICONS[label] || '✦';
 }
 
-function highlightDamageTypes(text: string): JSX.Element {
+function highlightDamageTypes(text: string): React.ReactElement {
   // Split text and highlight damage types with their colors
   const damageTypePattern = /(fire|cold|lightning|thunder|acid|poison|necrotic|radiant|force|psychic|slashing|piercing|bludgeoning)/gi;
   const parts = text.split(damageTypePattern);
