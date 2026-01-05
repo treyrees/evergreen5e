@@ -59,7 +59,7 @@ export async function saveItem(input: SaveItemInput): Promise<ActionResult<{ id:
       return { success: false, error: 'Invalid score value' };
     }
     // Check rarity is valid
-    const validRarities = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
+    const validRarities = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary', 'Legendary*'];
     if (!validRarities.includes(input.suggestedRarity)) {
       return { success: false, error: 'Invalid rarity value' };
     }
@@ -193,7 +193,7 @@ export async function updateSavedItem(
       return { success: false, error: 'Invalid score value' };
     }
     if (input.suggestedRarity !== undefined) {
-      const validRarities = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
+      const validRarities = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary', 'Legendary*'];
       if (!validRarities.includes(input.suggestedRarity)) {
         return { success: false, error: 'Invalid rarity value' };
       }

@@ -4,6 +4,7 @@ import { getCertification } from '@/lib/actions/certifications';
 export const runtime = 'edge';
 
 // Rarity color schemes for the badge
+// Legendary* uses red to indicate the item exceeds SRD reference items
 const RARITY_COLORS: Record<string, { border: string; accent: string; glow: string; text: string }> = {
   'Common': {
     border: '#64748b',
@@ -34,6 +35,12 @@ const RARITY_COLORS: Record<string, { border: string; accent: string; glow: stri
     accent: '#fbbf24',
     glow: 'rgba(245, 158, 11, 0.4)',
     text: '#fbbf24',
+  },
+  'Legendary*': {
+    border: '#ef4444',
+    accent: '#f87171',
+    glow: 'rgba(239, 68, 68, 0.4)',
+    text: '#f87171',
   },
 };
 

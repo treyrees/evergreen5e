@@ -140,13 +140,13 @@ export default function ItemsPage() {
           compareValue = a.name.localeCompare(b.name);
           break;
         case 'bookRarity':
-          const rarityOrder = ['common', 'uncommon', 'rare', 'very rare', 'legendary'];
+          const rarityOrder = ['common', 'uncommon', 'rare', 'very rare', 'legendary', 'legendary*'];
           const aIdx = rarityOrder.indexOf(a.rarity?.toLowerCase() || '');
           const bIdx = rarityOrder.indexOf(b.rarity?.toLowerCase() || '');
           compareValue = aIdx - bIdx;
           break;
         case 'calcRarity':
-          const calcRarityOrder = ['common', 'uncommon', 'rare', 'very rare', 'legendary'];
+          const calcRarityOrder = ['common', 'uncommon', 'rare', 'very rare', 'legendary', 'legendary*'];
           const aCalcIdx = calcRarityOrder.indexOf(a.calculatedRarity.toLowerCase());
           const bCalcIdx = calcRarityOrder.indexOf(b.calculatedRarity.toLowerCase());
           compareValue = aCalcIdx - bCalcIdx;
@@ -163,6 +163,7 @@ export default function ItemsPage() {
   }, [itemsWithScores, searchTerm, rarityFilter, sortBy, sortDirection]);
 
   // Get rarity color (matches calculator palette)
+  // Legendary* uses red to indicate the item exceeds SRD reference items
   const getRarityColor = (rarity: string): string => {
     switch (rarity.toLowerCase()) {
       case 'common': return 'text-slate-400';
@@ -170,6 +171,7 @@ export default function ItemsPage() {
       case 'rare': return 'text-sky-400/80';
       case 'very rare': return 'text-violet-400/80';
       case 'legendary': return 'text-amber-400/80';
+      case 'legendary*': return 'text-red-400/80';
       default: return 'text-slate-300';
     }
   };

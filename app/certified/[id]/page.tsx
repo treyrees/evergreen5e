@@ -7,12 +7,14 @@ import { CertificationEmbed } from '@/components/CertificationEmbed';
 import { getRarityColorClass } from '@/lib/calculator-ui-utils';
 
 // Rarity border colors for the certificate
+// Legendary* uses red to indicate the item exceeds SRD reference items
 const RARITY_BORDER_COLORS: Record<string, string> = {
   'Common': 'border-slate-500',
   'Uncommon': 'border-emerald-500',
   'Rare': 'border-sky-500',
   'Very Rare': 'border-violet-500',
   'Legendary': 'border-amber-500',
+  'Legendary*': 'border-red-500',
 };
 
 const RARITY_GLOW_COLORS: Record<string, string> = {
@@ -21,6 +23,7 @@ const RARITY_GLOW_COLORS: Record<string, string> = {
   'Rare': 'shadow-sky-500/30',
   'Very Rare': 'shadow-violet-500/40',
   'Legendary': 'shadow-amber-500/50',
+  'Legendary*': 'shadow-red-500/50',
 };
 
 const RARITY_ACCENT_COLORS: Record<string, string> = {
@@ -29,6 +32,7 @@ const RARITY_ACCENT_COLORS: Record<string, string> = {
   'Rare': 'text-sky-400',
   'Very Rare': 'text-violet-400',
   'Legendary': 'text-amber-400',
+  'Legendary*': 'text-red-400',
 };
 
 interface PageProps {
