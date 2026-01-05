@@ -108,6 +108,7 @@ export function CertifyModal({
     'Rare': 'text-sky-400',
     'Very Rare': 'text-violet-400',
     'Legendary': 'text-amber-400',
+    'Legendary*': 'text-red-400',
   };
 
   return (

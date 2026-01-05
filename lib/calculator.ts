@@ -844,6 +844,9 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
  * Convert combat score to rarity
  * Note: Items with any combat features but score < 1 get bumped to Uncommon
  * This prevents utility items from being rated as Common when they have features
+ *
+ * Legendary* (score > 6.0): Item exceeds the highest SRD reference items.
+ * The math is broken and the item cannot be promised to be balanced.
  */
 export function scoreToRarity(score: number, hasCombatFeatures: boolean = false): Rarity {
   // Minimum floor: items with features should be at least Uncommon
@@ -855,16 +858,20 @@ export function scoreToRarity(score: number, hasCombatFeatures: boolean = false)
   if (score < 2) return 'Uncommon';
   if (score < 3) return 'Rare';
   if (score < 4) return 'Very Rare';
+  if (score > 6) return 'Legendary*';
   return 'Legendary';
 }
 
 /**
  * Calculate how many tiers apart two rarities are
+ * Note: Legendary* is treated as same tier as Legendary for comparison purposes
  */
 function getRarityTierDifference(rarity1: string, rarity2: string): number {
-  const rarityOrder = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
-  const idx1 = rarityOrder.findIndex(r => r.toLowerCase() === rarity1.toLowerCase());
-  const idx2 = rarityOrder.findIndex(r => r.toLowerCase() === rarity2.toLowerCase());
+  const rarityOrder = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary', 'Legendary*'];
+  // Normalize: treat 'legendary*' same as 'legendary' for tier comparison
+  const normalize = (r: string) => r.toLowerCase() === 'legendary*' ? 'legendary' : r.toLowerCase();
+  const idx1 = rarityOrder.findIndex(r => r.toLowerCase() === normalize(rarity1));
+  const idx2 = rarityOrder.findIndex(r => r.toLowerCase() === normalize(rarity2));
   return Math.abs(idx1 - idx2);
 }
 
@@ -952,11 +959,13 @@ export function findAnchorItem(
 }
 
 /**
- * Get the rarity tier index (0=Common, 1=Uncommon, 2=Rare, 3=Very Rare, 4=Legendary)
+ * Get the rarity tier index (0=Common, 1=Uncommon, 2=Rare, 3=Very Rare, 4=Legendary/Legendary*)
+ * Note: Legendary* is treated as same tier as Legendary
  */
 function getRarityTierIndex(rarity: string): number {
   const rarityOrder = ['common', 'uncommon', 'rare', 'very rare', 'legendary'];
-  return rarityOrder.indexOf(rarity.toLowerCase());
+  const normalized = rarity.toLowerCase() === 'legendary*' ? 'legendary' : rarity.toLowerCase();
+  return rarityOrder.indexOf(normalized);
 }
 
 /**

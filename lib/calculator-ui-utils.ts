@@ -12,6 +12,7 @@ export function capitalizeRarity(rarity: string): string {
 
 /**
  * Get rarity color class based on rarity tier (case-insensitive)
+ * Legendary* uses red to indicate the item exceeds SRD reference items
  */
 export function getRarityColorClass(rarity: string): string {
   const r = rarity.toLowerCase();
@@ -19,6 +20,7 @@ export function getRarityColorClass(rarity: string): string {
   if (r === 'uncommon') return 'text-emerald-400/80';
   if (r === 'rare') return 'text-sky-400/80';
   if (r === 'very rare') return 'text-violet-400/80';
+  if (r === 'legendary*') return 'text-red-400/80';
   if (r === 'legendary') return 'text-amber-400/80';
   return 'text-slate-400';
 }
@@ -32,6 +34,7 @@ export function getRarityBgClass(rarity: string): string {
   if (r === 'uncommon') return 'bg-emerald-950/20';
   if (r === 'rare') return 'bg-sky-950/20';
   if (r === 'very rare') return 'bg-violet-950/20';
+  if (r === 'legendary*') return 'bg-red-950/20';
   if (r === 'legendary') return 'bg-amber-950/20';
   return 'bg-slate-700/30';
 }
@@ -55,19 +58,22 @@ export function getRarityScalePipClass(rarity: string): string {
   if (r === 'uncommon') return 'bg-emerald-400';
   if (r === 'rare') return 'bg-sky-400';
   if (r === 'very rare') return 'bg-violet-400';
+  if (r === 'legendary*') return 'bg-red-400';
   if (r === 'legendary') return 'bg-amber-400';
   return 'bg-slate-400';
 }
 
 /**
  * Rarity tier definitions for the scale indicator
+ * Legendary* (>6.0) indicates the item exceeds SRD reference items
  */
 const RARITY_TIERS = [
   { name: 'Common', floor: 0, ceiling: 1 },
   { name: 'Uncommon', floor: 1, ceiling: 2 },
   { name: 'Rare', floor: 2, ceiling: 3 },
   { name: 'Very Rare', floor: 3, ceiling: 4 },
-  { name: 'Legendary', floor: 4, ceiling: 5 },
+  { name: 'Legendary', floor: 4, ceiling: 6 },
+  { name: 'Legendary*', floor: 6, ceiling: Infinity },
 ] as const;
 
 /**
@@ -94,10 +100,14 @@ export function getRarityScaleData(score: number): {
   const nextTier = tierIndex < RARITY_TIERS.length - 1 ? RARITY_TIERS[tierIndex + 1] : null;
 
   // Calculate position within tier (0-9)
-  // For Legendary (unbounded), cap at position 9 for scores >= 5
+  // For Legendary and Legendary* (unbounded ceilings), scale by 5 to spread across the indicator
   let position: number;
   if (tier.name === 'Legendary') {
-    position = Math.min(9, Math.floor((clampedScore - tier.floor) * 10));
+    // Legendary spans 4.0-6.0, so divide range by 2 to get 10 pips
+    position = Math.min(9, Math.floor((clampedScore - tier.floor) * 5));
+  } else if (tier.name === 'Legendary*') {
+    // Legendary* is unbounded, just show position based on score above 6
+    position = Math.min(9, Math.floor((clampedScore - tier.floor) * 5));
   } else {
     position = Math.min(9, Math.floor((clampedScore - tier.floor) * 10));
   }

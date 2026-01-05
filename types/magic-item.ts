@@ -200,7 +200,7 @@ export interface MagicItem {
   dndbeyondSlug?: string; // D&D Beyond URL slug, e.g., "4774-sun-blade" for https://www.dndbeyond.com/magic-items/4774-sun-blade
 }
 
-export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Very Rare' | 'Legendary';
+export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Very Rare' | 'Legendary' | 'Legendary*';
 
 // ============================================
 // Certification Types (for balance certification)
