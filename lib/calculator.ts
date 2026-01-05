@@ -800,6 +800,30 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
         score += secondary.effectiveLevel * FLEXIBILITY_MULTIPLIER;
       }
     }
+
+    // At-will abilities (chargesPerUse === 0)
+    // These are unlimited use abilities, typically cantrips or minor effects
+    const atWillAbilities = combat.chargePool.abilities.filter(ability => ability.chargesPerUse === 0);
+    for (const ability of atWillAbilities) {
+      // At-will scoring based on spell level
+      // Cantrips (level 0) are minor utility: ~0.2 pts
+      // Level 1 at-will is significant: ~0.5 pts (like detect magic at will)
+      // Level 2 at-will is powerful: ~1.0 pts (like invisibility at will)
+      // Level 3+ at-will would be game-breaking, score heavily
+      const AT_WILL_VALUES: Record<number, number> = {
+        0: 0.2,   // Cantrip at-will: minor utility (Light, Prestidigitation)
+        1: 0.5,   // Level 1 at-will: useful utility (Detect Magic)
+        2: 1.0,   // Level 2 at-will: powerful (Invisibility, Levitate)
+        3: 2.0,   // Level 3 at-will: very powerful (Fly, Haste)
+        4: 3.0,   // Level 4+ at-will: potentially game-breaking
+        5: 4.0,
+        6: 5.0,
+        7: 6.0,
+        8: 8.0,
+        9: 10.0,
+      };
+      score += AT_WILL_VALUES[ability.spellLevel] ?? ability.spellLevel;
+    }
   }
 
   // Weapon properties (added properties not normally on the base weapon)

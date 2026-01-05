@@ -174,23 +174,31 @@ export default function CalculatorPage() {
     setUrlImported(true);
   }, [urlImported]);
 
+  // Usage mode types for ability form
+  type UsageMode = 'per-day' | 'charges' | 'at-will';
+
   const [newAbility, setNewAbility] = useState<{
     spell: string;
     spellLevel: number | null;
-    chargesPerUse: number | null;
+    usageMode: UsageMode;
+    usesPerDay: number | null;      // For per-day mode
+    chargesPerUse: number | null;   // For charges mode
     canUpcast: boolean;
   }>({
     spell: '',
     spellLevel: null,
+    usageMode: 'per-day',
+    usesPerDay: null,
     chargesPerUse: null,
     canUpcast: false,
   });
   const [showUpcastInfo, setShowUpcastInfo] = useState(false);
+  const [showChargePoolConfig, setShowChargePoolConfig] = useState(false);
   const [spellFormErrors, setSpellFormErrors] = useState<{
     name: boolean;
     level: boolean;
-    charges: boolean;
-  }>({ name: false, level: false, charges: false });
+    usage: boolean;
+  }>({ name: false, level: false, usage: false });
 
   // Check if selected base item is a weapon
   const isWeaponSelected = useMemo(() => WEAPON_ITEMS.has(baseItem), [baseItem]);
@@ -328,30 +336,81 @@ export default function CalculatorPage() {
   }, [user]);
 
   const addAbility = () => {
+    // Validate based on usage mode
+    const usageValid = newAbility.usageMode === 'at-will'
+      ? true // At-will needs no usage input
+      : newAbility.usageMode === 'per-day'
+        ? newAbility.usesPerDay !== null && newAbility.usesPerDay > 0
+        : newAbility.chargesPerUse !== null && newAbility.chargesPerUse > 0;
+
     const errors = {
       name: !newAbility.spell.trim(),
       level: newAbility.spellLevel === null,
-      charges: newAbility.chargesPerUse === null,
+      usage: !usageValid,
     };
 
-    if (errors.name || errors.level || errors.charges) {
+    if (errors.name || errors.level || errors.usage) {
       setSpellFormErrors(errors);
       // Clear errors after 2 seconds
-      setTimeout(() => setSpellFormErrors({ name: false, level: false, charges: false }), 2000);
+      setTimeout(() => setSpellFormErrors({ name: false, level: false, usage: false }), 2000);
       return;
     }
 
-    // All fields valid - add the ability
-    setSpellFormErrors({ name: false, level: false, charges: false });
-    setAbilities([...abilities, {
-      spell: newAbility.spell,
-      spellLevel: newAbility.spellLevel as number,
-      chargesPerUse: newAbility.chargesPerUse as number,
-      canUpcast: newAbility.canUpcast,
-    }]);
+    // All fields valid - add the ability based on usage mode
+    setSpellFormErrors({ name: false, level: false, usage: false });
+
+    const spellLevel = newAbility.spellLevel as number;
+
+    if (newAbility.usageMode === 'per-day') {
+      // Per-day mode: Create a simple "X uses per day" setup
+      // Internally, each ability costs 1 charge, and we auto-configure the pool
+      const usesPerDay = newAbility.usesPerDay as number;
+
+      // Check if there are already charge-based abilities (cost > 1)
+      const hasChargeAbilities = abilities.some((a: ChargedAbility) => a.chargesPerUse > 1);
+
+      if (!hasChargeAbilities && maxCharges === 0) {
+        // First per-day ability with no existing charge pool: auto-configure
+        setMaxCharges((prev: number) => prev + usesPerDay);
+        setChargesPerLongRest((prev: number) => prev + usesPerDay);
+      }
+
+      setAbilities([...abilities, {
+        spell: newAbility.spell,
+        spellLevel,
+        chargesPerUse: 1, // Per-day abilities cost 1 charge each
+        canUpcast: false, // Per-day abilities don't upcast
+      }]);
+    } else if (newAbility.usageMode === 'at-will') {
+      // At-will mode: Unlimited uses (modeled as 0 cost, special handling)
+      // For now, we model at-will as "costs 0 charges" - calculator will handle specially
+      // Actually, let's model it as having a very high effective recharge
+      // For scoring purposes, at-will cantrips add a small fixed value
+      setAbilities([...abilities, {
+        spell: newAbility.spell,
+        spellLevel,
+        chargesPerUse: 0, // 0 indicates at-will
+        canUpcast: false,
+      }]);
+    } else {
+      // Charges mode: Standard charge pool behavior
+      setAbilities([...abilities, {
+        spell: newAbility.spell,
+        spellLevel,
+        chargesPerUse: newAbility.chargesPerUse as number,
+        canUpcast: newAbility.canUpcast,
+      }]);
+      // Open charge pool config if not already configured
+      if (maxCharges === 0) {
+        setShowChargePoolConfig(true);
+      }
+    }
+
     setNewAbility({
       spell: '',
       spellLevel: null,
+      usageMode: newAbility.usageMode, // Keep the same mode for adding more
+      usesPerDay: null,
       chargesPerUse: null,
       canUpcast: false,
     });
@@ -2048,122 +2107,89 @@ export default function CalculatorPage() {
               <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4">Spells & Abilities</h2>
               <div className="space-y-4">
 
-                  {/* Collapsible Helper Guide */}
+                  {/* Collapsible Spell Level Guide */}
                   <details className="mb-3 bg-slate-700/30 border border-slate-600 rounded-md">
                     <summary className="px-3 py-2 cursor-pointer text-sm font-medium text-slate-300 hover:bg-slate-700/50 rounded-md select-none">
-                      Power Level Guide
+                      Spell Level Guide
                     </summary>
                     <div className="px-3 py-3 text-xs text-slate-300 space-y-3 border-t border-slate-600">
                       <p className="text-slate-400 text-[11px]">
-                        How impactful is this ability? Match your effect to a power level below.
+                        Match your ability to an equivalent spell level. Use the actual spell level if it&apos;s a real spell.
                       </p>
 
-                      {/* Power Level Quick Reference */}
+                      {/* Spell Level Quick Reference */}
                       <div className="space-y-1.5 text-[11px]">
                         <div className="flex items-start gap-2 py-1">
-                          <span className="text-slate-500 w-12 shrink-0 font-medium">Lv 0</span>
+                          <span className="text-slate-500 w-10 shrink-0 font-medium">0</span>
                           <div>
-                            <span className="text-slate-300">Minor convenience</span>
-                            <span className="text-slate-500 ml-1">(glow, clean, minor telekinesis)</span>
+                            <span className="text-slate-300">Cantrip</span>
+                            <span className="text-slate-500 ml-1">(Light, Prestidigitation, minor utility)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1">
-                          <span className="text-slate-400 w-12 shrink-0 font-medium">Lv 1-2</span>
+                          <span className="text-slate-400 w-10 shrink-0 font-medium">1-2</span>
                           <div>
-                            <span className="text-slate-300">Useful but limited</span>
-                            <span className="text-slate-500 ml-1">(1-3d6 damage, short invisibility, small heals)</span>
+                            <span className="text-slate-300">Low-level</span>
+                            <span className="text-slate-500 ml-1">(Magic Missile, Detect Magic, Invisibility)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-emerald-400">
-                          <span className="w-12 shrink-0 font-medium">Lv 3</span>
+                          <span className="w-10 shrink-0 font-medium">3</span>
                           <div>
-                            <span className="text-emerald-300">Combat-changing</span>
-                            <span className="text-emerald-500/80 ml-1">(AoE damage 8d6, flight, haste)</span>
+                            <span className="text-emerald-300">Combat-defining</span>
+                            <span className="text-emerald-500/80 ml-1">(Fireball, Lightning Bolt, Fly, Haste)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1">
-                          <span className="text-violet-400 w-12 shrink-0 font-medium">Lv 4-5</span>
+                          <span className="text-violet-400 w-10 shrink-0 font-medium">4-5</span>
                           <div>
                             <span className="text-violet-300">Encounter-ending</span>
-                            <span className="text-violet-400/70 ml-1">(polymorph the boss, banish a threat, revive ally)</span>
+                            <span className="text-violet-400/70 ml-1">(Polymorph, Banishment, Raise Dead)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-amber-400">
-                          <span className="w-12 shrink-0 font-medium">Lv 6-7</span>
+                          <span className="w-10 shrink-0 font-medium">6-7</span>
                           <div>
-                            <span className="text-amber-300">Skip the adventure</span>
-                            <span className="text-amber-500/80 ml-1">(teleport anywhere, see through all deception, disintegrate)</span>
+                            <span className="text-amber-300">Adventure-skipping</span>
+                            <span className="text-amber-500/80 ml-1">(Disintegrate, Teleport, True Seeing)</span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 py-1 text-rose-400">
-                          <span className="w-12 shrink-0 font-medium">Lv 8-9</span>
+                          <span className="w-10 shrink-0 font-medium">8-9</span>
                           <div>
                             <span className="text-rose-300">Reality-altering</span>
-                            <span className="text-rose-400/70 ml-1">(mind control, meteor swarm, wish)</span>
+                            <span className="text-rose-400/70 ml-1">(Dominate Monster, Meteor Swarm, Wish)</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Common Effect Patterns */}
-                      <details className="pt-2 border-t border-slate-600">
-                        <summary className="cursor-pointer text-[11px] text-slate-400 hover:text-slate-300 select-none">
-                          Common item effects →
-                        </summary>
-                        <div className="mt-2 space-y-2 text-[10px]">
-                          <div>
-                            <div className="text-slate-400 font-medium mb-1">Damage Effects</div>
-                            <div className="text-slate-500 space-y-0.5 pl-2">
-                              <div>+1d6 on hit → <span className="text-slate-300">Lv 1</span></div>
-                              <div>Ranged bolt (3d6, single target) → <span className="text-slate-300">Lv 2</span></div>
-                              <div>AoE blast (8d6, 20ft radius) → <span className="text-emerald-400">Lv 3</span></div>
-                              <div>Massive AoE (40d6 total) → <span className="text-rose-400">Lv 9</span></div>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-slate-400 font-medium mb-1">Movement</div>
-                            <div className="text-slate-500 space-y-0.5 pl-2">
-                              <div>+10ft speed → <span className="text-slate-300">Lv 1</span></div>
-                              <div>Fly 60ft for 10min → <span className="text-emerald-400">Lv 3</span></div>
-                              <div>Teleport 500ft → <span className="text-violet-400">Lv 4</span></div>
-                              <div>Teleport anywhere on plane → <span className="text-amber-400">Lv 7</span></div>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-slate-400 font-medium mb-1">Control / Debuffs</div>
-                            <div className="text-slate-500 space-y-0.5 pl-2">
-                              <div>Frighten 1 creature → <span className="text-slate-300">Lv 1</span></div>
-                              <div>Hold person (paralyzed) → <span className="text-slate-300">Lv 2</span></div>
-                              <div>Banish creature → <span className="text-violet-400">Lv 4</span></div>
-                              <div>Dominate monster → <span className="text-rose-400">Lv 8</span></div>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-slate-400 font-medium mb-1">Utility / Buffs</div>
-                            <div className="text-slate-500 space-y-0.5 pl-2">
-                              <div>Detect magic → <span className="text-slate-300">Lv 1</span></div>
-                              <div>Invisibility (1 creature) → <span className="text-slate-300">Lv 2</span></div>
-                              <div>Haste / extra action → <span className="text-emerald-400">Lv 3</span></div>
-                              <div>True seeing → <span className="text-amber-400">Lv 6</span></div>
-                            </div>
-                          </div>
-                        </div>
-                      </details>
-
                       <p className="text-slate-500 italic text-[10px] pt-2 border-t border-slate-600">
-                        Tip: When in doubt, find a similar spell on <a href="https://www.dndbeyond.com/spells" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:text-emerald-400 underline">D&D Beyond</a> and use that level.
+                        Tip: Look up unfamiliar spells on <a href="https://www.dndbeyond.com/spells" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:text-emerald-400 underline">D&D Beyond</a>.
                       </p>
                     </div>
                   </details>
 
-                  {/* Charge Pool Configuration */}
-                  {(maxCharges > 0 || chargesPerShortRest > 0 || chargesPerLongRest > 0 || abilities.length > 0) && (
-                    <div className="mb-4 p-3 bg-slate-700/30 rounded border border-slate-600">
-                      <label className="block text-xs font-medium text-slate-400 mb-2">
-                        Charge Pool
-                      </label>
-                      <div className="grid grid-cols-3 gap-2">
+                  {/* Charge Pool Configuration - shown when using charges mode or has charge-based abilities */}
+                  {(showChargePoolConfig || abilities.some(a => a.chargesPerUse > 1) || (maxCharges > 0 && abilities.some(a => a.chargesPerUse > 0))) && (
+                    <div className="mb-4 p-3 bg-violet-900/20 rounded border border-violet-700/50">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="text-xs font-medium text-violet-300">
+                          Charge Pool
+                        </label>
+                        <button
+                          onClick={() => setShowChargePoolConfig(false)}
+                          className="text-[10px] text-slate-500 hover:text-slate-300"
+                          title="Hide charge pool"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mb-3">
+                        Configure how many charges the item holds and how they recharge.
+                      </p>
+                      <div className="grid grid-cols-3 gap-2 mb-3">
                         <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">Max</label>
+                          <label className="block text-[10px] text-slate-400 mb-1">Maximum</label>
                           <input
                             type="text"
                             inputMode="numeric"
@@ -2175,12 +2201,12 @@ export default function CalculatorPage() {
                                 setMaxCharges(val === '' ? 0 : parseInt(val));
                               }
                             }}
-                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
+                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-violet-500 focus:outline-none"
                             placeholder="7"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">+ Short Rest</label>
+                          <label className="block text-[10px] text-slate-400 mb-1">Per Short Rest</label>
                           <input
                             type="text"
                             inputMode="numeric"
@@ -2192,12 +2218,12 @@ export default function CalculatorPage() {
                                 setChargesPerShortRest(val === '' ? 0 : parseInt(val));
                               }
                             }}
-                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
+                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-violet-500 focus:outline-none"
                             placeholder="0"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">+ Long Rest</label>
+                          <label className="block text-[10px] text-slate-400 mb-1">At Dawn</label>
                           <input
                             type="text"
                             inputMode="numeric"
@@ -2209,10 +2235,32 @@ export default function CalculatorPage() {
                                 setChargesPerLongRest(val === '' ? 0 : parseInt(val));
                               }
                             }}
-                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-emerald-500 focus:outline-none"
-                            placeholder="4"
+                            className="w-full px-2 py-1.5 border border-slate-600 rounded bg-slate-900 text-slate-100 text-sm focus:border-violet-500 focus:outline-none"
+                            placeholder="1d6+1"
                           />
+                          <p className="text-[9px] text-slate-500 mt-0.5">Use average for dice</p>
                         </div>
+                      </div>
+                      {/* Quick presets */}
+                      <div className="flex flex-wrap gap-1.5">
+                        <button
+                          onClick={() => { setMaxCharges(7); setChargesPerShortRest(0); setChargesPerLongRest(4); }}
+                          className="px-2 py-1 text-[10px] bg-slate-700/50 text-slate-400 rounded hover:bg-slate-700 hover:text-slate-300 transition-colors"
+                        >
+                          7 max, 1d6+1 dawn
+                        </button>
+                        <button
+                          onClick={() => { setMaxCharges(3); setChargesPerShortRest(0); setChargesPerLongRest(3); }}
+                          className="px-2 py-1 text-[10px] bg-slate-700/50 text-slate-400 rounded hover:bg-slate-700 hover:text-slate-300 transition-colors"
+                        >
+                          3 max, full dawn
+                        </button>
+                        <button
+                          onClick={() => { setMaxCharges(3); setChargesPerShortRest(3); setChargesPerLongRest(0); }}
+                          className="px-2 py-1 text-[10px] bg-slate-700/50 text-slate-400 rounded hover:bg-slate-700 hover:text-slate-300 transition-colors"
+                        >
+                          3 max, full short rest
+                        </button>
                       </div>
                     </div>
                   )}
@@ -2220,30 +2268,51 @@ export default function CalculatorPage() {
                   {/* Abilities List */}
                   {abilities.length > 0 && (
                     <div className="space-y-2 mb-3">
-                      {abilities.map((ability, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between bg-slate-700/50 p-3 rounded border border-slate-600"
-                        >
-                          <div className="text-sm text-slate-300">
-                            <span className="font-medium">{ability.spell}</span>
-                            <span className="text-slate-500"> Lv{ability.spellLevel}, {ability.chargesPerUse}ch{ability.canUpcast && <span className="text-emerald-400" title="Can upcast with extra charges">(+)</span>}</span>
-                          </div>
-                          <button
-                            onClick={() => removeAbility(index)}
-                            className="text-slate-500 hover:text-red-400 text-sm transition-colors"
+                      {abilities.map((ability, index) => {
+                        // Determine how to display the usage
+                        const isAtWill = ability.chargesPerUse === 0;
+                        const isPerDay = ability.chargesPerUse === 1 && maxCharges > 0 && chargesPerLongRest === maxCharges;
+                        const usageText = isAtWill
+                          ? 'at will'
+                          : isPerDay
+                            ? `${maxCharges}/day`
+                            : `${ability.chargesPerUse} charge${ability.chargesPerUse !== 1 ? 's' : ''}`;
+
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between bg-slate-700/50 p-3 rounded border border-slate-600"
                           >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
+                            <div className="text-sm text-slate-300">
+                              <span className="font-medium">{ability.spell}</span>
+                              <span className="text-slate-500 ml-1.5">
+                                {ability.spellLevel > 0 ? `(level ${ability.spellLevel})` : '(cantrip)'}
+                              </span>
+                              <span className="text-slate-400 ml-1.5">
+                                {usageText}
+                                {ability.canUpcast && <span className="text-emerald-400 ml-1" title="Can upcast with extra charges">+</span>}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => removeAbility(index)}
+                              className="text-slate-500 hover:text-red-400 text-sm transition-colors"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
                   {/* Add Ability Form */}
                   {showChargeForm ? (
-                    <div className="space-y-3 p-4 bg-slate-700/50 rounded border border-slate-600">
+                    <div className="space-y-4 p-4 bg-slate-700/50 rounded border border-slate-600">
+                      {/* Step 1: Ability Name */}
                       <div>
+                        <label className="block text-xs text-slate-400 mb-1.5 font-medium">
+                          What spell or ability does this item grant?
+                        </label>
                         <input
                           type="text"
                           value={newAbility.spell}
@@ -2251,7 +2320,7 @@ export default function CalculatorPage() {
                             setSpellFormErrors(prev => ({ ...prev, name: false }));
                             setNewAbility({ ...newAbility, spell: e.target.value });
                           }}
-                          placeholder="Spell/Ability name"
+                          placeholder="e.g., Fireball, Detect Magic, Lightning Bolt"
                           className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
                             spellFormErrors.name
                               ? 'border-red-500 focus:border-red-500'
@@ -2259,130 +2328,200 @@ export default function CalculatorPage() {
                           }`}
                         />
                         {spellFormErrors.name && (
-                          <p className="text-xs text-red-400 mt-1">Required</p>
+                          <p className="text-xs text-red-400 mt-1">Please enter an ability name</p>
                         )}
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">Power Level</label>
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={newAbility.spellLevel === null ? '' : newAbility.spellLevel}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setSpellFormErrors(prev => ({ ...prev, level: false }));
-                              if (val === '') {
-                                setNewAbility({ ...newAbility, spellLevel: null, canUpcast: false });
-                              } else if (/^[0-9]$/.test(val)) {
-                                const newLevel = Math.min(9, parseInt(val));
-                                // Auto-uncheck upcast if charges < new level
-                                const canStillUpcast = newAbility.chargesPerUse !== null && newAbility.chargesPerUse >= newLevel;
-                                setNewAbility({ ...newAbility, spellLevel: newLevel, canUpcast: canStillUpcast && newAbility.canUpcast });
-                              }
-                            }}
-                            className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
-                              spellFormErrors.level
-                                ? 'border-red-500 focus:border-red-500'
-                                : 'border-slate-600 focus:border-emerald-500'
-                            }`}
-                            placeholder="0-9"
-                          />
-                          {spellFormErrors.level && (
-                            <p className="text-xs text-red-400 mt-1">Required</p>
-                          )}
+
+                      {/* Step 2: Spell Level */}
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1.5 font-medium">
+                          Spell level (0 for cantrips)
+                        </label>
+                        <div className="flex gap-1">
+                          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((level) => (
+                            <button
+                              key={level}
+                              onClick={() => {
+                                setSpellFormErrors(prev => ({ ...prev, level: false }));
+                                // Reset upcast if level changes
+                                setNewAbility({ ...newAbility, spellLevel: level, canUpcast: false });
+                                // Auto-switch to at-will for cantrips
+                                if (level === 0 && newAbility.usageMode === 'charges') {
+                                  setNewAbility(prev => ({ ...prev, spellLevel: level, usageMode: 'at-will', canUpcast: false }));
+                                }
+                              }}
+                              className={`flex-1 py-2 text-sm rounded transition-colors ${
+                                newAbility.spellLevel === level
+                                  ? level === 0 ? 'bg-slate-600 text-white'
+                                    : level <= 2 ? 'bg-slate-500 text-white'
+                                    : level === 3 ? 'bg-emerald-600 text-white'
+                                    : level <= 5 ? 'bg-violet-600 text-white'
+                                    : level <= 7 ? 'bg-amber-600 text-white'
+                                    : 'bg-rose-600 text-white'
+                                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300'
+                              }`}
+                            >
+                              {level}
+                            </button>
+                          ))}
                         </div>
-                        <div>
-                          <label className="block text-[10px] text-slate-500 mb-1">Charges/Use</label>
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={newAbility.chargesPerUse === null ? '' : newAbility.chargesPerUse}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setSpellFormErrors(prev => ({ ...prev, charges: false }));
-                              if (val === '') {
-                                setNewAbility({ ...newAbility, chargesPerUse: null, canUpcast: false });
-                              } else if (/^[0-9]+$/.test(val)) {
-                                const newCharges = Math.max(1, parseInt(val));
-                                // Auto-uncheck upcast if charges < spell level
-                                const canStillUpcast = newAbility.spellLevel !== null && newCharges >= newAbility.spellLevel;
-                                setNewAbility({ ...newAbility, chargesPerUse: newCharges, canUpcast: canStillUpcast && newAbility.canUpcast });
-                              }
-                            }}
-                            className={`w-full px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm focus:outline-none transition-colors ${
-                              spellFormErrors.charges
-                                ? 'border-red-500 focus:border-red-500'
-                                : 'border-slate-600 focus:border-emerald-500'
-                            }`}
-                            placeholder="1+"
-                          />
-                          {spellFormErrors.charges && (
-                            <p className="text-xs text-red-400 mt-1">Required</p>
-                          )}
-                        </div>
+                        {spellFormErrors.level && (
+                          <p className="text-xs text-red-400 mt-1">Please select a spell level</p>
+                        )}
                       </div>
 
-                      {/* Upcast Info Panel */}
-                      <div className="mt-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowUpcastInfo(!showUpcastInfo)}
-                          className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
-                        >
-                          <span className={`transition-transform ${showUpcastInfo ? 'rotate-90' : ''}`}>▶</span>
-                          <span>Upcast with extra charges?</span>
-                        </button>
-                        {showUpcastInfo && (
-                          <div className="mt-2 p-3 bg-slate-700/50 rounded border border-slate-600 text-xs text-slate-400">
-                            <p className="mb-2">
-                              According to the SRD, most charge-based items allow upcasting by spending additional charges. For example, a Wand of Fireballs can cast Fireball at 4th level by spending 4 charges instead of 3.
-                            </p>
-                            <p className="mb-2">
-                              This option does not affect balance calculations, but will display a (+) indicator to remind you that upcasting is available.
-                            </p>
-                            <p className="mb-3 text-amber-400/80">
-                              Note: Upcastable spells require at least as many charges as their base level. Charges per use must be ≥ spell level.
-                            </p>
-                            {(() => {
-                              const canEnableUpcast = newAbility.chargesPerUse !== null &&
-                                newAbility.spellLevel !== null &&
-                                newAbility.chargesPerUse >= newAbility.spellLevel;
-                              return (
-                                <label className={`flex items-center gap-2 ${canEnableUpcast ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
-                                  <input
-                                    type="checkbox"
-                                    checked={newAbility.canUpcast}
-                                    disabled={!canEnableUpcast}
-                                    onChange={(e) => setNewAbility({ ...newAbility, canUpcast: e.target.checked })}
-                                    className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 disabled:opacity-50"
-                                  />
-                                  <span className="text-slate-300">Allow upcasting with extra charges</span>
-                                  {!canEnableUpcast && newAbility.spellLevel !== null && newAbility.chargesPerUse !== null && (
-                                    <span className="text-amber-400/80">(need {newAbility.spellLevel}+ charges)</span>
-                                  )}
-                                </label>
-                              );
-                            })()}
+                      {/* Step 3: How often can you use it? */}
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1.5 font-medium">
+                          How often can you use it?
+                        </label>
+                        <div className="grid grid-cols-3 gap-2 mb-3">
+                          <button
+                            onClick={() => setNewAbility({ ...newAbility, usageMode: 'per-day', canUpcast: false })}
+                            className={`px-3 py-2.5 text-sm rounded border transition-colors ${
+                              newAbility.usageMode === 'per-day'
+                                ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300'
+                                : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
+                            }`}
+                          >
+                            X / day
+                          </button>
+                          <button
+                            onClick={() => {
+                              setNewAbility({ ...newAbility, usageMode: 'charges' });
+                              setShowChargePoolConfig(true);
+                            }}
+                            className={`px-3 py-2.5 text-sm rounded border transition-colors ${
+                              newAbility.usageMode === 'charges'
+                                ? 'bg-violet-600/20 border-violet-500 text-violet-300'
+                                : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
+                            }`}
+                          >
+                            Uses charges
+                          </button>
+                          <button
+                            onClick={() => setNewAbility({ ...newAbility, usageMode: 'at-will', canUpcast: false })}
+                            className={`px-3 py-2.5 text-sm rounded border transition-colors ${
+                              newAbility.usageMode === 'at-will'
+                                ? 'bg-sky-600/20 border-sky-500 text-sky-300'
+                                : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
+                            }`}
+                          >
+                            At will
+                          </button>
+                        </div>
+
+                        {/* Conditional inputs based on usage mode */}
+                        {newAbility.usageMode === 'per-day' && (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={newAbility.usesPerDay === null ? '' : newAbility.usesPerDay}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setSpellFormErrors(prev => ({ ...prev, usage: false }));
+                                if (val === '' || /^[0-9]+$/.test(val)) {
+                                  setNewAbility({ ...newAbility, usesPerDay: val === '' ? null : Math.max(1, parseInt(val)) });
+                                }
+                              }}
+                              className={`w-20 px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm text-center focus:outline-none transition-colors ${
+                                spellFormErrors.usage
+                                  ? 'border-red-500 focus:border-red-500'
+                                  : 'border-slate-600 focus:border-emerald-500'
+                              }`}
+                              placeholder="1"
+                            />
+                            <span className="text-sm text-slate-400">times per day</span>
                           </div>
                         )}
+
+                        {newAbility.usageMode === 'charges' && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-slate-400">Costs</span>
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                value={newAbility.chargesPerUse === null ? '' : newAbility.chargesPerUse}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setSpellFormErrors(prev => ({ ...prev, usage: false }));
+                                  if (val === '' || /^[0-9]+$/.test(val)) {
+                                    const newCharges = val === '' ? null : Math.max(1, parseInt(val));
+                                    // Auto-check upcast availability
+                                    const canStillUpcast = newCharges !== null && newAbility.spellLevel !== null && newCharges >= newAbility.spellLevel;
+                                    setNewAbility({ ...newAbility, chargesPerUse: newCharges, canUpcast: canStillUpcast && newAbility.canUpcast });
+                                  }
+                                }}
+                                className={`w-20 px-3 py-2 border rounded bg-slate-900 text-slate-100 text-sm text-center focus:outline-none transition-colors ${
+                                  spellFormErrors.usage
+                                    ? 'border-red-500 focus:border-red-500'
+                                    : 'border-slate-600 focus:border-violet-500'
+                                }`}
+                                placeholder="3"
+                              />
+                              <span className="text-sm text-slate-400">charge{newAbility.chargesPerUse !== 1 ? 's' : ''} to cast</span>
+                            </div>
+
+                            {/* Upcast option for charge mode */}
+                            {newAbility.spellLevel !== null && newAbility.spellLevel > 0 && (
+                              <div className="pt-2 border-t border-slate-600">
+                                {(() => {
+                                  const canEnableUpcast = newAbility.chargesPerUse !== null &&
+                                    newAbility.spellLevel !== null &&
+                                    newAbility.chargesPerUse >= newAbility.spellLevel;
+                                  return (
+                                    <label className={`flex items-center gap-2 text-sm ${canEnableUpcast ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+                                      <input
+                                        type="checkbox"
+                                        checked={newAbility.canUpcast}
+                                        disabled={!canEnableUpcast}
+                                        onChange={(e) => setNewAbility({ ...newAbility, canUpcast: e.target.checked })}
+                                        className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-violet-500 focus:ring-violet-500 focus:ring-offset-0 disabled:opacity-50"
+                                      />
+                                      <span className="text-slate-300">Can upcast by spending extra charges</span>
+                                      {!canEnableUpcast && newAbility.chargesPerUse !== null && (
+                                        <span className="text-amber-400/80 text-xs">(need {newAbility.spellLevel}+ charges)</span>
+                                      )}
+                                    </label>
+                                  );
+                                })()}
+                                <p className="text-[10px] text-slate-500 mt-1 ml-6">
+                                  e.g., Wand of Fireballs: spend 4 charges to cast at 4th level
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {newAbility.usageMode === 'at-will' && (
+                          <p className="text-xs text-slate-500">
+                            Unlimited uses. Best for cantrips and minor utility effects.
+                          </p>
+                        )}
+
+                        {spellFormErrors.usage && newAbility.usageMode !== 'at-will' && (
+                          <p className="text-xs text-red-400 mt-1">Please enter usage amount</p>
+                        )}
                       </div>
 
-                      <div className="flex gap-2">
+                      {/* Action buttons */}
+                      <div className="flex gap-2 pt-2">
                         <button
                           onClick={addAbility}
-                          className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 text-sm font-medium transition-colors"
+                          className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded hover:bg-emerald-500 text-sm font-medium transition-colors"
                         >
-                          Add
+                          Add Ability
                         </button>
                         <button
                           onClick={() => {
                             setShowChargeForm(false);
-                            setSpellFormErrors({ name: false, level: false, charges: false });
+                            setSpellFormErrors({ name: false, level: false, usage: false });
                           }}
-                          className="px-4 py-2 bg-slate-600 text-slate-300 rounded hover:bg-slate-500 text-sm transition-colors"
+                          className="px-4 py-2.5 bg-slate-600 text-slate-300 rounded hover:bg-slate-500 text-sm transition-colors"
                         >
                           Cancel
                         </button>
