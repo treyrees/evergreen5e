@@ -753,12 +753,18 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
       (combat.chargePool.chargesPerShortRest * 2);
 
     // Calculate value-per-charge for each ability to find the "primary" (best) option
+    // chargesPerUse conventions:
+    //   > 0: costs that many charges (e.g., 3 = costs 3 charges)
+    //   < 0: per-day ability (e.g., -3 = 3/day, treated as 3 uses at 1 charge each)
+    //   = 0: at-will (handled separately below)
     const abilitiesWithValue = combat.chargePool.abilities
-      .filter(ability => ability.chargesPerUse > 0)
+      .filter(ability => ability.chargesPerUse !== 0) // Exclude at-will
       .map(ability => {
         const effectiveLevel = CHARGE_POOL_SPELL_VALUES[ability.spellLevel] ?? ability.spellLevel;
-        const valuePerCharge = effectiveLevel / ability.chargesPerUse;
-        return { ...ability, effectiveLevel, valuePerCharge };
+        // Per-day abilities (negative) are treated as costing 1 charge per use
+        const actualCost = ability.chargesPerUse < 0 ? 1 : ability.chargesPerUse;
+        const valuePerCharge = effectiveLevel / actualCost;
+        return { ...ability, effectiveLevel, valuePerCharge, actualCost };
       });
 
     // Sort by value-per-charge (highest first) - the best way to spend charges
@@ -769,13 +775,13 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
       const primary = abilitiesWithValue[0];
 
       // Burst potential: you can nova ALL charges in a single fight
-      const burstUses = combat.chargePool.maxCharges / primary.chargesPerUse;
+      const burstUses = combat.chargePool.maxCharges / primary.actualCost;
 
       // Sustained uses: what you get back per day
       // If no recharge specified (0/0), assume conservative 1 charge/day
       const sustainedUses = dailyRecharge > 0
-        ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / primary.chargesPerUse
-        : 1 / primary.chargesPerUse;
+        ? Math.min(dailyRecharge, combat.chargePool.maxCharges) / primary.actualCost
+        : 1 / primary.actualCost;
 
       // Blend burst and sustained: burst matters more for powerful spells
       // Level 3 spell: ~45% burst weight (8 Fireballs in a boss fight is huge)
@@ -799,6 +805,23 @@ export function calculateCombatScore(combat: CombatFeatures, baseItem?: string):
         // This represents "option value" without treating charges as additive
         score += secondary.effectiveLevel * FLEXIBILITY_MULTIPLIER;
       }
+    }
+
+    // At-will abilities (chargesPerUse === 0)
+    // Capped at level 2; higher level at-will would be game-breaking
+    const atWillAbilities = combat.chargePool.abilities.filter(ability => ability.chargesPerUse === 0);
+    for (const ability of atWillAbilities) {
+      // At-will scoring: unlimited casting breaks bounded resource assumptions
+      // Reference: Ring of Invisibility (at-will L2) is a LEGENDARY item
+      // At-will L1 spells like Shield, Charm Person, Detect Magic are very strong
+      const AT_WILL_VALUES: Record<number, number> = {
+        0: 0.2,   // Cantrip at-will: minor ribbon (Light, Prestidigitation) → Common
+        1: 2.0,   // Level 1 at-will: (Detect Magic, Charm Person, Shield) → Rare
+        2: 4.5,   // Level 2 at-will: (Shatter, Darkness, Invisibility) → Legendary
+      };
+      // Treat any level above 2 as level 2 for scoring (UI should prevent this)
+      const effectiveLevel = Math.min(ability.spellLevel, 2);
+      score += AT_WILL_VALUES[effectiveLevel] ?? 0.15;
     }
   }
 
