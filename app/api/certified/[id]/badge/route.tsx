@@ -4,7 +4,6 @@ import { getCertification } from '@/lib/actions/certifications';
 export const runtime = 'edge';
 
 // Rarity color schemes for the badge
-// Legendary* uses red to indicate the item exceeds SRD reference items
 const RARITY_COLORS: Record<string, { border: string; accent: string; glow: string; text: string; bg: string }> = {
   'Common': {
     border: '#64748b',
@@ -50,33 +49,6 @@ const RARITY_COLORS: Record<string, { border: string; accent: string; glow: stri
   },
 };
 
-// Feature icons for the badge
-const FEATURE_ICONS: Record<string, string> = {
-  'Enhancement': '⚔️',
-  'Bonus Damage': '💥',
-  'Armor Class': '🛡️',
-  'Saving Throws': '✨',
-  'Spell Save DC': '🎯',
-  'Spell Attack': '🔮',
-  'Ability Score': '💪',
-  'Resistances': '🔰',
-  'Damage Immunities': '🚫',
-  'Condition Immunities': '🛡️',
-  'Flight': '🪽',
-  'Senses & Movement': '👁️',
-  'Advantage': '🎲',
-  '+Proficiency': '📈',
-  'Other Skills': '🎭',
-  'Weapon Properties': '⚒️',
-  'Armor Properties': '🏋️',
-  'Spells': '📜',
-  'Charges': '⚡',
-};
-
-function getFeatureIcon(label: string): string {
-  return FEATURE_ICONS[label] || '✦';
-}
-
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -86,7 +58,6 @@ export async function GET(
   const result = await getCertification(id);
 
   if (!result.success || !result.data) {
-    // Return a placeholder error image
     return new ImageResponse(
       (
         <div
@@ -99,7 +70,7 @@ export async function GET(
             height: '100%',
             backgroundColor: '#1e293b',
             color: '#94a3b8',
-            fontFamily: 'serif',
+            fontFamily: 'sans-serif',
           }}
         >
           <span style={{ fontSize: 24 }}>Certification Not Found</span>
@@ -115,7 +86,7 @@ export async function GET(
   const cert = result.data;
   const colors = RARITY_COLORS[cert.suggestedRarity] || RARITY_COLORS['Common'];
 
-  // Build feature summary from itemAttributes
+  // Build feature list from itemAttributes or fallback
   const features: Array<{ label: string; value: string }> = cert.itemAttributes && cert.itemAttributes.length > 0
     ? cert.itemAttributes
     : [];
@@ -123,31 +94,32 @@ export async function GET(
   // Fallback for old certifications
   if (features.length === 0) {
     if (cert.enhancementBonus) {
-      features.push({ label: 'Enhancement', value: `+${cert.enhancementBonus}` });
+      features.push({ label: 'Enhancement', value: `+${cert.enhancementBonus} to attack and damage` });
     }
     if (cert.acBonus) {
       features.push({ label: 'Armor Class', value: `+${cert.acBonus} AC` });
     }
     if (cert.savingThrowBonus) {
-      features.push({ label: 'Saving Throws', value: `+${cert.savingThrowBonus}` });
+      features.push({ label: 'Saving Throws', value: `+${cert.savingThrowBonus} to saves` });
     }
     if (cert.extraDamageDice) {
       features.push({ label: 'Bonus Damage', value: `${cert.extraDamageDice} ${cert.extraDamageType || ''}` });
     }
     if (cert.chargesDescription) {
-      features.push({ label: 'Charges', value: 'Yes' });
+      features.push({ label: 'Charges', value: cert.chargesDescription });
     }
   }
 
-  // Limit to 4 features for display, with abbreviated values
-  const displayFeatures = features.slice(0, 4).map(f => {
-    // Abbreviate long values
-    let shortValue = f.value;
-    if (shortValue.length > 30) {
-      shortValue = shortValue.substring(0, 27) + '...';
+  // Format features for display - abbreviate long values
+  const displayFeatures = features.slice(0, 3).map(f => {
+    let text = `${f.label}: ${f.value}`;
+    if (text.length > 45) {
+      text = text.substring(0, 42) + '...';
     }
-    return { label: f.label, value: shortValue, icon: getFeatureIcon(f.label) };
+    return text;
   });
+
+  const moreCount = features.length > 3 ? features.length - 3 : 0;
 
   return new ImageResponse(
     (
@@ -157,91 +129,46 @@ export async function GET(
           flexDirection: 'column',
           width: '100%',
           height: '100%',
-          padding: 0,
-          fontFamily: 'serif',
+          fontFamily: 'sans-serif',
           position: 'relative',
+          backgroundColor: '#0c0a09',
         }}
       >
         {/* Background gradient */}
         <div
           style={{
             position: 'absolute',
-            inset: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             background: 'linear-gradient(180deg, #1c1917 0%, #0c0a09 100%)',
           }}
         />
 
-        {/* Subtle rarity tint overlay */}
+        {/* Rarity tint */}
         <div
           style={{
             position: 'absolute',
-            inset: 0,
-            background: `radial-gradient(ellipse at 50% 0%, ${colors.bg} 0%, transparent 70%)`,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `radial-gradient(ellipse at 50% 0%, ${colors.bg} 0%, transparent 60%)`,
           }}
         />
 
-        {/* Border frame with glow */}
+        {/* Border frame */}
         <div
           style={{
             position: 'absolute',
-            inset: 10,
+            top: 10,
+            left: 10,
+            right: 10,
+            bottom: 10,
             border: `2px solid ${colors.border}`,
             borderRadius: 12,
-            boxShadow: `0 0 40px ${colors.glow}, inset 0 0 60px ${colors.glow}`,
-          }}
-        />
-
-        {/* Corner ornaments */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 16,
-            left: 16,
-            width: 32,
-            height: 32,
-            borderTop: `2px solid ${colors.border}`,
-            borderLeft: `2px solid ${colors.border}`,
-            borderRadius: '6px 0 0 0',
-            opacity: 0.8,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            width: 32,
-            height: 32,
-            borderTop: `2px solid ${colors.border}`,
-            borderRight: `2px solid ${colors.border}`,
-            borderRadius: '0 6px 0 0',
-            opacity: 0.8,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 16,
-            left: 16,
-            width: 32,
-            height: 32,
-            borderBottom: `2px solid ${colors.border}`,
-            borderLeft: `2px solid ${colors.border}`,
-            borderRadius: '0 0 0 6px',
-            opacity: 0.8,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 16,
-            right: 16,
-            width: 32,
-            height: 32,
-            borderBottom: `2px solid ${colors.border}`,
-            borderRight: `2px solid ${colors.border}`,
-            borderRadius: '0 0 6px 0',
-            opacity: 0.8,
+            boxShadow: `0 0 30px ${colors.glow}`,
           }}
         />
 
@@ -249,199 +176,149 @@ export async function GET(
         <div
           style={{
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: 'column',
             position: 'relative',
-            flex: 1,
-            padding: '24px 32px',
-            gap: 24,
+            padding: '28px 36px',
+            height: '100%',
           }}
         >
-          {/* Left side - Item info */}
+          {/* Top row: Seal + Label */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-              justifyContent: 'center',
-              gap: 12,
+              alignItems: 'center',
+              gap: 10,
             }}
           >
-            {/* Certification label */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <span style={{ fontSize: 24 }}>🌿</span>
-              <span
-                style={{
-                  fontSize: 11,
-                  letterSpacing: '0.15em',
-                  color: colors.accent,
-                  textTransform: 'uppercase',
-                  fontWeight: 600,
-                }}
-              >
-                Balance Certified
-              </span>
-            </div>
-
-            {/* Item name */}
+            <span style={{ fontSize: 28 }}>🌿</span>
             <span
               style={{
-                fontSize: 32,
-                fontWeight: 700,
-                color: '#fef3c7',
-                lineHeight: 1.15,
-                maxWidth: 340,
+                fontSize: 12,
+                letterSpacing: '0.12em',
+                color: colors.accent,
+                textTransform: 'uppercase',
+                fontWeight: 600,
               }}
             >
-              {cert.itemName.length > 28 ? cert.itemName.substring(0, 26) + '...' : cert.itemName}
+              Balance Certified
             </span>
+          </div>
 
-            {/* Rarity + Score */}
+          {/* Item name */}
+          <div
+            style={{
+              display: 'flex',
+              marginTop: 12,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 30,
+                fontWeight: 700,
+                color: '#fef3c7',
+                lineHeight: 1.2,
+              }}
+            >
+              {cert.itemName.length > 32 ? cert.itemName.substring(0, 30) + '...' : cert.itemName}
+            </span>
+          </div>
+
+          {/* Rarity + Score + Base item row */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              marginTop: 10,
+            }}
+          >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 12,
-                marginTop: 4,
+                padding: '5px 14px',
+                borderRadius: 100,
+                border: `1.5px solid ${colors.border}`,
+                backgroundColor: 'rgba(28, 25, 23, 0.8)',
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '6px 16px',
-                  borderRadius: 100,
-                  border: `1.5px solid ${colors.border}`,
-                  backgroundColor: 'rgba(28, 25, 23, 0.8)',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: colors.text,
-                  }}
-                >
-                  {cert.suggestedRarity}
-                </span>
-              </div>
               <span
                 style={{
-                  fontSize: 14,
-                  color: '#78716c',
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: colors.text,
                 }}
               >
-                {cert.score.toFixed(2)} pts
+                {cert.suggestedRarity}
               </span>
             </div>
-
-            {/* Base item + Attunement */}
-            <div
-              style={{
-                display: 'flex',
-                gap: 12,
-                fontSize: 12,
-                color: '#a8a29e',
-                marginTop: 4,
-              }}
-            >
-              <span style={{ textTransform: 'capitalize' }}>{cert.baseItem}</span>
-              {cert.attunement && (
-                <>
-                  <span style={{ color: '#57534e' }}>•</span>
-                  <span style={{ color: '#a78bfa' }}>Requires Attunement</span>
-                </>
-              )}
-            </div>
+            <span style={{ fontSize: 13, color: '#78716c' }}>
+              {cert.score.toFixed(2)} pts
+            </span>
+            <span style={{ fontSize: 13, color: '#57534e' }}>•</span>
+            <span style={{ fontSize: 13, color: '#a8a29e', textTransform: 'capitalize' }}>
+              {cert.baseItem}
+            </span>
+            {cert.attunement && (
+              <>
+                <span style={{ fontSize: 13, color: '#57534e' }}>•</span>
+                <span style={{ fontSize: 13, color: '#a78bfa' }}>Attunement</span>
+              </>
+            )}
           </div>
 
-          {/* Right side - Features */}
+          {/* Features section */}
           {displayFeatures.length > 0 && (
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
-                width: 200,
-                gap: 8,
-                paddingLeft: 20,
-                borderLeft: '1px solid rgba(120, 113, 108, 0.3)',
+                marginTop: 16,
+                padding: '12px 16px',
+                backgroundColor: 'rgba(28, 25, 23, 0.6)',
+                borderRadius: 8,
+                border: '1px solid rgba(120, 113, 108, 0.2)',
+                gap: 6,
               }}
             >
-              <span
-                style={{
-                  fontSize: 10,
-                  letterSpacing: '0.1em',
-                  color: '#78716c',
-                  textTransform: 'uppercase',
-                  marginBottom: 4,
-                }}
-              >
-                Properties
-              </span>
               {displayFeatures.map((feature, i) => (
                 <div
                   key={i}
                   style={{
                     display: 'flex',
-                    alignItems: 'flex-start',
+                    alignItems: 'center',
                     gap: 8,
                   }}
                 >
-                  <span style={{ fontSize: 14 }}>{feature.icon}</span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: '#d6d3d1',
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {feature.label}
+                  <span style={{ fontSize: 11, color: colors.accent }}>◆</span>
+                  <span style={{ fontSize: 13, color: '#d6d3d1', lineHeight: 1.3 }}>
+                    {feature}
                   </span>
                 </div>
               ))}
-              {features.length > 4 && (
-                <span
-                  style={{
-                    fontSize: 10,
-                    color: '#78716c',
-                    fontStyle: 'italic',
-                  }}
-                >
-                  +{features.length - 4} more
+              {moreCount > 0 && (
+                <span style={{ fontSize: 11, color: '#78716c', marginLeft: 16 }}>
+                  +{moreCount} more properties
                 </span>
               )}
             </div>
           )}
-        </div>
 
-        {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'absolute',
-            bottom: 18,
-            left: 0,
-            right: 0,
-            gap: 16,
-          }}
-        >
-          <span
+          {/* Footer - positioned at bottom */}
+          <div
             style={{
-              fontSize: 10,
-              color: '#57534e',
-              letterSpacing: '0.05em',
+              display: 'flex',
+              position: 'absolute',
+              bottom: 20,
+              left: 36,
+              right: 36,
+              justifyContent: 'center',
             }}
           >
-            evergreen5e.vercel.app
-          </span>
+            <span style={{ fontSize: 10, color: '#57534e', letterSpacing: '0.05em' }}>
+              evergreen5e.vercel.app
+            </span>
+          </div>
         </div>
       </div>
     ),
