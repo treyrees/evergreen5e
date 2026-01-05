@@ -1078,41 +1078,39 @@ export default function CalculatorPage() {
               <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4">Combat Bonuses</h2>
               <div className="space-y-5">
                   {/* Enhancement Bonus */}
-                  <div>
+                  <div className="w-1/2 pr-2">
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       Enhancement (+hit/+dmg)
                     </label>
-                    <div className="flex items-center gap-3">
-                      <div className="flex gap-2">
-                        {[0, 1, 2, 3].map((value) => (
-                          <button
-                            key={value}
-                            onClick={() => {
-                              setEnhancement(value);
-                              if (value === 0) setEnhancementSometimes(false);
-                            }}
-                            className={`px-4 py-2 rounded-md font-medium transition-all ${
-                              enhancement === value
-                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
-                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                            }`}
-                          >
-                            +{value}
-                          </button>
-                        ))}
-                      </div>
-                      {enhancement > 0 && (
-                        <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={enhancementSometimes}
-                            onChange={(e) => setEnhancementSometimes(e.target.checked)}
-                            className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
-                          />
-                          <span className={enhancementSometimes ? 'text-amber-400' : ''}>Sometimes</span>
-                        </label>
-                      )}
+                    <div className="flex gap-1.5">
+                      {[0, 1, 2, 3].map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => {
+                            setEnhancement(value);
+                            if (value === 0) setEnhancementSometimes(false);
+                          }}
+                          className={`flex-1 px-3 py-2 rounded font-medium transition-all ${
+                            enhancement === value
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
+                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          }`}
+                        >
+                          +{value}
+                        </button>
+                      ))}
                     </div>
+                    {enhancement > 0 && (
+                      <label className="flex items-center gap-1.5 mt-2 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={enhancementSometimes}
+                          onChange={(e) => setEnhancementSometimes(e.target.checked)}
+                          className="h-3.5 w-3.5 text-amber-500 rounded border-slate-600 bg-slate-900"
+                        />
+                        <span className={enhancementSometimes ? 'text-amber-400' : ''}>Sometimes</span>
+                      </label>
+                    )}
                   </div>
 
                   {/* Bonus Damage Dice */}
